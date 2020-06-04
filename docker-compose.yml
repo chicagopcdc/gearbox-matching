@@ -1,0 +1,25 @@
+version: '2'
+
+services:
+
+  mysql-development:
+    image: mysql:5.7
+    restart: always
+    command: --bind-address=0.0.0.0
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: pedal_dev_v_0
+    ports:
+      - "32000:3306"
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d/:ro
+
+  app:
+    build: ./api
+    links:
+      - mysql-development
+    depends_on:
+      - mysql-development
+    ports:
+      - "5000:5000"
+
