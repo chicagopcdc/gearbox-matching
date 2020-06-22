@@ -38,7 +38,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `pedal_dev_v_0`.`study_version` ;
 
-CREATE TABLE IF NOT EXISTS `mypedal_dev_v_0db`.`study_version` (
+CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`study_version` (
   `id` INT NOT NULL,
   `study_id` INT NOT NULL,
   `create_date` DATETIME NULL,
