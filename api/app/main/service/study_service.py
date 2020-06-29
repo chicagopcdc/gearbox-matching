@@ -12,6 +12,9 @@ def save_new_study(data):
     study = Study.query.filter_by(code=data['code']).first()                     
     if not study:
         new_study = Study(                                                            
+            #DEBUG
+            id=data['id'],
+
             name=data['name'],
             code=data['code'],
             create_date=datetime.datetime.utcnow(),
