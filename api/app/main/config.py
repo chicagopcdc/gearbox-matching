@@ -16,7 +16,7 @@ class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:password@mysql-development:3306/pedal_dev_v_0"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-
+    ERROR_404_HELP = False #<-supresses default flask (unhelpful) 404 help message
 
 class TestingConfig(Config):
     DEBUG = True

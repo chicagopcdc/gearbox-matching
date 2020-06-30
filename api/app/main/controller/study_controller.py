@@ -18,21 +18,18 @@ _study = StudyDto.study
 
 @api.route('/<public_id>')
 @api.param('public_id', 'The Study identifier')
-@api.response(404, 'Study not found.')
-#class Study(Resource):
 class StudyInfo(Resource):
     @api.doc('get a study')
     @api.marshal_with(_study)
     def get(self, public_id):
         study = get_a_study(public_id)
         if not study:
-            api.abort(404)
+            api.abort(404, message="study '{}' not found".format(public_id))
         else:
             return study.as_dict()
 
 
 @api.route('/info')
-#class info(Resource):
 class AllStudiesInfo(Resource):
     def get(self):
         studies = get_all_studies() 
