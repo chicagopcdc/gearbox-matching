@@ -60,9 +60,6 @@ class Create(Resource):
             if key in allowed_keys:
                 new_study_dict.update({key:data[key]})
         try:
-            #DEBUG
-            new_study_dict.update({'id':3})
-            
             save_new_study(new_study_dict)
             return new_study_dict
         except Exception as e:

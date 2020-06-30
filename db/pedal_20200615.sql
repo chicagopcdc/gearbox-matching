@@ -24,7 +24,7 @@ USE `pedal_dev_v_0` ;
 DROP TABLE IF EXISTS `pedal_dev_v_0`.`study` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`study` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NULL,
   `code` VARCHAR(45) NULL,
   `create_date` DATETIME NULL,

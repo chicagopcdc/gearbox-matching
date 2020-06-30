@@ -11,14 +11,11 @@ from app.main.model.study_version import StudyVersion
 def save_new_study(data):
     study = Study.query.filter_by(code=data['code']).first()                     
     if not study:
-        new_study = Study(                                                            
-            #DEBUG
-            id=data['id'],
-
+        new_study = Study(
             name=data['name'],
             code=data['code'],
             create_date=datetime.datetime.utcnow(),
-            active=True
+            active=data['active']
         )
         save_changes(new_study)
         response_object = {
