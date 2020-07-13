@@ -46,7 +46,7 @@ class AllStudiesInfo(Resource):
 
 @api.route('/create_study')
 class Create(Resource):
-    @api.doc('create/add a study')
+    @api.doc('create a new study')
     def post(self):
         data = api.payload
         if not data or not isinstance(data, dict):
@@ -68,7 +68,7 @@ class Create(Resource):
 @api.route('/update_study/<public_id>')
 @api.param('public_id', 'The Study identifier')
 class Update(Resource):
-    @api.doc('update/change and a study')
+    @api.doc('update an existing study')
     def put(self, public_id):
         data = api.payload
         if not data or not isinstance(data, dict):
