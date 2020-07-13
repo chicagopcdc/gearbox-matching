@@ -42,3 +42,7 @@ def save_changes(data):
 
 def study_commit():
     db.session.commit()
+
+def study_delete(data):
+    db.session.delete(data)
+    db.session.commit()

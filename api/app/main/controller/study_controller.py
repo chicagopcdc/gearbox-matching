@@ -7,7 +7,7 @@ import json
 
 from app.main.util.dto import StudyDto
 from app.main.util import AlchemyEncoder
-from app.main.service.study_service import get_all_studies, get_a_study, get_study_version, save_new_study, study_commit
+from app.main.service.study_service import get_all_studies, get_a_study, get_study_version, save_new_study, study_commit, study_delete
 
 from app.main.model.study import Study
 
@@ -87,3 +87,21 @@ class Update(Resource):
             return study.as_dict()
         except Exception as e:
             logging.error(e, exc_info=True)
+
+
+@api.route('/delete_study/<public_id>')
+@api.param('public_id', 'The Study identifier')
+class Delete(Resource):
+    @api.doc('delete a study')
+    def delete(self, public_id):
+        study = get_a_study(public_id)
+        if not study:
+            api.abort(404, message="study '{}' not found".format(public_id))
+
+        try:
+            study_delete(study)
+            return study.as_dict()
+        except Exception as e:
+            logging.error(e, exc_info=True)
+
+
