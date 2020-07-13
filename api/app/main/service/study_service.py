@@ -5,9 +5,6 @@ from app.main import db
 from app.main.model.study import Study
 from app.main.model.study_version import StudyVersion
 
-
-
-
 def save_new_study(data):
     study = Study.query.filter_by(code=data['code']).first()                     
     if not study:
@@ -30,10 +27,8 @@ def save_new_study(data):
         }
         return response_object, 409
 
-
 def get_all_studies():
     return Study.query.all()
-
 
 def get_a_study(code):
     return Study.query.filter_by(code=code).first()
@@ -41,8 +36,9 @@ def get_a_study(code):
 def get_study_version(id):
     return StudyVersion.query.filter_by(id=id).first()
 
-
-
 def save_changes(data):
     db.session.add(data)
+    db.session.commit()
+
+def study_commit():
     db.session.commit()
