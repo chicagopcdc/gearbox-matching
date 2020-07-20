@@ -33,15 +33,21 @@ class StudyInfo(Resource):
 class AllStudiesInfo(Resource):
     def get(self):
         studies = get_all_studies()
-
-        return jsonify(
-            {
-                "current_date": date.today().strftime("%B %d, %Y"),
-                "current_time": strftime("%H:%M:%S +0000", gmtime()),
-                "status": "OK",
-                "body": [r.as_dict() for r in studies]
-            }
-        )
+        try:
+            if studies:
+                body = [r.as_dict() for r in studies]
+            else:
+                body = []
+            return jsonify(
+                {
+                    "current_date": date.today().strftime("%B %d, %Y"),
+                    "current_time": strftime("%H:%M:%S +0000", gmtime()),
+                    "status": "OK",
+                    "body": body
+                }
+            )
+        except:
+            api.abort(404, message="study table not found or has no data")
 
 
 @api.route('/create_study')
@@ -59,8 +65,8 @@ class Create(Resource):
             if key in allowed_keys:
                 new_study_dict.update({key:data[key]})
         try:
-            save_new_study(new_study_dict)
-            return new_study_dict
+            response = save_new_study(new_study_dict)
+            return response
         except Exception as e:
             logging.error(e, exc_info=True)
 
@@ -74,19 +80,30 @@ class Update(Resource):
         if not data or not isinstance(data, dict):
             api.abort(400, message="null payload or payload not json/dict")
 
+        #retrieve the study to be updated
         study = get_a_study(public_id)
         if not study:
             api.abort(404, message="study '{}' not found".format(public_id))
 
+        #set new key/values
         allowed_keys = study.as_dict().keys()
         for key in data.keys():
             if key in allowed_keys:
-                setattr(study, key, data[key])
+                if key=='code':
+                    existing_study_with_new_code = get_a_study(data[key])
+                    if not existing_study_with_new_code:
+                        setattr(study, key, data[key])
+                    else:
+                        #code values must be unique for each study
+                        api.abort(409, message="study code '{}' is duplicate".format(data[key]))
+                else:
+                    setattr(study, key, data[key])
         try:
             study_commit()
             return study.as_dict()
         except Exception as e:
             logging.error(e, exc_info=True)
+            return e
 
 
 @api.route('/delete_study/<public_id>')
@@ -103,5 +120,3 @@ class Delete(Resource):
             return study.as_dict()
         except Exception as e:
             logging.error(e, exc_info=True)
-
-
