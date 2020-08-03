@@ -34,7 +34,7 @@ Please note that the following information on endpoint and API are not stable an
 
 ### Input Fields
 
-- Endpoint: GET `/input-fields?study_ids=1,2,3...`
+- Endpoint: GET `/input-fields`
 - API:
 
 ```jsonc
