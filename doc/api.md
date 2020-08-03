@@ -2,75 +2,78 @@
 
 This is a summary of a discussion on GEARBOx API design on July 31, 2020.
 
+Significantly updated on Auguest 3, 2020.
+
 ## Highlights:
 
-- Eligibility criteria will be extracted from studies as a separate abstraction
-- Backend will provide three separate endpoints for:
-  1. Input fields configuration
-  3. Studies and eligibility criteria
-  2. save and get input form data 
-  
-- Frontend will be responsible for matching
+- Eligibility Criteria will be extracted from studies as a separate abstraction
+- Backend will provide four separate endpoints for:
+  1. Match Form configuration
+  2. Studies
+  3. Eligibility Criteria
+  4. Latest User Input for the Match Form
+- Frontend will be responsible for matching/displaying matched Studies to User Input values for the Match Form
 - Rough API design for response data
-- "Maybe" criteria for each study will be ignored and instead provided as extra info for that study
+- "Maybe" criteria for each Study will be ignored and instead provided as extra info for that Study
 
 ## General workflow
 
-Backend provides GET endpoints for 1) Input Fields configuration, 2) Studies and eligibility Criteria, and 3) Save and get input form data. Backend must validate the data prior to serving them. Backend also provides a POST endpoint for saved input values--request body must provide user information.
+Backend provides GET endpoints for 1) Match Form configuration, 2) Studies, 3) Eligibility Criteria, and 4) latest User Input for the Match Form. Backend must validate the data prior to serving them. Backend also provides a POST endpoint for latest User Input values--request body must provide User information.
 
-Frontend requests to and fetches from backend all data at successful authentication. Frontend then carries out the following tasks:
+Frontend requests to and fetches from Backend all data at successful authentication. Frontend then carries out the following tasks:
 
-- generate the match form input fields based on 1)
-- fetch saved input values for the user from backend if availble to fill out the match form 3)
-- display Studies and mark the current match status of each Study based on 2)
-- at each registered change in input values:
-  - update the match status
-  - disable input fields not needed in the remaining criteria
-  - send the current set of input values to backend
+- Generate the Match Form input fields based on 1)
+- Fetch saved input values for the user from Backend if availble to fill out the Match Form 4)
+- Display Studies and mark the current match status of each Study based on 1), 2) and 3)
+- At each registered change in Match Form input field values:
+  - Update the match status
+  - Disable input fields not needed in the remaining Eligibility Criteria
+  - Send the current Match Form input values to Backend
 
-## Endpoints
+## Endpoints and APIs
 
-Please note that the following information on endpoint and API are not stable and subject to change. Consider this section more as a proposal/working definition.
+Please note that the following information on each endpoint and API is not stable and subject to change. Consider this section more as a proposal/working definition.
 
-### Input Fields
+### Match Form configuration
 
-- Endpoint: GET `/input-fields`
+- Endpoint: GET `/match-form`
 - API:
 
 ```jsonc
-// an object with two props: "groups" and "inputs"
+// an object with two props: "groups" and "fields"
 {
-  // an array of group names to organize generated input fields
+  // an array of group objects to organize generated form input fields
   // each "group" will get a heading unless its value is empty string ""
   "groups": [
-    {id: 0, name: ""},
-    {id:1, name: "first group"},
-    {id:2, name: "second group"}
+    {
+      "id": 0, // unique id for the group
+      "name": ""
+    },
+    {
+      "id": 1,
+      "name": "first group"
+    }
     // ...more groups
   ],
 
-  // an array of input object with relevant props
-  "inputs": [
+  // an array of field objects with relevant props/attributes
+  "fields": [
     {
-      // name, type, group are required all all inputs
-      "name": "", // variable name
+      "id": 0, // unique id for the field
+      "groupId": 0, // one of the IDs in "groups" above
+
+      // name, type, group are required all all fields
+      "name": "", // field name
       "type": "", // one of the following: "checkbox", "radio", "number", "text", "select", "multiselect"
-      "group_ids": [], // one of the values in "groups" above
-      "eligibility_criteria_ids": [],
-      
+
       // the rest is optional
-      "label": "", // label text to display
-      "options": [], // used for input types "radio", "select", "multiselect"
-      "placeholder": "" // used for input types "number", "text", "select", "multiselect"
+      "label": "", // label text to display; avilable for all field types
+      "options": [], // options to choose from; available for field types "radio", "select", "multiselect"
+      "placeholder": "" // placeholder text to display; available for field types "number", "text", "select", "multiselect"
 
       // ... more attributes
-    },
-    {
-      "name": "",
-      "type": "",
-      "group": ""
-      // ...
     }
+    // ...more fields
   ]
 }
 ```
@@ -83,34 +86,38 @@ See [this demo app](https://poc-dynamic-form.netlify.app/) for an example.
 - API:
 
 ```jsonc
-// an array of study objects
+// an array of Study objects
 [
   {
-    "id": "", // unique id for the given study
+    "id": 0, // unique id for the Trial
     "title": "",
     "group": "",
-    "location": "",
-    "eligibility_criteria":   // an array of eligibility criteria objects
-    [                        // each elegibility criteria is an object with a range of permissible values
-      {
-        "input": {
-          "name": "", // variable name
-          "type": "",
-          "value": []   // values to match; see below for possible value types
-          // ... other props
-        },  
-      },
-      {
-        "input": {
-          // ...
-        }
-      },
+    "location": ""
+    // ...more information on the Trial
   }
+  // ...more Studies
 ]
- 
 ```
 
-#### Possible input value types
+### Eligibility Criteria
+
+- Endpoint: GET `/eligibility-criteria`
+- API:
+
+```jsonc
+// an array of Eligibility Criteria objects
+[
+  {
+    "id": 0, // unique id for the Criterion
+    "fieldId": 0,
+    "fieldValue": , // IMPORTANT: see below for more details
+    "studyIds": [0, 1]
+  },
+  // ...more Criteria
+]
+```
+
+#### Possible `fieldValue` types
 
 - Single boolean: `true`, `false`
 - Single numeric value: number
@@ -121,32 +128,24 @@ See [this demo app](https://poc-dynamic-form.netlify.app/) for an example.
     - `[5, null]`: 5 or more
     - `[null, 10]`: 10 or less
 - Set of text values: array of strings
-  - match if the input form value matches one of the strings
-  
-  
-### Studies
+  - match if the Match Form field value matches one of the strings
 
-- Endpoint: GET/POST `/form`
+### Latest User Input
+
+- Endpoints:
+  - GET `/latest-user-input?userId=0`
+  - POST `/latest-user-input`
 - API:
 
 ```jsonc
-// an array of inputs
-[
-  {
-      // name, type, group are required all all inputs
-      "name": "", // variable name
-      "type": "", // one of the following: "checkbox", "radio", "number", "text", "select", "multiselect"
-      "group_ids": [], // one of the values in "groups" above
-      "eligibility_criteria_id": [],
-      "value": ""       //The value inserted/typed by the user
-      
-      // the rest is optional
-      "label": "", // label text to display
-      "options": [], // used for input types "radio", "select", "multiselect"
-      "placeholder": "" // used for input types "number", "text", "select", "multiselect"
-
-      // ... more attributes
-    },
-]
- 
+{
+  "userId": 0, // unique id for the user
+  "fields": [
+    {
+      "id": 0,
+      "value": // value type must conform to what the relevant input value allows
+    }
+    // ... more fields
+  ]
+}
 ```
