@@ -2,7 +2,15 @@
 
 This is a summary of a discussion on GEARBOx API design on July 31, 2020.
 
-Significantly updated on Auguest 3, 2020.
+> _Updates_:
+>
+> - Auguest 3, 2020:
+>   - renamed endpoints
+>   - added a separate endpoint and API for Eligibility Criteria
+>   - added details on latest user to Highlights and General Workflow
+> - August 5, 2020:
+>   - added a block for document updates
+>   - added a separate endpoint and API for Matching Conditions
 
 ## Highlights:
 
@@ -11,20 +19,21 @@ Significantly updated on Auguest 3, 2020.
   1. Match Form configuration
   2. Studies
   3. Eligibility Criteria
-  4. Latest User Input for the Match Form
+  4. Match Conditions
+  5. Latest User Input for the Match Form
 - Frontend will be responsible for matching/displaying matched Studies to User Input values for the Match Form
 - Rough API design for response data
 - "Maybe" criteria for each Study will be ignored and instead provided as extra info for that Study
 
 ## General workflow
 
-Backend provides GET endpoints for 1) Match Form configuration, 2) Studies, 3) Eligibility Criteria, and 4) latest User Input for the Match Form. Backend must validate the data prior to serving them. Backend also provides a POST endpoint for latest User Input values--request body must provide User information.
+Backend provides GET endpoints for 1) Match Form configuration, 2) Studies, 3) Eligibility Criteria, 4) Match Conditions, and 5) latest User Input for the Match Form. Backend must validate the data prior to serving them. Backend also provides a POST endpoint for latest User Input values--request body must provide User information.
 
 Frontend requests to and fetches from Backend all data at successful authentication. Frontend then carries out the following tasks:
 
 - Generate the Match Form input fields based on 1)
-- Fetch saved input values for the user from Backend if availble to fill out the Match Form 4)
-- Display Studies and mark the current match status of each Study based on 1), 2) and 3)
+- Fetch saved input values for the user from Backend if availble to fill out the Match Form using 5)
+- Display Studies and mark the current match status of each Study based on 1), 2), 3), and 4)
 - At each registered change in Match Form input field values:
   - Update the match status
   - Disable input fields not needed in the remaining Eligibility Criteria
@@ -110,8 +119,7 @@ See [this demo app](https://poc-dynamic-form.netlify.app/) for an example.
   {
     "id": 0, // unique id for the Criterion
     "fieldId": 0,
-    "fieldValue": , // IMPORTANT: see below for more details
-    "studyIds": [0, 1]
+    "fieldValue": // IMPORTANT: see below for more details
   },
   // ...more Criteria
 ]
@@ -129,6 +137,33 @@ See [this demo app](https://poc-dynamic-form.netlify.app/) for an example.
     - `[null, 10]`: 10 or less
 - Set of text values: array of strings
   - match if the Match Form field value matches one of the strings
+
+### Match Conditions
+
+- Endpoint: GET `/match-conditions`
+- API:
+
+```jsonc
+// an array of Match Condition objects
+[
+  {
+    "studyId": 0, // Study id for the given Match Condition
+    "algorithm": {
+      "operator": "AND", // possible values: AND, OR
+      // array of Eligibility Criterion ids or algorithm objs
+      "criteria": [
+        1,
+        {
+          "operator": "OR",
+          "criteria": [2, 3]
+        },
+        4
+      ]
+    }
+  }
+  // more Match Conditions
+]
+```
 
 ### Latest User Input
 
