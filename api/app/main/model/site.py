@@ -1,30 +1,36 @@
-from app.main import db
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, Column, Integer, String, DateTime, Boolean
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+
+from app.main import DbSession
+#from app.main.model.study_version import StudyVersion
+#from app.main.model.study import Study
 # , flask_bcrypt
 
 
-class SiteHasStudy(db.Model):
+Base = declarative_base()
+
+class SiteHasStudy(Base):
     __tablename__ = 'site_has_study'
-    study_id = db.Column(db.Integer, ForeignKey('study.id'), primary_key=True)
-    site_id = db.Column(db.Integer, ForeignKey('site.id'), primary_key=True)
-    create_date = db.Column(db.DateTime, nullable=True)
-    active = db.Column(db.Boolean, nullable=True)
-    study = relationship("Study", back_populates="sites")
-    site = relationship("Site", back_populates="studies")
+    study_id = Column(Integer, ForeignKey('study.id'), primary_key=True)
+    site_id = Column(Integer, ForeignKey('site.id'), primary_key=True)
+    create_date = Column(DateTime, nullable=True)
+    active = Column(Boolean, nullable=True)
+
+    #study = relationship("Study", back_populates="sites")
+    #site = relationship("Site", back_populates="studies")
 
 
-
-class Site(db.Model):
+class Site(Base):
     __tablename__ = 'site'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String(45), nullable=True)
-    code = db.Column(db.String(45), nullable=True)
-    create_date = db.Column(db.DateTime, nullable=True)
-    active = db.Column(db.Boolean, nullable=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(45), nullable=True)
+    code = Column(String(45), nullable=True)
+    create_date = Column(DateTime, nullable=True)
+    active = Column(Boolean, nullable=True)
 
-
-    studies = relationship("SiteHasStudy", back_populates="site")
+    #studies = relationship("SiteHasStudy", back_populates="site")
 
     def as_dict(self):
        return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
+   

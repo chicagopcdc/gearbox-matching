@@ -4,14 +4,13 @@ import unittest
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
 
-
 from app import blueprint
-
-from app.main import create_app, db
+from app.main import create_app, DbSession
 from app.main.model import study
 
 
-app = create_app(os.getenv('BOILERPLATE_ENV') or 'dev')
+config_name = os.getenv('BOILERPLATE_ENV') or 'dev'
+app = create_app(config_name, config_name)
 
 app.register_blueprint(blueprint)
 
@@ -19,9 +18,9 @@ app.app_context().push()
 
 manager = Manager(app)
 
-migrate = Migrate(app, db)
+migrate = Migrate(app, DbSession)
 
-manager.add_command('db', MigrateCommand)
+manager.add_command('DbSession', MigrateCommand)
 
 @manager.command
 def run():

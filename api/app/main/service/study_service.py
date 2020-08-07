@@ -1,12 +1,13 @@
 import uuid
 import datetime
 
-from app.main import db
+from app.main import DbSession
 from app.main.model.study import Study
 from app.main.model.study_version import StudyVersion
 
 def save_new_study(data):
-    study = Study.query.filter_by(code=data['code']).first()                     
+    study = DbSession.query(Study).filter(Study.code==data['code']).first()
+    
     if not study:
         new_study = Study(
             name=data['name'],
@@ -28,21 +29,22 @@ def save_new_study(data):
         return response_object, 409
 
 def get_all_studies():
-    return Study.query.all()
+    return DbSession.query(Study).all()
 
 def get_a_study(code):
-    return Study.query.filter_by(code=code).first()
+    return DbSession.query(Study).filter(Study.code==code).first()
 
 def get_study_version(id):
-    return StudyVersion.query.filter_by(id=id).first()
-
-def save_changes(data):
-    db.session.add(data)
-    db.session.commit()
-
+    return DbSession.query(StudyVersion).filter(StudyVersion.id==id).first()
+    
+def save_changes(study_obj):
+    DbSession.add(study_obj)
+    DbSession.commit()
+    
 def study_commit():
-    db.session.commit()
+    DbSession.commit()
+    
+def study_delete(study_obj):
+    DbSession.delete(study_obj)
+    DbSession.commit()
 
-def study_delete(data):
-    db.session.delete(data)
-    db.session.commit()
