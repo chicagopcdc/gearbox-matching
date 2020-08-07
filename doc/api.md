@@ -12,7 +12,7 @@ This is a summary of a discussion on GEARBOx API design on July 31, 2020.
 >   - added a block for document updates
 >   - added a separate endpoint and API for Matching Conditions
 > - Auguet 7, 2020:
->   - modified Latest User Input API (remove unnecessary userId)
+>   - modified Latest User Input endpoint and API (remove unnecessary userId)
 
 ## Highlights:
 
@@ -169,9 +169,7 @@ See [this demo app](https://poc-dynamic-form.netlify.app/) for an example.
 
 ### Latest User Input
 
-- Endpoints:
-  - GET `/latest-user-input?userId=0`
-  - POST `/latest-user-input`
+- Endpoint: GET, POST `/latest-user-input`
 - API:
 
 ```jsonc
