@@ -1,12 +1,10 @@
-from app.main import DbSession
-
 from sqlalchemy import ForeignKey, Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
+
+from . import Base
+from app.main import DbSession
 
 # , flask_bcrypt
-
-Base = declarative_base()
 
 
 class StudyAlgorithmEngine(Base):
@@ -17,9 +15,9 @@ class StudyAlgorithmEngine(Base):
 
     start_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
-    
-    #study_version = relationship("StudyVersion", back_populates="algorithm_engines")
-    #algorithm_engine = relationship("AlgorithmEngine", back_populates="study_versions")   
+
+    study_version = relationship("StudyVersion", back_populates="algorithm_engines")
+    algorithm_engine = relationship("AlgorithmEngine", back_populates="study_versions")   
 
 
 class AlgorithmEngine(Base):
@@ -34,8 +32,4 @@ class AlgorithmEngine(Base):
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
 
-    #study_versions = relationship("StudyAlgorithmEngine", back_populates="algorithm_engine")
-
-    def as_dict(self):
-       return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
-   
+    study_versions = relationship("StudyAlgorithmEngine", back_populates="algorithm_engine")   

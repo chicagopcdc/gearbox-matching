@@ -1,15 +1,18 @@
-from main import db
+from sqlalchemy import Column, Integer, String, DateTime, Boolean
 
-class Arm(db.Model):
+from . import Base
+from app.main import DbSession
+
+class Arm(Base):
     """ User Model for storing user related details """
     __tablename__ = "arm"
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    version_id = db.Column(db.Integer, nullable=False)
-    study_id = db.Column(db.Integer, nullable=False)
-    code = db.Column(db.String(45), nullable=True)
-    create_date = db.Column(db.DateTime, nullable=False)
-    active = db.Column(db.Boolean, nullable=False, default=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    version_id = Column(Integer, nullable=False)
+    study_id = Column(Integer, nullable=False)
+    code = Column(String(45), nullable=True)
+    create_date = Column(DateTime, nullable=False)
+    active = Column(Boolean, nullable=False, default=True)
 
 
     
