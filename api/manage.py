@@ -1,4 +1,6 @@
 import os
+import subprocess
+import sys
 import unittest
 
 from flask_migrate import Migrate, MigrateCommand
@@ -28,12 +30,12 @@ def run():
 
 @manager.command
 def test():
-    """Runs the unit tests."""
-    tests = unittest.TestLoader().discover('app/test', pattern='test*.py')
-    result = unittest.TextTestRunner(verbosity=2).run(tests)
-    if result.wasSuccessful():
-        return 0
-    return 1
+    """
+    Runs pytest, which also runs unittests.
+    Use pytest for DB operations, unittest for other code.
+    """
+    status = subprocess.call("pytest", shell=True)
+    sys.exit(status)
 
 if __name__ == '__main__':
     manager.run()

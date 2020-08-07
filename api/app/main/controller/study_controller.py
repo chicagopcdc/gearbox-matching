@@ -20,7 +20,7 @@ _study = StudyDto.study
 @api.param('public_id', 'The Study identifier')
 class StudyInfo(Resource):
     @api.doc('get a study')
-    @api.marshal_with(_study)
+#    @api.marshal_with(_study)
     def get(self, public_id):
         study = get_a_study(public_id)
         if not study:
@@ -120,3 +120,4 @@ class Delete(Resource):
             return study.as_dict()
         except Exception as e:
             logging.error(e, exc_info=True)
+            return e

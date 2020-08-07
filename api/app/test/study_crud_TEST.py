@@ -10,7 +10,8 @@ headers = {'content-type': 'application/json'}
 
 class TestStudy(unittest.TestCase):
 
-    def test_00_info(self):
+    def test_test(self):
+
         #remove the db file for clean-slate testing
         os.remove('/docker-flask/app/test/flask_boilerplate_test.db')
 

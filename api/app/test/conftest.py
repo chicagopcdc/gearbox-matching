@@ -1,3 +1,9 @@
+"""
+Scoped session and teardown were copied
+from free/public software github.com/pbanaszkiewicz/budgetApp
+The MIT License (MIT)
+Copyright (c) 2014 Piotr Banaszkiewicz
+"""
 import pytest
 
 from app.main import create_app, DbSession
@@ -5,17 +11,15 @@ from app.main import create_app, DbSession
 from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
+
 @pytest.yield_fixture(scope="session")
 def app():
     """
     Creates a new Flask application for a test duration.
     Uses application factory `create_app`.
     """
-    #DEBUG
-    #_app = create_app("testingsession", config_object=TestConfig)
-    _app = create_app("testingsession", config_object='test') #TestConfig)
+    _app = create_app("testingsession", config_object='test')
 
-    # Base is declarative_base()
     Base.metadata.create_all(bind=_app.engine)
     _app.connection = _app.engine.connect()
 
@@ -33,7 +37,9 @@ def app():
     Base.metadata.drop_all(bind=_app.engine)
 
 
-@pytest.yield_fixture(scope="function")
+#@pytest.yield_fixture(scope="function")
+@pytest.yield_fixture(scope="module")
+#@pytest.yield_fixture(scope="session")
 def session(app):
     """
     Creates a new database session (with working transaction)
@@ -55,6 +61,9 @@ def session(app):
     session.close()
     ctx.pop()
 
-@pytest.yield_fixture(scope="function")
-def test_client(app):
-    yield app.test_client()
+
+# @pytest.yield_fixture(scope="function")
+# #@pytest.yield_fixture(scope="module")
+# #@pytest.yield_fixture(scope="session")
+# def test_client(app):
+#     yield app.test_client()
