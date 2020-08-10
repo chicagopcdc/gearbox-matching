@@ -20,11 +20,11 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     DEBUG = True
     TESTING = True
-    basedir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'test')) #<-put the sqlite3 db file in test dir
 
-    SQLALCHEMY_DATABASE_URI = 'sqlite+pysqlite:///' + os.path.join(basedir, 'flask_boilerplate_test.db')
-    #DEBUG
-    #SQLALCHEMY_DATABASE_URI = 'sqlite+pysqlite://' #<- in memory db
+    #choose mysql or sqlite (required file path) for tests
+    SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:password@mysql-development:3306/pedal_dev_v_0"
+    #basedir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'test'))
+    #SQLALCHEMY_DATABASE_URI = 'sqlite+pysqlite:///' + os.path.join(basedir, 'flask_boilerplate_test.db')
 
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False

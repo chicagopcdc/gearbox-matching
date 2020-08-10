@@ -24,3 +24,5 @@ services:
       - "5000:5000"
     volumes:
       - ./api:/docker-flask
+    env_file:
+      - config.env
