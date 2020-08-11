@@ -81,7 +81,7 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `pedal_dev_v_0`.`site` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`site` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `code` VARCHAR(45) NULL,
   `name` VARCHAR(45) NULL,
   `create_date` DATETIME NULL,
