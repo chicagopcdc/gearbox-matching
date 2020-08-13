@@ -21,3 +21,14 @@ class SiteDto:
         'create_date': fields.String(required=True, description='site creation time'),
         'active': fields.String(description='is site active')
     })    
+
+
+class SitehasStudyDto:
+    api = Namespace('site_has_study', description='site_has_study related operations')
+    site_has_study = api.model('site_has_study', {
+    	'study_id': fields.String(required=True, description="study id"),
+    	'site_id': fields.String(required=True, description="site id"),
+        'create_date': fields.String(required=True, description='site creation time'),
+        'active': fields.String(description='is site active')
+    })    
+    

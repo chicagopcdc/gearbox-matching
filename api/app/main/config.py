@@ -30,6 +30,8 @@ class TestingConfig(Config):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     ERROR_404_HELP = False #<-supresses default flask (unhelpful) 404 help message
 
+    RESTPLUS_MASK_HEADER = None #False #''
+    
 class ProductionConfig(Config):
     DEBUG = False
     # uncomment the line below to use postgres

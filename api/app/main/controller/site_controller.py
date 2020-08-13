@@ -12,7 +12,6 @@ from app.main.service.site_service import get_all_sites, get_a_site, get_site_ve
 from app.main.model.site import Site
 
 
-#DEBUG <-need to fix this in Study too, where i keep the import and the api definition below
 api = SiteDto.api
 _site = SiteDto.site
 
@@ -21,7 +20,7 @@ _site = SiteDto.site
 @api.param('public_id', 'The Site identifier')
 class SiteInfo(Resource):
     @api.doc('get a site')
-#    @api.marshal_with(_site)
+    @api.marshal_with(_site)
     def get(self, public_id):
         site = get_a_site(public_id)
         if not site:
