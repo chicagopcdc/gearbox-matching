@@ -30,7 +30,7 @@ class TestingConfig(Config):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     ERROR_404_HELP = False #<-supresses default flask (unhelpful) 404 help message
 
-    RESTPLUS_MASK_HEADER = None #False #''
+    RESTPLUS_MASK_HEADER = None
     
 class ProductionConfig(Config):
     DEBUG = False
