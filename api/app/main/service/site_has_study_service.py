@@ -2,7 +2,7 @@ import uuid
 import datetime
 
 from app.main import DbSession
-from app.main.model.site_has_study import SiteHasStudy
+from app.main.model.site import SiteHasStudy
 
 def save_new_site_has_study(data):
     site_has_study = DbSession.query(SiteHasStudy).filter(SiteHasStudy.code==data['code']).first()
