@@ -1,4 +1,5 @@
 from flask import Flask, _app_ctx_stack
+from flask_cors import CORS
 # from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import BaseQuery, SQLAlchemy
 from sqlalchemy import create_engine
@@ -28,6 +29,10 @@ def create_app(name_handler, config_object):
     app.config.from_object(config_by_name[config_object])
     app.engine = create_engine(app.config["SQLALCHEMY_DATABASE_URI"])
 
+    #allow cross-origin-resource-sharing (CORS), e.g. frontend at port:3000
+    cors = CORS(app)
+    app.config['CORS_HEADERS'] = 'Content-Type'
+    
     global DbSession
     # BaseQuery class provides some additional methods like
     # first_or_404() or get_or_404() -- borrowed from

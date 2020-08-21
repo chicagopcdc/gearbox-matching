@@ -1,5 +1,7 @@
 from flask_restplus import Namespace, fields
 
+class LoginDto:
+    api = Namespace('login', description='OICD login POST relay')
 
 class StudyDto:
     api = Namespace('study', description='study related operations')
