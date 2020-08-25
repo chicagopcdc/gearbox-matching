@@ -17,6 +17,7 @@ PyMySQL = "*"
 requests = "2.24.0"
 pytest = "6.0.0"
 flask_cors = "3.0.7"
+pyjwt = "1.7.1"
 
 [requires]
 python_version = "3.8"
