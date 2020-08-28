@@ -8,6 +8,7 @@ import requests
 from flask import Flask, request
 from flask_restplus import Resource
 
+from app.main import config
 from app.main.model.login import Login
 from app.main.util.dto import LoginDto
 from app.main.service.login_service import save_new_user, get_a_user, user_commit
@@ -24,7 +25,7 @@ class CodeToToken(Resource):
 
         body = {
             "grant_type": "authorization_code",
-            "client_id": "VAyVF4wMjyD7FBAVKIiZevlt80A4LNIT7O9SZ6vu",
+            "client_id": config.Config.CLIENT_ID,
             "code": code,
             "redirect_uri": redirect_uri,
         }
