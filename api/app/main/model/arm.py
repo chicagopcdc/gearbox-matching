@@ -4,7 +4,6 @@ from . import Base
 from app.main import DbSession
 
 class Arm(Base):
-    """ User Model for storing user related details """
     __tablename__ = "arm"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

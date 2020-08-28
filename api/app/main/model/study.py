@@ -10,7 +10,6 @@ from app.main.model.study_version import StudyVersion
 
 
 class Study(Base):
-    """ User Model for storing user related details """
     __tablename__ = "study"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

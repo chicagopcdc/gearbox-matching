@@ -309,12 +309,13 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`criterion_has_value` (
 ENGINE = InnoDB;
 
 -- -----------------------------------------------------
--- Table `pedal_dev_v_0`.`users`
+-- Table `pedal_dev_v_0`.`logins`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pedal_dev_v_0`.`users` ;
+DROP TABLE IF EXISTS `pedal_dev_v_0`.`logins` ;
 
-CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`users` (
-  `id` INT NOT NULL,
+CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`logins` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `sub_id` VARCAR(45) NOT NULL,
   `refresh_token` MEDIUMTEXT NOT NULL,
   `iat` DATETIME NULL,
   `exp` DATETIME NULL,
