@@ -11,8 +11,7 @@ class Login(Base):
     """ Login User Model for storing login-related details """
     __tablename__ = "logins"
 
-    #DEBUG
-    #sub_id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     sub_id = Column(Text, primary_key=True)
     refresh_token = Column(Text, nullable=False)
     iat = Column(DateTime, nullable=True)

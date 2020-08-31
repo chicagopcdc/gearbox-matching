@@ -43,12 +43,10 @@ class CodeToToken(Resource):
         refresh = tokens["refresh_token"]
         decoded_refresh = jwt.decode(refresh, verify=False)
 
-        sub_id = decoded_refresh['sub'] #<- id
+        sub_id = decoded_refresh['sub'] #<- user id from fence
         iat = decoded_refresh['iat'] #<- issue date
         exp = decoded_refresh['exp'] #<- expiry date
         payload = {
-            #DEBUG
-            #'sub_id': int(sub_id),
             'sub_id': sub_id,
             'refresh_token': refresh,
             'iat': datetime.fromtimestamp(iat).strftime('%Y-%m-%d %H:%M:%S'),

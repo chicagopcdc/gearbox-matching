@@ -3,8 +3,6 @@ from flask_restplus import Namespace, fields
 class LoginDto:
     api = Namespace('login', description='OICD login POST relay')
     login = api.model('login', {
-        #DEBUG
-        #'sub_id': fields.Integer(required=True, description="sub_id from fence /user"),
         'sub_id': fields.String(required=True, description="sub_id from fence /user"),
         'refresh_token': fields.String(required=True, description="oicd token"),
         'iat': fields.String(required=True, description="issued at time"),
