@@ -1,3 +1,4 @@
+import json
 import os
 
 # uncomment the line below for postgres database url from environment variable
@@ -7,7 +8,10 @@ import os
 class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'my_precious_secret_key')
     DEBUG = False
-
+    
+    f=open("/usr/share/gearbox/creds.json")
+    creds = json.load(f)
+    CLIENT_ID = creds['CLIENT_ID']
 
 class DevelopmentConfig(Config):
     # uncomment the line below to use postgres

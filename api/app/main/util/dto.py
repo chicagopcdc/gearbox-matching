@@ -1,5 +1,13 @@
 from flask_restplus import Namespace, fields
 
+class LoginDto:
+    api = Namespace('login', description='OICD login POST relay')
+    login = api.model('login', {
+        'sub_id': fields.String(required=True, description="sub_id from fence /user"),
+        'refresh_token': fields.String(required=True, description="oicd token"),
+        'iat': fields.String(required=True, description="issued at time"),
+        'exp': fields.String(required=True, description="expires at time"),
+    })
 
 class StudyDto:
     api = Namespace('study', description='study related operations')
@@ -23,7 +31,7 @@ class SiteDto:
     })    
 
 
-class SitehasStudyDto:
+class SiteHasStudyDto:
     api = Namespace('site_has_study', description='site_has_study related operations')
     site_has_study = api.model('site_has_study', {
     	'study_id': fields.String(required=True, description="study id"),
@@ -31,4 +39,3 @@ class SitehasStudyDto:
         'create_date': fields.String(required=True, description='site creation time'),
         'active': fields.String(description='is site active')
     })    
-    

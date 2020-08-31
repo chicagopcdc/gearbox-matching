@@ -9,7 +9,7 @@ from app.main.util.dto import SiteHasStudyDto
 from app.main.util import AlchemyEncoder
 from app.main.service.site_has_study_service import get_all_site_has_studies, get_a_site_has_study, get_site_has_study_version, save_new_site_has_study, site_has_study_commit, site_has_study_delete
 
-from app.main.model.site_has_study import SiteHasStudy
+from app.main.model.site import SiteHasStudy
 
 
 api = SiteHasStudyDto.api

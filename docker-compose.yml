@@ -24,5 +24,6 @@ services:
       - "5000:5000"
     volumes:
       - ./api:/docker-flask
+      - ./Secrets/creds.json:/usr/share/gearbox/creds.json
     env_file:
       - config.env

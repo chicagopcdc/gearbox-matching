@@ -9,7 +9,6 @@ from app.main.model.algorithm_engine import StudyAlgorithmEngine
 
 
 class StudyVersion(Base):
-    """ User Model for storing user related details """
     __tablename__ = "study_version"
 
     id = Column(Integer, primary_key=True)
