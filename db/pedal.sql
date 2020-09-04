@@ -241,7 +241,7 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`study_algorithm_engine` (
   `study_version_id` INT NOT NULL,
   `algorithm_engine_id` INT NOT NULL,
   `study_id` INT NOT NULL,
-  `date from` DATETIME NULL,
+  `start_date` DATETIME NULL,
   `active` TINYINT NULL,
   PRIMARY KEY (`study_version_id`, `algorithm_engine_id`, `study_id`),
   INDEX `fk_study_version_has_algorithm_engine_algorithm_engine1_idx` (`algorithm_engine_id` ASC),
@@ -319,6 +319,20 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`logins` (
   `refresh_token` MEDIUMTEXT NOT NULL,
   `iat` DATETIME NULL,
   `exp` DATETIME NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `pedal_dev_v_0`.`xyz`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `pedal_dev_v_0`.`xyz` ;
+
+CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`xyz` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `code` VARCHAR(45) NULL,
+  `name` VARCHAR(45) NULL,
+  `create_date` DATETIME NULL,
+  `active` TINYINT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 

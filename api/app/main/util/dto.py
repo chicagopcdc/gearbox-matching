@@ -1,13 +1,5 @@
 from flask_restplus import Namespace, fields
 
-class LoginDto:
-    api = Namespace('login', description='OICD login POST relay')
-    login = api.model('login', {
-        'sub_id': fields.String(required=True, description="sub_id from fence /user"),
-        'refresh_token': fields.String(required=True, description="oicd token"),
-        'iat': fields.String(required=True, description="issued at time"),
-        'exp': fields.String(required=True, description="expires at time"),
-    })
 
 class StudyDto:
     api = Namespace('study', description='study related operations')
@@ -39,3 +31,36 @@ class SiteHasStudyDto:
         'create_date': fields.String(required=True, description='site creation time'),
         'active': fields.String(description='is site active')
     })    
+
+
+class LoginDto:
+    api = Namespace('login', description='OICD login POST relay')
+    login = api.model('login', {
+        'sub_id': fields.String(required=True, description="sub_id from fence /user"),
+        'refresh_token': fields.String(required=True, description="oicd token"),
+        'iat': fields.String(required=True, description="issued at time"),
+        'exp': fields.String(required=True, description="expires at time"),
+    })
+
+###################################################
+###################################################
+
+class XyzDto:
+    api = Namespace('xyz', description='xyz related operations')
+    xyz = api.model('xyz', {
+    	'id': fields.String(required=True, description="xyz id"),
+        'name': fields.String(required=True, description='xyz name'),
+        'code': fields.String(required=True, description='xyz code'),
+        'create_date': fields.String(required=True, description='xyz creation time'),
+        'active': fields.String(description='is xyz active')
+    })    
+
+class StudyVersionDto:
+    api = Namespace('study_version', description='study_version related operations')
+    study_version = api.model('study_version', {
+    	'id': fields.String(required=True, description="study_version id"),
+        'study_id': fields.String(required=True, description='study id'),
+        'create_date': fields.String(required=True, description='study_version creation time'),
+        'active': fields.String(description='is study_version active')
+    })    
+

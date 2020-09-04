@@ -11,13 +11,15 @@ from app.main.model.algorithm_engine import StudyAlgorithmEngine
 class StudyVersion(Base):
     __tablename__ = "study_version"
 
+    #DEBUG
+    #id = Column(Integer, primary_key=True, autoincrement=True)
     id = Column(Integer, primary_key=True)
     study_id = Column(Integer, ForeignKey('study.id'), primary_key=True) 
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
 
+    #DEBUG
     algorithm_engines = relationship("StudyAlgorithmEngine", back_populates="study_version")
-    study = relationship("Study", back_populates="study_versions")
+    #algorithm_engines = relationship("StudyAlgorithmEngine", back_populates="study_version", cascade="all, delete-orphan")
 
-    def as_dict(self):
-       return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
+    study = relationship("Study", back_populates="study_versions")
