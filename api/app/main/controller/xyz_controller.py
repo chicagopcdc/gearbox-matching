@@ -5,11 +5,10 @@ import logging
 from time import gmtime, strftime
 import json
 
-from app.main.util.dto import XyzDto
-from app.main.util import AlchemyEncoder
-from app.main.service.xyz_service import XyzService #get_all_xyzs, get_a_xyz, get_xyz_version, save_new_xyz, xyz_commit, xyz_delete
-
 from app.main.model.xyz import Xyz
+from app.main.service.xyz_service import XyzService
+from app.main.util import AlchemyEncoder
+from app.main.util.dto import XyzDto
 
 
 api = XyzDto.api

@@ -5,11 +5,10 @@ import logging
 from time import gmtime, strftime
 import json
 
-from app.main.util.dto import StudyDto
-from app.main.util import AlchemyEncoder
-from app.main.service.study_service import StudyService #get_all_studies, get_a_study, get_study_version, save_new_study, study_commit, study_delete
-
 from app.main.model.study import Study
+from app.main.service.study_service import StudyService
+from app.main.util import AlchemyEncoder
+from app.main.util.dto import StudyDto
 
 
 api = StudyDto.api
