@@ -11,8 +11,8 @@ from flask_restplus import Resource
 
 from app.main import config
 from app.main.model.login import Login
+from app.main.service.login_service import LoginService
 from app.main.util.dto import LoginDto
-from app.main.service.login_service import save_new_login, get_all_logins, get_a_login, login_commit, login_delete
 
 api = LoginDto.api
 _login = LoginDto.login
@@ -40,9 +40,14 @@ class CodeToToken(Resource):
         tokens = json.loads(response.text)
 
         #process tokens and store refresh_token
-        refresh = tokens["refresh_token"]
-        decoded_refresh = jwt.decode(refresh, verify=False)
-
+        try:
+            refresh = tokens["refresh_token"]
+            decoded_refresh = jwt.decode(refresh, verify=False)
+        except Exception as e:
+            logging.error(e, exc_info=True)
+            message_text = """tokens not received: is CLIENT_ID set/passed to container? Secrets/creds.json should have format like: {"CLIENT_ID": "__client_id__"}"""
+            api.abort(message=message_text)
+            
         sub_id = decoded_refresh['sub'] #<- user id from fence
         iat = decoded_refresh['iat'] #<- issue date
         exp = decoded_refresh['exp'] #<- expiry date
@@ -92,7 +97,7 @@ class Create(Resource):
                 new_login_dict.update({key:data[key]})
 
         try:
-            response = save_new_login(new_login_dict)
+            response = LoginService.save_new_login(new_login_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -104,7 +109,7 @@ class LoginInfo(Resource):
     @api.doc('get login info')
     @api.marshal_with(_login)
     def get(self, sub_id):
-        login = get_a_login(sub_id)
+        login = LoginService.get_a_login(sub_id)
         if not login:
             api.abort(404, message="user login '{}' not found".format(sub_id))
         else:
@@ -114,7 +119,7 @@ class LoginInfo(Resource):
 @api.route('/info')
 class AllLoginsInfo(Resource):
     def get(self):
-        logins = get_all_logins()
+        logins = LoginService.get_all(Login)
         try:
             if logins:
                 body = [r.as_dict() for r in logins]
@@ -142,7 +147,7 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the login to be updated
-        login = get_a_login(sub_id)
+        login = LoginService.get_a_login(sub_id)
         if not login:
             api.abort(404, message="login info '{}' not found".format(sub_id))
 
@@ -151,7 +156,7 @@ class Update(Resource):
         for key in data.keys():
             if key in allowed_keys:
                 if key=='code':
-                    existing_login_with_new_code = get_a_login(data[key])
+                    existing_login_with_new_code = LoginService.get_a_login(data[key])
                     if not existing_login_with_new_code:
                         setattr(login, key, data[key])
                     else:
@@ -160,7 +165,7 @@ class Update(Resource):
                 else:
                     setattr(login, key, data[key])
         try:
-            login_commit()
+            LoginService.commit()
             return login.as_dict()
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -172,12 +177,12 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a login')
     def delete(self, sub_id):
-        login = get_a_login(sub_id)
+        login = LoginService.get_a_login(sub_id)
         if not login:
             api.abort(404, message="user login '{}' not found".format(sub_id))
 
         try:
-            login_delete(login)
+            LoginService.delete(login)
             return login.as_dict()
         except Exception as e:
             logging.error(e, exc_info=True)
