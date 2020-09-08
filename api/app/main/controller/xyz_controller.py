@@ -7,7 +7,7 @@ import json
 
 from app.main.util.dto import XyzDto
 from app.main.util import AlchemyEncoder
-from app.main.service.xyz_service import get_all_xyzs, get_a_xyz, get_xyz_version, save_new_xyz, xyz_commit, xyz_delete
+from app.main.service.xyz_service import XyzService #get_all_xyzs, get_a_xyz, get_xyz_version, save_new_xyz, xyz_commit, xyz_delete
 
 from app.main.model.xyz import Xyz
 
@@ -22,7 +22,7 @@ class XyzInfo(Resource):
     @api.doc('get a xyz')
     @api.marshal_with(_xyz)
     def get(self, public_id):
-        xyz = get_a_xyz(public_id)
+        xyz = XyzService.get_a_xyz(public_id)
         if not xyz:
             api.abort(404, message="xyz '{}' not found".format(public_id))
         else:
@@ -32,7 +32,7 @@ class XyzInfo(Resource):
 @api.route('/info')
 class AllXyzsInfo(Resource):
     def get(self):
-        xyzs = get_all_xyzs()
+        xyzs = XyzService.get_all(Xyz)
         try:
             if xyzs:
                 body = [r.as_dict() for r in xyzs]
@@ -65,7 +65,7 @@ class Create(Resource):
             if key in allowed_keys:
                 new_xyz_dict.update({key:data[key]})
         try:
-            response = save_new_xyz(new_xyz_dict)
+            response = XyzService.save_new_xyz(new_xyz_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -81,7 +81,7 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the xyz to be updated
-        xyz = get_a_xyz(public_id)
+        xyz = XyzService.get_a_xyz(public_id)
         if not xyz:
             api.abort(404, message="xyz '{}' not found".format(public_id))
 
@@ -90,7 +90,7 @@ class Update(Resource):
         for key in data.keys():
             if key in allowed_keys:
                 if key=='code':
-                    existing_xyz_with_new_code = get_a_xyz(data[key])
+                    existing_xyz_with_new_code = XyzService.get_a_xyz(data[key])
                     if not existing_xyz_with_new_code:
                         setattr(xyz, key, data[key])
                     else:
@@ -99,7 +99,7 @@ class Update(Resource):
                 else:
                     setattr(xyz, key, data[key])
         try:
-            xyz_commit()
+            XyzService.commit()
             return xyz.as_dict()
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -111,12 +111,12 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a xyz')
     def delete(self, public_id):
-        xyz = get_a_xyz(public_id)
+        xyz = XyzService.get_a_xyz(public_id)
         if not xyz:
             api.abort(404, message="xyz '{}' not found".format(public_id))
 
         try:
-            xyz_delete(xyz)
+            XyzService.delete(xyz)
             return xyz.as_dict()
         except Exception as e:
             logging.error(e, exc_info=True)

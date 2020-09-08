@@ -7,7 +7,7 @@ import json
 
 from app.main.util.dto import StudyDto
 from app.main.util import AlchemyEncoder
-from app.main.service.study_service import get_all_studies, get_a_study, get_study_version, save_new_study, study_commit, study_delete
+from app.main.service.study_service import StudyService #get_all_studies, get_a_study, get_study_version, save_new_study, study_commit, study_delete
 
 from app.main.model.study import Study
 
@@ -22,7 +22,7 @@ class StudyInfo(Resource):
     @api.doc('get a study')
     @api.marshal_with(_study)
     def get(self, public_id):
-        study = get_a_study(public_id)
+        study = StudyService.get_a_study(public_id)
         if not study:
             api.abort(404, message="study '{}' not found".format(public_id))
         else:
@@ -32,7 +32,7 @@ class StudyInfo(Resource):
 @api.route('/info')
 class AllStudiesInfo(Resource):
     def get(self):
-        studies = get_all_studies()
+        studies = StudyService.get_all(Study)
         try:
             if studies:
                 body = [r.as_dict() for r in studies]
@@ -65,7 +65,7 @@ class Create(Resource):
             if key in allowed_keys:
                 new_study_dict.update({key:data[key]})
         try:
-            response = save_new_study(new_study_dict)
+            response = StudyService.save_new_study(new_study_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -81,7 +81,7 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the study to be updated
-        study = get_a_study(public_id)
+        study = StudyService.get_a_study(public_id)
         if not study:
             api.abort(404, message="study '{}' not found".format(public_id))
 
@@ -90,7 +90,7 @@ class Update(Resource):
         for key in data.keys():
             if key in allowed_keys:
                 if key=='code':
-                    existing_study_with_new_code = get_a_study(data[key])
+                    existing_study_with_new_code = StudyService.get_a_study(data[key])
                     if not existing_study_with_new_code:
                         setattr(study, key, data[key])
                     else:
@@ -99,7 +99,7 @@ class Update(Resource):
                 else:
                     setattr(study, key, data[key])
         try:
-            study_commit()
+            StudyService.commit()
             return study.as_dict()
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -111,12 +111,12 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a study')
     def delete(self, public_id):
-        study = get_a_study(public_id)
+        study = StudyService.get_a_study(public_id)
         if not study:
             api.abort(404, message="study '{}' not found".format(public_id))
 
         try:
-            study_delete(study)
+            StudyService.delete(study)
             return study.as_dict()
         except Exception as e:
             logging.error(e, exc_info=True)
