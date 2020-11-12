@@ -9,11 +9,11 @@ from app.main.controller.study_controller import StudyInfo, AllStudiesInfo
 
 @pytest.fixture(scope="module")
 def study_versionA():
-    return StudyVersion(id=2, study_id=1)
+    return StudyVersion(id=4, study_id=2)
 
 @pytest.fixture(scope="module")
 def study_versionB():
-    return StudyVersion(id=3, study_id=1)
+    return StudyVersion(id=5, study_id=2)
 
 #create a different study to attach the version to
 @pytest.fixture(scope="module")

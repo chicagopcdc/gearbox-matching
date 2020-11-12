@@ -30,10 +30,10 @@ def test_scope(xyzA, xyzB, app, session):
 
 
 def test_xyz_info(xyzA, xyzB, app, session):
-    for code in [xyzA.as_dict()['code'], xyzB.as_dict()['code']]:
-        with app.test_request_context("/xyz/{}".format(code), method="GET"):
-            response = XyzInfo().get(code)
-            assert code == response['code']
+    for public_id in [xyzA.as_dict()['code'], xyzB.as_dict()['code']]:
+        with app.test_request_context("/xyz/{}".format(public_id), method="GET"):
+            response = XyzInfo().get(public_id)
+            assert public_id == response['code']
 
 
 def test_all_xyzs_info(xyzA, xyzB, app, session):

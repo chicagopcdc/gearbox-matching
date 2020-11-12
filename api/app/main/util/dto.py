@@ -64,3 +64,12 @@ class StudyVersionDto:
         'active': fields.String(description='is study_version active')
     })    
 
+class StudyAlgorithmEngineDto:
+    api = Namespace('study_algorithm_engine', description='study_algorithm_engine related operations')
+    study_algorithm_engine = api.model('study_algorithm_engine', {
+    	'study_version_id': fields.String(required=True, description="study_version id"),
+        'algorithm_engine_id': fields.String(required=True, description='algorithm_engine id'),
+        'study_id': fields.String(required=True, description='study id'),
+        'start_date': fields.String(description='start date'),
+        'active': fields.String(description='is study_algorithm_engine active')
+    })
