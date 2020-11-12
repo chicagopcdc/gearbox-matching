@@ -59,7 +59,7 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `pedal_dev_v_0`.`arm` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`arm` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `version_id` INT NOT NULL,
   `study_id` INT NOT NULL,
   `code` VARCHAR(45) NULL,

@@ -85,3 +85,14 @@ class AlgorithmEngineDto:
         'function': fields.String(description='algorithm_engine function'),
         'type': fields.String(description='algorithm_engine type')
     })
+
+class ArmDto:
+    api = Namespace('arm', description='arm related operations')
+    arm = api.model('arm', {
+    	'id': fields.String(required=True, description="arm id"),
+        'version_id': fields.String(description='arm version_id'),
+        'study_id': fields.String(description='arm study_id'),
+        'code': fields.String(description='arm code'),
+        'create_date': fields.String(description='arm create_date'),
+        'active': fields.String(description='is arm active')
+    })

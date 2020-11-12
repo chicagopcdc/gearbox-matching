@@ -12,7 +12,7 @@ from .main.controller.xyz_controller import api as xyz_ns
 from .main.controller.study_version_controller import api as study_version_ns
 from .main.controller.study_algorithm_engine_controller import api as study_algorithm_engine_ns
 from .main.controller.algorithm_engine_controller import api as algorithm_engine_ns
-# from .main.controller.arm_controller import api as arm_ns
+from .main.controller.arm_controller import api as arm_ns
 # from .main.controller.treatment_controller import api as treatment_ns
 # from .main.controller.criterion_controller import api as criterion_ns
 # from .main.controller.eligibility_criteria_controller import api as eligibility_criteria_ns
@@ -39,8 +39,7 @@ api.add_namespace(xyz_ns, path='/xyz')
 api.add_namespace(study_version_ns, path='/study_version')
 api.add_namespace(study_algorithm_engine_ns, path='/study_algorithm_engine')
 api.add_namespace(algorithm_engine_ns, path='/algorithm_engine')
-
-# api.add_namespace(arm_ns, path='/arm')
+api.add_namespace(arm_ns, path='/arm')
 # api.add_namespace(treatment_ns, path='/treatment')
 # api.add_namespace(criterion_ns, path='/criterion')
 # api.add_namespace(eligibility_criteria_ns, path='/eligibility_criteria')
