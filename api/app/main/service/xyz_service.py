@@ -12,10 +12,10 @@ class XyzService(Services):
 
         if not xyz:
             new_xyz = Xyz(
-                name=data['name'],
-                code=data['code'],
+                name=data.get('name'),
+                code=data.get('code'),
                 create_date=datetime.datetime.utcnow(),
-                active=data['active']
+                active=data.get('active'),
             )
             Services.save_changes(new_xyz)
             response_object = {

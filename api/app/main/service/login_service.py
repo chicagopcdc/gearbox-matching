@@ -12,10 +12,10 @@ class LoginService(Services):
 
         if not login:
             new_login = Login(
-                sub_id=data['sub_id'],
-                refresh_token=data['refresh_token'],
-                iat=data['iat'],
-                exp=data['exp'],
+                sub_id=data.get('sub_id'),
+                refresh_token=data.get('refresh_token'),
+                iat=data.get('iat'),
+                exp=data.get('exp'),
             )
             Services.save_changes(new_login)
             response_object = {

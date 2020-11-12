@@ -18,7 +18,7 @@ def studyB():
 def test_setup(studyA, studyB, app, session):
     session.add(studyA)
     session.add(studyB)
-#    session.commit()
+
 
 def test_scope(studyA, studyB, app, session):
     #fixture scope should be greater than 'function', for use in later tests
@@ -48,7 +48,7 @@ def test_all_studies_info(studyA, studyB, app, session):
         assert studyB.as_dict() in table_data
 
 
-def test_create_study(studyA, studyB, app, session):
+def test_create_study(app, session):
     payload= {'name': 'thisName', 'code': 'thisCode', 'active': 0}
     with app.test_request_context("/study/create_study", method="POST", json=payload):
         response, status_code = Create().post()

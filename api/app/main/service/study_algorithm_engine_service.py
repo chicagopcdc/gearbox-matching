@@ -18,11 +18,11 @@ class Study_Algorithm_EngineService(Services):
 
         if not study_algorithm_engine:
             new_study_algorithm_engine = Study_Algorithm_Engine(
-                study_version_id=data['study_version_id'],
-                algorithm_engine_id=data['algorithm_engine_id'],
-                study_id=data['study_id'],                
-                start_date=None,
-                active=None,
+                study_version_id=data.get('study_version_id'),
+                algorithm_engine_id=data.get('algorithm_engine_id'),
+                study_id=data.get('study_id'),                
+                start_date=data.get('start_date'),
+                active=data.get('active'),
             )
             Services.save_changes(new_study_algorithm_engine)
             response_object = {

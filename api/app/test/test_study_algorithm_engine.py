@@ -50,7 +50,7 @@ def test_all_study_algorithm_engines_info(study_algorithm_engineA, study_algorit
         assert study_algorithm_engineB.as_dict() in table_data
 
 
-def test_create_study_algorithm_engine(study_algorithm_engineA, study_algorithm_engineB, app, session):
+def test_create_study_algorithm_engine(app, session):
     payload = {'study_version_id': 3, 'algorithm_engine_id': 2, 'study_id': 2}
     with app.test_request_context("/study_algorithm_engine/create_study_algorithm_engine", method="POST", json=payload):
         response, status_code = Create().post()

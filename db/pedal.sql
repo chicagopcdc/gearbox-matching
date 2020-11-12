@@ -221,7 +221,7 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `pedal_dev_v_0`.`algorithm_engine` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`algorithm_engine` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `version` VARCHAR(45) NULL,
   `name` VARCHAR(45) NULL,
   `link` VARCHAR(256) NULL,

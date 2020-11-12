@@ -12,10 +12,10 @@ class SiteService(Services):
 
         if not site:
             new_site = Site(
-                name=data['name'],
-                code=data['code'],
+                name=data.get('name'),
+                code=data.get('code'),
                 create_date=datetime.datetime.utcnow(),
-                active=data['active']
+                active=data.get('active')
             )
             Services.save_changes(new_site)
             response_object = {

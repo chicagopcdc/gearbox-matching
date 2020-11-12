@@ -12,10 +12,10 @@ class StudyVersionService(Services):
 
         if not study_version:
             new_study_version = StudyVersion(
-                id = data['id'],
-                study_id=data['study_id'],
+                id = data.get('id'),
+                study_id=data.get('study_id'),
                 create_date=datetime.datetime.utcnow(),
-                active=data['active']
+                active=data.get('active')
             )
             Services.save_changes(new_study_version)
             response_object = {

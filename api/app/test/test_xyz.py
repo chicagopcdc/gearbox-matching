@@ -18,7 +18,7 @@ def xyzB():
 def test_setup(xyzA, xyzB, app, session):
     session.add(xyzA)
     session.add(xyzB)
-#    session.commit()
+
 
 def test_scope(xyzA, xyzB, app, session):
     #fixture scope should be greater than 'function', for use in later tests
@@ -48,7 +48,7 @@ def test_all_xyzs_info(xyzA, xyzB, app, session):
         assert xyzB.as_dict() in table_data
 
 
-def test_create_xyz(xyzA, xyzB, app, session):
+def test_create_xyz(app, session):
     payload= {'name': 'thisName', 'code': 'thisCode', 'active': 0}
     with app.test_request_context("/xyz/create_xyz", method="POST", json=payload):
         response, status_code = Create().post()

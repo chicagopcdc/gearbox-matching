@@ -12,10 +12,10 @@ class SiteHasStudyService(Services):
 
         if not site_has_study:
             new_site_has_study = SiteHasStudy(
-                name=data['name'],
-                code=data['code'],
+                name=data.get('name'),
+                code=data.get('code'),
                 create_date=datetime.datetime.utcnow(),
-                active=data['active']
+                active=data.get('active')
             )
             Services.save_changes(new_site_has_study)
             response_object = {

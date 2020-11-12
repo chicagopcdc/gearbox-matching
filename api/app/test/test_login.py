@@ -18,7 +18,7 @@ def loginB():
 def test_setup(loginA, loginB, app, session):
     session.add(loginA)
     session.add(loginB)
-#    session.commit()
+
 
 def test_scope(loginA, loginB, app, session):
     #fixture scope should be greater than 'function', for use in later tests
@@ -48,7 +48,7 @@ def test_all_logins_info(loginA, loginB, app, session):
         assert loginB.as_dict() in table_data
 
 
-def test_create_login(loginA, loginB, app, session):
+def test_create_login(app, session):
     payload= {"sub_id": '11', "refresh_token": "foxescatsandlazydogs999", "iat": "0000-01-01T00:00:00.000", "exp": "0001-01-01T00:00:00.000"}
     with app.test_request_context("/login/create_login", method="POST", json=payload):
         response, status_code = Create().post()
