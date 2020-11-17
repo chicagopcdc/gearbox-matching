@@ -32,7 +32,8 @@ def test_scope(study_algorithm_engineA, study_algorithm_engineB, app, session):
 
 def test_study_algorithm_engine_info(study_algorithm_engineA, study_algorithm_engineB, app, session):
     for sag in [study_algorithm_engineA.as_dict(), study_algorithm_engineB.as_dict()]:
-        with app.test_request_context("/study_algorithm_engine/{}".format(sag['study_version_id'], sag['algorithm_engine_id'], sag['study_id']), method="GET"):
+        #with app.test_request_context("/study_algorithm_engine/{}".format(sag['study_version_id'], sag['algorithm_engine_id'], sag['study_id']), method="GET"):
+        with app.test_request_context("/study_algorithm_engine/{}-{}-{}".format(sag['study_version_id'], sag['algorithm_engine_id'], sag['study_id']), method="GET"):
             pid = "{}-{}-{}".format(sag['study_version_id'], sag['algorithm_engine_id'], sag['study_id'])
             response = Study_Algorithm_EngineInfo().get(pid)
             assert pid == "{}-{}-{}".format(response['study_version_id'], response['algorithm_engine_id'], response['study_id'])

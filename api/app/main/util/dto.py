@@ -1,6 +1,17 @@
 from flask_restplus import Namespace, fields
 
 
+class XyzDto:
+    api = Namespace('xyz', description='xyz related operations')
+    xyz = api.model('xyz', {
+    	'id': fields.String(required=True, description="xyz id"),
+        'name': fields.String(required=True, description='xyz name'),
+        'code': fields.String(required=True, description='xyz code'),
+        'create_date': fields.String(required=True, description='xyz creation time'),
+        'active': fields.String(description='is xyz active')
+    })    
+
+
 class StudyDto:
     api = Namespace('study', description='study related operations')
     study = api.model('study', {
@@ -42,18 +53,6 @@ class LoginDto:
         'exp': fields.String(required=True, description="expires at time"),
     })
 
-###################################################
-###################################################
-
-class XyzDto:
-    api = Namespace('xyz', description='xyz related operations')
-    xyz = api.model('xyz', {
-    	'id': fields.String(required=True, description="xyz id"),
-        'name': fields.String(required=True, description='xyz name'),
-        'code': fields.String(required=True, description='xyz code'),
-        'create_date': fields.String(required=True, description='xyz creation time'),
-        'active': fields.String(description='is xyz active')
-    })    
 
 class StudyVersionDto:
     api = Namespace('study_version', description='study_version related operations')
@@ -63,6 +62,7 @@ class StudyVersionDto:
         'create_date': fields.String(required=True, description='study_version creation time'),
         'active': fields.String(description='is study_version active')
     })    
+
 
 class StudyAlgorithmEngineDto:
     api = Namespace('study_algorithm_engine', description='study_algorithm_engine related operations')
@@ -95,4 +95,26 @@ class ArmDto:
         'code': fields.String(description='arm code'),
         'create_date': fields.String(description='arm create_date'),
         'active': fields.String(description='is arm active')
+    })
+
+
+class TreatmentDto:
+    api = Namespace('treatment', description='treatment related operations')
+    treatment = api.model('treatment', {
+    	'id': fields.String(required=True, description="treatment id"),
+        'level_code': fields.String(description='treatment level_code'),
+        'level_display': fields.String(description='treatment level_display'),
+        'description': fields.String(description='treatment description'),
+        'create_date': fields.String(description='treatment create_date'),
+        'active': fields.String(description='is treatment active')
+    })
+
+    
+class ArmTreatmentDto:
+    api = Namespace('arm_treatment', description='arm_treatment related operations')
+    arm_treatment = api.model('arm_treatment', {
+    	'arm_id': fields.String(required=True, description="arm_treatment arm_id"),
+        'treatment_id': fields.String(description='arm_treatment treatment_id'),
+        'create_date': fields.String(description='arm_treatment create_date'),
+        'active': fields.String(description='is arm_treatment active')
     })

@@ -96,7 +96,7 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `pedal_dev_v_0`.`treatment` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`treatment` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `level_code` VARCHAR(45) NULL,
   `level_display` VARCHAR(128) NULL,
   `description` VARCHAR(512) NULL,
