@@ -161,6 +161,17 @@ class CriterionHasValueDto:
     criterion_has_value = api.model('criterion_has_value', {
     	'value_id': fields.String(required=True, description="criterion_has_value value_id"),
     	'criterion_id': fields.String(required=True, description="criterion_has_value criterion_id"),
-#    	'eligibility_id': fields.String(description="criterion_has_value eligibility_id"),
-#    	'arm_id': fields.String(description="criterion_has_value arm_id"),
+    })
+
+
+class ElCriteriaHasCriterionDto:
+    api = Namespace('el_criteria_has_criterion', description='el_criteria_has_criterion related operations')
+    el_criteria_has_criterion = api.model('el_criteria_has_criterion', {
+    	'criterion_id': fields.String(required=True, description="el_criteria_has_criterion criterion_id"),
+        'eligibility_criteria_id': fields.String(required=True, description='el_criteria_has_criterion eligibility_criteria_id'),
+        'arm_id': fields.String(required=True, description='el_criteria_has_criterion arm_id'),
+        'code': fields.String(description='el_criteria_has_criterion code'),
+        'display_name': fields.String(description='el_criteria_has_criterion display_name'),
+        'create_date': fields.String(description='el_criteria_has_criterion create_date'),
+        'active': fields.String(description='is el_criteria_has_criterion active')
     })
