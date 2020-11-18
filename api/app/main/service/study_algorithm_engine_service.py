@@ -11,9 +11,9 @@ class Study_Algorithm_EngineService(Services):
     def save_new_study_algorithm_engine(data):
         #NOT DRY
         study_algorithm_engine = DbSession.query(Study_Algorithm_Engine).filter(
-            Study_Algorithm_Engine.study_version_id==data['study_version_id'],
-            Study_Algorithm_Engine.algorithm_engine_id==data['algorithm_engine_id'],
-            Study_Algorithm_Engine.study_id==data['study_id'],
+            Study_Algorithm_Engine.study_version_id==data.get('study_version_id'),
+            Study_Algorithm_Engine.algorithm_engine_id==data.get('algorithm_engine_id'),
+            Study_Algorithm_Engine.study_id==data.get('study_id'),
         ).first()
 
         if not study_algorithm_engine:

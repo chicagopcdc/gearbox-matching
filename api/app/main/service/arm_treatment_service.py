@@ -9,8 +9,8 @@ class ArmTreatmentService(Services):
 
     def save_new_arm_treatment(data):
         arm_treatment = DbSession.query(ArmTreatment).filter(
-            ArmTreatment.arm_id==data['arm_id'],
-            ArmTreatment.treatment_id==data['treatment_id'],            
+            ArmTreatment.arm_id==data.get('arm_id'),
+            ArmTreatment.treatment_id==data.get('treatment_id'),
         ).first()
 
         if not arm_treatment:

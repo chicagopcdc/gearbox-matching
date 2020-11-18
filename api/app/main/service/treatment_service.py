@@ -9,7 +9,7 @@ class TreatmentService(Services):
 
     def save_new_treatment(data):
         try:
-            treatment = DbSession.query(Treatment).filter(Treatment.level_code==data['level_code']).first()
+            treatment = DbSession.query(Treatment).filter(Treatment.level_code==data.get('level_code')).first()
         except:
             treatment=None
 

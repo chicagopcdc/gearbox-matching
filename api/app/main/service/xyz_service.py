@@ -8,7 +8,7 @@ from app.main.service import Services
 class XyzService(Services):
 
     def save_new_xyz(data):
-        xyz = DbSession.query(Xyz).filter(Xyz.code==data['code']).first()
+        xyz = DbSession.query(Xyz).filter(Xyz.code==data.get('code')).first()
 
         if not xyz:
             new_xyz = Xyz(

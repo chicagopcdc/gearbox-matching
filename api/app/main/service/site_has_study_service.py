@@ -8,7 +8,7 @@ from app.main.service import Services
 class SiteHasStudyService(Services):
 
     def save_new_site_has_study(data):
-        site_has_study = DbSession.query(SiteHasStudy).filter(SiteHasStudy.code==data['code']).first()
+        site_has_study = DbSession.query(SiteHasStudy).filter(SiteHasStudy.code==data.get('code')).first()
 
         if not site_has_study:
             new_site_has_study = SiteHasStudy(

@@ -9,7 +9,7 @@ from app.main.service import Services
 class StudyService(Services):
     
     def save_new_study(data):
-        study = DbSession.query(Study).filter(Study.code==data['code']).first()
+        study = DbSession.query(Study).filter(Study.code==data.get('code')).first()
 
         if not study:
             new_study = Study(

@@ -8,7 +8,7 @@ from app.main.service import Services
 class LoginService(Services):
 
     def save_new_login(data):
-        login = DbSession.query(Login).filter(Login.sub_id==data['sub_id']).first()
+        login = DbSession.query(Login).filter(Login.sub_id==data.get('sub_id')).first()
 
         if not login:
             new_login = Login(

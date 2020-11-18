@@ -8,7 +8,7 @@ from app.main.service import Services
 class SiteService(Services):
 
     def save_new_site(data):
-        site = DbSession.query(Site).filter(Site.code==data['code']).first()
+        site = DbSession.query(Site).filter(Site.code==data.get('code')).first()
 
         if not site:
             new_site = Site(

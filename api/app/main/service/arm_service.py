@@ -8,7 +8,7 @@ from app.main.service import Services
 class ArmService(Services):
 
     def save_new_arm(data):
-        arm = DbSession.query(Arm).filter(Arm.code==data['code']).first()
+        arm = DbSession.query(Arm).filter(Arm.code==data.get('code')).first()
 
         if not arm:
             new_arm = Arm(
