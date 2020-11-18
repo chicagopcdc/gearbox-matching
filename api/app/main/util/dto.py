@@ -129,3 +129,28 @@ class EligibilityCriteriaDto:
         'active': fields.String(description='is eligibility_criteria active')
     })
 
+
+class CriterionDto:
+    api = Namespace('criterion', description='criterion related operations')
+    criterion = api.model('criterion', {
+    	'id': fields.String(required=True, description="criterion id"),
+        'code': fields.String(description='criterion code'),
+        'display_name': fields.String(description='criterion display_name'),
+        'description': fields.String(description='criterion description'),
+        'create_date': fields.String(description='criterion create_date'),
+        'active': fields.String(description='is criterion active')
+    })
+
+
+class ValueDto:
+    api = Namespace('value', description='value related operations')
+    value = api.model('value', {
+    	'id': fields.String(required=True, description="value id"),
+        'code': fields.String(description='value coded'),
+        'type': fields.String(description='value type'),
+        'display_value': fields.String(description='value display_value'),
+        'upper_threshold': fields.String(description='value upper_threshold'),
+        'lower_threshold': fields.String(description='value lower_threshold'),
+        'create_date': fields.String(description='value create_date'),
+        'active': fields.String(description='is value active')
+    })

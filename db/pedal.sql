@@ -177,7 +177,7 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `pedal_dev_v_0`.`value` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`value` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `code` VARCHAR(45) NULL,
   `type` VARCHAR(45) NULL,
   `display_value` VARCHAR(45) NULL,
