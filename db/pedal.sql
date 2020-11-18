@@ -123,18 +123,18 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `pedal_dev_v_0`.`elegibility_criteria`
+-- Table `pedal_dev_v_0`.`eligibility_criteria`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pedal_dev_v_0`.`elegibility_criteria` ;
+DROP TABLE IF EXISTS `pedal_dev_v_0`.`eligibility_criteria` ;
 
-CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`elegibility_criteria` (
-  `id` INT NOT NULL,
+CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`eligibility_criteria` (
+  `id` INT NOT NULL AUTO_INCREMENT,
   `arm_id` INT NOT NULL,
   `create_date` DATETIME NULL,
   `active` TINYINT NULL,
   PRIMARY KEY (`id`, `arm_id`),
-  INDEX `fk_elegibility_criteria_arm1_idx` (`arm_id` ASC),
-  CONSTRAINT `fk_elegibility_criteria_arm1`
+  INDEX `fk_eligibility_criteria_arm1_idx` (`arm_id` ASC),
+  CONSTRAINT `fk_eligibility_criteria_arm1`
     FOREIGN KEY (`arm_id`)
     REFERENCES `pedal_dev_v_0`.`arm` (`id`)
     ON DELETE NO ACTION
@@ -149,23 +149,23 @@ DROP TABLE IF EXISTS `pedal_dev_v_0`.`el_criteria_has_criterion` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`el_criteria_has_criterion` (
   `criterion_id` INT NOT NULL,
-  `elegibility_criteria_id` INT NOT NULL,
+  `eligibility_criteria_id` INT NOT NULL,
   `arm_id` INT NOT NULL,
   `code` VARCHAR(45) NOT NULL,
   `display_name` VARCHAR(45) NULL,
   `create_date` DATETIME NULL,
   `active` TINYINT NULL,
-  PRIMARY KEY (`criterion_id`, `elegibility_criteria_id`, `arm_id`),
+  PRIMARY KEY (`criterion_id`, `eligibility_criteria_id`, `arm_id`),
   INDEX `fk_criterion_criterion_list1_idx` (`criterion_id` ASC),
-  INDEX `fk_el_criteria_has_criterion_elegibility_criteria1_idx` (`elegibility_criteria_id` ASC, `arm_id` ASC),
+  INDEX `fk_el_criteria_has_criterion_eligibility_criteria1_idx` (`eligibility_criteria_id` ASC, `arm_id` ASC),
   CONSTRAINT `fk_criterion_criterion_list1`
     FOREIGN KEY (`criterion_id`)
     REFERENCES `pedal_dev_v_0`.`criterion` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_el_criteria_has_criterion_elegibility_criteria1`
-    FOREIGN KEY (`elegibility_criteria_id` , `arm_id`)
-    REFERENCES `pedal_dev_v_0`.`elegibility_criteria` (`id` , `arm_id`)
+  CONSTRAINT `fk_el_criteria_has_criterion_eligibility_criteria1`
+    FOREIGN KEY (`eligibility_criteria_id` , `arm_id`)
+    REFERENCES `pedal_dev_v_0`.`eligibility_criteria` (`id` , `arm_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;

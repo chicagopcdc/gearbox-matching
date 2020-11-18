@@ -118,3 +118,14 @@ class ArmTreatmentDto:
         'create_date': fields.String(description='arm_treatment create_date'),
         'active': fields.String(description='is arm_treatment active')
     })
+
+
+class EligibilityCriteriaDto:
+    api = Namespace('eligibility_criteria', description='eligibility_criteria related operations')
+    eligibility_criteria = api.model('eligibility_criteria', {
+    	'id': fields.String(required=True, description="eligibility_criteria id"),
+        'arm_id': fields.String(description='eligibility_criteria arm_id'),
+        'create_date': fields.String(description='eligibility_criteria create_date'),
+        'active': fields.String(description='is eligibility_criteria active')
+    })
+
