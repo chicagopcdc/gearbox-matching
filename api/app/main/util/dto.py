@@ -154,3 +154,13 @@ class ValueDto:
         'create_date': fields.String(description='value create_date'),
         'active': fields.String(description='is value active')
     })
+
+
+class CriterionHasValueDto:
+    api = Namespace('criterion_has_value', description='criterion_has_value related operations')
+    criterion_has_value = api.model('criterion_has_value', {
+    	'value_id': fields.String(required=True, description="criterion_has_value value_id"),
+    	'criterion_id': fields.String(required=True, description="criterion_has_value criterion_id"),
+#    	'eligibility_id': fields.String(description="criterion_has_value eligibility_id"),
+#    	'arm_id': fields.String(description="criterion_has_value arm_id"),
+    })

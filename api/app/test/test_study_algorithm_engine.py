@@ -83,9 +83,6 @@ def test_update_study_algorithm_engine(study_algorithm_engineA, study_algorithm_
         expected_response.update(payload)
         assert response == expected_response
 
-    with app.test_request_context("/study_algorithm_engine/{}".format(pidA), method="GET"):
-        current_study_algorithm_engineA = Study_Algorithm_EngineInfo().get(pidA)
-
 
 def test_delete_study_algorithm_engine(study_algorithm_engineA, study_algorithm_engineB, app, session):
     study_algorithm_engineA_dict = study_algorithm_engineA.as_dict()

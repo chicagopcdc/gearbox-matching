@@ -23,3 +23,9 @@ insert into `arm` (`id`, `version_id`, `study_id`, `code`) values (2, 2, 1, 'cod
 
 insert into `treatment` (`id`, `level_code`) values (1, 'level_code_1');
 insert into `treatment` (`id`, `level_code`) values (2, 'level_code_2');
+
+insert into `criterion` (`id`, `code`) values (1, 'code1');
+insert into `criterion` (`id`, `code`) values (2, 'code2');
+
+insert into `value` (`id`, `code`) values (1, 'code1');
+insert into `value` (`id`, `code`) values (2, 'code2');
