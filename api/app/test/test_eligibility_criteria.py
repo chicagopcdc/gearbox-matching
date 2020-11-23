@@ -7,12 +7,12 @@ from app.main.controller.eligibility_criteria_controller import EligibilityCrite
 
 @pytest.fixture(scope="module")
 def eligibility_criteriaA():
-    return EligibilityCriteria(arm_id = 1)
+    return EligibilityCriteria(study_version_id = 1, active = 0)
 
 
 @pytest.fixture(scope="module")
 def eligibility_criteriaB():
-    return EligibilityCriteria(arm_id = 2)
+    return EligibilityCriteria(study_version_id=2, active = 0)
 
 
 def test_setup(eligibility_criteriaA, eligibility_criteriaB, app, session):
@@ -49,7 +49,7 @@ def test_all_eligibility_criterias_info(eligibility_criteriaA, eligibility_crite
 
 
 def test_create_eligibility_criteria(app, session):
-    payload= {'arm_id': 1, 'active': 1}
+    payload= {'study_version_id': 1, 'active': 1}
     with app.test_request_context("/eligibility_criteria/create_eligibility_criteria", method="POST", json=payload):
         response, status_code = Create().post()
         print (response)
@@ -83,20 +83,11 @@ def test_update_eligibility_criteria(eligibility_criteriaA, eligibility_criteria
     with app.test_request_context("/eligibility_criteria/{}".format(idA), method="GET"):
         current_eligibility_criteriaA = EligibilityCriteriaInfo().get(idA)
         
-    #attempt re-use of public_id/code (expected 409)
-    eligibility_criteriaB_dict = eligibility_criteriaB.as_dict()
-    idB = eligibility_criteriaB_dict['id']
-    payload = {'id': idB}
-    with app.test_request_context("/eligibility_criteria/update_eligibility_criteria/{}".format(idA), method="PUT", json=payload):
-        try:
-            response = Update().put(idA)
-        except Exception as e:
-            assert e.code == 409    
 
 def test_delete_eligibility_criteria(eligibility_criteriaA, eligibility_criteriaB, app, session):
     eligibility_criteriaA_dict = eligibility_criteriaA.as_dict()
     idA = eligibility_criteriaA_dict['id']
-
+    
     with app.test_request_context("/eligibility_criteria/delete_eligibility_criteria/{}".format(idA), method="DELETE"):
         response = Delete().delete(idA)
         assert response == eligibility_criteriaA_dict

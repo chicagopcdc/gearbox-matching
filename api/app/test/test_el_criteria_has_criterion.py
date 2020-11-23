@@ -7,12 +7,12 @@ from app.main.controller.el_criteria_has_criterion_controller import ElCriteriaH
 
 @pytest.fixture(scope="module")
 def el_criteria_has_criterionA():
-    return ElCriteriaHasCriterion(criterion_id=1, eligibility_criteria_id=1, arm_id=1, code = 'codeA', display_name = 'display_nameA')
+    return ElCriteriaHasCriterion(criterion_id=1, eligibility_criteria_id=1, code = 'codeA', display_name = 'display_nameA')
 
 
 @pytest.fixture(scope="module")
 def el_criteria_has_criterionB():
-    return ElCriteriaHasCriterion(criterion_id=2, eligibility_criteria_id=2, arm_id=2, code = 'codeB')
+    return ElCriteriaHasCriterion(criterion_id=2, eligibility_criteria_id=2, code = 'codeB')
 
 
 def test_setup(el_criteria_has_criterionA, el_criteria_has_criterionB, app, session):
@@ -49,7 +49,7 @@ def test_all_el_criteria_has_criterions_info(el_criteria_has_criterionA, el_crit
 
 
 def test_create_el_criteria_has_criterion(app, session):
-    payload= {'criterion_id':2, 'eligibility_criteria_id':1, 'arm_id':1, 'display_name': 'thisName', 'code': 'thisCode', 'active': 0}
+    payload= {'criterion_id':2, 'eligibility_criteria_id':1, 'display_name': 'thisName', 'code': 'thisCode', 'active': 0}
     with app.test_request_context("/el_criteria_has_criterion/create_el_criteria_has_criterion", method="POST", json=payload):
         response, status_code = Create().post()
         print (response)

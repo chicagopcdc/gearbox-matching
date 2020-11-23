@@ -14,7 +14,6 @@ class ElCriteriaHasCriterionService(Services):
             new_el_criteria_has_criterion = ElCriteriaHasCriterion(
                 criterion_id=data.get('criterion_id'),
                 eligibility_criteria_id=data.get('eligibility_criteria_id'),
-                arm_id=data.get('arm_id'),
                 code=data.get('code'),
                 display_name=data.get('display_name'),
                 create_date=datetime.datetime.utcnow(),

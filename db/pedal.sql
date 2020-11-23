@@ -54,28 +54,6 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `pedal_dev_v_0`.`arm`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `pedal_dev_v_0`.`arm` ;
-
-CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`arm` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `version_id` INT NOT NULL,
-  `study_id` INT NOT NULL,
-  `code` VARCHAR(45) NULL,
-  `create_date` DATETIME NULL,
-  `active` TINYINT NULL,
-  PRIMARY KEY (`id`),
-  INDEX `fk_arm_study_version1_idx` (`version_id` ASC, `study_id` ASC),
-  CONSTRAINT `fk_arm_study_version1`
-    FOREIGN KEY (`version_id` , `study_id`)
-    REFERENCES `pedal_dev_v_0`.`study_version` (`id` , `study_id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
 -- Table `pedal_dev_v_0`.`site`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `pedal_dev_v_0`.`site` ;
@@ -84,22 +62,6 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`site` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `code` VARCHAR(45) NULL,
   `name` VARCHAR(45) NULL,
-  `create_date` DATETIME NULL,
-  `active` TINYINT NULL,
-  PRIMARY KEY (`id`))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `pedal_dev_v_0`.`treatment`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `pedal_dev_v_0`.`treatment` ;
-
-CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`treatment` (
-  `id` INT NOT NULL AUTO_INCREMENT,
-  `level_code` VARCHAR(45) NULL,
-  `level_display` VARCHAR(128) NULL,
-  `description` VARCHAR(512) NULL,
   `create_date` DATETIME NULL,
   `active` TINYINT NULL,
   PRIMARY KEY (`id`))
@@ -129,14 +91,14 @@ DROP TABLE IF EXISTS `pedal_dev_v_0`.`eligibility_criteria` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`eligibility_criteria` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `arm_id` INT NOT NULL,
+  `study_version_id` INT NOT NULL,  
   `create_date` DATETIME NULL,
   `active` TINYINT NULL,
-  PRIMARY KEY (`id`, `arm_id`),
-  INDEX `fk_eligibility_criteria_arm1_idx` (`arm_id` ASC),
-  CONSTRAINT `fk_eligibility_criteria_arm1`
-    FOREIGN KEY (`arm_id`)
-    REFERENCES `pedal_dev_v_0`.`arm` (`id`)
+  PRIMARY KEY (`id`, `study_version_id`),
+  INDEX `fk_eligibility_criteria_study_version1_idx` (`study_version_id` ASC),  
+    CONSTRAINT `fk_eligibility_criteria_study_version1`
+    FOREIGN KEY (`study_version_id`)
+    REFERENCES `pedal_dev_v_0`.`study_version` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -150,22 +112,21 @@ DROP TABLE IF EXISTS `pedal_dev_v_0`.`el_criteria_has_criterion` ;
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`el_criteria_has_criterion` (
   `criterion_id` INT NOT NULL,
   `eligibility_criteria_id` INT NOT NULL,
-  `arm_id` INT NOT NULL,
   `code` VARCHAR(45) NOT NULL,
   `display_name` VARCHAR(45) NULL,
   `create_date` DATETIME NULL,
   `active` TINYINT NULL,
-  PRIMARY KEY (`criterion_id`, `eligibility_criteria_id`, `arm_id`),
+  PRIMARY KEY (`criterion_id`, `eligibility_criteria_id`),
   INDEX `fk_criterion_criterion_list1_idx` (`criterion_id` ASC),
-  INDEX `fk_el_criteria_has_criterion_eligibility_criteria1_idx` (`eligibility_criteria_id` ASC, `arm_id` ASC),
+  INDEX `fk_el_criteria_has_criterion_eligibility_criteria1_idx` (`eligibility_criteria_id` ASC),
   CONSTRAINT `fk_criterion_criterion_list1`
     FOREIGN KEY (`criterion_id`)
     REFERENCES `pedal_dev_v_0`.`criterion` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_el_criteria_has_criterion_eligibility_criteria1`
-    FOREIGN KEY (`eligibility_criteria_id` , `arm_id`)
-    REFERENCES `pedal_dev_v_0`.`eligibility_criteria` (`id` , `arm_id`)
+    FOREIGN KEY (`eligibility_criteria_id`)
+    REFERENCES `pedal_dev_v_0`.`eligibility_criteria` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -186,32 +147,6 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`value` (
   `create_date` DATETIME NULL,
   `active` TINYINT NULL,
   PRIMARY KEY (`id`))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `pedal_dev_v_0`.`arm_treatment`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `pedal_dev_v_0`.`arm_treatment` ;
-
-CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`arm_treatment` (
-  `arm_id` INT NOT NULL,
-  `treatment_id` INT NOT NULL,
-  `create_date` DATETIME NULL,
-  `active` TINYINT NULL,
-  PRIMARY KEY (`arm_id`, `treatment_id`),
-  INDEX `fk_arm_has_treatment_treatment1_idx` (`treatment_id` ASC),
-  INDEX `fk_arm_has_treatment_arm1_idx` (`arm_id` ASC),
-  CONSTRAINT `fk_arm_has_treatment_arm1`
-    FOREIGN KEY (`arm_id`)
-    REFERENCES `pedal_dev_v_0`.`arm` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_arm_has_treatment_treatment1`
-    FOREIGN KEY (`treatment_id`)
-    REFERENCES `pedal_dev_v_0`.`treatment` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 

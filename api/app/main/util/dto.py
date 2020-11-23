@@ -86,45 +86,11 @@ class AlgorithmEngineDto:
         'type': fields.String(description='algorithm_engine type')
     })
 
-class ArmDto:
-    api = Namespace('arm', description='arm related operations')
-    arm = api.model('arm', {
-    	'id': fields.String(required=True, description="arm id"),
-        'version_id': fields.String(description='arm version_id'),
-        'study_id': fields.String(description='arm study_id'),
-        'code': fields.String(description='arm code'),
-        'create_date': fields.String(description='arm create_date'),
-        'active': fields.String(description='is arm active')
-    })
-
-
-class TreatmentDto:
-    api = Namespace('treatment', description='treatment related operations')
-    treatment = api.model('treatment', {
-    	'id': fields.String(required=True, description="treatment id"),
-        'level_code': fields.String(description='treatment level_code'),
-        'level_display': fields.String(description='treatment level_display'),
-        'description': fields.String(description='treatment description'),
-        'create_date': fields.String(description='treatment create_date'),
-        'active': fields.String(description='is treatment active')
-    })
-
-    
-class ArmTreatmentDto:
-    api = Namespace('arm_treatment', description='arm_treatment related operations')
-    arm_treatment = api.model('arm_treatment', {
-    	'arm_id': fields.String(required=True, description="arm_treatment arm_id"),
-        'treatment_id': fields.String(description='arm_treatment treatment_id'),
-        'create_date': fields.String(description='arm_treatment create_date'),
-        'active': fields.String(description='is arm_treatment active')
-    })
-
 
 class EligibilityCriteriaDto:
     api = Namespace('eligibility_criteria', description='eligibility_criteria related operations')
     eligibility_criteria = api.model('eligibility_criteria', {
     	'id': fields.String(required=True, description="eligibility_criteria id"),
-        'arm_id': fields.String(description='eligibility_criteria arm_id'),
         'create_date': fields.String(description='eligibility_criteria create_date'),
         'active': fields.String(description='is eligibility_criteria active')
     })
@@ -169,7 +135,6 @@ class ElCriteriaHasCriterionDto:
     el_criteria_has_criterion = api.model('el_criteria_has_criterion', {
     	'criterion_id': fields.String(required=True, description="el_criteria_has_criterion criterion_id"),
         'eligibility_criteria_id': fields.String(required=True, description='el_criteria_has_criterion eligibility_criteria_id'),
-        'arm_id': fields.String(required=True, description='el_criteria_has_criterion arm_id'),
         'code': fields.String(description='el_criteria_has_criterion code'),
         'display_name': fields.String(description='el_criteria_has_criterion display_name'),
         'create_date': fields.String(description='el_criteria_has_criterion create_date'),

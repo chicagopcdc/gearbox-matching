@@ -9,13 +9,13 @@ class EligibilityCriteriaService(Services):
 
     def save_new_eligibility_criteria(data):
         eligibility_criteria = DbSession.query(EligibilityCriteria).filter(
-            EligibilityCriteria.id==data.get('id')
+            EligibilityCriteria.id==data.get('id'),
         ).first()
 
         if not eligibility_criteria:
             new_eligibility_criteria = EligibilityCriteria(
                 id=data.get('id'),
-                arm_id=data.get('arm_id'),
+                study_version_id=data.get('study_version_id'),
                 create_date=datetime.datetime.utcnow(),
                 active=data.get('active'),
             )

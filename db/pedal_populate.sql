@@ -18,18 +18,11 @@ insert into `study_algorithm_engine` (`study_version_id`, `study_id`, `algorithm
 
 insert into `logins` (`sub_id`, `refresh_token`, `iat`, `exp`) values (1, 'alphaNum0123', '2020-01-01T00:00:00.000', '2021-01-01T00:00:00.000');
 
-insert into `arm` (`id`, `version_id`, `study_id`, `code`) values (1, 1, 1, 'code1');
-insert into `arm` (`id`, `version_id`, `study_id`, `code`) values (2, 2, 1, 'code2');
-
-insert into `treatment` (`id`, `level_code`) values (1, 'level_code_1');
-insert into `treatment` (`id`, `level_code`) values (2, 'level_code_2');
-
 insert into `criterion` (`id`, `code`) values (1, 'code1');
 insert into `criterion` (`id`, `code`) values (2, 'code2');
 
 insert into `value` (`id`, `code`) values (1, 'code1');
 insert into `value` (`id`, `code`) values (2, 'code2');
 
-insert into `eligibility_criteria` (`id`, `arm_id`) values (1, 1);
-insert into `eligibility_criteria` (`id`, `arm_id`) values (2, 2);
-
+insert into `eligibility_criteria` (`id`, `study_version_id`) values (1, 1);
+insert into `eligibility_criteria` (`id`, `study_version_id`) values (2, 2);
