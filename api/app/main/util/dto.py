@@ -108,25 +108,20 @@ class CriterionDto:
     })
 
 
-class ValueDto:
-    api = Namespace('value', description='value related operations')
-    value = api.model('value', {
-    	'id': fields.String(required=True, description="value id"),
-        'code': fields.String(description='value coded'),
-        'type': fields.String(description='value type'),
-        'display_value': fields.String(description='value display_value'),
-        'upper_threshold': fields.String(description='value upper_threshold'),
-        'lower_threshold': fields.String(description='value lower_threshold'),
-        'create_date': fields.String(description='value create_date'),
-        'active': fields.String(description='is value active')
+class TagDto:
+    api = Namespace('tag', description='tag related operations')
+    tag = api.model('tag', {
+    	'id': fields.String(required=True, description="tag id"),
+        'code': fields.String(description='tag code'),
+        'type': fields.String(description='tag type')
     })
 
 
-class CriterionHasValueDto:
-    api = Namespace('criterion_has_value', description='criterion_has_value related operations')
-    criterion_has_value = api.model('criterion_has_value', {
-    	'value_id': fields.String(required=True, description="criterion_has_value value_id"),
-    	'criterion_id': fields.String(required=True, description="criterion_has_value criterion_id"),
+class CriterionHasTagDto:
+    api = Namespace('criterion_has_tag', description='criterion_has_tag related operations')
+    criterion_has_tag = api.model('criterion_has_tag', {
+    	'criterion_id': fields.String(required=True, description="criterion_has_tag criterion_id"),
+    	'tag_id': fields.String(required=True, description="criterion_has_tag tag_id")
     })
 
 

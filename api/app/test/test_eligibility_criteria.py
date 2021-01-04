@@ -49,7 +49,7 @@ def test_all_eligibility_criterias_info(eligibility_criteriaA, eligibility_crite
 
 
 def test_create_eligibility_criteria(app, session):
-    payload= {'study_version_id': 1, 'active': 1}
+    payload= {'study_version_id': 3, 'active': 1}
     with app.test_request_context("/eligibility_criteria/create_eligibility_criteria", method="POST", json=payload):
         response, status_code = Create().post()
         print (response)

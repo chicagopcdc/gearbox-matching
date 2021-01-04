@@ -21,8 +21,8 @@ insert into `logins` (`sub_id`, `refresh_token`, `iat`, `exp`) values (1, 'alpha
 insert into `criterion` (`id`, `code`) values (1, 'code1');
 insert into `criterion` (`id`, `code`) values (2, 'code2');
 
-insert into `value` (`id`, `code`) values (1, 'code1');
-insert into `value` (`id`, `code`) values (2, 'code2');
+insert into `tag` (`id`, `code`) values (1, 'code1');
+insert into `tag` (`id`, `code`) values (2, 'code2');
 
 insert into `eligibility_criteria` (`id`, `study_version_id`) values (1, 1);
 insert into `eligibility_criteria` (`id`, `study_version_id`) values (2, 2);

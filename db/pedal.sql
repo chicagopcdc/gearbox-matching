@@ -133,19 +133,14 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `pedal_dev_v_0`.`value`
+-- Table `pedal_dev_v_0`.`tag`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pedal_dev_v_0`.`value` ;
+DROP TABLE IF EXISTS `pedal_dev_v_0`.`tag` ;
 
-CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`value` (
+CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`tag` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `code` VARCHAR(45) NULL,
   `type` VARCHAR(45) NULL,
-  `display_value` VARCHAR(45) NULL,
-  `upper_threshold` DECIMAL(19,4) NULL,
-  `lower_threshold` DECIMAL(19,4) NULL,
-  `create_date` DATETIME NULL,
-  `active` TINYINT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -221,24 +216,24 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `pedal_dev_v_0`.`criterion_has_value`
+-- Table `pedal_dev_v_0`.`criterion_has_tag`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pedal_dev_v_0`.`criterion_has_value` ;
+DROP TABLE IF EXISTS `pedal_dev_v_0`.`criterion_has_tag` ;
 
-CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`criterion_has_value` (
+CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`criterion_has_tag` (
   `criterion_id` INT NOT NULL,
-  `value_id` INT NOT NULL,
-  PRIMARY KEY (`criterion_id`, `value_id`),
-  INDEX `fk_criterion_has_value_value1_idx` (`value_id` ASC),
-  INDEX `fk_criterion_has_value_criterion1_idx` (`criterion_id` ASC),
-  CONSTRAINT `fk_criterion_has_value_criterion1`
+  `tag_id` INT NOT NULL,
+  PRIMARY KEY (`criterion_id`, `tag_id`),
+  INDEX `fk_criterion_has_tag_criterion1_idx` (`criterion_id` ASC),
+  INDEX `fk_criterion_has_tag_tag1_idx` (`tag_id` ASC),
+  CONSTRAINT `fk_criterion_has_tag_criterion1`
     FOREIGN KEY (`criterion_id`)
     REFERENCES `pedal_dev_v_0`.`criterion` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_criterion_has_value_value1`
-    FOREIGN KEY (`value_id`)
-    REFERENCES `pedal_dev_v_0`.`value` (`id`)
+  CONSTRAINT `fk_criterion_has_tag_tag1`
+    FOREIGN KEY (`tag_id`)
+    REFERENCES `pedal_dev_v_0`.`tag` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
