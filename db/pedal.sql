@@ -133,6 +133,42 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `pedal_dev_v_0`.`eligibility_criteria_has_note`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `pedal_dev_v_0`.`eligibility_criteria_has_note` ;
+
+CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`eligibility_criteria_has_note` (
+  `eligibility_criteria_id` INT NOT NULL,
+  `note_id` INT NOT NULL,
+  PRIMARY KEY (`eligibility_criteria_id`, `note_id`),
+  INDEX `fk_eligibility_criteria_has_note_eligibility_criteria1_idx` (`eligibility_criteria_id` ASC),
+  INDEX `fk_eligibility_criteria_has_note_note1_idx` (`note_id` ASC),
+  CONSTRAINT `fk_eligibility_criteria_has_note_eligibility_criteria1`
+    FOREIGN KEY (`eligibility_criteria_id`)
+    REFERENCES `pedal_dev_v_0`.`eligibility_criteria` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_eligibility_criteria_has_note_note1`
+    FOREIGN KEY (`note_id`)
+    REFERENCES `pedal_dev_v_0`.`note` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `pedal_dev_v_0`.`note`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `pedal_dev_v_0`.`note` ;
+
+CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`note` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `value` VARCHAR(45) NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `pedal_dev_v_0`.`tag`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `pedal_dev_v_0`.`tag` ;

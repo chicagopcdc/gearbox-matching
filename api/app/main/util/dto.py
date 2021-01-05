@@ -135,3 +135,19 @@ class ElCriteriaHasCriterionDto:
         'create_date': fields.String(description='el_criteria_has_criterion create_date'),
         'active': fields.String(description='is el_criteria_has_criterion active')
     })
+
+
+class EligibilityCriteriaHasNoteDto:
+    api = Namespace('eligibility_criteria_has_note', description='eligibility_criteria_has_note related operations')
+    eligibility_criteria_has_note = api.model('eligibility_criteria_has_note', {
+        'eligibility_criteria_id': fields.String(required=True, description='eligibility_criteria_has_note eligibility_criteria_id'),
+        'note_id': fields.String(required=True, description='eligibility_criteria_has_note note_id')
+    })
+
+
+class NoteDto:
+    api = Namespace('note', description='note related operations')
+    note = api.model('note', {
+    	'id': fields.String(required=True, description="note id"),
+        'value': fields.String(description='note value')
+    })

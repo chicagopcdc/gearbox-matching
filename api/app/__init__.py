@@ -17,6 +17,8 @@ from .main.controller.criterion_controller import api as criterion_ns
 from .main.controller.tag_controller import api as tag_ns
 from .main.controller.criterion_has_tag_controller import api as criterion_has_tag_ns
 from .main.controller.el_criteria_has_criterion_controller import api as el_criteria_has_criterion_ns
+from .main.controller.eligibility_criteria_has_note import api as eligibility_criteria_has_note_ns
+from .main.controller.note_controller import api as note_ns
 
 blueprint = Blueprint('api', __name__)
 
@@ -39,3 +41,5 @@ api.add_namespace(criterion_ns, path='/criterion')
 api.add_namespace(tag_ns, path='/tag')
 api.add_namespace(criterion_has_tag_ns, path='/criterion_has_tag')
 api.add_namespace(el_criteria_has_criterion_ns, path='/el_criteria_has_criterion')
+api.add_namespace(eligibility_criteria_has_note_ns, path='/eligibility_criteria_has_note')
+api.add_namespace(note_ns, path='/note')

@@ -26,3 +26,7 @@ insert into `tag` (`id`, `code`) values (2, 'code2');
 
 insert into `eligibility_criteria` (`id`, `study_version_id`) values (1, 1);
 insert into `eligibility_criteria` (`id`, `study_version_id`) values (2, 2);
+
+insert into `note` (`id`, `value`) values (1, 'value1');
+insert into `note` (`id`, `value`) values (2, 'value2');
+insert into `note` (`id`, `value`) values (3, 'value3');
