@@ -33,7 +33,7 @@ def test_scope(eligibility_criteria_has_noteA, eligibility_criteria_has_noteB, a
 def test_eligibility_criteria_has_note_info(eligibility_criteria_has_noteA, eligibility_criteria_has_noteB, app, session):
     for echn in [eligibility_criteria_has_noteA.as_dict(), eligibility_criteria_has_noteB.as_dict()]:
         with app.test_request_context("/eligibility_criteria_has_note/{}-{}".format(echn['eligibility_criteria_id'], echn['note_id']), method="GET"):
-            pid = "{}-{}".format(echn['eligibility_id'], echn['note_id'])
+            pid = "{}-{}".format(echn['eligibility_criteria_id'], echn['note_id'])
             response = EligibilityCriteriaHasNoteInfo().get(pid)
             assert pid == "{}-{}".format(response['eligibility_criteria_id'], response['note_id'])
 

@@ -85,6 +85,21 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `pedal_dev_v_0`.`ontology_code`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `pedal_dev_v_0`.`ontology_code` ;
+
+CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`ontology_code` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `ontology_url` VARCHAR(45) NULL,
+  `name` VARCHAR(45) NULL,
+  `code` VARCHAR(45) NULL,
+  `value` VARCHAR(45) NULL,
+  `version` VARCHAR(45) NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
 -- Table `pedal_dev_v_0`.`eligibility_criteria`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `pedal_dev_v_0`.`eligibility_criteria` ;
@@ -133,6 +148,26 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- Table `pedal_dev_v_0`.`value`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `pedal_dev_v_0`.`value` ;
+
+CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`value` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `code` VARCHAR(45) NULL,
+  `type` VARCHAR(45) NULL,
+  `value_string` VARCHAR(45) NULL,
+  `upper_threshold` DECIMAL(19,4) NULL,
+  `lower_threshold` DECIMAL(19,4) NULL,
+  `create_date` DATETIME NULL,
+  `active` TINYINT NULL,
+  `value_list` VARCHAR(45) NULL,
+  `value_bool` VARCHAR(45) NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
 -- Table `pedal_dev_v_0`.`eligibility_criteria_has_note`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `pedal_dev_v_0`.`eligibility_criteria_has_note` ;
@@ -177,6 +212,19 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`tag` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `code` VARCHAR(45) NULL,
   `type` VARCHAR(45) NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `pedal_dev_v_0`.`input_type`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `pedal_dev_v_0`.`input_type` ;
+
+CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`input_type` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `type` VARCHAR(45) NULL,
+  `name` VARCHAR(45) NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 

@@ -2,7 +2,7 @@ import uuid
 import datetime
 
 from app.main import DbSession
-from app.main.model.tag import Note
+from app.main.model.note import Note
 from app.main.service import Services
 
 class NoteService(Services):

@@ -5,7 +5,7 @@ from app.main import DbSession
 from app.main.model.eligibility_criteria_has_note import EligibilityCriteriaHasNote
 from app.main.service import Services
 
-class EligibilityCriteriaHasNote(Services):
+class EligibilityCriteriaHasNoteService(Services):
 
     def save_new_eligibility_criteria_has_note(data):
         eligibility_criteria_has_note = DbSession.query(EligibilityCriteriaHasNote).filter(

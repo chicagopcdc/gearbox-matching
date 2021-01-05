@@ -17,8 +17,10 @@ from .main.controller.criterion_controller import api as criterion_ns
 from .main.controller.tag_controller import api as tag_ns
 from .main.controller.criterion_has_tag_controller import api as criterion_has_tag_ns
 from .main.controller.el_criteria_has_criterion_controller import api as el_criteria_has_criterion_ns
-from .main.controller.eligibility_criteria_has_note import api as eligibility_criteria_has_note_ns
+from .main.controller.eligibility_criteria_has_note_controller import api as eligibility_criteria_has_note_ns
 from .main.controller.note_controller import api as note_ns
+from .main.controller.ontology_code_controller import api as ontology_code_ns
+from .main.controller.input_type_controller import api as input_type_ns
 
 blueprint = Blueprint('api', __name__)
 
@@ -43,3 +45,5 @@ api.add_namespace(criterion_has_tag_ns, path='/criterion_has_tag')
 api.add_namespace(el_criteria_has_criterion_ns, path='/el_criteria_has_criterion')
 api.add_namespace(eligibility_criteria_has_note_ns, path='/eligibility_criteria_has_note')
 api.add_namespace(note_ns, path='/note')
+api.add_namespace(ontology_code_ns, path='/ontology_code')
+api.add_namespace(input_type_ns, path='/input_type')

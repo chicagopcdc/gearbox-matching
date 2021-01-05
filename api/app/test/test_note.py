@@ -33,7 +33,7 @@ def test_note_info(noteA, noteB, app, session):
     for public_id in [noteA.as_dict()['id'], noteB.as_dict()['id']]:
         with app.test_request_context("/note/{}".format(public_id), method="GET"):
             response = NoteInfo().get(public_id)
-            assert public_id == response['id']
+            assert str(public_id) == response['id']
 
 
 def test_all_notes_info(noteA, noteB, app, session):

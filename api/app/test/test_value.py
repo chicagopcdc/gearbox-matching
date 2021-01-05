@@ -71,7 +71,7 @@ def test_update_value(valueA, valueB, app, session):
     #basic update test
     valueA_dict = valueA.as_dict()
     codeA = valueA_dict['code']
-    payload = {'display_value': 'this_diaplay_value'}
+    payload = {'value_string': 'this_value_string'}
     with app.test_request_context("/value/update_value/{}".format(codeA), method="PUT", json=payload):
         response = Update().put(codeA)
         expected_response = valueA_dict

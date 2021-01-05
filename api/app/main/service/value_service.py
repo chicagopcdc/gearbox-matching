@@ -15,11 +15,13 @@ class ValueService(Services):
                 id=data.get('id'),
                 code=data.get('code'),
                 type=data.get('type'),
-                display_value=data.get('display_value'),
+                value_string=data.get('value_string'),
                 upper_threshold=data.get('upper_threshold'),
                 lower_threshold=data.get('lower_threshold'),
                 create_date=datetime.datetime.utcnow(),
                 active=data.get('active'),
+                value_list=data.get('value_list'),
+                value_bool=data.get('value_bool'),
             )
             Services.save_changes(new_value)
             response_object = {

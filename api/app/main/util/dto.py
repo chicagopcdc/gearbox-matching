@@ -137,6 +137,22 @@ class ElCriteriaHasCriterionDto:
     })
 
 
+class ValueDto:
+    api = Namespace('value', description='value related operations')
+    value = api.model('value', {
+    	'id': fields.String(required=True, description="value id"),
+    	'code': fields.String(description="value code"),
+    	'type': fields.String(description="value type"),
+    	'value_string': fields.String(description="value value_string"),
+    	'upper_threshold': fields.String(description="value upper_threshold"),
+    	'lower_threshold': fields.String(description="value lower_threshold"),
+    	'create_date': fields.String(description="value create_date"),
+    	'active': fields.String(description="value active"),
+    	'value_list': fields.String(description="value value_list"),
+    	'value_bool': fields.String(description="value value_bool"),
+    })
+
+    
 class EligibilityCriteriaHasNoteDto:
     api = Namespace('eligibility_criteria_has_note', description='eligibility_criteria_has_note related operations')
     eligibility_criteria_has_note = api.model('eligibility_criteria_has_note', {
@@ -150,4 +166,25 @@ class NoteDto:
     note = api.model('note', {
     	'id': fields.String(required=True, description="note id"),
         'value': fields.String(description='note value')
+    })
+
+    
+class InputTypeDto:
+    api = Namespace('input_type', description='input_type related operations')
+    input_type = api.model('input_type', {
+    	'id': fields.String(required=True, description="input_type id"),
+        'type': fields.String(description='input_type type'),
+        'name': fields.String(description='input_type code')
+    })
+
+
+class OntologyCodeDto:
+    api = Namespace('ontology_code', description='ontology_code related operations')
+    ontology_code = api.model('ontology_code', {
+    	'id': fields.String(required=True, description="ontology_code id"),
+    	'ontology_url': fields.String(description="ontology_code ontology_url"),
+    	'name': fields.String(description="ontology_code name"),
+    	'code': fields.String(description="ontology_code code"),
+    	'value': fields.String(description="ontology_code value"),
+    	'version': fields.String(description="ontology_code version")
     })
