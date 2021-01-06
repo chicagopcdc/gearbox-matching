@@ -21,7 +21,7 @@ class CriterionInfo(Resource):
     @api.doc('get a criterion')
     @api.marshal_with(_criterion)
     def get(self, public_id):
-        criterion = CriterionService.get_a_criterion(public_id)
+        criterion = CriterionService.get_a_criterion(self, public_id)
         if not criterion:
             api.abort(404, message="criterion '{}' not found".format(public_id))
         else:
@@ -64,7 +64,7 @@ class Create(Resource):
             if key in allowed_keys:
                 new_criterion_dict.update({key:data[key]})
         try:
-            response = CriterionService.save_new_criterion(new_criterion_dict)
+            response = CriterionService.save_new_criterion(CriterionService, new_criterion_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -80,7 +80,7 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the criterion to be updated
-        criterion = CriterionService.get_a_criterion(public_id)
+        criterion = CriterionService.get_a_criterion(self, public_id)
         if not criterion:
             api.abort(404, message="criterion '{}' not found".format(public_id))
 
@@ -89,7 +89,7 @@ class Update(Resource):
         for key in data.keys():
             if key in allowed_keys:
                 if key=='code':
-                    existing_criterion_with_new_code = CriterionService.get_a_criterion(data[key])
+                    existing_criterion_with_new_code = CriterionService.get_a_criterion(self, data[key])
                     if not existing_criterion_with_new_code:
                         setattr(criterion, key, data[key])
                     else:
@@ -110,7 +110,7 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a criterion')
     def delete(self, public_id):
-        criterion = CriterionService.get_a_criterion(public_id)
+        criterion = CriterionService.get_a_criterion(self, public_id)
         if not criterion:
             api.abort(404, message="criterion '{}' not found".format(public_id))
 

@@ -21,7 +21,7 @@ class AlgorithmEngineInfo(Resource):
     @api.doc('get a algorithm_engine')
     @api.marshal_with(_algorithm_engine)
     def get(self, public_id):
-        algorithm_engine = AlgorithmEngineService.get_a_algorithm_engine(public_id)
+        algorithm_engine = AlgorithmEngineService.get_a_algorithm_engine(self, public_id)
         if not algorithm_engine:
             api.abort(404, message="algorithm_engine '{}' not found".format(public_id))
         else:
@@ -64,7 +64,7 @@ class Create(Resource):
             if key in allowed_keys:
                 new_algorithm_engine_dict.update({key:data[key]})
         try:
-            response = AlgorithmEngineService.save_new_algorithm_engine(new_algorithm_engine_dict)
+            response = AlgorithmEngineService.save_new_algorithm_engine(AlgorithmEngineService, new_algorithm_engine_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -80,7 +80,7 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the algorithm_engine to be updated
-        algorithm_engine = AlgorithmEngineService.get_a_algorithm_engine(public_id)
+        algorithm_engine = AlgorithmEngineService.get_a_algorithm_engine(self, public_id)
         if not algorithm_engine:
             api.abort(404, message="algorithm_engine '{}' not found".format(public_id))
 
@@ -89,7 +89,7 @@ class Update(Resource):
         for key in data.keys():
             if key in allowed_keys:
                 if key=='id':
-                    existing_algorithm_engine_with_new_code = AlgorithmEngineService.get_a_algorithm_engine(data[key])
+                    existing_algorithm_engine_with_new_code = AlgorithmEngineService.get_a_algorithm_engine(self, data[key])
                     if not existing_algorithm_engine_with_new_code:
                         setattr(algorithm_engine, key, data[key])
                     else:
@@ -110,7 +110,7 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a algorithm_engine')
     def delete(self, public_id):
-        algorithm_engine = AlgorithmEngineService.get_a_algorithm_engine(public_id)
+        algorithm_engine = AlgorithmEngineService.get_a_algorithm_engine(self, public_id)
         if not algorithm_engine:
             api.abort(404, message="algorithm_engine '{}' not found".format(public_id))
 

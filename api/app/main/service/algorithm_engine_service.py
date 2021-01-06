@@ -7,8 +7,8 @@ from app.main.service import Services
 
 class AlgorithmEngineService(Services):
 
-    def save_new_algorithm_engine(data):
-        algorithm_engine = DbSession.query(AlgorithmEngine).filter(AlgorithmEngine.name==data.get('name')).first()
+    def save_new_algorithm_engine(self, data):
+        algorithm_engine = self.get_a_algorithm_engine(self, data.get('id'))
 
         if not algorithm_engine:
             new_algorithm_engine = AlgorithmEngine(
@@ -33,7 +33,7 @@ class AlgorithmEngineService(Services):
             }
             return response_object, 409
 
-    def get_a_algorithm_engine(public_id):
+    def get_a_algorithm_engine(self, public_id):
         return DbSession.query(AlgorithmEngine).filter(AlgorithmEngine.id==public_id).first()
 
     def get_algorithm_engine_version(id):

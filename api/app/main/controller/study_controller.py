@@ -21,7 +21,7 @@ class StudyInfo(Resource):
     @api.doc('get a study')
     @api.marshal_with(_study)
     def get(self, public_id):
-        study = StudyService.get_a_study(public_id)
+        study = StudyService.get_a_study(self, public_id)
         if not study:
             api.abort(404, message="study '{}' not found".format(public_id))
         else:
@@ -64,7 +64,7 @@ class Create(Resource):
             if key in allowed_keys:
                 new_study_dict.update({key:data[key]})
         try:
-            response = StudyService.save_new_study(new_study_dict)
+            response = StudyService.save_new_study(StudyService, new_study_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -80,7 +80,7 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the study to be updated
-        study = StudyService.get_a_study(public_id)
+        study = StudyService.get_a_study(self, public_id)
         if not study:
             api.abort(404, message="study '{}' not found".format(public_id))
 
@@ -89,7 +89,7 @@ class Update(Resource):
         for key in data.keys():
             if key in allowed_keys:
                 if key=='code':
-                    existing_study_with_new_code = StudyService.get_a_study(data[key])
+                    existing_study_with_new_code = StudyService.get_a_study(self, data[key])
                     if not existing_study_with_new_code:
                         setattr(study, key, data[key])
                     else:
@@ -110,7 +110,7 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a study')
     def delete(self, public_id):
-        study = StudyService.get_a_study(public_id)
+        study = StudyService.get_a_study(self, public_id)
         if not study:
             api.abort(404, message="study '{}' not found".format(public_id))
 

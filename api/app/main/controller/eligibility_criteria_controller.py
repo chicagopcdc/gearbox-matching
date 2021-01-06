@@ -21,7 +21,7 @@ class EligibilityCriteriaInfo(Resource):
     @api.doc('get a eligibility_criteria')
     @api.marshal_with(_eligibility_criteria)
     def get(self, public_id):
-        eligibility_criteria = EligibilityCriteriaService.get_a_eligibility_criteria(public_id)
+        eligibility_criteria = EligibilityCriteriaService.get_a_eligibility_criteria(self, public_id)
         if not eligibility_criteria:
             api.abort(404, message="eligibility_criteria '{}' not found".format(public_id))
         else:
@@ -64,7 +64,7 @@ class Create(Resource):
             if key in allowed_keys:
                 new_eligibility_criteria_dict.update({key:data[key]})
         try:
-            response = EligibilityCriteriaService.save_new_eligibility_criteria(new_eligibility_criteria_dict)
+            response = EligibilityCriteriaService.save_new_eligibility_criteria(EligibilityCriteriaService, new_eligibility_criteria_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -80,7 +80,7 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the eligibility_criteria to be updated
-        eligibility_criteria = EligibilityCriteriaService.get_a_eligibility_criteria(public_id)
+        eligibility_criteria = EligibilityCriteriaService.get_a_eligibility_criteria(self, public_id)
         if not eligibility_criteria:
             api.abort(404, message="eligibility_criteria '{}' not found".format(public_id))
 
@@ -89,7 +89,7 @@ class Update(Resource):
         for key in data.keys():
             if key in allowed_keys:
                 if key=='code':
-                    existing_eligibility_criteria_with_new_code = EligibilityCriteriaService.get_a_eligibility_criteria(data[key])
+                    existing_eligibility_criteria_with_new_code = EligibilityCriteriaService.get_a_eligibility_criteria(self, data[key])
                     if not existing_eligibility_criteria_with_new_code:
                         setattr(eligibility_criteria, key, data[key])
                     else:
@@ -110,7 +110,7 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a eligibility_criteria')
     def delete(self, public_id):
-        eligibility_criteria = EligibilityCriteriaService.get_a_eligibility_criteria(public_id)
+        eligibility_criteria = EligibilityCriteriaService.get_a_eligibility_criteria(self, public_id)
         if not eligibility_criteria:
             api.abort(404, message="eligibility_criteria '{}' not found".format(public_id))
 

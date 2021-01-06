@@ -8,8 +8,8 @@ from app.main.service import Services
 
 class StudyService(Services):
     
-    def save_new_study(data):
-        study = DbSession.query(Study).filter(Study.code==data.get('code')).first()
+    def save_new_study(self, data):
+        study = self.get_a_study(self, data.get('code'))
 
         if not study:
             new_study = Study(
@@ -32,7 +32,7 @@ class StudyService(Services):
             return response_object, 409
 
 
-    def get_a_study(code):
+    def get_a_study(self, code):
         return DbSession.query(Study).filter(Study.code==code).first()
 
     def get_study_version(id):

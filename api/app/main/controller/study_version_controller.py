@@ -21,7 +21,7 @@ class StudyVersionInfo(Resource):
     @api.doc('get a study_version')
     @api.marshal_with(_study_version)
     def get(self, public_id):
-        study = StudyVersionService.get_a_study_version(public_id)
+        study = StudyVersionService.get_a_study_version(self, public_id)
         if not study:
             api.abort(404, message="study '{}' not found".format(public_id))
         else:
@@ -64,7 +64,7 @@ class Create(Resource):
             if key in allowed_keys:
                 new_study_version_dict.update({key:data[key]})
         try:
-            response = StudyVersionService.save_new_study_version(new_study_version_dict)
+            response = StudyVersionService.save_new_study_version(StudyVersionService, new_study_version_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -80,7 +80,7 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the study_version to be updated
-        study_version = StudyVersionService.get_a_study_version(public_id)
+        study_version = StudyVersionService.get_a_study_version(self, public_id)
         if not study_version:
             api.abort(404, message="study_version '{}' not found".format(public_id))
 
@@ -89,7 +89,7 @@ class Update(Resource):
         for key in data.keys():
             if key in allowed_keys:
                 if key=='study_id':
-                    existing_study_version_with_new_code = StudyVersionService.get_a_study_version(data[key])
+                    existing_study_version_with_new_code = StudyVersionService.get_a_study_version(self, data[key])
                     if not existing_study_version_with_new_code:
                         setattr(study_version, key, data[key])
                     else:
@@ -110,7 +110,7 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a study_version')
     def delete(self, public_id):
-        study_version = StudyVersionService.get_a_study_version(public_id)
+        study_version = StudyVersionService.get_a_study_version(self, public_id)
         if not study_version:
             api.abort(404, message="study_version '{}' not found".format(public_id))
 

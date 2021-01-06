@@ -26,7 +26,7 @@ class EligibilityCriteriaHasNoteInfo(Resource):
             'eligibility_criteria_id': pid[0],
             'note_id': pid[1]
         }
-        eligibility_criteria_has_note = EligibilityCriteriaHasNoteService.get_a_eligibility_criteria_has_note(data)
+        eligibility_criteria_has_note = EligibilityCriteriaHasNoteService.get_a_eligibility_criteria_has_note(self, data)
         if not eligibility_criteria_has_note:
             api.abort(404, message="eligibility_criteria_has_note '{}' not found".format(public_id))
         else:
@@ -69,7 +69,7 @@ class Create(Resource):
             if key in allowed_keys:
                 new_eligibility_criteria_has_note_dict.update({key:data[key]})
         try:
-            response = EligibilityCriteriaHasNoteService.save_new_eligibility_criteria_has_note(new_eligibility_criteria_has_note_dict)
+            response = EligibilityCriteriaHasNoteService.save_new_eligibility_criteria_has_note(EligibilityCriteriaHasNoteService, new_eligibility_criteria_has_note_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -90,7 +90,7 @@ class Update(Resource):
             'eligibility_criteria_id': pid[0],
             'note_id': pid[1]
         }
-        eligibility_criteria_has_note = EligibilityCriteriaHasNoteService.get_a_eligibility_criteria_has_note(pid_data)
+        eligibility_criteria_has_note = EligibilityCriteriaHasNoteService.get_a_eligibility_criteria_has_note(self, pid_data)
         if not eligibility_criteria_has_note:
             api.abort(404, message="eligibility_criteria_has_note '{}' not found".format(public_id))
 
@@ -118,7 +118,7 @@ class Delete(Resource):
             'eligibility_criteria_id': pid[0],
             'note_id': pid[1]
         }
-        eligibility_criteria_has_note = EligibilityCriteriaHasNoteService.get_a_eligibility_criteria_has_note(pid_data)
+        eligibility_criteria_has_note = EligibilityCriteriaHasNoteService.get_a_eligibility_criteria_has_note(self, pid_data)
         if not eligibility_criteria_has_note:
             api.abort(404, message="eligibility_criteria_has_note '{}' not found".format(public_id))
 

@@ -7,8 +7,8 @@ from app.main.service import Services
 
 class StudyVersionService(Services):
     
-    def save_new_study_version(data):
-        study_version = DbSession.query(StudyVersion).filter(StudyVersion.id==data.get('id')).first()
+    def save_new_study_version(self, data):
+        study_version = self.get_a_study_version(self, data.get('id'))
 
         if not study_version:
             new_study_version = StudyVersion(
@@ -30,6 +30,6 @@ class StudyVersionService(Services):
             }
             return response_object, 409
 
-    def get_a_study_version(id):
+    def get_a_study_version(self, id):
         return DbSession.query(StudyVersion).filter(StudyVersion.id==id).first()
 

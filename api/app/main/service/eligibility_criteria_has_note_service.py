@@ -7,11 +7,8 @@ from app.main.service import Services
 
 class EligibilityCriteriaHasNoteService(Services):
 
-    def save_new_eligibility_criteria_has_note(data):
-        eligibility_criteria_has_note = DbSession.query(EligibilityCriteriaHasNote).filter(
-            EligibilityCriteriaHasNote.eligibility_criteria_id==data.get('eligibility_criteria_id'),
-            EligibilityCriteriaHasNote.note_id==data.get('note_id'),
-        ).first()
+    def save_new_eligibility_criteria_has_note(self, data):
+        eligibility_criteria_has_note = self.get_a_eligibility_criteria_has_note(self, data)
 
         if not eligibility_criteria_has_note:
             new_eligibility_criteria_has_note = EligibilityCriteriaHasNote(
@@ -31,7 +28,7 @@ class EligibilityCriteriaHasNoteService(Services):
             }
             return response_object, 409
 
-    def get_a_eligibility_criteria_has_note(data):
+    def get_a_eligibility_criteria_has_note(self, data):
         return DbSession.query(EligibilityCriteriaHasNote).filter(
             EligibilityCriteriaHasNote.eligibility_criteria_id==data['eligibility_criteria_id'],
             EligibilityCriteriaHasNote.note_id==data['note_id'],

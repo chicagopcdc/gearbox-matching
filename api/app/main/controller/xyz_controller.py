@@ -21,7 +21,9 @@ class XyzInfo(Resource):
     @api.doc('get a xyz')
     @api.marshal_with(_xyz)
     def get(self, public_id):
-        xyz = XyzService.get_a_xyz(public_id)
+        #DEBUG
+        #xyz = XyzService.get_a_xyz(public_id)
+        xyz = XyzService.get_a_xyz(self, public_id)
         if not xyz:
             api.abort(404, message="xyz '{}' not found".format(public_id))
         else:
@@ -64,7 +66,13 @@ class Create(Resource):
             if key in allowed_keys:
                 new_xyz_dict.update({key:data[key]})
         try:
-            response = XyzService.save_new_xyz(new_xyz_dict)
+
+            #DEBUG
+            #response = XyzService.save_new_xyz(new_xyz_dict)
+            #response = XyzService.save_new_xyz(self, new_xyz_dict)
+            #response = XyzService.save_new_xyz(Xyz, new_xyz_dict)
+            response = XyzService.save_new_xyz(XyzService, new_xyz_dict)
+
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -80,7 +88,11 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the xyz to be updated
-        xyz = XyzService.get_a_xyz(public_id)
+
+        #DEBUG
+        #xyz = XyzService.get_a_xyz(public_id)
+        xyz = XyzService.get_a_xyz(self, public_id)
+
         if not xyz:
             api.abort(404, message="xyz '{}' not found".format(public_id))
 
@@ -89,7 +101,11 @@ class Update(Resource):
         for key in data.keys():
             if key in allowed_keys:
                 if key=='code':
-                    existing_xyz_with_new_code = XyzService.get_a_xyz(data[key])
+
+                    #DEBUG
+                    #existing_xyz_with_new_code = XyzService.get_a_xyz(data[key])
+                    existing_xyz_with_new_code = XyzService.get_a_xyz(self, data[key])
+                    
                     if not existing_xyz_with_new_code:
                         setattr(xyz, key, data[key])
                     else:
@@ -110,7 +126,11 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a xyz')
     def delete(self, public_id):
-        xyz = XyzService.get_a_xyz(public_id)
+
+        #DEBUG
+        #xyz = XyzService.get_a_xyz(public_id)
+        xyz = XyzService.get_a_xyz(self, public_id)
+        
         if not xyz:
             api.abort(404, message="xyz '{}' not found".format(public_id))
 

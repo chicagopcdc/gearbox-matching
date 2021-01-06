@@ -21,7 +21,7 @@ class NoteInfo(Resource):
     @api.doc('get a note')
     @api.marshal_with(_note)
     def get(self, public_id):
-        note = NoteService.get_a_note(public_id)
+        note = NoteService.get_a_note(self, public_id)
         if not note:
             api.abort(404, message="note '{}' not found".format(public_id))
         else:
@@ -64,7 +64,7 @@ class Create(Resource):
             if key in allowed_keys:
                 new_note_dict.update({key:data[key]})
         try:
-            response = NoteService.save_new_note(new_note_dict)
+            response = NoteService.save_new_note(NoteService, new_note_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -80,7 +80,7 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the note to be updated
-        note = NoteService.get_a_note(public_id)
+        note = NoteService.get_a_note(self, public_id)
         if not note:
             api.abort(404, message="note '{}' not found".format(public_id))
 
@@ -102,7 +102,7 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a note')
     def delete(self, public_id):
-        note = NoteService.get_a_note(public_id)
+        note = NoteService.get_a_note(self, public_id)
         if not note:
             api.abort(404, message="note '{}' not found".format(public_id))
 

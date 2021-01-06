@@ -7,8 +7,8 @@ from app.main.service import Services
 
 class ElCriteriaHasCriterionService(Services):
 
-    def save_new_el_criteria_has_criterion(data):
-        el_criteria_has_criterion = DbSession.query(ElCriteriaHasCriterion).filter(ElCriteriaHasCriterion.code==data.get('code')).first()
+    def save_new_el_criteria_has_criterion(self, data):
+        el_criteria_has_criterion = self.get_a_el_criteria_has_criterion(self, data.get('code'))
 
         if not el_criteria_has_criterion:
             new_el_criteria_has_criterion = ElCriteriaHasCriterion(
@@ -32,5 +32,5 @@ class ElCriteriaHasCriterionService(Services):
             }
             return response_object, 409
 
-    def get_a_el_criteria_has_criterion(code):
+    def get_a_el_criteria_has_criterion(self, code):
         return DbSession.query(ElCriteriaHasCriterion).filter(ElCriteriaHasCriterion.code==code).first()

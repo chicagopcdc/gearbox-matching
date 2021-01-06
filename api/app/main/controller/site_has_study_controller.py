@@ -21,7 +21,7 @@ class SiteHasStudyInfo(Resource):
     @api.doc('get a site_has_study')
     @api.marshal_with(_site_has_study)
     def get(self, public_id):
-        site_has_study = SiteHasStudyService.get_a_site_has_study(public_id)
+        site_has_study = SiteHasStudyService.get_a_site_has_study(self, public_id)
         if not site_has_study:
             api.abort(404, message="site_has_study '{}' not found".format(public_id))
         else:
@@ -64,7 +64,7 @@ class Create(Resource):
             if key in allowed_keys:
                 new_site_has_study_dict.update({key:data[key]})
         try:
-            response = SiteHasStudyService.save_new_site_has_study(new_site_has_study_dict)
+            response = SiteHasStudyService.save_new_site_has_study(SiteHasStudyService, new_site_has_study_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -80,7 +80,7 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the site_has_study to be updated
-        site_has_study = SiteHasStudyService.get_a_site_has_study(public_id)
+        site_has_study = SiteHasStudyService.get_a_site_has_study(self, public_id)
         if not site_has_study:
             api.abort(404, message="site_has_study '{}' not found".format(public_id))
 
@@ -89,7 +89,7 @@ class Update(Resource):
         for key in data.keys():
             if key in allowed_keys:
                 if key=='code':
-                    existing_site_has_study_with_new_code = SiteHasStudyService.get_a_site_has_study(data[key])
+                    existing_site_has_study_with_new_code = SiteHasStudyService.get_a_site_has_study(self, data[key])
                     if not existing_site_has_study_with_new_code:
                         setattr(site_has_study, key, data[key])
                     else:
@@ -110,7 +110,7 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a site_has_study')
     def delete(self, public_id):
-        site_has_study = SiteHasStudyService.get_a_site_has_study(public_id)
+        site_has_study = SiteHasStudyService.get_a_site_has_study(self, public_id)
         if not site_has_study:
             api.abort(404, message="site_has_study '{}' not found".format(public_id))
 

@@ -7,8 +7,8 @@ from app.main.service import Services
 
 class CriterionService(Services):
 
-    def save_new_criterion(data):
-        criterion = DbSession.query(Criterion).filter(Criterion.code==data.get('code')).first()
+    def save_new_criterion(self, data):
+        criterion = self.get_a_criterion(self, data.get('code'))
 
         if not criterion:
             new_criterion = Criterion(
@@ -32,6 +32,6 @@ class CriterionService(Services):
             }
             return response_object, 409
 
-    def get_a_criterion(code):
+    def get_a_criterion(self, code):
         return DbSession.query(Criterion).filter(Criterion.code==code).first()
 

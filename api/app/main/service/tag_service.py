@@ -7,8 +7,8 @@ from app.main.service import Services
 
 class TagService(Services):
 
-    def save_new_tag(data):
-        tag = DbSession.query(Tag).filter(Tag.code==data.get('code')).first()
+    def save_new_tag(self, data):
+        tag = self.get_a_tag(self, data.get('code'))
 
         if not tag:
             new_tag = Tag(
@@ -29,6 +29,5 @@ class TagService(Services):
             }
             return response_object, 409
 
-    def get_a_tag(code):
+    def get_a_tag(self, code):
         return DbSession.query(Tag).filter(Tag.code==code).first()
-

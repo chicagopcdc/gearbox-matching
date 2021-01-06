@@ -21,7 +21,7 @@ class SiteInfo(Resource):
     @api.doc('get a site')
     @api.marshal_with(_site)
     def get(self, public_id):
-        site = SiteService.get_a_site(public_id)
+        site = SiteService.get_a_site(self, public_id)
         if not site:
             api.abort(404, message="site '{}' not found".format(public_id))
         else:
@@ -64,7 +64,7 @@ class Create(Resource):
             if key in allowed_keys:
                 new_site_dict.update({key:data[key]})
         try:
-            response = SiteService.save_new_site(new_site_dict)
+            response = SiteService.save_new_site(SiteService, new_site_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -80,7 +80,7 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the site to be updated
-        site = SiteService.get_a_site(public_id)
+        site = SiteService.get_a_site(self, public_id)
         if not site:
             api.abort(404, message="site '{}' not found".format(public_id))
 
@@ -89,7 +89,7 @@ class Update(Resource):
         for key in data.keys():
             if key in allowed_keys:
                 if key=='code':
-                    existing_site_with_new_code = SiteService.get_a_site(data[key])
+                    existing_site_with_new_code = SiteService.get_a_site(self, data[key])
                     if not existing_site_with_new_code:
                         setattr(site, key, data[key])
                     else:
@@ -110,7 +110,7 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a site')
     def delete(self, public_id):
-        site = SiteService.get_a_site(public_id)
+        site = SiteService.get_a_site(self, public_id)
         if not site:
             api.abort(404, message="site '{}' not found".format(public_id))
 

@@ -7,8 +7,8 @@ from app.main.service import Services
 
 class OntologyCodeService(Services):
 
-    def save_new_ontology_code(data):
-        ontology_code = DbSession.query(OntologyCode).filter(OntologyCode.code==data.get('code')).first()
+    def save_new_ontology_code(self, data):
+        ontology_code = self.get_a_ontology_code(self, data.get('code'))
 
         if not ontology_code:
             new_ontology_code = OntologyCode(
@@ -32,6 +32,5 @@ class OntologyCodeService(Services):
             }
             return response_object, 409
 
-    def get_a_ontology_code(code):
+    def get_a_ontology_code(self, code):
         return DbSession.query(OntologyCode).filter(OntologyCode.code==code).first()
-

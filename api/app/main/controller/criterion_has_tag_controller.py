@@ -26,7 +26,7 @@ class CriterionHasTagInfo(Resource):
             'criterion_id': pid[0],
             'tag_id': pid[1],
         }
-        criterion_has_tag = CriterionHasTagService.get_a_criterion_has_tag(data)
+        criterion_has_tag = CriterionHasTagService.get_a_criterion_has_tag(self, data)
         if not criterion_has_tag:
             api.abort(404, message="criterion_has_tag '{}' not found".format(public_id))
         else:
@@ -69,7 +69,7 @@ class Create(Resource):
             if key in allowed_keys:
                 new_criterion_has_tag_dict.update({key:data[key]})
         try:
-            response = CriterionHasTagService.save_new_criterion_has_tag(new_criterion_has_tag_dict)
+            response = CriterionHasTagService.save_new_criterion_has_tag(CriterionHasTagService, new_criterion_has_tag_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -90,7 +90,7 @@ class Update(Resource):
             'criterion_id': pid[0],
             'tag_id': pid[1],
         }
-        criterion_has_tag = CriterionHasTagService.get_a_criterion_has_tag(pid_data)
+        criterion_has_tag = CriterionHasTagService.get_a_criterion_has_tag(self, pid_data)
         if not criterion_has_tag:
             api.abort(404, message="criterion_has_tag '{}' not found".format(public_id))
 
@@ -100,7 +100,6 @@ class Update(Resource):
             if key in allowed_keys:
                 #DO NOT PREVENT PRIMARY KEY CHANGES
                 setattr(criterion_has_tag, key, data[key])
-
         try:
             CriterionHasTagService.commit()
             return criterion_has_tag.as_dict()
@@ -119,7 +118,7 @@ class Delete(Resource):
             'criterion_id': pid[0],
             'tag_id': pid[1],
         }
-        criterion_has_tag = CriterionHasTagService.get_a_criterion_has_tag(pid_data)
+        criterion_has_tag = CriterionHasTagService.get_a_criterion_has_tag(self, pid_data)
         if not criterion_has_tag:
             api.abort(404, message="criterion_has_tag '{}' not found".format(public_id))
 

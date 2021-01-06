@@ -97,7 +97,7 @@ class Create(Resource):
                 new_login_dict.update({key:data[key]})
 
         try:
-            response = LoginService.save_new_login(new_login_dict)
+            response = LoginService.save_new_login(LoginService, new_login_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -109,7 +109,7 @@ class LoginInfo(Resource):
     @api.doc('get login info')
     @api.marshal_with(_login)
     def get(self, sub_id):
-        login = LoginService.get_a_login(sub_id)
+        login = LoginService.get_a_login(self, sub_id)
         if not login:
             api.abort(404, message="user login '{}' not found".format(sub_id))
         else:
@@ -147,7 +147,7 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the login to be updated
-        login = LoginService.get_a_login(sub_id)
+        login = LoginService.get_a_login(self, sub_id)
         if not login:
             api.abort(404, message="login info '{}' not found".format(sub_id))
 
@@ -156,7 +156,7 @@ class Update(Resource):
         for key in data.keys():
             if key in allowed_keys:
                 if key=='code':
-                    existing_login_with_new_code = LoginService.get_a_login(data[key])
+                    existing_login_with_new_code = LoginService.get_a_login(self, data[key])
                     if not existing_login_with_new_code:
                         setattr(login, key, data[key])
                     else:
@@ -177,7 +177,7 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a login')
     def delete(self, sub_id):
-        login = LoginService.get_a_login(sub_id)
+        login = LoginService.get_a_login(self, sub_id)
         if not login:
             api.abort(404, message="user login '{}' not found".format(sub_id))
 

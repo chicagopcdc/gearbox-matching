@@ -21,7 +21,7 @@ class OntologyCodeInfo(Resource):
     @api.doc('get a ontology_code')
     @api.marshal_with(_ontology_code)
     def get(self, public_id):
-        ontology_code = OntologyCodeService.get_a_ontology_code(public_id)
+        ontology_code = OntologyCodeService.get_a_ontology_code(self, public_id)
         if not ontology_code:
             api.abort(404, message="ontology_code '{}' not found".format(public_id))
         else:
@@ -64,7 +64,7 @@ class Create(Resource):
             if key in allowed_keys:
                 new_ontology_code_dict.update({key:data[key]})
         try:
-            response = OntologyCodeService.save_new_ontology_code(new_ontology_code_dict)
+            response = OntologyCodeService.save_new_ontology_code(OntologyCodeService, new_ontology_code_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -80,7 +80,7 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the ontology_code to be updated
-        ontology_code = OntologyCodeService.get_a_ontology_code(public_id)
+        ontology_code = OntologyCodeService.get_a_ontology_code(self, public_id)
         if not ontology_code:
             api.abort(404, message="ontology_code '{}' not found".format(public_id))
 
@@ -89,7 +89,7 @@ class Update(Resource):
         for key in data.keys():
             if key in allowed_keys:
                 if key=='code':
-                    existing_ontology_code_with_new_code = OntologyCodeService.get_a_ontology_code(data[key])
+                    existing_ontology_code_with_new_code = OntologyCodeService.get_a_ontology_code(self, data[key])
                     if not existing_ontology_code_with_new_code:
                         setattr(ontology_code, key, data[key])
                     else:
@@ -110,7 +110,7 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a ontology_code')
     def delete(self, public_id):
-        ontology_code = OntologyCodeService.get_a_ontology_code(public_id)
+        ontology_code = OntologyCodeService.get_a_ontology_code(self, public_id)
         if not ontology_code:
             api.abort(404, message="ontology_code '{}' not found".format(public_id))
 

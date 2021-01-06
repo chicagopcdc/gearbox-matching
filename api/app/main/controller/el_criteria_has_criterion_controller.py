@@ -21,7 +21,7 @@ class ElCriteriaHasCriterionInfo(Resource):
     @api.doc('get a el_criteria_has_criterion')
     @api.marshal_with(_el_criteria_has_criterion)
     def get(self, public_id):
-        el_criteria_has_criterion = ElCriteriaHasCriterionService.get_a_el_criteria_has_criterion(public_id)
+        el_criteria_has_criterion = ElCriteriaHasCriterionService.get_a_el_criteria_has_criterion(self, public_id)
         if not el_criteria_has_criterion:
             api.abort(404, message="el_criteria_has_criterion '{}' not found".format(public_id))
         else:
@@ -64,7 +64,7 @@ class Create(Resource):
             if key in allowed_keys:
                 new_el_criteria_has_criterion_dict.update({key:data[key]})
         try:
-            response = ElCriteriaHasCriterionService.save_new_el_criteria_has_criterion(new_el_criteria_has_criterion_dict)
+            response = ElCriteriaHasCriterionService.save_new_el_criteria_has_criterion(ElCriteriaHasCriterionService, new_el_criteria_has_criterion_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -80,7 +80,7 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the el_criteria_has_criterion to be updated
-        el_criteria_has_criterion = ElCriteriaHasCriterionService.get_a_el_criteria_has_criterion(public_id)
+        el_criteria_has_criterion = ElCriteriaHasCriterionService.get_a_el_criteria_has_criterion(self, public_id)
         if not el_criteria_has_criterion:
             api.abort(404, message="el_criteria_has_criterion '{}' not found".format(public_id))
 
@@ -89,7 +89,7 @@ class Update(Resource):
         for key in data.keys():
             if key in allowed_keys:
                 if key=='code':
-                    existing_el_criteria_has_criterion_with_new_code = ElCriteriaHasCriterionService.get_a_el_criteria_has_criterion(data[key])
+                    existing_el_criteria_has_criterion_with_new_code = ElCriteriaHasCriterionService.get_a_el_criteria_has_criterion(self, data[key])
                     if not existing_el_criteria_has_criterion_with_new_code:
                         setattr(el_criteria_has_criterion, key, data[key])
                     else:
@@ -110,7 +110,7 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a el_criteria_has_criterion')
     def delete(self, public_id):
-        el_criteria_has_criterion = ElCriteriaHasCriterionService.get_a_el_criteria_has_criterion(public_id)
+        el_criteria_has_criterion = ElCriteriaHasCriterionService.get_a_el_criteria_has_criterion(self, public_id)
         if not el_criteria_has_criterion:
             api.abort(404, message="el_criteria_has_criterion '{}' not found".format(public_id))
 

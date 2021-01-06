@@ -2,18 +2,18 @@ import datetime
 import json
 import pytest
 
-from app.main.model.study_algorithm_engine import Study_Algorithm_Engine
-from app.main.controller.study_algorithm_engine_controller import Study_Algorithm_EngineInfo, AllStudy_Algorithm_EnginesInfo, Create, Update, Delete
+from app.main.model.algorithm_engine import StudyAlgorithmEngine
+from app.main.controller.study_algorithm_engine_controller import StudyAlgorithmEngineInfo, AllStudyAlgorithmEnginesInfo, Create, Update, Delete
 
 
 @pytest.fixture(scope="module")
 def study_algorithm_engineA():
-    return Study_Algorithm_Engine(study_version_id = 2, algorithm_engine_id = 1, study_id=1)
+    return StudyAlgorithmEngine(study_version_id = 2, algorithm_engine_id = 1, study_id=1)
 
 
 @pytest.fixture(scope="module")
 def study_algorithm_engineB():
-    return Study_Algorithm_Engine(study_version_id = 3, algorithm_engine_id = 1, study_id=2)
+    return StudyAlgorithmEngine(study_version_id = 3, algorithm_engine_id = 1, study_id=2)
 
 
 def test_setup(study_algorithm_engineA, study_algorithm_engineB, app, session):
@@ -24,7 +24,7 @@ def test_setup(study_algorithm_engineA, study_algorithm_engineB, app, session):
 def test_scope(study_algorithm_engineA, study_algorithm_engineB, app, session):
     #fixture scope should be greater than 'function', for use in later tests
     with app.test_request_context("/study_algorithm_engine/info", method="GET"):        
-        response = AllStudy_Algorithm_EnginesInfo().get()
+        response = AllStudyAlgorithmEnginesInfo().get()
         table_data = response.json['body']
         assert study_algorithm_engineA.as_dict() in table_data
         assert study_algorithm_engineB.as_dict() in table_data
@@ -35,13 +35,13 @@ def test_study_algorithm_engine_info(study_algorithm_engineA, study_algorithm_en
         #with app.test_request_context("/study_algorithm_engine/{}".format(sag['study_version_id'], sag['algorithm_engine_id'], sag['study_id']), method="GET"):
         with app.test_request_context("/study_algorithm_engine/{}-{}-{}".format(sag['study_version_id'], sag['algorithm_engine_id'], sag['study_id']), method="GET"):
             pid = "{}-{}-{}".format(sag['study_version_id'], sag['algorithm_engine_id'], sag['study_id'])
-            response = Study_Algorithm_EngineInfo().get(pid)
+            response = StudyAlgorithmEngineInfo().get(pid)
             assert pid == "{}-{}-{}".format(response['study_version_id'], response['algorithm_engine_id'], response['study_id'])
 
 
 def test_all_study_algorithm_engines_info(study_algorithm_engineA, study_algorithm_engineB, app, session):
     with app.test_request_context("/study_algorithm_engine/info", method="GET"):        
-        response = AllStudy_Algorithm_EnginesInfo().get()
+        response = AllStudyAlgorithmEnginesInfo().get()
         assert response.status_code == 200
        
         table_data = response.json['body']
@@ -61,7 +61,7 @@ def test_create_study_algorithm_engine(app, session):
 
 def test_scope_again(app, session):
     with app.test_request_context("/study_algorithm_engine/info", method="GET"):        
-        response = AllStudy_Algorithm_EnginesInfo().get()
+        response = AllStudyAlgorithmEnginesInfo().get()
         table_data = response.json['body']
         payload_seen = 0
         for row in table_data:
@@ -95,6 +95,6 @@ def test_delete_study_algorithm_engine(study_algorithm_engineA, study_algorithm_
     #attempt to get what was deleted (expected 404)
     with app.test_request_context("/study_algorithm_engine/{}".format(pidA), method="GET"):
         try:
-            response = Study_Algorithm_EngineInfo().get(pidA)
+            response = StudyAlgorithmEngineInfo().get(pidA)
         except Exception as e:
             assert e.code == 404

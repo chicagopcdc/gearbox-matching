@@ -7,8 +7,8 @@ from app.main.service import Services
 
 class LoginService(Services):
 
-    def save_new_login(data):
-        login = DbSession.query(Login).filter(Login.sub_id==data.get('sub_id')).first()
+    def save_new_login(self, data):
+        login = self.get_a_login(self, data.get('sub_id'))
 
         if not login:
             new_login = Login(
@@ -30,6 +30,6 @@ class LoginService(Services):
             }
             return response_object, 409
 
-    def get_a_login(sub_id):
+    def get_a_login(self, sub_id):
         return DbSession.query(Login).filter(Login.sub_id==sub_id).first()
 

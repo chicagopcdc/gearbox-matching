@@ -7,8 +7,8 @@ from app.main.service import Services
 
 class NoteService(Services):
 
-    def save_new_note(data):
-        note = DbSession.query(Note).filter(Note.id==data.get('id')).first()
+    def save_new_note(self, data):
+        note = self.get_a_note(self, data.get('id'))
 
         if not note:
             new_note = Note(
@@ -28,6 +28,5 @@ class NoteService(Services):
             }
             return response_object, 409
 
-    def get_a_note(id):
+    def get_a_note(self, id):
         return DbSession.query(Note).filter(Note.id==id).first()
-

@@ -7,8 +7,8 @@ from app.main.service import Services
 
 class SiteHasStudyService(Services):
 
-    def save_new_site_has_study(data):
-        site_has_study = DbSession.query(SiteHasStudy).filter(SiteHasStudy.code==data.get('code')).first()
+    def save_new_site_has_study(self, data):
+        site_has_study = self.get_a_site_has_study(self, data.get('code'))
 
         if not site_has_study:
             new_site_has_study = SiteHasStudy(
@@ -30,10 +30,8 @@ class SiteHasStudyService(Services):
             }
             return response_object, 409
 
-    def get_a_site_has_study(code):
+    def get_a_site_has_study(self, code):
         return DbSession.query(SiteHasStudy).filter(SiteHasStudy.code==code).first()
 
     def get_site_has_study_version(id):
         return DbSession.query(SiteHasStudyVersion).filter(SiteHasStudyVersion.id==id).first()
-
-

@@ -21,7 +21,7 @@ class InputTypeInfo(Resource):
     @api.doc('get a input_type')
     @api.marshal_with(_input_type)
     def get(self, public_id):
-        input_type = InputTypeService.get_a_input_type(public_id)
+        input_type = InputTypeService.get_a_input_type(self,public_id)
         if not input_type:
             api.abort(404, message="input_type '{}' not found".format(public_id))
         else:
@@ -64,7 +64,7 @@ class Create(Resource):
             if key in allowed_keys:
                 new_input_type_dict.update({key:data[key]})
         try:
-            response = InputTypeService.save_new_input_type(new_input_type_dict)
+            response = InputTypeService.save_new_input_type(InputTypeService, new_input_type_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -80,7 +80,7 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the input_type to be updated
-        input_type = InputTypeService.get_a_input_type(public_id)
+        input_type = InputTypeService.get_a_input_type(self, public_id)
         if not input_type:
             api.abort(404, message="input_type '{}' not found".format(public_id))
 
@@ -89,7 +89,7 @@ class Update(Resource):
         for key in data.keys():
             if key in allowed_keys:
                 if key=='name':
-                    existing_input_type_with_new_code = InputTypeService.get_a_input_type(data[key])
+                    existing_input_type_with_new_code = InputTypeService.get_a_input_type(self, data[key])
                     if not existing_input_type_with_new_code:
                         setattr(input_type, key, data[key])
                     else:
@@ -110,7 +110,7 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a input_type')
     def delete(self, public_id):
-        input_type = InputTypeService.get_a_input_type(public_id)
+        input_type = InputTypeService.get_a_input_type(self, public_id)
         if not input_type:
             api.abort(404, message="input_type '{}' not found".format(public_id))
 

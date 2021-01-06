@@ -7,9 +7,9 @@ from app.main.service import Services
 
 class XyzService(Services):
 
-    def save_new_xyz(data):
-        xyz = DbSession.query(Xyz).filter(Xyz.code==data.get('code')).first()
-
+    def save_new_xyz(self, data):
+        xyz = self.get_a_xyz(self, data.get('code'))
+        
         if not xyz:
             new_xyz = Xyz(
                 name=data.get('name'),
@@ -30,7 +30,7 @@ class XyzService(Services):
             }
             return response_object, 409
 
-    def get_a_xyz(code):
+    def get_a_xyz(self, code):
         return DbSession.query(Xyz).filter(Xyz.code==code).first()
 
     def get_xyz_version(id):

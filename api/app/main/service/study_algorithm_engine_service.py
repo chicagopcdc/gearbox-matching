@@ -2,22 +2,17 @@ import uuid
 import datetime
 
 from app.main import DbSession
-from app.main.model.study_algorithm_engine import Study_Algorithm_Engine
+from app.main.model.algorithm_engine import StudyAlgorithmEngine
 from app.main.service import Services
 
 
-class Study_Algorithm_EngineService(Services):
+class StudyAlgorithmEngineService(Services):
 
-    def save_new_study_algorithm_engine(data):
-        #NOT DRY
-        study_algorithm_engine = DbSession.query(Study_Algorithm_Engine).filter(
-            Study_Algorithm_Engine.study_version_id==data.get('study_version_id'),
-            Study_Algorithm_Engine.algorithm_engine_id==data.get('algorithm_engine_id'),
-            Study_Algorithm_Engine.study_id==data.get('study_id'),
-        ).first()
+    def save_new_study_algorithm_engine(self, data):
+        study_algorithm_engine = self.get_a_study_algorithm_engine(self, data)
 
         if not study_algorithm_engine:
-            new_study_algorithm_engine = Study_Algorithm_Engine(
+            new_study_algorithm_engine = StudyAlgorithmEngine(
                 study_version_id=data.get('study_version_id'),
                 algorithm_engine_id=data.get('algorithm_engine_id'),
                 study_id=data.get('study_id'),                
@@ -33,14 +28,14 @@ class Study_Algorithm_EngineService(Services):
         else:
             response_object = {
                 'status': 'fail',
-                'message': 'Study_Algorithm_Engine already exists. Please Log in.',
+                'message': 'StudyAlgorithmEngine already exists. Please Log in.',
             }
             return response_object, 409
 
 
-    def get_a_study_algorithm_engine(data):
-        return DbSession.query(Study_Algorithm_Engine).filter(
-            Study_Algorithm_Engine.study_version_id==data['study_version_id'],
-            Study_Algorithm_Engine.algorithm_engine_id==data['algorithm_engine_id'],
-            Study_Algorithm_Engine.study_id==data['study_id'],
+    def get_a_study_algorithm_engine(self, data):
+        return DbSession.query(StudyAlgorithmEngine).filter(
+            StudyAlgorithmEngine.study_version_id==data['study_version_id'],
+            StudyAlgorithmEngine.algorithm_engine_id==data['algorithm_engine_id'],
+            StudyAlgorithmEngine.study_id==data['study_id'],
         ).first()

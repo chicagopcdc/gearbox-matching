@@ -7,8 +7,8 @@ from app.main.service import Services
 
 class InputTypeService(Services):
 
-    def save_new_input_type(data):
-        input_type = DbSession.query(InputType).filter(InputType.name==data.get('name')).first()
+    def save_new_input_type(self, data):
+        input_type = self.get_a_input_type(self, data.get('name'))
 
         if not input_type:
             new_input_type = InputType(
@@ -29,6 +29,5 @@ class InputTypeService(Services):
             }
             return response_object, 409
 
-    def get_a_input_type(name):
+    def get_a_input_type(self, name):
         return DbSession.query(InputType).filter(InputType.name==name).first()
-

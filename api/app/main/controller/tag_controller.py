@@ -21,7 +21,7 @@ class TagInfo(Resource):
     @api.doc('get a tag')
     @api.marshal_with(_tag)
     def get(self, public_id):
-        tag = TagService.get_a_tag(public_id)
+        tag = TagService.get_a_tag(self, public_id)
         if not tag:
             api.abort(404, message="tag '{}' not found".format(public_id))
         else:
@@ -64,7 +64,7 @@ class Create(Resource):
             if key in allowed_keys:
                 new_tag_dict.update({key:data[key]})
         try:
-            response = TagService.save_new_tag(new_tag_dict)
+            response = TagService.save_new_tag(TagService, new_tag_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -80,7 +80,7 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the tag to be updated
-        tag = TagService.get_a_tag(public_id)
+        tag = TagService.get_a_tag(self, public_id)
         if not tag:
             api.abort(404, message="tag '{}' not found".format(public_id))
 
@@ -89,7 +89,7 @@ class Update(Resource):
         for key in data.keys():
             if key in allowed_keys:
                 if key=='code':
-                    existing_tag_with_new_code = TagService.get_a_tag(data[key])
+                    existing_tag_with_new_code = TagService.get_a_tag(self, data[key])
                     if not existing_tag_with_new_code:
                         setattr(tag, key, data[key])
                     else:
@@ -110,7 +110,7 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a tag')
     def delete(self, public_id):
-        tag = TagService.get_a_tag(public_id)
+        tag = TagService.get_a_tag(self, public_id)
         if not tag:
             api.abort(404, message="tag '{}' not found".format(public_id))
 

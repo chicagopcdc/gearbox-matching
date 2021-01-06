@@ -5,8 +5,8 @@ import logging
 from time import gmtime, strftime
 import json
 
-from app.main.model.study_algorithm_engine import Study_Algorithm_Engine
-from app.main.service.study_algorithm_engine_service import Study_Algorithm_EngineService
+from app.main.model.algorithm_engine import StudyAlgorithmEngine
+from app.main.service.study_algorithm_engine_service import StudyAlgorithmEngineService
 from app.main.util import AlchemyEncoder
 from app.main.util.dto import StudyAlgorithmEngineDto
 
@@ -16,8 +16,8 @@ _study_algorithm_engine = StudyAlgorithmEngineDto.study_algorithm_engine
 
 
 @api.route('/<public_id>')
-@api.param('public_id', 'The Study_Algorithm_Engine identifier')
-class Study_Algorithm_EngineInfo(Resource):
+@api.param('public_id', 'The StudyAlgorithmEngine identifier')
+class StudyAlgorithmEngineInfo(Resource):
     @api.doc('get a study_algorithm_engine')
     @api.marshal_with(_study_algorithm_engine)
     def get(self, public_id):
@@ -27,7 +27,7 @@ class Study_Algorithm_EngineInfo(Resource):
             'algorithm_engine_id': pid[1],
             'study_id': pid[2]
         }
-        study_algorithm_engine = Study_Algorithm_EngineService.get_a_study_algorithm_engine(data)
+        study_algorithm_engine = StudyAlgorithmEngineService.get_a_study_algorithm_engine(self, data)
         if not study_algorithm_engine:
             api.abort(404, message="study_algorithm_engine '{}' not found".format(public_id))
         else:
@@ -35,9 +35,9 @@ class Study_Algorithm_EngineInfo(Resource):
 
 
 @api.route('/info')
-class AllStudy_Algorithm_EnginesInfo(Resource):
+class AllStudyAlgorithmEnginesInfo(Resource):
     def get(self):
-        study_algorithm_engines = Study_Algorithm_EngineService.get_all(Study_Algorithm_Engine)
+        study_algorithm_engines = StudyAlgorithmEngineService.get_all(StudyAlgorithmEngine)
         try:
             if study_algorithm_engines:
                 body = [r.as_dict() for r in study_algorithm_engines]
@@ -62,7 +62,7 @@ class Create(Resource):
         data = api.payload
         if not data or not isinstance(data, dict):
             api.abort(400, message="null payload or payload not json/dict")
-        template = Study_Algorithm_Engine()
+        template = StudyAlgorithmEngine()
         allowed_keys = template.as_dict().keys()
         
         new_study_algorithm_engine_dict = {}
@@ -70,14 +70,14 @@ class Create(Resource):
             if key in allowed_keys:
                 new_study_algorithm_engine_dict.update({key:data[key]})
         try:
-            response = Study_Algorithm_EngineService.save_new_study_algorithm_engine(new_study_algorithm_engine_dict)
+            response = StudyAlgorithmEngineService.save_new_study_algorithm_engine(StudyAlgorithmEngineService, new_study_algorithm_engine_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
 
 
 @api.route('/update_study_algorithm_engine/<public_id>')
-@api.param('public_id', 'The Study_Algorithm_Engine identifier')
+@api.param('public_id', 'The StudyAlgorithmEngine identifier')
 class Update(Resource):
     @api.doc('update an existing study_algorithm_engine')
     def put(self, public_id):
@@ -92,7 +92,7 @@ class Update(Resource):
             'algorithm_engine_id': pid[1],
             'study_id': pid[2]
         }
-        study_algorithm_engine = Study_Algorithm_EngineService.get_a_study_algorithm_engine(pid_data)
+        study_algorithm_engine = StudyAlgorithmEngineService.get_a_study_algorithm_engine(self, pid_data)
         if not study_algorithm_engine:
             api.abort(404, message="study_algorithm_engine '{}' not found".format(public_id))
 
@@ -103,7 +103,7 @@ class Update(Resource):
                 #DO NOT PREVENT PRIMARY KEY CHANGES
                 setattr(study_algorithm_engine, key, data[key])
         try:
-            Study_Algorithm_EngineService.commit()
+            StudyAlgorithmEngineService.commit()
             return study_algorithm_engine.as_dict()
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -111,7 +111,7 @@ class Update(Resource):
 
 
 @api.route('/delete_study_algorithm_engine/<public_id>')
-@api.param('public_id', 'The Study_Algorithm_Engine identifier')
+@api.param('public_id', 'The StudyAlgorithmEngine identifier')
 class Delete(Resource):
     @api.doc('delete a study_algorithm_engine')
     def delete(self, public_id):
@@ -121,12 +121,12 @@ class Delete(Resource):
             'algorithm_engine_id': pid[1],
             'study_id': pid[2]
         }
-        study_algorithm_engine = Study_Algorithm_EngineService.get_a_study_algorithm_engine(pid_data)
+        study_algorithm_engine = StudyAlgorithmEngineService.get_a_study_algorithm_engine(self, pid_data)
         if not study_algorithm_engine:
             api.abort(404, message="study_algorithm_engine '{}' not found".format(public_id))
 
         try:
-            Study_Algorithm_EngineService.delete(study_algorithm_engine)
+            StudyAlgorithmEngineService.delete(study_algorithm_engine)
             return study_algorithm_engine.as_dict()
         except Exception as e:
             logging.error(e, exc_info=True)
