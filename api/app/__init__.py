@@ -3,14 +3,12 @@
 from flask_restplus import Api
 from flask import Blueprint
 
+from .main.controller.login_controller import api as login_ns
 from .main.controller.study_controller import api as study_ns
 from .main.controller.site_controller import api as site_ns
 from .main.controller.site_has_study_controller import api as site_has_study_ns
-
-from .main.controller.xyz_controller import api as xyz_ns
 from .main.controller.study_version_controller import api as study_version_ns
 from .main.controller.study_algorithm_engine_controller import api as study_algorithm_engine_ns
-from .main.controller.login_controller import api as login_ns
 from .main.controller.algorithm_engine_controller import api as algorithm_engine_ns
 from .main.controller.eligibility_criteria_controller import api as eligibility_criteria_ns
 from .main.controller.criterion_controller import api as criterion_ns
@@ -30,7 +28,6 @@ api = Api(blueprint,
           description='a boilerplate for flask restplus web service'
           )
 
-api.add_namespace(xyz_ns, path='/xyz')
 api.add_namespace(login_ns, path='/login')
 api.add_namespace(study_ns, path='/study')
 api.add_namespace(site_ns, path='/site')
