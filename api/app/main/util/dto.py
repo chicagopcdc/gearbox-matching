@@ -1,17 +1,6 @@
 from flask_restplus import Namespace, fields
 
 
-class XyzDto:
-    api = Namespace('xyz', description='xyz related operations')
-    xyz = api.model('xyz', {
-    	'id': fields.String(required=True, description="xyz id"),
-        'name': fields.String(required=True, description='xyz name'),
-        'code': fields.String(required=True, description='xyz code'),
-        'create_date': fields.String(required=True, description='xyz creation time'),
-        'active': fields.String(description='is xyz active')
-    })    
-
-
 class StudyDto:
     api = Namespace('study', description='study related operations')
     study = api.model('study', {
