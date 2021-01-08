@@ -2,7 +2,7 @@ import uuid
 import datetime
 
 from app.main import DbSession
-from app.main.model.algorithm_engine import StudyAlgorithmEngine
+from app.main.model.study_algorithm_engine import StudyAlgorithmEngine
 from app.main.service import Services
 
 
@@ -15,7 +15,6 @@ class StudyAlgorithmEngineService(Services):
             new_study_algorithm_engine = StudyAlgorithmEngine(
                 study_version_id=data.get('study_version_id'),
                 algorithm_engine_id=data.get('algorithm_engine_id'),
-                study_id=data.get('study_id'),                
                 start_date=data.get('start_date'),
                 active=data.get('active'),
             )
@@ -37,5 +36,4 @@ class StudyAlgorithmEngineService(Services):
         return DbSession.query(StudyAlgorithmEngine).filter(
             StudyAlgorithmEngine.study_version_id==data['study_version_id'],
             StudyAlgorithmEngine.algorithm_engine_id==data['algorithm_engine_id'],
-            StudyAlgorithmEngine.study_id==data['study_id'],
         ).first()

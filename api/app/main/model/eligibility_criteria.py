@@ -9,6 +9,6 @@ from app.main import DbSession
 class EligibilityCriteria(Base):
     __tablename__ = 'eligibility_criteria'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    study_version_id = Column(Integer, ForeignKey('study_version.id'), primary_key=True)
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
+    study_version_id = Column(Integer, ForeignKey('study_version.id'))

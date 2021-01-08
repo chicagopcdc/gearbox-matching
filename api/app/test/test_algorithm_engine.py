@@ -7,12 +7,12 @@ from app.main.controller.algorithm_engine_controller import AlgorithmEngineInfo,
 
 @pytest.fixture(scope="module")
 def algorithm_engineA():
-    return AlgorithmEngine(name = 'algorithm_engineA')
+    return AlgorithmEngine(criterion_id = 1, parent_path = 'parentPathA')
 
 
 @pytest.fixture(scope="module")
 def algorithm_engineB():
-    return AlgorithmEngine(name = 'algorithm_engineB')
+    return AlgorithmEngine(criterion_id = 2, parent_path = 'parentPathB')
 
 
 def test_setup(algorithm_engineA, algorithm_engineB, app, session):
@@ -50,7 +50,7 @@ def test_all_algorithm_engines_info(algorithm_engineA, algorithm_engineB, app, s
 
 #def test_create_algorithm_engine(algorithm_engineA, algorithm_engineB, app, session):
 def test_create_algorithm_engine(app, session):
-    payload= {'version': 'test_version', 'name': 'test_name'}
+    payload= {'criterion_id': 3}
     with app.test_request_context("/algorithm_engine/create_algorithm_engine", method="POST", json=payload):
         response, status_code = Create().post()
         print (response)
@@ -63,7 +63,7 @@ def test_scope_again(app, session):
         table_data = response.json['body']
         payload_seen = 0
         for row in table_data:
-            if row['version'] == 'test_version' and row['name'] == 'test_name':
+            if row['criterion_id'] == 3:
                 payload_seen = 1
         assert payload_seen == 1
 
@@ -72,7 +72,7 @@ def test_update_algorithm_engine(algorithm_engineA, algorithm_engineB, app, sess
     #basic update test
     algorithm_engineA_dict = algorithm_engineA.as_dict()
     idA = algorithm_engineA_dict['id']
-    payload = {'name': algorithm_engineA_dict['name']+'_updated'} #update the name for algorithm_engineA
+    payload = {'parent_path': algorithm_engineA_dict['parent_path']+'_updated'} #update the name for algorithm_engineA
     with app.test_request_context("/algorithm_engine/update_algorithm_engine/{}".format(idA), method="PUT", json=payload):
         response = Update().put(idA)
         expected_response = algorithm_engineA_dict

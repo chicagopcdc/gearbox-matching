@@ -5,7 +5,7 @@ import logging
 from time import gmtime, strftime
 import json
 
-from app.main.model.algorithm_engine import StudyAlgorithmEngine
+from app.main.model.study_algorithm_engine import StudyAlgorithmEngine
 from app.main.service.study_algorithm_engine_service import StudyAlgorithmEngineService
 from app.main.util import AlchemyEncoder
 from app.main.util.dto import StudyAlgorithmEngineDto
@@ -25,7 +25,6 @@ class StudyAlgorithmEngineInfo(Resource):
         data = {
             'study_version_id': pid[0],
             'algorithm_engine_id': pid[1],
-            'study_id': pid[2]
         }
         study_algorithm_engine = StudyAlgorithmEngineService.get_a_study_algorithm_engine(self, data)
         if not study_algorithm_engine:
@@ -90,7 +89,6 @@ class Update(Resource):
         pid_data = {
             'study_version_id': pid[0],
             'algorithm_engine_id': pid[1],
-            'study_id': pid[2]
         }
         study_algorithm_engine = StudyAlgorithmEngineService.get_a_study_algorithm_engine(self, pid_data)
         if not study_algorithm_engine:
@@ -119,7 +117,6 @@ class Delete(Resource):
         pid_data = {
             'study_version_id': pid[0],
             'algorithm_engine_id': pid[1],
-            'study_id': pid[2]
         }
         study_algorithm_engine = StudyAlgorithmEngineService.get_a_study_algorithm_engine(self, pid_data)
         if not study_algorithm_engine:

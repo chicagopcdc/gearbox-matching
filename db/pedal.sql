@@ -80,7 +80,21 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`criterion` (
   `description` VARCHAR(512) NULL,
   `create_date` DATETIME NULL,
   `active` TINYINT NULL,
-  PRIMARY KEY (`id`))
+  `ontology_code_id` INT NULL,
+  `input_type_id` INT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_criterion_ontology_code1_idx` (`ontology_code_id` ASC),
+  INDEX `fk_criterion_input_type1_idx` (`input_type_id` ASC),
+  CONSTRAINT `fk_criterion_ontology_code1`
+    FOREIGN KEY (`ontology_code_id`)
+    REFERENCES `pedal_dev_v_0`.`ontology_code` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_criterion_input_type1`
+    FOREIGN KEY (`input_type_id`)
+    REFERENCES `pedal_dev_v_0`.`input_type` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
@@ -106,10 +120,10 @@ DROP TABLE IF EXISTS `pedal_dev_v_0`.`eligibility_criteria` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`eligibility_criteria` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `study_version_id` INT NOT NULL,  
   `create_date` DATETIME NULL,
   `active` TINYINT NULL,
-  PRIMARY KEY (`id`, `study_version_id`),
+  `study_version_id` INT NOT NULL,  
+  PRIMARY KEY (`id`),
   INDEX `fk_eligibility_criteria_study_version1_idx` (`study_version_id` ASC),  
     CONSTRAINT `fk_eligibility_criteria_study_version1`
     FOREIGN KEY (`study_version_id`)
@@ -127,14 +141,14 @@ DROP TABLE IF EXISTS `pedal_dev_v_0`.`el_criteria_has_criterion` ;
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`el_criteria_has_criterion` (
   `criterion_id` INT NOT NULL,
   `eligibility_criteria_id` INT NOT NULL,
-  `code` VARCHAR(45) NOT NULL,
-  `display_name` VARCHAR(45) NULL,
   `create_date` DATETIME NULL,
   `active` TINYINT NULL,
+  `value_id` INT NULL,
   PRIMARY KEY (`criterion_id`, `eligibility_criteria_id`),
-  INDEX `fk_criterion_criterion_list1_idx` (`criterion_id` ASC),
+  INDEX `fk_el_criteria_has_criterion_criterion1_idx` (`criterion_id` ASC),
   INDEX `fk_el_criteria_has_criterion_eligibility_criteria1_idx` (`eligibility_criteria_id` ASC),
-  CONSTRAINT `fk_criterion_criterion_list1`
+  INDEX `fk_el_criteria_has_criterion_value1_idx` (`value_id` ASC),
+  CONSTRAINT `fk_el_criteria_has_criterion_criterion1`
     FOREIGN KEY (`criterion_id`)
     REFERENCES `pedal_dev_v_0`.`criterion` (`id`)
     ON DELETE NO ACTION
@@ -142,6 +156,11 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`el_criteria_has_criterion` (
   CONSTRAINT `fk_el_criteria_has_criterion_eligibility_criteria1`
     FOREIGN KEY (`eligibility_criteria_id`)
     REFERENCES `pedal_dev_v_0`.`eligibility_criteria` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_el_criteria_has_criterion_value1`
+    FOREIGN KEY (`value_id`)
+    REFERENCES `pedal_dev_v_0`.`value` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -236,13 +255,17 @@ DROP TABLE IF EXISTS `pedal_dev_v_0`.`algorithm_engine` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`algorithm_engine` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `version` VARCHAR(45) NULL,
-  `name` VARCHAR(45) NULL,
-  `link` VARCHAR(256) NULL,
-  `description` VARCHAR(512) NULL,
-  `function` VARCHAR(512) NULL,
-  `type` VARCHAR(45) NULL,
-  PRIMARY KEY (`id`))
+  `criterion_id` INT NULL,
+  `parent_id` INT NULL,
+  `parent_path` VARCHAR(45) NULL,
+  `operator` VARCHAR(45) NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_algorithm_engine_criterion1_idx` (`criterion_id` ASC),
+  CONSTRAINT `fk_algorithm_engine_criterion1`
+    FOREIGN KEY (`criterion_id`)
+    REFERENCES `pedal_dev_v_0`.`criterion` (`id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
@@ -254,20 +277,19 @@ DROP TABLE IF EXISTS `pedal_dev_v_0`.`study_algorithm_engine` ;
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`study_algorithm_engine` (
   `study_version_id` INT NOT NULL,
   `algorithm_engine_id` INT NOT NULL,
-  `study_id` INT NOT NULL,
   `start_date` DATETIME NULL,
   `active` TINYINT NULL,
-  PRIMARY KEY (`study_version_id`, `algorithm_engine_id`, `study_id`),
-  INDEX `fk_study_version_has_algorithm_engine_algorithm_engine1_idx` (`algorithm_engine_id` ASC),
-  INDEX `fk_study_algorithm_engine_study_version1_idx` (`study_version_id` ASC, `study_id` ASC),
-  CONSTRAINT `fk_study_version_has_algorithm_engine_algorithm_engine1`
-    FOREIGN KEY (`algorithm_engine_id`)
-    REFERENCES `pedal_dev_v_0`.`algorithm_engine` (`id`)
+  PRIMARY KEY (`study_version_id`, `algorithm_engine_id`),
+  INDEX `fk_study_algorithm_engine_study_version1_idx` (`study_version_id` ASC),
+  INDEX `fk_study_algorithm_engine_algorithm_engine1_idx` (`algorithm_engine_id` ASC),
+  CONSTRAINT `fk_study_algorithm_engine_study_version1`
+    FOREIGN KEY (`study_version_id`)
+    REFERENCES `pedal_dev_v_0`.`study_version` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_study_algorithm_engine_study_version1`
-    FOREIGN KEY (`study_version_id` , `study_id`)
-    REFERENCES `pedal_dev_v_0`.`study_version` (`id` , `study_id`)
+  CONSTRAINT `fk_study_algorithm_engine_algorithm_engine1`
+    FOREIGN KEY (`algorithm_engine_id`)
+    REFERENCES `pedal_dev_v_0`.`algorithm_engine` (`id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;

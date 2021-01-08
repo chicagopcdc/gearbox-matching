@@ -5,7 +5,7 @@ import logging
 from time import gmtime, strftime
 import json
 
-from app.main.model.site import SiteHasStudy
+from app.main.model.site_has_study import SiteHasStudy
 from app.main.service.site_has_study_service import SiteHasStudyService
 from app.main.util import AlchemyEncoder
 from app.main.util.dto import SiteHasStudyDto

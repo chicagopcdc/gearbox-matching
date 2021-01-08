@@ -3,8 +3,8 @@ from sqlalchemy.orm import relationship
 
 from . import Base
 from app.main import DbSession
-from app.main.model.site import SiteHasStudy
-from app.main.model.study_version import StudyVersion
+#from app.main.model.site_has_study import SiteHasStudy
+#from app.main.model.study_version import StudyVersion
 
 # , flask_bcrypt
 
@@ -18,5 +18,5 @@ class Study(Base):
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
 
-    sites = relationship("SiteHasStudy", back_populates="study")
-    study_versions = relationship("StudyVersion", back_populates="study")
+#    sites = relationship("SiteHasStudy", back_populates="study")
+#    study_versions = relationship("StudyVersion", back_populates="study")

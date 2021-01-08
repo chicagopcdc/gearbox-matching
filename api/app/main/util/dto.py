@@ -69,7 +69,6 @@ class StudyAlgorithmEngineDto:
     study_algorithm_engine = api.model('study_algorithm_engine', {
     	'study_version_id': fields.String(required=True, description="study_version id"),
         'algorithm_engine_id': fields.String(required=True, description='algorithm_engine id'),
-        'study_id': fields.String(required=True, description='study id'),
         'start_date': fields.String(description='start date'),
         'active': fields.String(description='is study_algorithm_engine active')
     })
@@ -78,12 +77,10 @@ class AlgorithmEngineDto:
     api = Namespace('algorithm_engine', description='algorithm_engine related operations')
     algorithm_engine = api.model('algorithm_engine', {
     	'id': fields.String(required=True, description="algorithm_engine id"),
-        'version': fields.String(description='algorithm_engine version'),
-        'name': fields.String(description='algorithm_engine name'),
-        'link': fields.String(description='algorithm_engine link'),
-        'description': fields.String(description='algorithm_engine description'),
-        'function': fields.String(description='algorithm_engine function'),
-        'type': fields.String(description='algorithm_engine type')
+    	'criterion_id': fields.String(description="algorithm_engine criterion_id"),
+    	'parent_id': fields.String(description="algorithm_engine parent_id"),
+        'parent_path': fields.String(description="algorithm_engine parent_path"),
+    	'operator': fields.String(description="algorithm_engine operator")
     })
 
 
@@ -104,7 +101,9 @@ class CriterionDto:
         'display_name': fields.String(description='criterion display_name'),
         'description': fields.String(description='criterion description'),
         'create_date': fields.String(description='criterion create_date'),
-        'active': fields.String(description='is criterion active')
+        'active': fields.String(description='is criterion active'),
+        'ontology_code_id': fields.String(description='criterion ontology_code_id'),
+        'input_type_id': fields.String(description='criterion input_type_id')
     })
 
 
@@ -130,10 +129,9 @@ class ElCriteriaHasCriterionDto:
     el_criteria_has_criterion = api.model('el_criteria_has_criterion', {
     	'criterion_id': fields.String(required=True, description="el_criteria_has_criterion criterion_id"),
         'eligibility_criteria_id': fields.String(required=True, description='el_criteria_has_criterion eligibility_criteria_id'),
-        'code': fields.String(description='el_criteria_has_criterion code'),
-        'display_name': fields.String(description='el_criteria_has_criterion display_name'),
         'create_date': fields.String(description='el_criteria_has_criterion create_date'),
-        'active': fields.String(description='is el_criteria_has_criterion active')
+        'active': fields.String(description='is el_criteria_has_criterion active'),
+        'value_id': fields.String(description='el_criteria_has_criterion value_id')
     })
 
 

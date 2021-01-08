@@ -12,12 +12,10 @@ class AlgorithmEngineService(Services):
 
         if not algorithm_engine:
             new_algorithm_engine = AlgorithmEngine(
-                version=data.get('version'),
-                name=data.get('name'),
-                link=data.get('link'),
-                description=data.get('description'),
-                function=data.get('function'),
-                type=data.get('type'),
+                criterion_id=data.get('criterion_id'),
+                parent_id=data.get('parent_id'),
+                parent_path=data.get('parent_path'),
+                operator=data.get('operator'),
             )
                     
             Services.save_changes(new_algorithm_engine)
@@ -36,6 +34,4 @@ class AlgorithmEngineService(Services):
     def get_a_algorithm_engine(self, public_id):
         return DbSession.query(AlgorithmEngine).filter(AlgorithmEngine.id==public_id).first()
 
-    def get_algorithm_engine_version(id):
-        return DbSession.query(AlgorithmEngineVersion).filter(AlgorithmEngineVersion.id==id).first()
 

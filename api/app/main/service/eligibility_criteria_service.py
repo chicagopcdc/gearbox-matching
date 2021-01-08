@@ -13,9 +13,9 @@ class EligibilityCriteriaService(Services):
         if not eligibility_criteria:
             new_eligibility_criteria = EligibilityCriteria(
                 id=data.get('id'),
-                study_version_id=data.get('study_version_id'),
                 create_date=datetime.datetime.utcnow(),
                 active=data.get('active'),
+                study_version_id=data.get('study_version_id'),
             )
             Services.save_changes(new_eligibility_criteria)
             response_object = {

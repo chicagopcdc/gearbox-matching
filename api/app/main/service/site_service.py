@@ -32,6 +32,3 @@ class SiteService(Services):
 
     def get_a_site(self, code):
         return DbSession.query(Site).filter(Site.code==code).first()
-
-    def get_site_version(id):
-        return DbSession.query(SiteVersion).filter(SiteVersion.id==id).first()

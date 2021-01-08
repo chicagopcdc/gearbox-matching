@@ -8,16 +8,15 @@ from app.main.service import Services
 class ElCriteriaHasCriterionService(Services):
 
     def save_new_el_criteria_has_criterion(self, data):
-        el_criteria_has_criterion = self.get_a_el_criteria_has_criterion(self, data.get('code'))
+        el_criteria_has_criterion = self.get_a_el_criteria_has_criterion(self, data)
 
         if not el_criteria_has_criterion:
             new_el_criteria_has_criterion = ElCriteriaHasCriterion(
                 criterion_id=data.get('criterion_id'),
                 eligibility_criteria_id=data.get('eligibility_criteria_id'),
-                code=data.get('code'),
-                display_name=data.get('display_name'),
                 create_date=datetime.datetime.utcnow(),
                 active=data.get('active'),
+                value_id=data.get('value_id')
             )
             Services.save_changes(new_el_criteria_has_criterion)
             response_object = {
@@ -32,5 +31,8 @@ class ElCriteriaHasCriterionService(Services):
             }
             return response_object, 409
 
-    def get_a_el_criteria_has_criterion(self, code):
-        return DbSession.query(ElCriteriaHasCriterion).filter(ElCriteriaHasCriterion.code==code).first()
+    def get_a_el_criteria_has_criterion(self, data):
+        return DbSession.query(ElCriteriaHasCriterion).filter(
+            ElCriteriaHasCriterion.criterion_id==data['criterion_id'],
+            ElCriteriaHasCriterion.eligibility_criteria_id==data['eligibility_criteria_id'],
+        ).first()

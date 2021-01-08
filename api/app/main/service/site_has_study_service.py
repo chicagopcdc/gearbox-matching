@@ -2,7 +2,7 @@ import uuid
 import datetime
 
 from app.main import DbSession
-from app.main.model.site import SiteHasStudy
+from app.main.model.site_has_study import SiteHasStudy
 from app.main.service import Services
 
 class SiteHasStudyService(Services):

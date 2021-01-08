@@ -12,3 +12,14 @@ clean unused volumes
 
 remove container and associated volumes
 	docker rm -v [container]
+
+
+~~~~~~~~~~~~~~~~~~~
+
+The app will fail unless Secrets/creds.json is created (in root dir of the app).
+
+creds.json holds the client_id for fence.
+
+{
+    "CLIENT_ID":""
+}
