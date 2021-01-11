@@ -11,3 +11,5 @@ class Tag(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     code = Column(String(45), nullable=True)
     type = Column(String(45), nullable=True)
+
+    criterions = relationship("CriterionHasTag", back_populates="tag")

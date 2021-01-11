@@ -4,6 +4,8 @@ from sqlalchemy.orm import relationship
 from . import Base
 from app.main import DbSession
 
+from app.main.model.criterion_has_tag import CriterionHasTag
+
 # , flask_bcrypt
 
 class Criterion(Base):
@@ -14,3 +16,6 @@ class Criterion(Base):
     description = Column(String(45), nullable=True)
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
+
+    tags = relationship("CriterionHasTag", back_populates="criterion")
+    eligibility_criterias = relationship("ElCriteriaHasCriterion", back_populates="criterion")

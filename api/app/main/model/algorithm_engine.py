@@ -15,4 +15,4 @@ class AlgorithmEngine(Base):
     parent_path = Column(String(45), nullable=True)
     operator = Column(String(45), nullable=True)
 
-#    study_versions = relationship("StudyAlgorithmEngine", back_populates="algorithm_engine")   
+    study_versions = relationship("StudyAlgorithmEngine", back_populates="algorithm_engine")   

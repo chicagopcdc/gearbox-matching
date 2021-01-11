@@ -15,5 +15,6 @@ class Site(Base):
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
 
-#    studies = relationship("SiteHasStudy", back_populates="site")
+    studies = relationship("SiteHasStudy", back_populates="site")
+
 

@@ -12,3 +12,7 @@ class EligibilityCriteria(Base):
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
     study_version_id = Column(Integer, ForeignKey('study_version.id'))
+
+    notes = relationship("EligibilityCriteriaHasNote", back_populates="eligibility_criteria")
+    criterions = relationship("ElCriteriaHasCriterion", back_populates="eligibility_criteria")
+    values = relationship("ElCriteriaHasCriterion", back_populates="eligibility_criteria")

@@ -14,5 +14,5 @@ class StudyAlgorithmEngine(Base):
     start_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
 
-#    study_version = relationship("StudyVersion", back_populates="algorithm_engines")
-#    algorithm_engine = relationship("AlgorithmEngine", back_populates="study_versions")
+    algorithm_engine = relationship("AlgorithmEngine", back_populates="study_versions")
+    study_version = relationship("StudyVersion", back_populates="algorithm_engines")
