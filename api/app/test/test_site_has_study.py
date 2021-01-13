@@ -18,7 +18,7 @@ def siteB():
 def test_setup(siteA, siteB, app, session):
     session.add(siteA)
     session.add(siteB)
-#    session.commit()
+
 
 def test_scope(siteA, siteB, app, session):
     #fixture scope should be greater than 'function', for use in later tests
@@ -48,7 +48,7 @@ def test_all_sites_info(siteA, siteB, app, session):
         assert siteB.as_dict() in table_data
 
 
-def test_create_site(siteA, siteB, app, session):
+def test_create_site(app, session):
     payload= {'name': 'thisName', 'code': 'thisCode', 'active': 0}
     with app.test_request_context("/site/create_site", method="POST", json=payload):
         response, status_code = Create().post()

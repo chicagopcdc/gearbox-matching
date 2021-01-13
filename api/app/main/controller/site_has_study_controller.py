@@ -5,11 +5,10 @@ import logging
 from time import gmtime, strftime
 import json
 
-from app.main.util.dto import SiteHasStudyDto
+from app.main.model.site_has_study import SiteHasStudy
+from app.main.service.site_has_study_service import SiteHasStudyService
 from app.main.util import AlchemyEncoder
-from app.main.service.site_has_study_service import get_all_site_has_studies, get_a_site_has_study, get_site_has_study_version, save_new_site_has_study, site_has_study_commit, site_has_study_delete
-
-from app.main.model.site import SiteHasStudy
+from app.main.util.dto import SiteHasStudyDto
 
 
 api = SiteHasStudyDto.api
@@ -22,7 +21,7 @@ class SiteHasStudyInfo(Resource):
     @api.doc('get a site_has_study')
     @api.marshal_with(_site_has_study)
     def get(self, public_id):
-        site_has_study = get_a_site_has_study(public_id)
+        site_has_study = SiteHasStudyService.get_a_site_has_study(self, public_id)
         if not site_has_study:
             api.abort(404, message="site_has_study '{}' not found".format(public_id))
         else:
@@ -32,7 +31,7 @@ class SiteHasStudyInfo(Resource):
 @api.route('/info')
 class AllSiteHasStudiesInfo(Resource):
     def get(self):
-        site_has_studies = get_all_site_has_studies()
+        site_has_studies = SiteHasStudyService.get_all(SiteHasStudy)
         try:
             if site_has_studies:
                 body = [r.as_dict() for r in site_has_studies]
@@ -65,7 +64,7 @@ class Create(Resource):
             if key in allowed_keys:
                 new_site_has_study_dict.update({key:data[key]})
         try:
-            response = save_new_site_has_study(new_site_has_study_dict)
+            response = SiteHasStudyService.save_new_site_has_study(SiteHasStudyService, new_site_has_study_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -81,7 +80,7 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the site_has_study to be updated
-        site_has_study = get_a_site_has_study(public_id)
+        site_has_study = SiteHasStudyService.get_a_site_has_study(self, public_id)
         if not site_has_study:
             api.abort(404, message="site_has_study '{}' not found".format(public_id))
 
@@ -90,7 +89,7 @@ class Update(Resource):
         for key in data.keys():
             if key in allowed_keys:
                 if key=='code':
-                    existing_site_has_study_with_new_code = get_a_site_has_study(data[key])
+                    existing_site_has_study_with_new_code = SiteHasStudyService.get_a_site_has_study(self, data[key])
                     if not existing_site_has_study_with_new_code:
                         setattr(site_has_study, key, data[key])
                     else:
@@ -99,7 +98,7 @@ class Update(Resource):
                 else:
                     setattr(site_has_study, key, data[key])
         try:
-            site_has_study_commit()
+            SiteHasStudyService.commit()
             return site_has_study.as_dict()
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -111,12 +110,12 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a site_has_study')
     def delete(self, public_id):
-        site_has_study = get_a_site_has_study(public_id)
+        site_has_study = SiteHasStudyService.get_a_site_has_study(self, public_id)
         if not site_has_study:
             api.abort(404, message="site_has_study '{}' not found".format(public_id))
 
         try:
-            site_has_study_delete(site_has_study)
+            SiteHasStudyService.delete(site_has_study)
             return site_has_study.as_dict()
         except Exception as e:
             logging.error(e, exc_info=True)

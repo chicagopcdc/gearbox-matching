@@ -3,7 +3,6 @@ from sqlalchemy.orm import relationship
 
 from . import Base
 from app.main import DbSession
-from app.main.model.algorithm_engine import StudyAlgorithmEngine
 
 # , flask_bcrypt
 
@@ -15,9 +14,5 @@ class StudyVersion(Base):
     study_id = Column(Integer, ForeignKey('study.id'), primary_key=True) 
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
-
+  
     algorithm_engines = relationship("StudyAlgorithmEngine", back_populates="study_version")
-    study = relationship("Study", back_populates="study_versions")
-
-    def as_dict(self):
-       return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}

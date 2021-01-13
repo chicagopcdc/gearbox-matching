@@ -5,11 +5,10 @@ import logging
 from time import gmtime, strftime
 import json
 
-from app.main.util.dto import SiteDto
-from app.main.util import AlchemyEncoder
-from app.main.service.site_service import get_all_sites, get_a_site, get_site_version, save_new_site, site_commit, site_delete
-
 from app.main.model.site import Site
+from app.main.service.site_service import SiteService
+from app.main.util import AlchemyEncoder
+from app.main.util.dto import SiteDto
 
 
 api = SiteDto.api
@@ -22,7 +21,7 @@ class SiteInfo(Resource):
     @api.doc('get a site')
     @api.marshal_with(_site)
     def get(self, public_id):
-        site = get_a_site(public_id)
+        site = SiteService.get_a_site(self, public_id)
         if not site:
             api.abort(404, message="site '{}' not found".format(public_id))
         else:
@@ -32,7 +31,7 @@ class SiteInfo(Resource):
 @api.route('/info')
 class AllSitesInfo(Resource):
     def get(self):
-        sites = get_all_sites()
+        sites = SiteService.get_all(Site)
         try:
             if sites:
                 body = [r.as_dict() for r in sites]
@@ -65,7 +64,7 @@ class Create(Resource):
             if key in allowed_keys:
                 new_site_dict.update({key:data[key]})
         try:
-            response = save_new_site(new_site_dict)
+            response = SiteService.save_new_site(SiteService, new_site_dict)
             return response
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -81,7 +80,7 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the site to be updated
-        site = get_a_site(public_id)
+        site = SiteService.get_a_site(self, public_id)
         if not site:
             api.abort(404, message="site '{}' not found".format(public_id))
 
@@ -90,7 +89,7 @@ class Update(Resource):
         for key in data.keys():
             if key in allowed_keys:
                 if key=='code':
-                    existing_site_with_new_code = get_a_site(data[key])
+                    existing_site_with_new_code = SiteService.get_a_site(self, data[key])
                     if not existing_site_with_new_code:
                         setattr(site, key, data[key])
                     else:
@@ -99,7 +98,7 @@ class Update(Resource):
                 else:
                     setattr(site, key, data[key])
         try:
-            site_commit()
+            SiteService.commit()
             return site.as_dict()
         except Exception as e:
             logging.error(e, exc_info=True)
@@ -111,12 +110,12 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a site')
     def delete(self, public_id):
-        site = get_a_site(public_id)
+        site = SiteService.get_a_site(self, public_id)
         if not site:
             api.abort(404, message="site '{}' not found".format(public_id))
 
         try:
-            site_delete(site)
+            SiteService.delete(site)
             return site.as_dict()
         except Exception as e:
             logging.error(e, exc_info=True)
