@@ -48,8 +48,8 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`study_version` (
   CONSTRAINT `fk_study_version_study1`
     FOREIGN KEY (`study_id`)
     REFERENCES `pedal_dev_v_0`.`study` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -88,13 +88,13 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`criterion` (
   CONSTRAINT `fk_criterion_ontology_code1`
     FOREIGN KEY (`ontology_code_id`)
     REFERENCES `pedal_dev_v_0`.`ontology_code` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_criterion_input_type1`
     FOREIGN KEY (`input_type_id`)
     REFERENCES `pedal_dev_v_0`.`input_type` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -128,8 +128,8 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`eligibility_criteria` (
     CONSTRAINT `fk_eligibility_criteria_study_version1`
     FOREIGN KEY (`study_version_id`)
     REFERENCES `pedal_dev_v_0`.`study_version` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -151,18 +151,18 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`el_criteria_has_criterion` (
   CONSTRAINT `fk_el_criteria_has_criterion_criterion1`
     FOREIGN KEY (`criterion_id`)
     REFERENCES `pedal_dev_v_0`.`criterion` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_el_criteria_has_criterion_eligibility_criteria1`
     FOREIGN KEY (`eligibility_criteria_id`)
     REFERENCES `pedal_dev_v_0`.`eligibility_criteria` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_el_criteria_has_criterion_value1`
     FOREIGN KEY (`value_id`)
     REFERENCES `pedal_dev_v_0`.`value` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -200,13 +200,13 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`eligibility_criteria_has_note` (
   CONSTRAINT `fk_eligibility_criteria_has_note_eligibility_criteria1`
     FOREIGN KEY (`eligibility_criteria_id`)
     REFERENCES `pedal_dev_v_0`.`eligibility_criteria` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_eligibility_criteria_has_note_note1`
     FOREIGN KEY (`note_id`)
     REFERENCES `pedal_dev_v_0`.`note` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -264,8 +264,8 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`algorithm_engine` (
   CONSTRAINT `fk_algorithm_engine_criterion1`
     FOREIGN KEY (`criterion_id`)
     REFERENCES `pedal_dev_v_0`.`criterion` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -285,13 +285,13 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`study_algorithm_engine` (
   CONSTRAINT `fk_study_algorithm_engine_study_version1`
     FOREIGN KEY (`study_version_id`)
     REFERENCES `pedal_dev_v_0`.`study_version` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_study_algorithm_engine_algorithm_engine1`
     FOREIGN KEY (`algorithm_engine_id`)
     REFERENCES `pedal_dev_v_0`.`algorithm_engine` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -311,13 +311,13 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`site_has_study` (
   CONSTRAINT `fk_site_has_study_site1`
     FOREIGN KEY (`site_id`)
     REFERENCES `pedal_dev_v_0`.`site` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_site_has_study_study1`
     FOREIGN KEY (`study_id`)
     REFERENCES `pedal_dev_v_0`.`study` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -335,13 +335,13 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`criterion_has_tag` (
   CONSTRAINT `fk_criterion_has_tag_criterion1`
     FOREIGN KEY (`criterion_id`)
     REFERENCES `pedal_dev_v_0`.`criterion` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_criterion_has_tag_tag1`
     FOREIGN KEY (`tag_id`)
     REFERENCES `pedal_dev_v_0`.`tag` (`id`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 -- -----------------------------------------------------
