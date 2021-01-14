@@ -19,6 +19,7 @@ from .main.controller.eligibility_criteria_has_note_controller import api as eli
 from .main.controller.note_controller import api as note_ns
 from .main.controller.ontology_code_controller import api as ontology_code_ns
 from .main.controller.input_type_controller import api as input_type_ns
+from .main.controller.value_controller import api as value_ns
 
 blueprint = Blueprint('api', __name__)
 
@@ -44,3 +45,4 @@ api.add_namespace(eligibility_criteria_has_note_ns, path='/eligibility_criteria_
 api.add_namespace(note_ns, path='/note')
 api.add_namespace(ontology_code_ns, path='/ontology_code')
 api.add_namespace(input_type_ns, path='/input_type')
+api.add_namespace(value_ns, path='/value')
