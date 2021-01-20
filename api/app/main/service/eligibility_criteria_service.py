@@ -8,7 +8,7 @@ from app.main.service import Services
 class EligibilityCriteriaService(Services):
 
     def save_new_eligibility_criteria(self, data):
-        eligibility_criteria = self.get_a_eligibility_criteria(self, data.get('id'))
+        eligibility_criteria = self.get_a_eligibility_criteria(self, data.get('study_version_id'))
 
         if not eligibility_criteria:
             new_eligibility_criteria = EligibilityCriteria(
@@ -30,5 +30,5 @@ class EligibilityCriteriaService(Services):
             }
             return response_object, 409
 
-    def get_a_eligibility_criteria(self, id):
-        return DbSession.query(EligibilityCriteria).filter(EligibilityCriteria.id==id).first()
+    def get_a_eligibility_criteria(self, study_version_id):
+        return DbSession.query(EligibilityCriteria).filter(EligibilityCriteria.study_version_id==study_version_id).first()
