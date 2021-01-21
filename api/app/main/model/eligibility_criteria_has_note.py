@@ -1,10 +1,8 @@
-from sqlalchemy import ForeignKey, Column, Integer, String, DateTime, Boolean
+from sqlalchemy import ForeignKey, Column, Integer
 from sqlalchemy.orm import relationship
 
 from . import Base
-from app.main import DbSession
 
-# , flask_bcrypt
 
 class EligibilityCriteriaHasNote(Base):
     __tablename__ = 'eligibility_criteria_has_note'
