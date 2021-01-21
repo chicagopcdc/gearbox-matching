@@ -17,4 +17,4 @@ class Value(Base):
     value_list = Column(String(45), nullable=True)
     value_bool = Column(String(45), nullable=True)
 
-    eligibility_criterias = relationship("ElCriteriaHasCriterion", back_populates="value")
+    el_criteria_has_criterions = relationship("ElCriteriaHasCriterion", back_populates="value")

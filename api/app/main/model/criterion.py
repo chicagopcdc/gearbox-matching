@@ -16,4 +16,4 @@ class Criterion(Base):
     active = Column(Boolean, nullable=True)
 
     tags = relationship("CriterionHasTag", back_populates="criterion")
-    eligibility_criterias = relationship("ElCriteriaHasCriterion", back_populates="criterion")
+    el_criteria_has_criterions = relationship("ElCriteriaHasCriterion", back_populates="criterion")
