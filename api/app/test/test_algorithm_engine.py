@@ -7,12 +7,12 @@ from app.main.controller.algorithm_engine_controller import AlgorithmEngineInfo,
 
 @pytest.fixture(scope="module")
 def algorithm_engineA():
-    return AlgorithmEngine(criterion_id = 1, parent_path = 'parentPathA')
+    return AlgorithmEngine(el_criteria_has_criterion_id = 1, parent_path = 'parentPathA')
 
 
 @pytest.fixture(scope="module")
 def algorithm_engineB():
-    return AlgorithmEngine(criterion_id = 2, parent_path = 'parentPathB')
+    return AlgorithmEngine(el_criteria_has_criterion_id = 2, parent_path = 'parentPathB')
 
 
 def test_setup(algorithm_engineA, algorithm_engineB, app, session):
@@ -50,7 +50,7 @@ def test_all_algorithm_engines_info(algorithm_engineA, algorithm_engineB, app, s
 
 #def test_create_algorithm_engine(algorithm_engineA, algorithm_engineB, app, session):
 def test_create_algorithm_engine(app, session):
-    payload= {'criterion_id': 3}
+    payload= {'el_criteria_has_criterion_id': 3}
     with app.test_request_context("/algorithm_engine/create_algorithm_engine", method="POST", json=payload):
         response, status_code = Create().post()
         print (response)
@@ -63,7 +63,7 @@ def test_scope_again(app, session):
         table_data = response.json['body']
         payload_seen = 0
         for row in table_data:
-            if row['criterion_id'] == 3:
+            if row['el_criteria_has_criterion_id'] == 3:
                 payload_seen = 1
         assert payload_seen == 1
 

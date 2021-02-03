@@ -18,5 +18,7 @@ class Value(Base):
     active = Column(Boolean, nullable=True)
     value_list = Column(String(45), nullable=True)
     value_bool = Column(String(45), nullable=True)
+    upper_modifier = Column(String(45), nullable=True)
+    lower_modifier = Column(String(45), nullable=True)
 
     eligibility_criterias = relationship("ElCriteriaHasCriterion", back_populates="value")

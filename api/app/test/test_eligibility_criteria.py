@@ -7,12 +7,12 @@ from app.main.controller.eligibility_criteria_controller import EligibilityCrite
 
 @pytest.fixture(scope="module")
 def eligibility_criteriaA():
-    return EligibilityCriteria(study_version_id = 1, active = 0)
+    return EligibilityCriteria(study_version_id=4, active = 0)
 
 
 @pytest.fixture(scope="module")
 def eligibility_criteriaB():
-    return EligibilityCriteria(study_version_id=2, active = 0)
+    return EligibilityCriteria(study_version_id=5, active = 0)
 
 
 def test_setup(eligibility_criteriaA, eligibility_criteriaB, app, session):
@@ -30,10 +30,10 @@ def test_scope(eligibility_criteriaA, eligibility_criteriaB, app, session):
 
 
 def test_eligibility_criteria_info(eligibility_criteriaA, eligibility_criteriaB, app, session):
-    for public_id in [eligibility_criteriaA.as_dict()['id'], eligibility_criteriaB.as_dict()['id']]:
+    for public_id in [eligibility_criteriaA.as_dict()['study_version_id'], eligibility_criteriaB.as_dict()['study_version_id']]:
         with app.test_request_context("/eligibility_criteria/{}".format(public_id), method="GET"):
             response = EligibilityCriteriaInfo().get(public_id)
-            assert public_id == int(response['id'])
+            assert public_id == int(response['study_version_id'])
 
 
 def test_all_eligibility_criterias_info(eligibility_criteriaA, eligibility_criteriaB, app, session):
@@ -49,7 +49,7 @@ def test_all_eligibility_criterias_info(eligibility_criteriaA, eligibility_crite
 
 
 def test_create_eligibility_criteria(app, session):
-    payload= {'study_version_id': 3, 'active': 1}
+    payload= {'study_version_id': 6, 'active': 1}
     with app.test_request_context("/eligibility_criteria/create_eligibility_criteria", method="POST", json=payload):
         response, status_code = Create().post()
         print (response)
@@ -72,21 +72,21 @@ def test_scope_again(app, session):
 def test_update_eligibility_criteria(eligibility_criteriaA, eligibility_criteriaB, app, session):
     #basic update test
     eligibility_criteriaA_dict = eligibility_criteriaA.as_dict()
-    idA = eligibility_criteriaA_dict['id']
-    payload = {'active': 1} #make it active
+    idA = eligibility_criteriaA_dict['study_version_id']
+    payload = {'active': True} #make it active
     with app.test_request_context("/eligibility_criteria/update_eligibility_criteria/{}".format(idA), method="PUT", json=payload):
         response = Update().put(idA)
         expected_response = eligibility_criteriaA_dict
         expected_response.update(payload)
         assert response == expected_response
-        
+
     with app.test_request_context("/eligibility_criteria/{}".format(idA), method="GET"):
         current_eligibility_criteriaA = EligibilityCriteriaInfo().get(idA)
         
 
 def test_delete_eligibility_criteria(eligibility_criteriaA, eligibility_criteriaB, app, session):
     eligibility_criteriaA_dict = eligibility_criteriaA.as_dict()
-    idA = eligibility_criteriaA_dict['id']
+    idA = eligibility_criteriaA_dict['study_version_id']
     
     with app.test_request_context("/eligibility_criteria/delete_eligibility_criteria/{}".format(idA), method="DELETE"):
         response = Delete().delete(idA)

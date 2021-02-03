@@ -10,7 +10,7 @@ from app.main import DbSession
 class AlgorithmEngine(Base):
     __tablename__ = 'algorithm_engine'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    criterion_id = Column(Integer, ForeignKey('criterion.id'), nullable=True)
+    el_criteria_has_criterion_id = Column(Integer, ForeignKey('el_criteria_has_criterion.id'), nullable=True)
     parent_id = Column(Integer, nullable=True)
     parent_path = Column(String(45), nullable=True)
     operator = Column(String(45), nullable=True)

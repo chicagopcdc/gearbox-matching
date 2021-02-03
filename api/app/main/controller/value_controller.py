@@ -21,7 +21,12 @@ class ValueInfo(Resource):
     @api.doc('get a value')
     @api.marshal_with(_value)
     def get(self, public_id):
-        value = ValueService.get_a_value(self, public_id)
+        pid = public_id.split('-')
+        pid_data = {
+            'code': pid[0],
+            'value_string': pid[1],
+        }        
+        value = ValueService.get_a_value(self, pid_data)
         if not value:
             api.abort(404, message="value '{}' not found".format(public_id))
         else:
@@ -80,7 +85,12 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the value to be updated
-        value = ValueService.get_a_value(self, public_id)
+        pid = public_id.split('-')
+        pid_data = {
+            'code': pid[0],
+            'value_string': pid[1],
+        }
+        value = ValueService.get_a_value(self, pid_data)
         if not value:
             api.abort(404, message="value '{}' not found".format(public_id))
 
@@ -88,15 +98,8 @@ class Update(Resource):
         allowed_keys = value.as_dict().keys()
         for key in data.keys():
             if key in allowed_keys:
-                if key=='code':
-                    existing_value_with_new_code = ValueService.get_a_value(self, data[key])
-                    if not existing_value_with_new_code:
-                        setattr(value, key, data[key])
-                    else:
-                        #code values must be unique for each value
-                        api.abort(409, message="value code '{}' is duplicate".format(data[key]))
-                else:
-                    setattr(value, key, data[key])
+                #DO NOT PREVENT PRIMARY KEY CHANGES
+                setattr(value, key, data[key])
         try:
             ValueService.commit()
             return value.as_dict()
@@ -110,7 +113,12 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a value')
     def delete(self, public_id):
-        value = ValueService.get_a_value(self, public_id)
+        pid = public_id.split('-')
+        pid_data = {
+            'code': pid[0],
+            'value_string': pid[1],
+        }
+        value = ValueService.get_a_value(self, pid_data)
         if not value:
             api.abort(404, message="value '{}' not found".format(public_id))
 

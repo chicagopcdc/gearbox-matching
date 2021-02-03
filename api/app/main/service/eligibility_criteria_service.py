@@ -31,4 +31,6 @@ class EligibilityCriteriaService(Services):
             return response_object, 409
 
     def get_a_eligibility_criteria(self, study_version_id):
-        return DbSession.query(EligibilityCriteria).filter(EligibilityCriteria.study_version_id==study_version_id).first()
+        return DbSession.query(EligibilityCriteria).filter(
+            EligibilityCriteria.study_version_id==study_version_id
+        ).first()

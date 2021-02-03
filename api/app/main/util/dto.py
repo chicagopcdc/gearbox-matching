@@ -66,7 +66,7 @@ class AlgorithmEngineDto:
     api = Namespace('algorithm_engine', description='algorithm_engine related operations')
     algorithm_engine = api.model('algorithm_engine', {
     	'id': fields.String(required=True, description="algorithm_engine id"),
-    	'criterion_id': fields.String(description="algorithm_engine criterion_id"),
+    	'el_criteria_has_criterion_id': fields.String(description="algorithm_engine el_criteria_has_criterion_id"),
     	'parent_id': fields.String(description="algorithm_engine parent_id"),
         'parent_path': fields.String(description="algorithm_engine parent_path"),
     	'operator': fields.String(description="algorithm_engine operator")
@@ -78,7 +78,8 @@ class EligibilityCriteriaDto:
     eligibility_criteria = api.model('eligibility_criteria', {
     	'id': fields.String(required=True, description="eligibility_criteria id"),
         'create_date': fields.String(description='eligibility_criteria create_date'),
-        'active': fields.String(description='is eligibility_criteria active')
+        'active': fields.String(description='is eligibility_criteria active'),
+        'study_version_id': fields.String(required=True, description='eligibility_criteria study_version_id')
     })
 
 
@@ -116,6 +117,7 @@ class CriterionHasTagDto:
 class ElCriteriaHasCriterionDto:
     api = Namespace('el_criteria_has_criterion', description='el_criteria_has_criterion related operations')
     el_criteria_has_criterion = api.model('el_criteria_has_criterion', {
+        'id': fields.String(required=True, description="el_criteria_has_criterion id"),
     	'criterion_id': fields.String(required=True, description="el_criteria_has_criterion criterion_id"),
         'eligibility_criteria_id': fields.String(required=True, description='el_criteria_has_criterion eligibility_criteria_id'),
         'create_date': fields.String(description='el_criteria_has_criterion create_date'),
@@ -136,7 +138,9 @@ class ValueDto:
     	'create_date': fields.String(description="value create_date"),
     	'active': fields.String(description="value active"),
     	'value_list': fields.String(description="value value_list"),
-    	'value_bool': fields.String(description="value value_bool"),
+    	'value_bool': fields.String(description="value value_bool"),  
+    	'upper_modifier': fields.String(description="value upper_modifier"),
+    	'lower_modifier': fields.String(description="value lower_modifier")
     })
 
     

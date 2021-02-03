@@ -8,8 +8,9 @@ from app.main import DbSession
 
 class ElCriteriaHasCriterion(Base):
     __tablename__ = 'el_criteria_has_criterion'
-    criterion_id = Column(Integer, ForeignKey('criterion.id'), primary_key=True)
-    eligibility_criteria_id = Column(Integer, ForeignKey('eligibility_criteria.id'), primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    criterion_id = Column(Integer, ForeignKey('criterion.id'))
+    eligibility_criteria_id = Column(Integer, ForeignKey('eligibility_criteria.id'))
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
     value_id = Column(Integer, ForeignKey('value.id'), nullable=True)

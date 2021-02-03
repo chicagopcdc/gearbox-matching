@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`study_version` (
   `study_id` INT NOT NULL,
   `create_date` DATETIME NULL,
   `active` TINYINT NULL,
-  PRIMARY KEY (`id`, `study_id`),
+  PRIMARY KEY (`id`),
   INDEX `fk_study_version_study1_idx` (`study_id` ASC),
   CONSTRAINT `fk_study_version_study1`
     FOREIGN KEY (`study_id`)
@@ -139,12 +139,13 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `pedal_dev_v_0`.`el_criteria_has_criterion` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`el_criteria_has_criterion` (
+  `id` INT NOT NULL AUTO_INCREMENT,
   `criterion_id` INT NOT NULL,
   `eligibility_criteria_id` INT NOT NULL,
   `create_date` DATETIME NULL,
   `active` TINYINT NULL,
   `value_id` INT NULL,
-  PRIMARY KEY (`criterion_id`, `eligibility_criteria_id`),
+  PRIMARY KEY (`id`),
   INDEX `fk_el_criteria_has_criterion_criterion1_idx` (`criterion_id` ASC),
   INDEX `fk_el_criteria_has_criterion_eligibility_criteria1_idx` (`eligibility_criteria_id` ASC),
   INDEX `fk_el_criteria_has_criterion_value1_idx` (`value_id` ASC),
@@ -182,6 +183,8 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`value` (
   `active` TINYINT NULL,
   `value_list` VARCHAR(45) NULL,
   `value_bool` VARCHAR(45) NULL,
+  `upper_modifier` VARCHAR(45) NULL,
+  `lower_modifier` VARCHAR(45) NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -255,15 +258,15 @@ DROP TABLE IF EXISTS `pedal_dev_v_0`.`algorithm_engine` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`algorithm_engine` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `criterion_id` INT NULL,
+  `el_criteria_has_criterion_id` INT NULL,
   `parent_id` INT NULL,
   `parent_path` VARCHAR(45) NULL,
   `operator` VARCHAR(45) NULL,
   PRIMARY KEY (`id`),
-  INDEX `fk_algorithm_engine_criterion1_idx` (`criterion_id` ASC),
-  CONSTRAINT `fk_algorithm_engine_criterion1`
-    FOREIGN KEY (`criterion_id`)
-    REFERENCES `pedal_dev_v_0`.`criterion` (`id`)
+  INDEX `fk_algorithm_engine_el_criteria_has_criterion1_idx` (`el_criteria_has_criterion_id` ASC),
+  CONSTRAINT `fk_algorithm_engine_el_criteria_has_criterion1`
+    FOREIGN KEY (`el_criteria_has_criterion_id`)
+    REFERENCES `pedal_dev_v_0`.`el_criteria_has_criterion` (`id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB;

@@ -7,12 +7,12 @@ from app.main.controller.el_criteria_has_criterion_controller import ElCriteriaH
 
 @pytest.fixture(scope="module")
 def el_criteria_has_criterionA():
-    return ElCriteriaHasCriterion(criterion_id=1, eligibility_criteria_id=1)
+    return ElCriteriaHasCriterion(criterion_id=1, eligibility_criteria_id=3)
 
 
 @pytest.fixture(scope="module")
 def el_criteria_has_criterionB():
-    return ElCriteriaHasCriterion(criterion_id=2, eligibility_criteria_id=2)
+    return ElCriteriaHasCriterion(criterion_id=2, eligibility_criteria_id=3)
 
 
 def test_setup(el_criteria_has_criterionA, el_criteria_has_criterionB, app, session):
@@ -50,7 +50,7 @@ def test_all_el_criteria_has_criterions_info(el_criteria_has_criterionA, el_crit
 
 
 def test_create_el_criteria_has_criterion(app, session):
-    payload= {'criterion_id':2, 'eligibility_criteria_id':1}
+    payload= {'criterion_id':3, 'eligibility_criteria_id':1}
     with app.test_request_context("/el_criteria_has_criterion/create_el_criteria_has_criterion", method="POST", json=payload):
         response, status_code = Create().post()
         print (response)
@@ -64,7 +64,7 @@ def test_scope_again(app, session):
         payload_seen = 0
         for row in table_data:
             pid = "{}-{}".format(row['criterion_id'], row['eligibility_criteria_id'])
-            if pid == '2-1':
+            if pid == '3-1':
                 payload_seen = 1
         assert payload_seen == 1
 

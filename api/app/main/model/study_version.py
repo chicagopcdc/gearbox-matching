@@ -11,7 +11,7 @@ class StudyVersion(Base):
     __tablename__ = "study_version"
 
     id = Column(Integer, primary_key=True)
-    study_id = Column(Integer, ForeignKey('study.id'), primary_key=True) 
+    study_id = Column(Integer, ForeignKey('study.id'))
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
   

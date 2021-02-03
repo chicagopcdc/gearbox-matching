@@ -12,6 +12,7 @@ class ElCriteriaHasCriterionService(Services):
 
         if not el_criteria_has_criterion:
             new_el_criteria_has_criterion = ElCriteriaHasCriterion(
+                id=data.get('id'),
                 criterion_id=data.get('criterion_id'),
                 eligibility_criteria_id=data.get('eligibility_criteria_id'),
                 create_date=datetime.datetime.utcnow(),
