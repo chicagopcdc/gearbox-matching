@@ -9,6 +9,6 @@ from app.main import DbSession
 class Note(Base):
     __tablename__ = 'note'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    value = Column(String(45), nullable=True)
+    value = Column(String, nullable=True)
 
     eligibility_criterias = relationship("EligibilityCriteriaHasNote", back_populates="note")

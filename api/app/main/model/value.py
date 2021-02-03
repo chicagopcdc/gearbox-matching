@@ -9,16 +9,16 @@ from app.main import DbSession
 class Value(Base):
     __tablename__ = 'value'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    code = Column(String(45), nullable=True)
-    type = Column(String(45), nullable=True)
-    value_string = Column(String(45), nullable=True)
+    code = Column(String, nullable=True)
+    type = Column(String, nullable=True)
+    value_string = Column(String, nullable=True)
     upper_threshold = Column(Float, nullable=True)
     lower_threshold = Column(Float, nullable=True)
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
-    value_list = Column(String(45), nullable=True)
-    value_bool = Column(String(45), nullable=True)
-    upper_modifier = Column(String(45), nullable=True)
-    lower_modifier = Column(String(45), nullable=True)
+    value_list = Column(String, nullable=True)
+    value_bool = Column(String, nullable=True)
+    upper_modifier = Column(String, nullable=True)
+    lower_modifier = Column(String, nullable=True)
 
     eligibility_criterias = relationship("ElCriteriaHasCriterion", back_populates="value")

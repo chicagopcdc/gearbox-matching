@@ -19,24 +19,35 @@ def create(table, ignore):
     cols = df.columns
     for index, row in df.iterrows():
         payload = dict(row)
-        discard =[payload.pop(key) for key in ignore]
+        if ignore:
+            discard =[payload.pop(key) for key in ignore]
         for key, val in payload.items():
-            if pd.isnull(val):
+            if isinstance(val, str):
+                pass
+            elif pd.isnull(val):
                 payload.update({key: None})
+            elif isinstance(val, (np.integer)): #needed to allow json serialization
+                payload.update({key: val.item()})
         json_payload = json.dumps(payload)
         print (json_payload)
         response = requests.post('{}/{}/create_{}'.format(host, table, table), data = json_payload, headers = headers)
         if response.status_code in [201, 409]:
             print ('success: {}'.format(response.status_code))
         else:
-            print (response.text)
+            #print (dir(response))
+            print (response.request)
     print ('\n\n')
+
 ############################
 
 
 create('study', ['id', 'create_date'])
 create('study_version', ['id', 'create_date'])
 create('value', ['id'])
+create('input_type', ['id'])
+create('tag', ['id'])
+create('criterion', ['id'])
+create('criterion_has_tag', None)
 
 
 # table = 'value'

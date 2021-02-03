@@ -75,7 +75,7 @@ DROP TABLE IF EXISTS `pedal_dev_v_0`.`criterion` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`criterion` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `code` VARCHAR(45) NULL,
+  `code` VARCHAR(512) NULL,
   `display_name` VARCHAR(128) NULL,
   `description` VARCHAR(512) NULL,
   `create_date` DATETIME NULL,
