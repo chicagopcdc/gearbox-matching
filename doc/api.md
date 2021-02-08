@@ -13,6 +13,8 @@ This is a summary of a discussion on GEARBOx API design on July 31, 2020.
 >   - added a separate endpoint and API for Matching Conditions
 > - Auguet 7, 2020:
 >   - modified Latest User Input endpoint and API (remove unnecessary userId)
+> - February 8, 2021:
+>   - modified Eligibility Criteria API (add `operator` field)
 
 ## Highlights:
 
@@ -121,7 +123,8 @@ See [this demo app](https://poc-dynamic-form.netlify.app/) for an example.
   {
     "id": 0, // unique id for the Criterion
     "fieldId": 0,
-    "fieldValue": // IMPORTANT: see below for more details
+    "fieldValue":, // boolean | string | number; see below for more details
+    "operator": // "eq" | "gt" | "gte" | "lt" | "lte" | "ne"; see below for more details
   },
   // ...more Criteria
 ]
@@ -132,13 +135,16 @@ See [this demo app](https://poc-dynamic-form.netlify.app/) for an example.
 - Single boolean: `true`, `false`
 - Single numeric value: number
 - Single text value: string
-- Range of numbers: array of two numbers or null
-  - examples:
-    - `[5, 10]`: between 5 and 10 (inclusive)
-    - `[5, null]`: 5 or more
-    - `[null, 10]`: 10 or less
-- Set of text values: array of strings
-  - match if the Match Form field value matches one of the strings
+
+#### Possible `operator` values
+
+- `"eq"`: equal to (`==`)
+- `"gt"`: greater than (`>`)
+- `"gte"`: greater than/equal to (`>=`)
+- `"lt"`: less than (`<`)
+- `"lte"`: less than/equal to (`<=`)
+- `"ne"`: not equal to (`!=`)
+
 
 ### Match Conditions
 
