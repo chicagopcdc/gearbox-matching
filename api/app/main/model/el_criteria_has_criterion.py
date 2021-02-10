@@ -13,7 +13,7 @@ class ElCriteriaHasCriterion(Base):
     eligibility_criteria_id = Column(Integer, ForeignKey('eligibility_criteria.id'))
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
-    value_id = Column(Integer, ForeignKey('value.id'), nullable=True)
+    value_id = Column(Integer, ForeignKey('value.id'))
 
     eligibility_criteria = relationship("EligibilityCriteria", back_populates="criterions")
     criterion = relationship("Criterion", back_populates="eligibility_criterias")

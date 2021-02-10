@@ -36,4 +36,5 @@ class ElCriteriaHasCriterionService(Services):
         return DbSession.query(ElCriteriaHasCriterion).filter(
             ElCriteriaHasCriterion.criterion_id==data['criterion_id'],
             ElCriteriaHasCriterion.eligibility_criteria_id==data['eligibility_criteria_id'],
+            ElCriteriaHasCriterion.value_id==data['value_id'],            
         ).first()

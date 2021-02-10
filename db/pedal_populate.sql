@@ -38,9 +38,13 @@ insert into `eligibility_criteria` (`id`, `study_version_id`) values (1, 1);
 insert into `eligibility_criteria` (`id`, `study_version_id`) values (2, 2);
 insert into `eligibility_criteria` (`id`, `study_version_id`) values (3, 3);
 
-insert into `el_criteria_has_criterion` (`id`, `criterion_id`, `eligibility_criteria_id`) values (1, 1, 1);
-insert into `el_criteria_has_criterion` (`id`, `criterion_id`, `eligibility_criteria_id`) values (2, 2, 2);
-insert into `el_criteria_has_criterion` (`id`, `criterion_id`, `eligibility_criteria_id`) values (3, 3, 3);
+insert into `value` (`id`, `code`, `type`, `value_string`, `upper_threshold`, `active`, `upper_modifier`) values (1, 'Age', 'Integer', '<22 years', 8030, 1, '<');
+insert into `value` (`id`, `code`, `type`, `value_string`, `lower_threshold`, `active`, `lower_modifier`) values (2, 'Age', 'Integer', '>12 mos', 365, 1, '>');
+insert into `value` (`id`, `code`, `type`, `value_string`, `lower_threshold`, `active`, `lower_modifier`) values (3, 'Weight', 'Integer', '>=5 kg', 5, 1, '>');
+
+insert into `el_criteria_has_criterion` (`id`, `criterion_id`, `eligibility_criteria_id`, `value_id`) values (1, 1, 1, 1);
+insert into `el_criteria_has_criterion` (`id`, `criterion_id`, `eligibility_criteria_id`, `value_id`) values (2, 2, 2, 2);
+insert into `el_criteria_has_criterion` (`id`, `criterion_id`, `eligibility_criteria_id`, `value_id`) values (3, 3, 3, 3);
 
 insert into `algorithm_engine` (`id`, `el_criteria_has_criterion_id`, `parent_path`) values (1, 1, 'parent_path1');
 insert into `algorithm_engine` (`id`, `el_criteria_has_criterion_id`, `parent_path`) values (2, 2, 'parent_path2');

@@ -16,6 +16,8 @@ class Criterion(Base):
     description = Column(String, nullable=True)
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
-
+    ontology_code_id = Column(Integer, ForeignKey('ontology_code.id'))
+    input_type_id = Column(Integer, ForeignKey('input_type.id'))
+    
     tags = relationship("CriterionHasTag", back_populates="criterion")
     eligibility_criterias = relationship("ElCriteriaHasCriterion", back_populates="criterion")

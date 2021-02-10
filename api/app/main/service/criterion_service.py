@@ -18,6 +18,8 @@ class CriterionService(Services):
                 description=data.get('description'),
                 create_date=datetime.datetime.utcnow(),
                 active=data.get('active'),
+                ontology_code_id=data.get('ontology_code_id'),
+                input_type_id=data.get('input_type_id'),
             )
             Services.save_changes(new_criterion)
             response_object = {

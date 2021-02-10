@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`el_criteria_has_criterion` (
   `eligibility_criteria_id` INT NOT NULL,
   `create_date` DATETIME NULL,
   `active` TINYINT NULL,
-  `value_id` INT NULL,
+  `value_id` INT NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_el_criteria_has_criterion_criterion1_idx` (`criterion_id` ASC),
   INDEX `fk_el_criteria_has_criterion_eligibility_criteria1_idx` (`eligibility_criteria_id` ASC),

@@ -25,6 +25,7 @@ class ElCriteriaHasCriterionInfo(Resource):
         data = {
             'criterion_id': pid[0],
             'eligibility_criteria_id': pid[1],
+            'value_id': pid[2],            
         }
         el_criteria_has_criterion = ElCriteriaHasCriterionService.get_a_el_criteria_has_criterion(self, data)
         if not el_criteria_has_criterion:
@@ -89,6 +90,7 @@ class Update(Resource):
         pid_data = {
             'criterion_id': pid[0],
             'eligibility_criteria_id': pid[1],
+            'value_id': pid[2],
         }
         el_criteria_has_criterion = ElCriteriaHasCriterionService.get_a_el_criteria_has_criterion(self, pid_data)
         if not el_criteria_has_criterion:
@@ -117,6 +119,7 @@ class Delete(Resource):
         pid_data = {
             'criterion_id': pid[0],
             'eligibility_criteria_id': pid[1],
+            'value_id': pid[2],
         }
         el_criteria_has_criterion = ElCriteriaHasCriterionService.get_a_el_criteria_has_criterion(self, pid_data)
         if not el_criteria_has_criterion:

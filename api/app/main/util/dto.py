@@ -122,7 +122,7 @@ class ElCriteriaHasCriterionDto:
         'eligibility_criteria_id': fields.String(required=True, description='el_criteria_has_criterion eligibility_criteria_id'),
         'create_date': fields.String(description='el_criteria_has_criterion create_date'),
         'active': fields.String(description='is el_criteria_has_criterion active'),
-        'value_id': fields.String(description='el_criteria_has_criterion value_id')
+        'value_id': fields.String(required=True, description='el_criteria_has_criterion value_id')
     })
 
 
