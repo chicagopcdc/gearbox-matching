@@ -9,11 +9,11 @@ from app.main.controller.study_controller import StudyInfo, AllStudiesInfo
 
 @pytest.fixture(scope="module")
 def study_versionA():
-    return StudyVersion(study_id=7)
+    return StudyVersion(study_id=10)
 
 @pytest.fixture(scope="module")
 def study_versionB():
-    return StudyVersion(study_id=8)
+    return StudyVersion(study_id=11)
 
 #create a different study to attach the version to
 @pytest.fixture(scope="module")
@@ -77,7 +77,7 @@ def test_all_study_versions_info(study_versionA, study_versionB, study_versionC,
         assert study_versionC.as_dict() in table_data
 
 def test_create_study_version(studyA, app, session):
-    payload= {'study_id':9, 'active':0}
+    payload= {'study_id':12, 'active':0}
     with app.test_request_context("/study_version/create_study_version", method="POST", json=payload):
         response, status_code = Create().post()
         assert status_code == 201

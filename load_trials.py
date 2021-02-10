@@ -7,6 +7,7 @@ import requests
 ############################
 
 data_path = '~/Desktop/tables/'
+data_prefix = 'v17/load_trials_v17 - '
 host = 'http://0.0.0.0:5000'
 headers = {'Content-type': 'application/json'}
 
@@ -14,7 +15,7 @@ headers = {'Content-type': 'application/json'}
 
 def create(table, ignore):
     print (table)
-    filename = data_path + table + '.csv'
+    filename = data_path + data_prefix + table + '.csv'
     df = pd.read_csv(filename)
     cols = df.columns
     for index, row in df.iterrows():
@@ -46,13 +47,14 @@ def create(table, ignore):
 #create('value', ['id'])
 #create('input_type', ['id'])
 #create('tag', ['id'])
+
 #create('criterion', ['id'])
 #create('criterion_has_tag', None)
 
 #create('eligibility_criteria', ['id', 'create_date'])
-create('el_criteria_has_criterion', ['id'])
+#create('el_criteria_has_criterion', ['id'])
 
-#create('algorithm_engine', None)
+create('algorithm_engine', None)
 #create('study_algorithm_engine', None)
 #create('eligibility_criteria', ['id', 'create_date'])
 

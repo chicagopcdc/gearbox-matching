@@ -7,12 +7,12 @@ from app.main.controller.eligibility_criteria_controller import EligibilityCrite
 
 @pytest.fixture(scope="module")
 def eligibility_criteriaA():
-    return EligibilityCriteria(study_version_id=4, active = 0)
+    return EligibilityCriteria(study_version_id=6, active = 0)
 
 
 @pytest.fixture(scope="module")
 def eligibility_criteriaB():
-    return EligibilityCriteria(study_version_id=5, active = 0)
+    return EligibilityCriteria(study_version_id=7, active = 0)
 
 
 def test_setup(eligibility_criteriaA, eligibility_criteriaB, app, session):
@@ -49,7 +49,7 @@ def test_all_eligibility_criterias_info(eligibility_criteriaA, eligibility_crite
 
 
 def test_create_eligibility_criteria(app, session):
-    payload= {'study_version_id': 6, 'active': 1}
+    payload= {'study_version_id': 8, 'active': 1}
     with app.test_request_context("/eligibility_criteria/create_eligibility_criteria", method="POST", json=payload):
         response, status_code = Create().post()
         print (response)

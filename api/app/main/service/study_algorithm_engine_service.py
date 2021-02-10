@@ -14,7 +14,7 @@ class StudyAlgorithmEngineService(Services):
         if not study_algorithm_engine:
             new_study_algorithm_engine = StudyAlgorithmEngine(
                 study_version_id=data.get('study_version_id'),
-                algorithm_engine_id=data.get('algorithm_engine_id'),
+                algorithm_engine_pk=data.get('algorithm_engine_pk'),
                 start_date=data.get('start_date'),
                 active=data.get('active'),
             )
@@ -35,5 +35,5 @@ class StudyAlgorithmEngineService(Services):
     def get_a_study_algorithm_engine(self, data):
         return DbSession.query(StudyAlgorithmEngine).filter(
             StudyAlgorithmEngine.study_version_id==data['study_version_id'],
-            StudyAlgorithmEngine.algorithm_engine_id==data['algorithm_engine_id'],
+            StudyAlgorithmEngine.algorithm_engine_pk==data['algorithm_engine_pk'],
         ).first()

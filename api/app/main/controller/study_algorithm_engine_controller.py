@@ -24,7 +24,7 @@ class StudyAlgorithmEngineInfo(Resource):
         pid = public_id.split('-')
         data = {
             'study_version_id': pid[0],
-            'algorithm_engine_id': pid[1],
+            'algorithm_engine_pk': pid[1],
         }
         study_algorithm_engine = StudyAlgorithmEngineService.get_a_study_algorithm_engine(self, data)
         if not study_algorithm_engine:
@@ -88,7 +88,7 @@ class Update(Resource):
         pid = public_id.split('-')
         pid_data = {
             'study_version_id': pid[0],
-            'algorithm_engine_id': pid[1],
+            'algorithm_engine_pk': pid[1],
         }
         study_algorithm_engine = StudyAlgorithmEngineService.get_a_study_algorithm_engine(self, pid_data)
         if not study_algorithm_engine:
@@ -116,7 +116,7 @@ class Delete(Resource):
         pid = public_id.split('-')
         pid_data = {
             'study_version_id': pid[0],
-            'algorithm_engine_id': pid[1],
+            'algorithm_engine_pk': pid[1],
         }
         study_algorithm_engine = StudyAlgorithmEngineService.get_a_study_algorithm_engine(self, pid_data)
         if not study_algorithm_engine:

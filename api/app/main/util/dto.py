@@ -57,7 +57,7 @@ class StudyAlgorithmEngineDto:
     api = Namespace('study_algorithm_engine', description='study_algorithm_engine related operations')
     study_algorithm_engine = api.model('study_algorithm_engine', {
     	'study_version_id': fields.String(required=True, description="study_version id"),
-        'algorithm_engine_id': fields.String(required=True, description='algorithm_engine id'),
+        'algorithm_engine_pk': fields.String(required=True, description='algorithm_engine pk (primary key)'),
         'start_date': fields.String(description='start date'),
         'active': fields.String(description='is study_algorithm_engine active')
     })
@@ -65,6 +65,7 @@ class StudyAlgorithmEngineDto:
 class AlgorithmEngineDto:
     api = Namespace('algorithm_engine', description='algorithm_engine related operations')
     algorithm_engine = api.model('algorithm_engine', {
+    	'pk': fields.String(required=True, description="algorithm_engine primary key"),
     	'id': fields.String(required=True, description="algorithm_engine id"),
     	'el_criteria_has_criterion_id': fields.String(description="algorithm_engine el_criteria_has_criterion_id"),
     	'parent_id': fields.String(description="algorithm_engine parent_id"),

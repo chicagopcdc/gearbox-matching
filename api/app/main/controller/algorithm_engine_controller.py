@@ -21,7 +21,12 @@ class AlgorithmEngineInfo(Resource):
     @api.doc('get a algorithm_engine')
     @api.marshal_with(_algorithm_engine)
     def get(self, public_id):
-        algorithm_engine = AlgorithmEngineService.get_a_algorithm_engine(self, public_id)
+        pid = public_id.split('-')
+        data = {
+            'pk': pid[0],
+            'id': pid[1],
+        }
+        algorithm_engine = AlgorithmEngineService.get_a_algorithm_engine(self, data)
         if not algorithm_engine:
             api.abort(404, message="algorithm_engine '{}' not found".format(public_id))
         else:
@@ -80,7 +85,12 @@ class Update(Resource):
             api.abort(400, message="null payload or payload not json/dict")
 
         #retrieve the algorithm_engine to be updated
-        algorithm_engine = AlgorithmEngineService.get_a_algorithm_engine(self, public_id)
+        pid = public_id.split('-')
+        pid_data = {
+            'pk': pid[0],
+            'id': pid[1],
+        }
+        algorithm_engine = AlgorithmEngineService.get_a_algorithm_engine(self, pid_data)
         if not algorithm_engine:
             api.abort(404, message="algorithm_engine '{}' not found".format(public_id))
 
@@ -110,7 +120,12 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a algorithm_engine')
     def delete(self, public_id):
-        algorithm_engine = AlgorithmEngineService.get_a_algorithm_engine(self, public_id)
+        pid = public_id.split('-')
+        pid_data = {
+            'pk': pid[0],
+            'id': pid[1],
+        }
+        algorithm_engine = AlgorithmEngineService.get_a_algorithm_engine(self, pid_data)
         if not algorithm_engine:
             api.abort(404, message="algorithm_engine '{}' not found".format(public_id))
 
