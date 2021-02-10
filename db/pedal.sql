@@ -262,7 +262,7 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`algorithm_engine` (
   `id` INT NOT NULL,
   `el_criteria_has_criterion_id` INT NULL,
   `parent_id` INT NULL,
-  `parent_path` VARCHAR(45) NULL,
+  `parent_path` VARCHAR(512) NULL,
   `operator` VARCHAR(45) NULL,
   PRIMARY KEY (`pk`),
   INDEX `fk_algorithm_engine_el_criteria_has_criterion1_idx` (`el_criteria_has_criterion_id` ASC),
@@ -282,6 +282,7 @@ DROP TABLE IF EXISTS `pedal_dev_v_0`.`study_algorithm_engine` ;
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`study_algorithm_engine` (
   `study_version_id` INT NOT NULL,
   `algorithm_engine_pk` INT NOT NULL,
+  `algorithm_engine_id` INT NOT NULL,
   `start_date` DATETIME NULL,
   `active` TINYINT NULL,
   PRIMARY KEY (`study_version_id`, `algorithm_engine_pk`),

@@ -58,6 +58,7 @@ class StudyAlgorithmEngineDto:
     study_algorithm_engine = api.model('study_algorithm_engine', {
     	'study_version_id': fields.String(required=True, description="study_version id"),
         'algorithm_engine_pk': fields.String(required=True, description='algorithm_engine pk (primary key)'),
+        'algorithm_engine_id': fields.String(required=True, description='algorithm_engine id'),
         'start_date': fields.String(description='start date'),
         'active': fields.String(description='is study_algorithm_engine active')
     })

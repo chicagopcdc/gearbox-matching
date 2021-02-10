@@ -15,6 +15,7 @@ class StudyAlgorithmEngineService(Services):
             new_study_algorithm_engine = StudyAlgorithmEngine(
                 study_version_id=data.get('study_version_id'),
                 algorithm_engine_pk=data.get('algorithm_engine_pk'),
+                algorithm_engine_id=data.get('algorithm_engine_id'),
                 start_date=data.get('start_date'),
                 active=data.get('active'),
             )

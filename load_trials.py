@@ -42,21 +42,21 @@ def create(table, ignore):
 ########################################################
 
 
-#create('study', ['id', 'create_date'])
-#create('study_version', ['id', 'create_date'])
-#create('value', ['id'])
-#create('input_type', ['id'])
-#create('tag', ['id'])
+# create('study', ['id', 'create_date'])
+# create('study_version', ['id', 'create_date'])
+# create('value', ['id'])
+# create('input_type', ['id'])
+# create('tag', ['id'])
 
-#create('criterion', ['id'])
-#create('criterion_has_tag', None)
+# create('criterion', ['id'])
+# create('criterion_has_tag', None)
 
-#create('eligibility_criteria', ['id', 'create_date'])
-#create('el_criteria_has_criterion', ['id'])
+# create('eligibility_criteria', ['id', 'create_date'])
+# create('el_criteria_has_criterion', ['id'])
 
-create('algorithm_engine', None)
-#create('study_algorithm_engine', None)
-#create('eligibility_criteria', ['id', 'create_date'])
+# create('algorithm_engine', ['pk'])
+
+create('study_algorithm_engine', None)
 
 
 ########################################################
