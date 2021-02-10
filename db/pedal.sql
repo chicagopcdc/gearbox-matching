@@ -245,7 +245,8 @@ DROP TABLE IF EXISTS `pedal_dev_v_0`.`input_type` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`input_type` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `type` VARCHAR(45) NULL,
+  `data_type` VARCHAR(45) NULL,
+  `render_type` VARCHAR(45) NULL,
   `name` VARCHAR(45) NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;

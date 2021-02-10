@@ -164,7 +164,8 @@ class InputTypeDto:
     api = Namespace('input_type', description='input_type related operations')
     input_type = api.model('input_type', {
     	'id': fields.String(required=True, description="input_type id"),
-        'type': fields.String(description='input_type type'),
+        'data_type': fields.String(description='input_type data_type'),
+        'render_type': fields.String(description='input_type render_type'),
         'name': fields.String(description='input_type code')
     })
 

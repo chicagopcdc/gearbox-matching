@@ -7,12 +7,12 @@ from app.main.controller.input_type_controller import InputTypeInfo, AllInputTyp
 
 @pytest.fixture(scope="module")
 def input_typeA():
-    return InputType(type = 'typeA', name = 'nameA')
+    return InputType(data_type = 'typeA', name = 'nameA')
 
 
 @pytest.fixture(scope="module")
 def input_typeB():
-    return InputType(type = 'typeB', name = 'nameB')
+    return InputType(data_type = 'typeB', name = 'nameB')
 
 
 def test_setup(input_typeA, input_typeB, app, session):
@@ -71,7 +71,7 @@ def test_update_input_type(input_typeA, input_typeB, app, session):
     #basic update test
     input_typeA_dict = input_typeA.as_dict()
     nameA = input_typeA_dict['name']
-    payload = {'type': 'this_type'}
+    payload = {'data_type': 'this_type'}
     with app.test_request_context("/input_type/update_input_type/{}".format(nameA), method="PUT", json=payload):
         response = Update().put(nameA)
         expected_response = input_typeA_dict

@@ -13,7 +13,8 @@ class InputTypeService(Services):
         if not input_type:
             new_input_type = InputType(
                 id=data.get('id'),
-                type=data.get('type'),
+                data_type=data.get('data_type'),
+                render_type=data.get('render_type'),
                 name=data.get('name'),
             )
             Services.save_changes(new_input_type)
