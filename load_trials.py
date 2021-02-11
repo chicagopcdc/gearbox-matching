@@ -30,31 +30,30 @@ def create(table, ignore):
             elif isinstance(val, (np.integer)): #needed to allow json serialization
                 payload.update({key: val.item()})
         json_payload = json.dumps(payload)
-        print (json_payload)
         response = requests.post('{}/{}/create_{}'.format(host, table, table), data = json_payload, headers = headers)
         if response.status_code in [201, 409]:
             print ('success: {}'.format(response.status_code))
         else:
-            #print (dir(response))
-            print (response.status_code)
+            print ("-------------------->> FAILfailFAILfailFAIL: {}".format(response.status_code))
+            print (json_payload)
     print ('\n\n')
 
 ########################################################
 
 
-# create('study', ['id', 'create_date'])
-# create('study_version', ['id', 'create_date'])
-# create('value', ['id'])
-# create('input_type', ['id'])
-# create('tag', ['id'])
+create('study', ['id', 'create_date'])
+create('study_version', ['id', 'create_date'])
+create('value', ['id'])
+create('input_type', ['id'])
+create('tag', ['id'])
 
-# create('criterion', ['id'])
-# create('criterion_has_tag', None)
+create('criterion', ['id'])
+create('criterion_has_tag', None)
 
-# create('eligibility_criteria', ['id', 'create_date'])
-# create('el_criteria_has_criterion', ['id'])
+create('eligibility_criteria', ['id', 'create_date'])
+create('el_criteria_has_criterion', ['id'])
 
-# create('algorithm_engine', ['pk'])
+create('algorithm_engine', ['pk'])
 
 create('study_algorithm_engine', None)
 

@@ -21,6 +21,10 @@ from .main.controller.ontology_code_controller import api as ontology_code_ns
 from .main.controller.input_type_controller import api as input_type_ns
 from .main.controller.value_controller import api as value_ns
 
+""" MATCH ENDPOINTS """
+from .main.controller.match_controller import api as match_ns
+
+
 blueprint = Blueprint('api', __name__)
 
 api = Api(blueprint,
@@ -28,6 +32,7 @@ api = Api(blueprint,
           version='1.0',
           description='a boilerplate for flask restplus web service'
           )
+
 
 api.add_namespace(login_ns, path='/login')
 api.add_namespace(study_ns, path='/study')
@@ -46,3 +51,6 @@ api.add_namespace(note_ns, path='/note')
 api.add_namespace(ontology_code_ns, path='/ontology_code')
 api.add_namespace(input_type_ns, path='/input_type')
 api.add_namespace(value_ns, path='/value')
+
+""" MATCH ENDPOINTS """
+api.add_namespace(match_ns, path='/match')
