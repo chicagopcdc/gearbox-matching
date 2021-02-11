@@ -184,26 +184,6 @@ class OntologyCodeDto:
     })
 
     
-class MatchDto:
+class MatchDto(StudyDto, ValueDto):
     api = Namespace('match', description='match related operations')
-    value = api.model('value', {
-    	'id': fields.String(required=True, description="value id"),
-    	'code': fields.String(description="value code"),
-    	'type': fields.String(description="value type"),
-    	'value_string': fields.String(description="value value_string"),
-    	'upper_threshold': fields.String(description="value upper_threshold"),
-    	'lower_threshold': fields.String(description="value lower_threshold"),
-    	'create_date': fields.String(description="value create_date"),
-    	'active': fields.String(description="value active"),
-    	'value_list': fields.String(description="value value_list"),
-    	'value_bool': fields.String(description="value value_bool"),  
-    	'upper_modifier': fields.String(description="value upper_modifier"),
-    	'lower_modifier': fields.String(description="value lower_modifier")
-    })
-    study = api.model('study', {
-    	'id': fields.String(required=True, description="study id"),
-        'name': fields.String(required=True, description='study name'),
-        'code': fields.String(required=True, description='study code'),
-        'create_date': fields.String(required=True, description='study creation time'),
-        'active': fields.String(description='is study active')
-    })
+
