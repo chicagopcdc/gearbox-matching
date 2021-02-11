@@ -6,7 +6,7 @@ from app.main import DbSession
 
 from app.main.model.criterion_has_tag import CriterionHasTag
 
-# , flask_bcrypt
+# , flask_bcrypt                                                                                                                                                                                             
 
 class Criterion(Base):
     __tablename__ = 'criterion'
@@ -18,6 +18,7 @@ class Criterion(Base):
     active = Column(Boolean, nullable=True)
     ontology_code_id = Column(Integer, ForeignKey('ontology_code.id'))
     input_type_id = Column(Integer, ForeignKey('input_type.id'))
-    
+
     tags = relationship("CriterionHasTag", back_populates="criterion")
     eligibility_criterias = relationship("ElCriteriaHasCriterion", back_populates="criterion")
+    

@@ -2,9 +2,6 @@ from sqlalchemy import Column, Integer, Text, DateTime
 from sqlalchemy.orm import relationship
 
 from . import Base
-from app.main import DbSession
-
-# , flask_bcrypt
 
 
 class Login(Base):

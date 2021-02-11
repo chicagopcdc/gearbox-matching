@@ -1,10 +1,8 @@
-from sqlalchemy import ForeignKey, Column, Integer, String, DateTime, Boolean, Float
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Float
 from sqlalchemy.orm import relationship
 
 from . import Base
-from app.main import DbSession
 
-# , flask_bcrypt
 
 class Value(Base):
     __tablename__ = 'value'
@@ -21,4 +19,4 @@ class Value(Base):
     upper_modifier = Column(String, nullable=True)
     lower_modifier = Column(String, nullable=True)
 
-    eligibility_criterias = relationship("ElCriteriaHasCriterion", back_populates="value")
+    el_criteria_has_criterions = relationship("ElCriteriaHasCriterion", back_populates="value")
