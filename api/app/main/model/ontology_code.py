@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from . import Base
 from app.main import DbSession
 
-# , flask_bcrypt
+# , flask_bcrypt                                                                                                                                                                                             
 
 class OntologyCode(Base):
     __tablename__ = 'ontology_code'

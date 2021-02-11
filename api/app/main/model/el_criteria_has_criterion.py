@@ -1,10 +1,8 @@
-from sqlalchemy import ForeignKey, Column, Integer, String, DateTime, Boolean
+from sqlalchemy import ForeignKey, Column, Integer, DateTime, Boolean
 from sqlalchemy.orm import relationship
 
 from . import Base
-from app.main import DbSession
 
-# , flask_bcrypt
 
 class ElCriteriaHasCriterion(Base):
     __tablename__ = 'el_criteria_has_criterion'
@@ -15,6 +13,6 @@ class ElCriteriaHasCriterion(Base):
     active = Column(Boolean, nullable=True)
     value_id = Column(Integer, ForeignKey('value.id'))
 
-    eligibility_criteria = relationship("EligibilityCriteria", back_populates="criterions")
-    criterion = relationship("Criterion", back_populates="eligibility_criterias")
-    value = relationship("Value", back_populates="eligibility_criterias")
+    eligibility_criteria = relationship("EligibilityCriteria", back_populates="el_criteria_has_criterions")
+    criterion = relationship("Criterion", back_populates="el_criteria_has_criterions")
+    value = relationship("Value", back_populates="el_criteria_has_criterions")
