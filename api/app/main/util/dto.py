@@ -184,6 +184,5 @@ class OntologyCodeDto:
     })
 
     
-class MatchDto(StudyDto, ValueDto):
+class MatchDto(StudyDto, ValueDto, AlgorithmEngineDto):
     api = Namespace('match', description='match related operations')
-

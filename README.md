@@ -49,3 +49,35 @@ creds.json holds the client_id for fence.
 {
     "CLIENT_ID":""
 }
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+How to load trial criteria data:
+
+Create a python3 vuirtual environment, call it "venv""
+"virtualenv -p python3 venv"
+
+Activate the venv:
+"source venv/bin/activate"
+
+Install requirements (for numpy, pandas, requests):
+In the root path, see requirements.txt
+"pip install -r requirements.txt"
+
+In load_trials.py, set the path to csv table data.
+Default is "~/Desktop/tables/v17/", with csv filname prefixes "load_trials_v17 - ".
+
+Run load_trial.py script
+"python load_trails.py"
+
+Run it once.
+
+Stdout shows 201s when POST successfully creates new table rows from the loaded data. Use route "/tablename/info" to get all rows for some table, "tablename" to confirm what's there (or not).
+
+"docker-compose down" clears the DB. Just "cntrl-c" will or "docker-compose stop" will keep the data when you compose up again.
+
+Match-related endpoints are under the "/match" path.
+
+"/match/studies" and "/match/eligibility-criteria" are implemented. These return specified data from teh study and values table, respectively. The outputs need to be handled yet to ensure that ids are consistent with the suite of info provided by the other match endpoints.
+
+In this branch "/match/match-conditions" is under construction yet.
