@@ -9,9 +9,12 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'my_precious_secret_key')
     DEBUG = False
     
-    f=open("/usr/share/gearbox/creds.json")
-    creds = json.load(f)
-    CLIENT_ID = creds['CLIENT_ID']
+    try:
+        f=open("/usr/share/gearbox/creds.json")
+        creds = json.load(f)
+        CLIENT_ID = creds['CLIENT_ID']
+    except:
+        CLIENT_ID = ""
 
 class DevelopmentConfig(Config):
     # uncomment the line below to use postgres
