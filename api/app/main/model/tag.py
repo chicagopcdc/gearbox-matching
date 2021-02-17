@@ -1,10 +1,8 @@
-from sqlalchemy import ForeignKey, Column, Integer, String, DateTime, Boolean, Float
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 
 from . import Base
-from app.main import DbSession
 
-# , flask_bcrypt
 
 class Tag(Base):
     __tablename__ = 'tag'
