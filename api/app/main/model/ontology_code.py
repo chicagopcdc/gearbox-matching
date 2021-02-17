@@ -8,10 +8,11 @@ class OntologyCode(Base):
     __tablename__ = 'ontology_code'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
-    ontology_url = Column(String(45), nullable=True)
-    name = Column(String(45), nullable=True)
-    code = Column(String(45), nullable=True)
-    value = Column(String(45), nullable=True)
-    version = Column(String(45), nullable=True)
+    ontology_url = Column(String, nullable=True)
+    name = Column(String, nullable=True)
+    code = Column(String, nullable=True)
+    value = Column(String, nullable=True)
+    version = Column(String, nullable=True)
 
-    criterions = relationship("Criterion", back_populates="ontology_code")
+
+    
