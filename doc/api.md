@@ -19,7 +19,7 @@ This is a summary of a discussion on GEARBOx API design on July 31, 2020.
 >   - updated Match Form configuration API based on feedback to
 >     - handle sophisticated `showIf` conditions
 >     - add a new `age` input type
->     - distinguish `radioOptions` and `selectOptions` with a new shape for "selectOptions" value to support displaying description for a select option
+>     - modify `options` value into an object with "value", "label", and "descrtiption" attributes
 
 ## Highlights:
 
@@ -96,10 +96,7 @@ Please note that the following information on each endpoint and API is not stabl
           }
         ]
       },
-      "radioOptions": [ // options to choose from; available for field type "radio"
-        ""
-      ],
-      "selectOptions": [ // options to choose from; available for field types "select", "multiselect"
+      "options": [ // options to choose from; available for field types "radio", "select", "multiselect"
         {
           "value": "",
           "label": "", // optional; if not provided, will use value
