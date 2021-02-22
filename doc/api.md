@@ -15,6 +15,11 @@ This is a summary of a discussion on GEARBOx API design on July 31, 2020.
 >   - modified Latest User Input endpoint and API (remove unnecessary userId)
 > - February 8, 2021:
 >   - modified Eligibility Criteria API (add `operator` field)
+> - February 22, 2012:
+>   - updated Match Form configuration API based on feedback to
+>     - handle sophisticated `showIf` conditions
+>     - add a new `age` input type
+>     - distinguish `radioOptions` and `selectOptions` with a new shape for "selectOptions" value to support displaying description for a select option
 
 ## Highlights:
 
@@ -77,11 +82,30 @@ Please note that the following information on each endpoint and API is not stabl
 
       // name, type, group are required all all fields
       "name": "", // field name
-      "type": "", // one of the following: "checkbox", "radio", "number", "text", "select", "multiselect"
+      "type": "", // one of the following: "checkbox", "radio", "number", "text", "select", "multiselect", "age"
 
       // the rest is optional
       "label": "", // label text to display; avilable for all field types
-      "options": [], // options to choose from; available for field types "radio", "select", "multiselect"
+      "showIf": { // for conditional display; available for all field types
+        "operator": "AND", // possible values: AND, OR
+        "criteria": [
+          {
+            "id": 1, // id for another field
+            "operator": "eq", // one of the following: "eq", "gt", "gte", "lt", "lte", "ne"
+            "value": // value for another field; boolean, string, or number
+          }
+        ]
+      },
+      "radioOptions": [ // options to choose from; available for field type "radio"
+        ""
+      ],
+      "selectOptions": [ // options to choose from; available for field types "select", "multiselect"
+        {
+          "value": "",
+          "label": "", // optional; if not provided, will use value
+          "description": "" // optional; available for "select" only
+        }
+      ],
       "placeholder": "" // placeholder text to display; available for field types "number", "text", "select", "multiselect"
 
       // ... more attributes
@@ -92,6 +116,17 @@ Please note that the following information on each endpoint and API is not stabl
 ```
 
 See [this demo app](https://poc-dynamic-form.netlify.app/) for an example.
+
+#### Conditional rendering with `showIf`
+
+Fields with `showIf` property are conditionally rendered based on the values of other fields. The `showIf` value shape is based on those of Eligibility Criteria and Match Conditions (see below).
+
+#### Field type `"age"`
+
+This is a special input type with a dedicated input component consisting of year, month, and day input fields. The actual `age` value will be in days, and the values for year and month fields will be converted to days using the following formula:
+
+* 1 year is 365 days
+* 1 month is 30 days
 
 ### Studies
 
