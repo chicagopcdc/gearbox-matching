@@ -15,11 +15,13 @@ This is a summary of a discussion on GEARBOx API design on July 31, 2020.
 >   - modified Latest User Input endpoint and API (remove unnecessary userId)
 > - February 8, 2021:
 >   - modified Eligibility Criteria API (add `operator` field)
-> - February 22, 2012:
+> - February 22, 2021:
 >   - updated Match Form configuration API based on feedback to
 >     - handle sophisticated `showIf` conditions
 >     - add a new `age` input type
 >     - modify `options` value into an object with "value", "label", and "descrtiption" attributes
+> - March 1, 2021
+>   - updated Match Form configuration API `options` value type
 
 ## Highlights:
 
@@ -98,8 +100,8 @@ Please note that the following information on each endpoint and API is not stabl
       },
       "options": [ // options to choose from; available for field types "radio", "select", "multiselect"
         {
-          "value": "",
-          "label": "", // optional; if not provided, will use value
+          "value": 0, // integer; based on id in database
+          "label": "",
           "description": "" // optional; available for "select" only
         }
       ],
