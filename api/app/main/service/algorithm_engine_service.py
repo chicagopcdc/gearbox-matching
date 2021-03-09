@@ -37,14 +37,3 @@ class AlgorithmEngineService(Services):
             AlgorithmEngine.pk==data.get('pk'),
             AlgorithmEngine.id==data.get('id'),
         ).first()
-
-    def get_id(self, id):
-        return DbSession.query(AlgorithmEngine).filter(
-            AlgorithmEngine.id==id,
-        ).all()
-    
-    def get_ors(self, id):
-        return DbSession.query(AlgorithmEngine).filter(
-            AlgorithmEngine.parent_id==int(id),
-            AlgorithmEngine.operator=='OR',
-        ).all()

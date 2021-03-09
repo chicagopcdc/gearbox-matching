@@ -3,7 +3,6 @@ from flask_restplus import Resource
 from datetime import date
 import logging
 from time import gmtime, strftime
-import json
 
 from app.main.util import AlchemyEncoder
 from app.main.util.dto import MatchDto
@@ -16,6 +15,8 @@ from app.main.service.value_service import ValueService
 
 from app.main.model.algorithm_engine import AlgorithmEngine
 from app.main.service.algorithm_engine_service import AlgorithmEngineService
+
+import app.main.service.match_conditions as mc
 
 
 api = MatchDto.api
@@ -109,16 +110,21 @@ class MatchEligibilityCriteria(Resource):
 @api.route('/match-conditions')
 class MatchMatchConditions(Resource):
     def get(self):
-        algo_engs = AlgorithmEngineService.get_all(AlgorithmEngine)
+        all_algo_engs = AlgorithmEngineService.get_all(AlgorithmEngine)
         try:
-            if algo_engs:
-                #DEBUG
-                logging.warning("KDSFHKDSHFKSDHFLKDSHF")
+            if all_algo_engs:
+                #get parent_paths (pps), and corresponding operators (ops)
+                pps = [x.as_dict()['parent_path'] for x in all_algo_engs]
+                ops = [x.as_dict()['operator'] for x in all_algo_engs]
+                #append another fake OR to trigger the final row to go in
+                pps.append('terminus')
+                ops.append('OR')
 
-                result = traverse(self.algo_engs)
+                full_paths = mc.get_full_paths(pps, ops)
+                X = mc.merged(full_paths)
+                R = mc.format(X)
                 
-                body = [result]
-                
+                body = R
             else:
                 body = []
             return jsonify(
@@ -131,24 +137,3 @@ class MatchMatchConditions(Resource):
             )
         except:
             api.abort(404, message="algorithm_engine table not found or has no data")
-
-
-    def traverse(self, algo_engs):
-        #get all algo_eng data
-        ae = [x.as_dict() for x in algo_engs]
-
-        #get the list of logic blocks ids
-        ids = list(set([x['id'] for x in ae]))
-
-        body = []
-        for id in ids:
-            #get all rows with same id (same study)
-            rows = AlgorithmEngineService.get_id(self, id)
-
-            #this is the 
-            root_node = rows[0].as_dict().get('id')
-
-            #DEBUG
-            logging.warning(root_node)
-
-        return root_node
