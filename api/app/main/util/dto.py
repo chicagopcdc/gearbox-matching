@@ -186,3 +186,31 @@ class OntologyCodeDto:
     
 class MatchDto(StudyDto, ValueDto, AlgorithmEngineDto):
     api = Namespace('match', description='match related operations')
+
+    
+class DisplayRulesDto:
+    api = Namespace('display_rules', description='display_rules related operations')
+    display_rules = api.model('display_rules', {
+    	'id': fields.String(required=True, description="display_rules id"),
+    	'criterion_id': fields.String(description="display_rules criterion_id"),
+    	'priority': fields.String(description="display_rules priority")
+    })
+
+
+class TriggeredByDto:
+    api = Namespace('triggered_by', description='triggered_by related operations')
+    triggered_by = api.model('triggered_by', {
+    	'display_rules_id': fields.String(required=True, description="triggered_by display_rules_id"),
+    	'criterion_id': fields.String(description="triggered_by criterion_id"),
+    	'value_id': fields.String(description="triggered_by value_id"),
+    	'path': fields.String(description="triggered_by path")
+    })
+
+
+class InputTypeHasValueDto:
+    api = Namespace('input_type_has_value', description='input_type_has_value related operations')
+    input_type_has_value = api.model('input_type_has_value', {
+    	'value_id': fields.String(description="input_type_has_value value_id"),
+    	'input_type_id': fields.String(required=True, description="input_type_has_value input_type_id"),
+    	'create_date': fields.String(description="input_type_has_value create_date")
+    })

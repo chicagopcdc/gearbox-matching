@@ -365,17 +365,76 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`logins` (
 ENGINE = InnoDB;
 
 -- -----------------------------------------------------
--- Table `pedal_dev_v_0`.`xyz`
+-- Table `pedal_dev_v_0`.`display_rules`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pedal_dev_v_0`.`xyz` ;
+DROP TABLE IF EXISTS `pedal_dev_v_0`.`display_rules` ;
 
-CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`xyz` (
+CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`display_rules` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `code` VARCHAR(45) NULL,
-  `name` VARCHAR(45) NULL,
+  `criterion_id` INT NOT NULL,
+  `priority` INT NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_display_rules_criterion1_idx` (`criterion_id` ASC),
+  CONSTRAINT `fk_display_rules_criterion1`
+    FOREIGN KEY (`criterion_id`)
+    REFERENCES `pedal_dev_v_0`.`criterion` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `pedal_dev_v_0`.`triggered_by`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `pedal_dev_v_0`.`triggered_by` ;
+
+CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`triggered_by` (
+  `display_rules_id` INT NOT NULL,
+  `criterion_id` INT NOT NULL,
+  `value_id` INT NOT NULL,
+  `path` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`criterion_id`),
+  INDEX `fk_triggered_by_display_rules1_idx` (`display_rules_id` ASC),
+  INDEX `fk_triggered_by_criterion1_idx` (`criterion_id` ASC),
+  INDEX `fk_triggered_by_value1_idx` (`value_id` ASC),
+  CONSTRAINT `fk_triggered_by_display_rules1`
+    FOREIGN KEY (`display_rules_id`)
+    REFERENCES `pedal_dev_v_0`.`display_rules` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_triggered_by_criterion1`
+    FOREIGN KEY (`criterion_id`)
+    REFERENCES `pedal_dev_v_0`.`criterion` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_triggered_by_value1`
+    FOREIGN KEY (`value_id`)
+    REFERENCES `pedal_dev_v_0`.`value` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `pedal_dev_v_0`.`input_type_has_value`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `pedal_dev_v_0`.`input_type_has_value` ;
+
+CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`input_type_has_value` (
+  `value_id` INT NOT NULL,
+  `input_type_id` INT NOT NULL,
   `create_date` DATETIME NULL,
-  `active` TINYINT NULL,
-  PRIMARY KEY (`id`))
+  PRIMARY KEY (`input_type_id`),
+  INDEX `fk_input_type_has_value_value1_idx` (`value_id` ASC),
+  INDEX `fk_input_type_has_value_input_type1_idx` (`input_type_id` ASC),
+  CONSTRAINT `fk_input_type_has_value_value1`
+    FOREIGN KEY (`value_id`)
+    REFERENCES `pedal_dev_v_0`.`value` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_input_type_has_value_input_type1`
+    FOREIGN KEY (`input_type_id`)
+    REFERENCES `pedal_dev_v_0`.`input_type` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 -- -----------------------------------------------------
