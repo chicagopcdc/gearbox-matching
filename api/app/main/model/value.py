@@ -20,3 +20,4 @@ class Value(Base):
     lower_modifier = Column(String, nullable=True)
 
     el_criteria_has_criterions = relationship("ElCriteriaHasCriterion", back_populates="value")
+    input_types = relationship("InputTypeHasValue", back_populates="value")

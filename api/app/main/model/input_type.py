@@ -10,3 +10,5 @@ class InputType(Base):
     data_type = Column(String, nullable=True)
     render_type = Column(String, nullable=True)
     name = Column(String, nullable=True)
+
+    values = relationship("InputTypeHasValue", back_populates="input_type")
