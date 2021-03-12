@@ -5,7 +5,7 @@ from app.main.service import Services
 class TriggeredByService(Services):
 
     def save_new_triggered_by(self, data):
-        triggered_by = self.get_a_triggered_by(self, data)
+        triggered_by = self.get_a_triggered_by(self, data.get('criterion_id'))
 
         if not triggered_by:
             new_triggered_by = TriggeredBy(
@@ -27,7 +27,7 @@ class TriggeredByService(Services):
             }
             return response_object, 409
 
-    def get_a_triggered_by(self, data):
+    def get_a_triggered_by(self, criterion_id):
         return DbSession.query(TriggeredBy).filter(
-            TriggeredBy.id==data['criterion_id'],
+            TriggeredBy.criterion_id==criterion_id,
         ).first()

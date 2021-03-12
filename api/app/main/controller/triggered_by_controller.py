@@ -21,13 +21,7 @@ class TriggeredByInfo(Resource):
     @api.doc('get a triggered_by')
     @api.marshal_with(_triggered_by)
     def get(self, public_id):
-        pid = public_id.split('-')
-        data = {
-            'criterion_id': pid[0],
-            'eligibility_criteria_id': pid[1],
-            'value_id': pid[2],            
-        }
-        triggered_by = TriggeredByService.get_a_triggered_by(self, data)
+        triggered_by = TriggeredByService.get_a_triggered_by(self, public_id)
         if not triggered_by:
             api.abort(404, message="triggered_by '{}' not found".format(public_id))
         else:
@@ -84,15 +78,7 @@ class Update(Resource):
         data = api.payload
         if not data or not isinstance(data, dict):
             api.abort(400, message="null payload or payload not json/dict")
-
-        #retrieve the triggered_by to be updated
-        pid = public_id.split('-')
-        pid_data = {
-            'criterion_id': pid[0],
-            'eligibility_criteria_id': pid[1],
-            'value_id': pid[2],
-        }
-        triggered_by = TriggeredByService.get_a_triggered_by(self, pid_data)
+        triggered_by = TriggeredByService.get_a_triggered_by(self, public_id)
         if not triggered_by:
             api.abort(404, message="triggered_by '{}' not found".format(public_id))
 
@@ -115,13 +101,7 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a triggered_by')
     def delete(self, public_id):
-        pid = public_id.split('-')
-        pid_data = {
-            'criterion_id': pid[0],
-            'eligibility_criteria_id': pid[1],
-            'value_id': pid[2],
-        }
-        triggered_by = TriggeredByService.get_a_triggered_by(self, pid_data)
+        triggered_by = TriggeredByService.get_a_triggered_by(self, public_id)
         if not triggered_by:
             api.abort(404, message="triggered_by '{}' not found".format(public_id))
 

@@ -21,13 +21,7 @@ class InputTypeHasValueInfo(Resource):
     @api.doc('get a input_type_has_value')
     @api.marshal_with(_input_type_has_value)
     def get(self, public_id):
-        pid = public_id.split('-')
-        data = {
-            'criterion_id': pid[0],
-            'eligibility_criteria_id': pid[1],
-            'value_id': pid[2],            
-        }
-        input_type_has_value = InputTypeHasValueService.get_a_input_type_has_value(self, data)
+        input_type_has_value = InputTypeHasValueService.get_a_input_type_has_value(self, public_id)
         if not input_type_has_value:
             api.abort(404, message="input_type_has_value '{}' not found".format(public_id))
         else:
@@ -84,15 +78,7 @@ class Update(Resource):
         data = api.payload
         if not data or not isinstance(data, dict):
             api.abort(400, message="null payload or payload not json/dict")
-
-        #retrieve the input_type_has_value to be updated
-        pid = public_id.split('-')
-        pid_data = {
-            'criterion_id': pid[0],
-            'eligibility_criteria_id': pid[1],
-            'value_id': pid[2],
-        }
-        input_type_has_value = InputTypeHasValueService.get_a_input_type_has_value(self, pid_data)
+        input_type_has_value = InputTypeHasValueService.get_a_input_type_has_value(self, public_id)
         if not input_type_has_value:
             api.abort(404, message="input_type_has_value '{}' not found".format(public_id))
 
@@ -115,13 +101,7 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a input_type_has_value')
     def delete(self, public_id):
-        pid = public_id.split('-')
-        pid_data = {
-            'criterion_id': pid[0],
-            'eligibility_criteria_id': pid[1],
-            'value_id': pid[2],
-        }
-        input_type_has_value = InputTypeHasValueService.get_a_input_type_has_value(self, pid_data)
+        input_type_has_value = InputTypeHasValueService.get_a_input_type_has_value(self, public_id)
         if not input_type_has_value:
             api.abort(404, message="input_type_has_value '{}' not found".format(public_id))
 

@@ -7,7 +7,7 @@ from app.main.service import Services
 class InputTypeHasValueService(Services):
 
     def save_new_input_type_has_value(self, data):
-        input_type_has_value = self.get_a_input_type_has_value(self, data)
+        input_type_has_value = self.get_a_input_type_has_value(self, data.get('input_type_id'))
 
         if not input_type_has_value:
             new_input_type_has_value = InputTypeHasValue(
@@ -28,7 +28,7 @@ class InputTypeHasValueService(Services):
             }
             return response_object, 409
 
-    def get_a_input_type_has_value(self, data):
+    def get_a_input_type_has_value(self, input_type_id):
         return DbSession.query(InputTypeHasValue).filter(
-            InputTypeHasValue.input_type_id==data['input_type_id'],
+            InputTypeHasValue.input_type_id==input_type_id,
         ).first()

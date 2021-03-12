@@ -7,12 +7,12 @@ from app.main.controller.display_rules_controller import DisplayRulesInfo, AllDi
 
 @pytest.fixture(scope="module")
 def display_rulesA():
-    return DisplayRules(id=1, criterion_id=1, priority=1)
+    return DisplayRules(criterion_id=3, priority=3)
 
 
 @pytest.fixture(scope="module")
 def display_rulesB():
-    return DisplayRules(id=2, criterion_id=2, priority=2)
+    return DisplayRules(criterion_id=4, priority=4)
 
 
 def test_setup(display_rulesA, display_rulesB, app, session):
@@ -50,7 +50,7 @@ def test_all_display_ruless_info(display_rulesA, display_rulesB, app, session):
 
 
 def test_create_display_rules(app, session):
-    payload= {"criterion_id":3, "priority":3}
+    payload= {"criterion_id":5, "priority":5}
     with app.test_request_context("/display_rules/create_display_rules", method="POST", json=payload):
         response, status_code = Create().post()
         print (response)
@@ -64,7 +64,7 @@ def test_scope_again(app, session):
         payload_seen = 0
         for row in table_data:
             criterion_id = str(row['id'])
-            if str(criterion_id) == '3':
+            if str(criterion_id) == '5':
                 payload_seen = 1
         assert payload_seen == 1
 

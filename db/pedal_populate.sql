@@ -64,3 +64,10 @@ insert into `algorithm_engine` (`pk`, `id`, `el_criteria_has_criterion_id`, `par
 insert into `algorithm_engine` (`pk`, `id`, `el_criteria_has_criterion_id`, `parent_path`) values (2, 2, 2, 'parent_path2');
 
 insert into `study_algorithm_engine` (`study_version_id`, `algorithm_engine_pk`, `algorithm_engine_id`) values (1, 1, 1);
+
+insert into `display_rules` (`id`, `criterion_id`, `priority`) values (1, 1, 1);
+insert into `display_rules` (`id`, `criterion_id`, `priority`) values (2, 2, 2);
+
+insert into `input_type` (`data_type`, `name`) values ('data_type_1', 'name_1');
+insert into `input_type` (`data_type`, `name`) values ('data_type_2', 'name_2');
+insert into `input_type` (`data_type`, `name`) values ('data_type_3', 'name_3');
