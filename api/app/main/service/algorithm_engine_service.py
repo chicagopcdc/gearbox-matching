@@ -8,11 +8,10 @@ from app.main.service import Services
 class AlgorithmEngineService(Services):
 
     def save_new_algorithm_engine(self, data):
-        algorithm_engine = self.get_a_algorithm_engine(self, data)
+        algorithm_engine = self.get_a_algorithm_engine(self, data.get('id'))
 
         if not algorithm_engine:
             new_algorithm_engine = AlgorithmEngine(
-                id=data.get('id'),
                 el_criteria_has_criterion_id=data.get('el_criteria_has_criterion_id'),
                 parent_id=data.get('parent_id'),
                 parent_path=data.get('parent_path'),
@@ -32,8 +31,7 @@ class AlgorithmEngineService(Services):
             }
             return response_object, 409
 
-    def get_a_algorithm_engine(self, data):
+    def get_a_algorithm_engine(self, id):
         return DbSession.query(AlgorithmEngine).filter(
-            AlgorithmEngine.pk==data.get('pk'),
-            AlgorithmEngine.id==data.get('id'),
+            AlgorithmEngine.id==id
         ).first()

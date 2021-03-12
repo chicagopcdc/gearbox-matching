@@ -60,10 +60,10 @@ insert into `el_criteria_has_criterion` (`id`, `criterion_id`, `eligibility_crit
 insert into `el_criteria_has_criterion` (`id`, `criterion_id`, `eligibility_criteria_id`, `value_id`) values (4, 4, 4, 4);
 insert into `el_criteria_has_criterion` (`id`, `criterion_id`, `eligibility_criteria_id`, `value_id`) values (5, 5, 5, 5);
 
-insert into `algorithm_engine` (`pk`, `id`, `el_criteria_has_criterion_id`, `parent_path`) values (1, 1, 1, 'parent_path1');
-insert into `algorithm_engine` (`pk`, `id`, `el_criteria_has_criterion_id`, `parent_path`) values (2, 2, 2, 'parent_path2');
+insert into `algorithm_engine` (`id`, `el_criteria_has_criterion_id`, `parent_id`, `parent_path`) values (1, 1, 1, 'parent_path1');
+insert into `algorithm_engine` (`id`, `el_criteria_has_criterion_id`, `parent_id`, `parent_path`) values (2, 2, 1, 'parent_path2');
 
-insert into `study_algorithm_engine` (`study_version_id`, `algorithm_engine_pk`, `algorithm_engine_id`) values (1, 1, 1);
+insert into `study_algorithm_engine` (`study_version_id`, `algorithm_engine_id`) values (1, 1);
 
 insert into `display_rules` (`id`, `criterion_id`, `priority`) values (1, 1, 1);
 insert into `display_rules` (`id`, `criterion_id`, `priority`) values (2, 2, 2);

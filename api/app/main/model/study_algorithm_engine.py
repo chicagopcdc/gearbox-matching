@@ -7,8 +7,7 @@ from . import Base
 class StudyAlgorithmEngine(Base):
     __tablename__ = 'study_algorithm_engine'
     study_version_id = Column(Integer, ForeignKey('study_version.id'), primary_key=True)
-    algorithm_engine_pk = Column(Integer, ForeignKey('algorithm_engine.pk'), primary_key=True)
-    algorithm_engine_id = Column(Integer)
+    algorithm_engine_id = Column(Integer, ForeignKey('algorithm_engine.id'), primary_key=True)
     start_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
 

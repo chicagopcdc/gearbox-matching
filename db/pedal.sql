@@ -258,13 +258,12 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `pedal_dev_v_0`.`algorithm_engine` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`algorithm_engine` (
-  `pk` INT NOT NULL AUTO_INCREMENT,
-  `id` INT NOT NULL,
-  `el_criteria_has_criterion_id` INT NULL,
-  `parent_id` INT NULL,
-  `parent_path` VARCHAR(512) NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `el_criteria_has_criterion_id` INT NOT NULL,
+  `parent_id` INT NOT NULL,
+  `parent_path` VARCHAR(512) NOT NULL,
   `operator` VARCHAR(45) NULL,
-  PRIMARY KEY (`pk`),
+  PRIMARY KEY (`id`),
   INDEX `fk_algorithm_engine_el_criteria_has_criterion1_idx` (`el_criteria_has_criterion_id` ASC),
   CONSTRAINT `fk_algorithm_engine_el_criteria_has_criterion1`
     FOREIGN KEY (`el_criteria_has_criterion_id`)
@@ -281,21 +280,20 @@ DROP TABLE IF EXISTS `pedal_dev_v_0`.`study_algorithm_engine` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`study_algorithm_engine` (
   `study_version_id` INT NOT NULL,
-  `algorithm_engine_pk` INT NOT NULL,
   `algorithm_engine_id` INT NOT NULL,
   `start_date` DATETIME NULL,
   `active` TINYINT NULL,
-  PRIMARY KEY (`study_version_id`, `algorithm_engine_pk`),
+  PRIMARY KEY (`study_version_id`, `algorithm_engine_id`),
   INDEX `fk_study_algorithm_engine_study_version1_idx` (`study_version_id` ASC),
-  INDEX `fk_study_algorithm_engine_algorithm_engine1_pkx` (`algorithm_engine_pk` ASC),
+  INDEX `fk_study_algorithm_engine_algorithm_engine1_idx` (`algorithm_engine_id` ASC),
   CONSTRAINT `fk_study_algorithm_engine_study_version1`
     FOREIGN KEY (`study_version_id`)
     REFERENCES `pedal_dev_v_0`.`study_version` (`id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE,
   CONSTRAINT `fk_study_algorithm_engine_algorithm_engine1`
-    FOREIGN KEY (`algorithm_engine_pk`)
-    REFERENCES `pedal_dev_v_0`.`algorithm_engine` (`pk`)
+    FOREIGN KEY (`algorithm_engine_id`)
+    REFERENCES `pedal_dev_v_0`.`algorithm_engine` (`id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB;

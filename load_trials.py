@@ -53,7 +53,7 @@ create('criterion_has_tag', None)
 create('eligibility_criteria', ['id', 'create_date'])
 create('el_criteria_has_criterion', ['id'])
 
-create('algorithm_engine', ['pk'])
+create('algorithm_engine', ['id'])
 
 create('study_algorithm_engine', None)
 
