@@ -32,10 +32,10 @@ def test_scope(eligibility_criteria_has_noteA, eligibility_criteria_has_noteB, a
 
 def test_eligibility_criteria_has_note_info(eligibility_criteria_has_noteA, eligibility_criteria_has_noteB, app, session):
     for echn in [eligibility_criteria_has_noteA.as_dict(), eligibility_criteria_has_noteB.as_dict()]:
-        with app.test_request_context("/eligibility_criteria_has_note/{}-{}".format(echn['eligibility_criteria_id'], echn['note_id']), method="GET"):
-            pid = "{}-{}".format(echn['eligibility_criteria_id'], echn['note_id'])
+        with app.test_request_context("/eligibility_criteria_has_note/{}".format(echn['eligibility_criteria_id']), method="GET"):
+            pid = "{}".format(echn['eligibility_criteria_id'])
             response = EligibilityCriteriaHasNoteInfo().get(pid)
-            assert pid == "{}-{}".format(response['eligibility_criteria_id'], response['note_id'])
+            assert pid == "{}".format(response['eligibility_criteria_id'])
 
 
 def test_all_eligibility_criteria_has_notes_info(eligibility_criteria_has_noteA, eligibility_criteria_has_noteB, app, session):
@@ -51,7 +51,7 @@ def test_all_eligibility_criteria_has_notes_info(eligibility_criteria_has_noteA,
 
 
 def test_create_eligibility_criteria_has_note(app, session):
-    payload = {'eligibility_criteria_id': 1, 'note_id': 2}
+    payload = {'eligibility_criteria_id': 4, 'note_id': 3}
     with app.test_request_context("/eligibility_criteria_has_note/create_eligibility_criteria_has_note", method="POST", json=payload):
         response, status_code = Create().post()
         print (response)
@@ -64,8 +64,8 @@ def test_scope_again(app, session):
         table_data = response.json['body']
         payload_seen = 0
         for row in table_data:
-            pid = "{}-{}".format(row['eligibility_criteria_id'], row['note_id'])
-            if pid == '1-2':
+            pid = "{}*{}".format(row['eligibility_criteria_id'], row['note_id'])
+            if pid == '4*3':
                 payload_seen = 1
         assert payload_seen == 1
 
@@ -73,7 +73,7 @@ def test_scope_again(app, session):
 def test_update_eligibility_criteria_has_note(eligibility_criteria_has_noteA, eligibility_criteria_has_noteB, app, session):
     #basic update test
     eligibility_criteria_has_noteA_dict = eligibility_criteria_has_noteA.as_dict()
-    pidA = "{}-{}".format(eligibility_criteria_has_noteA_dict['eligibility_criteria_id'], eligibility_criteria_has_noteA_dict['note_id'])
+    pidA = "{}".format(eligibility_criteria_has_noteA_dict['eligibility_criteria_id'])
     payload = {'note_id': 3}
     
     with app.test_request_context("/eligibility_criteria_has_note/update_eligibility_criteria_has_note/{}".format(pidA), method="PUT", json=payload):
@@ -85,7 +85,7 @@ def test_update_eligibility_criteria_has_note(eligibility_criteria_has_noteA, el
 
 def test_delete_eligibility_criteria_has_note(eligibility_criteria_has_noteA, eligibility_criteria_has_noteB, app, session):
     eligibility_criteria_has_noteA_dict = eligibility_criteria_has_noteA.as_dict()
-    pidA = "{}-{}".format(eligibility_criteria_has_noteA_dict['eligibility_criteria_id'], eligibility_criteria_has_noteA_dict['note_id'])
+    pidA = "{}".format(eligibility_criteria_has_noteA_dict['eligibility_criteria_id'])
 
     with app.test_request_context("/eligibility_criteria_has_note/delete_eligibility_criteria_has_note/{}".format(pidA), method="DELETE"):
         response = Delete().delete(pidA)

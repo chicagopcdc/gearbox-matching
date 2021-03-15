@@ -21,13 +21,7 @@ class ElCriteriaHasCriterionInfo(Resource):
     @api.doc('get a el_criteria_has_criterion')
     @api.marshal_with(_el_criteria_has_criterion)
     def get(self, public_id):
-        pid = public_id.split('-')
-        data = {
-            'criterion_id': pid[0],
-            'eligibility_criteria_id': pid[1],
-            'value_id': pid[2],            
-        }
-        el_criteria_has_criterion = ElCriteriaHasCriterionService.get_a_el_criteria_has_criterion(self, data)
+        el_criteria_has_criterion = ElCriteriaHasCriterionService.get_a_el_criteria_has_criterion(self, public_id)
         if not el_criteria_has_criterion:
             api.abort(404, message="el_criteria_has_criterion '{}' not found".format(public_id))
         else:
@@ -84,15 +78,7 @@ class Update(Resource):
         data = api.payload
         if not data or not isinstance(data, dict):
             api.abort(400, message="null payload or payload not json/dict")
-
-        #retrieve the el_criteria_has_criterion to be updated
-        pid = public_id.split('-')
-        pid_data = {
-            'criterion_id': pid[0],
-            'eligibility_criteria_id': pid[1],
-            'value_id': pid[2],
-        }
-        el_criteria_has_criterion = ElCriteriaHasCriterionService.get_a_el_criteria_has_criterion(self, pid_data)
+        el_criteria_has_criterion = ElCriteriaHasCriterionService.get_a_el_criteria_has_criterion(self, public_id)
         if not el_criteria_has_criterion:
             api.abort(404, message="el_criteria_has_criterion '{}' not found".format(public_id))
 
@@ -115,13 +101,7 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a el_criteria_has_criterion')
     def delete(self, public_id):
-        pid = public_id.split('-')
-        pid_data = {
-            'criterion_id': pid[0],
-            'eligibility_criteria_id': pid[1],
-            'value_id': pid[2],
-        }
-        el_criteria_has_criterion = ElCriteriaHasCriterionService.get_a_el_criteria_has_criterion(self, pid_data)
+        el_criteria_has_criterion = ElCriteriaHasCriterionService.get_a_el_criteria_has_criterion(self, public_id)
         if not el_criteria_has_criterion:
             api.abort(404, message="el_criteria_has_criterion '{}' not found".format(public_id))
 

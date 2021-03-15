@@ -32,10 +32,10 @@ def test_scope(study_algorithm_engineA, study_algorithm_engineB, app, session):
 
 def test_study_algorithm_engine_info(study_algorithm_engineA, study_algorithm_engineB, app, session):
     for sag in [study_algorithm_engineA.as_dict(), study_algorithm_engineB.as_dict()]:
-        with app.test_request_context("/study_algorithm_engine/{}-{}".format(sag['study_version_id'], sag['algorithm_engine_id']), method="GET"):
-            pid = "{}-{}".format(sag['study_version_id'], sag['algorithm_engine_id'])
+        with app.test_request_context("/study_algorithm_engine/{}".format(sag['study_version_id']), method="GET"):
+            pid = "{}".format(sag['study_version_id'])
             response = StudyAlgorithmEngineInfo().get(pid)
-            assert pid == "{}-{}".format(response['study_version_id'], response['algorithm_engine_id'])
+            assert pid == "{}".format(response['study_version_id'])
 
 
 def test_all_study_algorithm_engines_info(study_algorithm_engineA, study_algorithm_engineB, app, session):
@@ -51,7 +51,7 @@ def test_all_study_algorithm_engines_info(study_algorithm_engineA, study_algorit
 
 
 def test_create_study_algorithm_engine(app, session):
-    payload = {'study_version_id': 3, 'algorithm_engine_id': 2}
+    payload = {'study_version_id': 4, 'algorithm_engine_id': 2}
     with app.test_request_context("/study_algorithm_engine/create_study_algorithm_engine", method="POST", json=payload):
         response, status_code = Create().post()
         print (response)
@@ -64,8 +64,8 @@ def test_scope_again(app, session):
         table_data = response.json['body']
         payload_seen = 0
         for row in table_data:
-            pid = "{}-{}".format(row['study_version_id'], row['algorithm_engine_id'])
-            if pid == '3-2':
+            pid = "{}".format(row['study_version_id'])
+            if pid == '4':
                 payload_seen = 1
         assert payload_seen == 1
 
@@ -73,7 +73,7 @@ def test_scope_again(app, session):
 def test_update_study_algorithm_engine(study_algorithm_engineA, study_algorithm_engineB, app, session):
     #basic update test
     study_algorithm_engineA_dict = study_algorithm_engineA.as_dict()
-    pidA = "{}-{}".format(study_algorithm_engineA_dict['study_version_id'], study_algorithm_engineA_dict['algorithm_engine_id'])
+    pidA = "{}".format(study_algorithm_engineA_dict['study_version_id'])
     payload = {'active': 1}
     
     with app.test_request_context("/study_algorithm_engine/update_study_algorithm_engine/{}".format(pidA), method="PUT", json=payload):
@@ -85,7 +85,7 @@ def test_update_study_algorithm_engine(study_algorithm_engineA, study_algorithm_
 
 def test_delete_study_algorithm_engine(study_algorithm_engineA, study_algorithm_engineB, app, session):
     study_algorithm_engineA_dict = study_algorithm_engineA.as_dict()
-    pidA = "{}-{}".format(study_algorithm_engineA_dict['study_version_id'], study_algorithm_engineA_dict['algorithm_engine_id'])
+    pidA = "{}".format(study_algorithm_engineA_dict['study_version_id'])
 
     with app.test_request_context("/study_algorithm_engine/delete_study_algorithm_engine/{}".format(pidA), method="DELETE"):
         response = Delete().delete(pidA)

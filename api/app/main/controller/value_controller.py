@@ -21,12 +21,7 @@ class ValueInfo(Resource):
     @api.doc('get a value')
     @api.marshal_with(_value)
     def get(self, public_id):
-        pid = public_id.split('-')
-        pid_data = {
-            'code': pid[0],
-            'value_string': pid[1],
-        }        
-        value = ValueService.get_a_value(self, pid_data)
+        value = ValueService.get_a_value(self, public_id)
         if not value:
             api.abort(404, message="value '{}' not found".format(public_id))
         else:
@@ -83,14 +78,7 @@ class Update(Resource):
         data = api.payload
         if not data or not isinstance(data, dict):
             api.abort(400, message="null payload or payload not json/dict")
-
-        #retrieve the value to be updated
-        pid = public_id.split('-')
-        pid_data = {
-            'code': pid[0],
-            'value_string': pid[1],
-        }
-        value = ValueService.get_a_value(self, pid_data)
+        value = ValueService.get_a_value(self, public_id)
         if not value:
             api.abort(404, message="value '{}' not found".format(public_id))
 
@@ -113,12 +101,7 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a value')
     def delete(self, public_id):
-        pid = public_id.split('-')
-        pid_data = {
-            'code': pid[0],
-            'value_string': pid[1],
-        }
-        value = ValueService.get_a_value(self, pid_data)
+        value = ValueService.get_a_value(self, public_id)
         if not value:
             api.abort(404, message="value '{}' not found".format(public_id))
 

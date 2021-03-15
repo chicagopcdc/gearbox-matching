@@ -65,7 +65,7 @@ Tests use (and require) the pre-set data, in `./db/pedal_populate.sql`.
 
 When running tests, new data is created in the tests themselves and flushed from the session at the end of the tests.
 
-Some tables use the `"code"` field, which can be used as a lookup code. Those that do not have `"code"` use primary keys, packages as dash separated ids (int), i.e. using the format `{}-{}-...`.
+Some tables use the `"code"` field, which can be used as a lookup code. Those that do not have `"code"` use a primary key.
 
 ## Stop Docker Compose
 

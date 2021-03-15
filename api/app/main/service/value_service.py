@@ -8,11 +8,10 @@ from app.main.service import Services
 class ValueService(Services):
 
     def save_new_value(self, data):
-        value = self.get_a_value(self, data)
+        value = self.get_a_value(self, data.get('id'))
 
         if not value:
             new_value = Value(
-                id=data.get('id'),
                 code=data.get('code'),
                 type=data.get('type'),
                 value_string=data.get('value_string'),
@@ -38,8 +37,7 @@ class ValueService(Services):
             }
             return response_object, 409
 
-    def get_a_value(self, data):
+    def get_a_value(self, id):
         return DbSession.query(Value).filter(
-            Value.code==data.get('code'),
-            Value.value_string==data.get('value_string'),
+            Value.id==id
          ).first()

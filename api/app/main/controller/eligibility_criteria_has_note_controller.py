@@ -21,12 +21,7 @@ class EligibilityCriteriaHasNoteInfo(Resource):
     @api.doc('get a eligibility_criteria_has_note')
     @api.marshal_with(_eligibility_criteria_has_note)
     def get(self, public_id):
-        pid = public_id.split('-')
-        data = {
-            'eligibility_criteria_id': pid[0],
-            'note_id': pid[1]
-        }
-        eligibility_criteria_has_note = EligibilityCriteriaHasNoteService.get_a_eligibility_criteria_has_note(self, data)
+        eligibility_criteria_has_note = EligibilityCriteriaHasNoteService.get_a_eligibility_criteria_has_note(self, public_id)
         if not eligibility_criteria_has_note:
             api.abort(404, message="eligibility_criteria_has_note '{}' not found".format(public_id))
         else:
@@ -83,14 +78,7 @@ class Update(Resource):
         data = api.payload
         if not data or not isinstance(data, dict):
             api.abort(400, message="null payload or payload not json/dict")
-
-        #retrieve the eligibility_criteria_has_note to be updated
-        pid = public_id.split('-')
-        pid_data = {
-            'eligibility_criteria_id': pid[0],
-            'note_id': pid[1]
-        }
-        eligibility_criteria_has_note = EligibilityCriteriaHasNoteService.get_a_eligibility_criteria_has_note(self, pid_data)
+        eligibility_criteria_has_note = EligibilityCriteriaHasNoteService.get_a_eligibility_criteria_has_note(self, public_id)
         if not eligibility_criteria_has_note:
             api.abort(404, message="eligibility_criteria_has_note '{}' not found".format(public_id))
 
@@ -113,12 +101,7 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a eligibility_criteria_has_note')
     def delete(self, public_id):
-        pid = public_id.split('-')
-        pid_data = {
-            'eligibility_criteria_id': pid[0],
-            'note_id': pid[1]
-        }
-        eligibility_criteria_has_note = EligibilityCriteriaHasNoteService.get_a_eligibility_criteria_has_note(self, pid_data)
+        eligibility_criteria_has_note = EligibilityCriteriaHasNoteService.get_a_eligibility_criteria_has_note(self, public_id)
         if not eligibility_criteria_has_note:
             api.abort(404, message="eligibility_criteria_has_note '{}' not found".format(public_id))
 

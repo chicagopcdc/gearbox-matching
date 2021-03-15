@@ -9,7 +9,7 @@ from app.main.service import Services
 class StudyAlgorithmEngineService(Services):
 
     def save_new_study_algorithm_engine(self, data):
-        study_algorithm_engine = self.get_a_study_algorithm_engine(self, data)
+        study_algorithm_engine = self.get_a_study_algorithm_engine(self, data.get('study_version_id'))
 
         if not study_algorithm_engine:
             new_study_algorithm_engine = StudyAlgorithmEngine(
@@ -32,8 +32,7 @@ class StudyAlgorithmEngineService(Services):
             return response_object, 409
 
 
-    def get_a_study_algorithm_engine(self, data):
+    def get_a_study_algorithm_engine(self, study_version_id):
         return DbSession.query(StudyAlgorithmEngine).filter(
-            StudyAlgorithmEngine.study_version_id==data['study_version_id'],
-            StudyAlgorithmEngine.algorithm_engine_id==data['algorithm_engine_id'],
+            StudyAlgorithmEngine.study_version_id==study_version_id
         ).first()

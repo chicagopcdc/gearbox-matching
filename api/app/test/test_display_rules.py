@@ -63,7 +63,7 @@ def test_scope_again(app, session):
         table_data = response.json['body']
         payload_seen = 0
         for row in table_data:
-            criterion_id = str(row['id'])
+            criterion_id = str(row['criterion_id'])
             if str(criterion_id) == '5':
                 payload_seen = 1
         assert payload_seen == 1

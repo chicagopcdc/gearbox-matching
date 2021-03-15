@@ -31,10 +31,10 @@ def test_scope(el_criteria_has_criterionA, el_criteria_has_criterionB, app, sess
 
 def test_el_criteria_has_criterion_info(el_criteria_has_criterionA, el_criteria_has_criterionB, app, session):
     for echc in [el_criteria_has_criterionA.as_dict(), el_criteria_has_criterionB.as_dict()]:
-        with app.test_request_context("/el_criteria_has_criterion/{}-{}".format(echc['criterion_id'], echc['eligibility_criteria_id'], echc['value_id']), method="GET"):
-            pid = "{}-{}-{}".format(echc['criterion_id'], echc['eligibility_criteria_id'], echc['value_id'])
+        with app.test_request_context("/el_criteria_has_criterion/{}".format(echc['id']), method="GET"):
+            pid = "{}".format(echc['id'])
             response = ElCriteriaHasCriterionInfo().get(pid)
-            assert pid == "{}-{}-{}".format(response['criterion_id'], response['eligibility_criteria_id'], response['value_id'])
+            assert pid == "{}".format(response['id'])
 
 
 def test_all_el_criteria_has_criterions_info(el_criteria_has_criterionA, el_criteria_has_criterionB, app, session):
@@ -63,8 +63,8 @@ def test_scope_again(app, session):
         table_data = response.json['body']
         payload_seen = 0
         for row in table_data:
-            pid = "{}-{}-{}".format(row['criterion_id'], row['eligibility_criteria_id'], row['value_id'])
-            if pid == '2-3-3':
+            pid = "{}*{}*{}".format(row['criterion_id'], row['eligibility_criteria_id'], row['value_id'])
+            if pid == '2*3*3':
                 payload_seen = 1
         assert payload_seen == 1
 
@@ -72,7 +72,7 @@ def test_scope_again(app, session):
 def test_update_el_criteria_has_criterion(el_criteria_has_criterionA, el_criteria_has_criterionB, app, session):
     #basic update test
     el_criteria_has_criterionA_dict = el_criteria_has_criterionA.as_dict()
-    pidA = "{}-{}-{}".format(el_criteria_has_criterionA_dict['criterion_id'], el_criteria_has_criterionA_dict['eligibility_criteria_id'], el_criteria_has_criterionA_dict['value_id'])
+    pidA = "{}".format(el_criteria_has_criterionA_dict['id'])
     payload = {'active': 1} #update the name for el_criteria_has_criterionA
     with app.test_request_context("/el_criteria_has_criterion/update_el_criteria_has_criterion/{}".format(pidA), method="PUT", json=payload):
         response = Update().put(pidA)
@@ -83,7 +83,7 @@ def test_update_el_criteria_has_criterion(el_criteria_has_criterionA, el_criteri
 
 def test_delete_el_criteria_has_criterion(el_criteria_has_criterionA, el_criteria_has_criterionB, app, session):
     el_criteria_has_criterionA_dict = el_criteria_has_criterionA.as_dict()
-    pidA = "{}-{}-{}".format(el_criteria_has_criterionA_dict['criterion_id'], el_criteria_has_criterionA_dict['eligibility_criteria_id'], el_criteria_has_criterionA_dict['value_id'])
+    pidA = "{}".format(el_criteria_has_criterionA_dict['id'])
 
     with app.test_request_context("/el_criteria_has_criterion/delete_el_criteria_has_criterion/{}".format(pidA), method="DELETE"):
         response = Delete().delete(pidA)

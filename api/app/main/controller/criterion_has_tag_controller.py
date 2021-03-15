@@ -21,12 +21,7 @@ class CriterionHasTagInfo(Resource):
     @api.doc('get a criterion_has_tag')
     @api.marshal_with(_criterion_has_tag)
     def get(self, public_id):
-        pid = public_id.split('-')
-        data = {
-            'criterion_id': pid[0],
-            'tag_id': pid[1],
-        }
-        criterion_has_tag = CriterionHasTagService.get_a_criterion_has_tag(self, data)
+        criterion_has_tag = CriterionHasTagService.get_a_criterion_has_tag(self, public_id)
         if not criterion_has_tag:
             api.abort(404, message="criterion_has_tag '{}' not found".format(public_id))
         else:
@@ -83,14 +78,7 @@ class Update(Resource):
         data = api.payload
         if not data or not isinstance(data, dict):
             api.abort(400, message="null payload or payload not json/dict")
-
-        #retrieve the criterion_has_tag to be updated
-        pid = public_id.split('-')
-        pid_data = {
-            'criterion_id': pid[0],
-            'tag_id': pid[1],
-        }
-        criterion_has_tag = CriterionHasTagService.get_a_criterion_has_tag(self, pid_data)
+        criterion_has_tag = CriterionHasTagService.get_a_criterion_has_tag(self, public_id)
         if not criterion_has_tag:
             api.abort(404, message="criterion_has_tag '{}' not found".format(public_id))
 
@@ -113,12 +101,7 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a criterion_has_tag')
     def delete(self, public_id):
-        pid = public_id.split('-')
-        pid_data = {
-            'criterion_id': pid[0],
-            'tag_id': pid[1],
-        }
-        criterion_has_tag = CriterionHasTagService.get_a_criterion_has_tag(self, pid_data)
+        criterion_has_tag = CriterionHasTagService.get_a_criterion_has_tag(self, public_id)
         if not criterion_has_tag:
             api.abort(404, message="criterion_has_tag '{}' not found".format(public_id))
 

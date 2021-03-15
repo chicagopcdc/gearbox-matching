@@ -31,10 +31,10 @@ def test_scope(valueA, valueB, app, session):
 
 def test_value_info(valueA, valueB, app, session):
     for val in [valueA.as_dict(), valueB.as_dict()]:
-        with app.test_request_context("/value/{}-{}".format(val['code'], val['value_string']), method="GET"):
-            pid = "{}-{}".format(val['code'], val['value_string'])
+        with app.test_request_context("/value/{}".format(val['id']), method="GET"):
+            pid = "{}".format(val['id'])
             response = ValueInfo().get(pid)
-            assert pid == "{}-{}".format(response['code'], response['value_string'])
+            assert pid == "{}".format(response['id'])
 
 
 def test_all_values_info(valueA, valueB, app, session):
@@ -63,8 +63,8 @@ def test_scope_again(app, session):
         table_data = response.json['body']
         payload_seen = 0
         for row in table_data:
-            pid = "{}-{}".format(row['code'], row['value_string'])
-            if pid == 'thisCode-this_val_str':
+            pid = "{}*{}".format(row['code'], row['value_string'])
+            if pid == 'thisCode*this_val_str':
                 payload_seen = 1
         assert payload_seen == 1
 
@@ -72,7 +72,7 @@ def test_scope_again(app, session):
 def test_update_value(valueA, valueB, app, session):
     #basic update test
     valueA_dict = valueA.as_dict()
-    pidA = "{}-{}".format(valueA_dict['code'], valueA_dict['value_string'])
+    pidA = "{}".format(valueA_dict['id'])
     payload = {'value_string': 'this_other_value_str'}
     with app.test_request_context("/value/update_value/{}".format(pidA), method="PUT", json=payload):
         response = Update().put(pidA)
@@ -83,7 +83,7 @@ def test_update_value(valueA, valueB, app, session):
 
 def test_delete_value(valueA, valueB, app, session):
     valueA_dict = valueA.as_dict()
-    pidA = "{}-{}".format(valueA_dict['code'], valueA_dict['value_string'])
+    pidA = "{}".format(valueA_dict['id'])
 
     with app.test_request_context("/value/delete_value/{}".format(pidA), method="DELETE"):
         response = Delete().delete(pidA)

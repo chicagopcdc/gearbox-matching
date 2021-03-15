@@ -8,11 +8,10 @@ from app.main.service import Services
 class ElCriteriaHasCriterionService(Services):
 
     def save_new_el_criteria_has_criterion(self, data):
-        el_criteria_has_criterion = self.get_a_el_criteria_has_criterion(self, data)
+        el_criteria_has_criterion = self.get_a_el_criteria_has_criterion(self, data.get('id'))
 
         if not el_criteria_has_criterion:
             new_el_criteria_has_criterion = ElCriteriaHasCriterion(
-                id=data.get('id'),
                 criterion_id=data.get('criterion_id'),
                 eligibility_criteria_id=data.get('eligibility_criteria_id'),
                 create_date=datetime.datetime.utcnow(),
@@ -32,9 +31,7 @@ class ElCriteriaHasCriterionService(Services):
             }
             return response_object, 409
 
-    def get_a_el_criteria_has_criterion(self, data):
+    def get_a_el_criteria_has_criterion(self, id):
         return DbSession.query(ElCriteriaHasCriterion).filter(
-            ElCriteriaHasCriterion.criterion_id==data['criterion_id'],
-            ElCriteriaHasCriterion.eligibility_criteria_id==data['eligibility_criteria_id'],
-            ElCriteriaHasCriterion.value_id==data['value_id'],            
+            ElCriteriaHasCriterion.id==id
         ).first()

@@ -21,12 +21,7 @@ class StudyAlgorithmEngineInfo(Resource):
     @api.doc('get a study_algorithm_engine')
     @api.marshal_with(_study_algorithm_engine)
     def get(self, public_id):
-        pid = public_id.split('-')
-        data = {
-            'study_version_id': pid[0],
-            'algorithm_engine_id': pid[1],
-        }
-        study_algorithm_engine = StudyAlgorithmEngineService.get_a_study_algorithm_engine(self, data)
+        study_algorithm_engine = StudyAlgorithmEngineService.get_a_study_algorithm_engine(self, public_id)
         if not study_algorithm_engine:
             api.abort(404, message="study_algorithm_engine '{}' not found".format(public_id))
         else:
@@ -83,14 +78,7 @@ class Update(Resource):
         data = api.payload
         if not data or not isinstance(data, dict):
             api.abort(400, message="null payload or payload not json/dict")
-
-        #retrieve the study_algorithm_engine to be updated
-        pid = public_id.split('-')
-        pid_data = {
-            'study_version_id': pid[0],
-            'algorithm_engine_id': pid[1],
-        }
-        study_algorithm_engine = StudyAlgorithmEngineService.get_a_study_algorithm_engine(self, pid_data)
+        study_algorithm_engine = StudyAlgorithmEngineService.get_a_study_algorithm_engine(self, public_id)
         if not study_algorithm_engine:
             api.abort(404, message="study_algorithm_engine '{}' not found".format(public_id))
 
@@ -113,12 +101,7 @@ class Update(Resource):
 class Delete(Resource):
     @api.doc('delete a study_algorithm_engine')
     def delete(self, public_id):
-        pid = public_id.split('-')
-        pid_data = {
-            'study_version_id': pid[0],
-            'algorithm_engine_id': pid[1],
-        }
-        study_algorithm_engine = StudyAlgorithmEngineService.get_a_study_algorithm_engine(self, pid_data)
+        study_algorithm_engine = StudyAlgorithmEngineService.get_a_study_algorithm_engine(self, public_id)
         if not study_algorithm_engine:
             api.abort(404, message="study_algorithm_engine '{}' not found".format(public_id))
 
