@@ -16,8 +16,9 @@ insert into `study` (`id`, `name`, `code`) values (11, 'study', 'study11');
 insert into `study` (`id`, `name`, `code`) values (12, 'study', 'study12');
 
 insert into `site` (`id`, `name`, `code`) values (1, 'site 1', 'site1');
-
-insert into `site_has_study` (`site_id`, `study_id`) values (1, 1);
+insert into `site` (`id`, `name`, `code`) values (2, 'site 2', 'site2');
+insert into `site` (`id`, `name`, `code`) values (3, 'site 3', 'site3');
+insert into `site` (`id`, `name`, `code`) values (4, 'site 4', 'site4');
 
 insert into `study_version` (`id`, `study_id`) values (1, 1);
 insert into `study_version` (`id`, `study_id`) values (2, 2);
