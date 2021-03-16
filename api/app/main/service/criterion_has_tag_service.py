@@ -8,7 +8,7 @@ from app.main.service import Services
 class CriterionHasTagService(Services):
 
     def save_new_criterion_has_tag(self, data):
-        criterion_has_tag = self.get_a_criterion_has_tag(self, data.get('criterion_id'))
+        criterion_has_tag = self.get_a_criterion_has_tag(self, data)
 
         if not criterion_has_tag:
             new_criterion_has_tag = CriterionHasTag(
@@ -28,8 +28,9 @@ class CriterionHasTagService(Services):
             }
             return response_object, 409
 
-    def get_a_criterion_has_tag(self, criterion_id):
+    def get_a_criterion_has_tag(self, data):
         return DbSession.query(CriterionHasTag).filter(
-            CriterionHasTag.criterion_id==criterion_id
+            CriterionHasTag.criterion_id==data.get('criterion_id'),
+            CriterionHasTag.tag_id==data.get('tag_id')
         ).first()
 

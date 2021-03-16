@@ -15,15 +15,17 @@ api = CriterionHasTagDto.api
 _criterion_has_tag = CriterionHasTagDto.criterion_has_tag
 
 
-@api.route('/<public_id>')
-@api.param('public_id', 'The CriterionHasTag identifier')
+@api.route('')
 class CriterionHasTagInfo(Resource):
     @api.doc('get a criterion_has_tag')
     @api.marshal_with(_criterion_has_tag)
-    def get(self, public_id):
-        criterion_has_tag = CriterionHasTagService.get_a_criterion_has_tag(self, public_id)
+    def get(self):
+        data = api.payload
+        if not data or not isinstance(data, dict):
+            api.abort(400, message="null payload or payload not json/dict")
+        criterion_has_tag = CriterionHasTagService.get_a_criterion_has_tag(self, data)
         if not criterion_has_tag:
-            api.abort(404, message="criterion_has_tag '{}' not found".format(public_id))
+            api.abort(404, message="criterion_has_tag '{}' not found".format(data))
         else:
             return criterion_has_tag.as_dict()
 
@@ -70,40 +72,16 @@ class Create(Resource):
             logging.error(e, exc_info=True)
 
 
-@api.route('/update_criterion_has_tag/<public_id>')
-@api.param('public_id', 'The CriterionHasTag identifier')
-class Update(Resource):
-    @api.doc('update an existing criterion_has_tag')
-    def put(self, public_id):
+@api.route('/delete_criterion_has_tag')
+class Delete(Resource):
+    @api.doc('delete a criterion_has_tag')
+    def delete(self):
         data = api.payload
         if not data or not isinstance(data, dict):
             api.abort(400, message="null payload or payload not json/dict")
-        criterion_has_tag = CriterionHasTagService.get_a_criterion_has_tag(self, public_id)
+        criterion_has_tag = CriterionHasTagService.get_a_criterion_has_tag(self, data)
         if not criterion_has_tag:
-            api.abort(404, message="criterion_has_tag '{}' not found".format(public_id))
-
-        #set new key/values
-        allowed_keys = criterion_has_tag.as_dict().keys()
-        for key in data.keys():
-            if key in allowed_keys:
-                #DO NOT PREVENT PRIMARY KEY CHANGES
-                setattr(criterion_has_tag, key, data[key])
-        try:
-            CriterionHasTagService.commit()
-            return criterion_has_tag.as_dict()
-        except Exception as e:
-            logging.error(e, exc_info=True)
-            return e
-
-
-@api.route('/delete_criterion_has_tag/<public_id>')
-@api.param('public_id', 'The CriterionHasTag identifier')
-class Delete(Resource):
-    @api.doc('delete a criterion_has_tag')
-    def delete(self, public_id):
-        criterion_has_tag = CriterionHasTagService.get_a_criterion_has_tag(self, public_id)
-        if not criterion_has_tag:
-            api.abort(404, message="criterion_has_tag '{}' not found".format(public_id))
+            api.abort(404, message="criterion_has_tag '{}' not found".format(data))
 
         try:
             CriterionHasTagService.delete(criterion_has_tag)

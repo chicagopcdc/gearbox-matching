@@ -2,7 +2,7 @@ import json
 import pytest
 
 from app.main.model.criterion_has_tag import CriterionHasTag
-from app.main.controller.criterion_has_tag_controller import CriterionHasTagInfo, AllCriterionHasTagsInfo, Create, Update, Delete
+from app.main.controller.criterion_has_tag_controller import CriterionHasTagInfo, AllCriterionHasTagsInfo, Create, Delete
 
 
 @pytest.fixture(scope="module")
@@ -31,10 +31,10 @@ def test_scope(criterion_has_tagA, criterion_has_tagB, app, session):
 
 def test_criterion_has_tag_info(criterion_has_tagA, criterion_has_tagB, app, session):
     for cht in [criterion_has_tagA.as_dict(), criterion_has_tagB.as_dict()]:
-        with app.test_request_context("/criterion_has_tag/{}".format(cht['criterion_id']), method="GET"):
-            pid = "{}".format(cht['criterion_id'])
-            response = CriterionHasTagInfo().get(pid)
-            assert pid == "{}".format(response['criterion_id'])
+        payload = {'criterion_id': str(cht.get('criterion_id')), 'tag_id': str(cht.get('tag_id'))}
+        with app.test_request_context("/criterion_has_tag", method="GET", json=payload):
+            response = CriterionHasTagInfo().get()
+            assert payload == response
 
 
 def test_all_criterion_has_tags_info(criterion_has_tagA, criterion_has_tagB, app, session):
@@ -69,29 +69,17 @@ def test_scope_again(app, session):
         assert payload_seen == 1
 
 
-def test_update_criterion_has_tag(criterion_has_tagA, criterion_has_tagB, app, session):
-    #basic update test
-    criterion_has_tagA_dict = criterion_has_tagA.as_dict()
-    pidA = "{}".format(criterion_has_tagA_dict['criterion_id'])
-    payload = {'tag_id': 2, 'criterion_id': 4}
-    with app.test_request_context("/criterion_has_tag/update_criterion_has_tag/{}".format(pidA), method="PUT", json=payload):
-        response = Update().put(pidA)
-        expected_response = criterion_has_tagA_dict
-        expected_response.update(payload)
-        assert response == expected_response
-        
-
 def test_delete_criterion_has_tag(criterion_has_tagA, criterion_has_tagB, app, session):
-    criterion_has_tagA_dict = criterion_has_tagA.as_dict()
-    pidA = "{}".format(criterion_has_tagA_dict['criterion_id'])
+    chtA_dict = criterion_has_tagA.as_dict()
+    payload = {'criterion_id': chtA_dict.get('criterion_id'), 'tag_id': chtA_dict.get('tag_id')}
 
-    with app.test_request_context("/criterion_has_tag/delete_criterion_has_tag/{}".format(pidA), method="DELETE"):
-        response = Delete().delete(pidA)
-        assert response == criterion_has_tagA_dict
+    with app.test_request_context("/criterion_has_tag/delete_criterion_has_tag", method="DELETE", json=payload):
+        response = Delete().delete()
+        assert response == chtA_dict
 
     #attempt to get what was deleted (expected 404)
-    with app.test_request_context("/criterion_has_tag/{}".format(pidA), method="GET"):
+    with app.test_request_context("/criterion_has_tag", method="GET", json=payload):
         try:
-            response = CriterionHasTagInfo().get(pidA)
+            response = CriterionHasTagInfo().get()
         except Exception as e:
             assert e.code == 404
