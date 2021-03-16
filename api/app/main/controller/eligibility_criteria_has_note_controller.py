@@ -15,19 +15,21 @@ api = EligibilityCriteriaHasNoteDto.api
 _eligibility_criteria_has_note = EligibilityCriteriaHasNoteDto.eligibility_criteria_has_note
 
 
-@api.route('/<public_id>')
-@api.param('public_id', 'The EligibilityCriteriaHasNote identifier')
+@api.route('')
 class EligibilityCriteriaHasNoteInfo(Resource):
     @api.doc('get a eligibility_criteria_has_note')
     @api.marshal_with(_eligibility_criteria_has_note)
-    def get(self, public_id):
-        eligibility_criteria_has_note = EligibilityCriteriaHasNoteService.get_a_eligibility_criteria_has_note(self, public_id)
+    def get(self):
+        data = api.payload
+        if not data or not isinstance(data, dict):
+            api.abort(400, message="null payload or payload not json/dict")
+        eligibility_criteria_has_note = EligibilityCriteriaHasNoteService.get_a_eligibility_criteria_has_note(self, data)
         if not eligibility_criteria_has_note:
-            api.abort(404, message="eligibility_criteria_has_note '{}' not found".format(public_id))
+            api.abort(404, message="eligibility_criteria_has_note '{}' not found".format(data))
         else:
             return eligibility_criteria_has_note.as_dict()
 
-
+            
 @api.route('/info')
 class AllEligibilityCriteriaHasNotesInfo(Resource):
     def get(self):
@@ -70,40 +72,16 @@ class Create(Resource):
             logging.error(e, exc_info=True)
 
 
-@api.route('/update_eligibility_criteria_has_note/<public_id>')
-@api.param('public_id', 'The EligibilityCriteriaHasNote identifier')
-class Update(Resource):
-    @api.doc('update an existing eligibility_criteria_has_note')
-    def put(self, public_id):
+@api.route('/delete_eligibility_criteria_has_note')
+class Delete(Resource):
+    @api.doc('delete a eligibility_criteria_has_note')
+    def delete(self):
         data = api.payload
         if not data or not isinstance(data, dict):
             api.abort(400, message="null payload or payload not json/dict")
-        eligibility_criteria_has_note = EligibilityCriteriaHasNoteService.get_a_eligibility_criteria_has_note(self, public_id)
+        eligibility_criteria_has_note = EligibilityCriteriaHasNoteService.get_a_eligibility_criteria_has_note(self, data)
         if not eligibility_criteria_has_note:
-            api.abort(404, message="eligibility_criteria_has_note '{}' not found".format(public_id))
-
-        #set new key/values
-        allowed_keys = eligibility_criteria_has_note.as_dict().keys()
-        for key in data.keys():
-            if key in allowed_keys:
-                #DO NOT PREVENT PRIMARY KEY CHANGES
-                setattr(eligibility_criteria_has_note, key, data[key])
-        try:
-            EligibilityCriteriaHasNoteService.commit()
-            return eligibility_criteria_has_note.as_dict()
-        except Exception as e:
-            logging.error(e, exc_info=True)
-            return e
-
-
-@api.route('/delete_eligibility_criteria_has_note/<public_id>')
-@api.param('public_id', 'The EligibilityCriteriaHasNote identifier')
-class Delete(Resource):
-    @api.doc('delete a eligibility_criteria_has_note')
-    def delete(self, public_id):
-        eligibility_criteria_has_note = EligibilityCriteriaHasNoteService.get_a_eligibility_criteria_has_note(self, public_id)
-        if not eligibility_criteria_has_note:
-            api.abort(404, message="eligibility_criteria_has_note '{}' not found".format(public_id))
+            api.abort(404, message="eligibility_criteria_has_note '{}' not found".format(data))
 
         try:
             EligibilityCriteriaHasNoteService.delete(eligibility_criteria_has_note)
