@@ -4,10 +4,10 @@ from sqlalchemy.orm import relationship
 from . import Base
 
 
-class InputTypeHasValue(Base):
-    __tablename__ = 'input_type_has_value'
-    value_id = Column(Integer, ForeignKey('value.id'))
+class CriterionHasValue(Base):
+    __tablename__ = 'criterion_has_value'
     criterion_id = Column(Integer, ForeignKey('criterion.id'), primary_key=True)
+    value_id = Column(Integer, ForeignKey('value.id'))
     create_date = Column(DateTime, nullable=True)
 
     criterion = relationship("Criterion", back_populates="values")

@@ -22,7 +22,7 @@ from .main.controller.input_type_controller import api as input_type_ns
 from .main.controller.value_controller import api as value_ns
 from .main.controller.display_rules_controller import api as display_rules_ns
 from .main.controller.triggered_by_controller import api as triggered_by_ns
-from .main.controller.input_type_has_value_controller import api as input_type_has_value_ns
+from .main.controller.criterion_has_value_controller import api as criterion_has_value_ns
 
 """ MATCH ENDPOINTS """
 from .main.controller.match_controller import api as match_ns
@@ -57,7 +57,7 @@ api.add_namespace(value_ns, path='/value')
 
 api.add_namespace(display_rules_ns, path='/display_rules')
 api.add_namespace(triggered_by_ns, path='/triggered_by')
-api.add_namespace(input_type_has_value_ns, path='/input_type_has_value')
+api.add_namespace(criterion_has_value_ns, path='/criterion_has_value')
 
 """ MATCH ENDPOINTS """
 api.add_namespace(match_ns, path='/match')
