@@ -7,7 +7,7 @@ import requests
 ############################
 
 data_path = '~/Desktop/tables/'
-data_prefix = 'v17/load_trials_v17 - '
+data_prefix = 'v19/load_trials_v19 - '
 host = 'http://0.0.0.0:5000'
 headers = {'Content-type': 'application/json'}
 
@@ -41,19 +41,19 @@ def create(table, ignore):
 ########################################################
 
 
-create('study', ['id', 'create_date'])
-create('study_version', ['id', 'create_date'])
-create('value', ['id'])
-create('input_type', ['id'])
-create('tag', ['id'])
+# create('study', ['id', 'create_date'])
+# create('study_version', ['id', 'create_date'])
+# create('value', ['id'])
+# create('input_type', ['id'])
+# create('tag', ['id'])
 
-create('criterion', ['id'])
-create('criterion_has_tag', None)
+# create('criterion', ['id'])
+# create('criterion_has_tag', None)
 
-create('eligibility_criteria', ['id', 'create_date'])
+#create('eligibility_criteria', ['id', 'create_date'])
 create('el_criteria_has_criterion', ['id'])
 
-create('algorithm_engine', ['id'])
+#create('algorithm_engine', ['id'])
 
-create('study_algorithm_engine', None)
+#create('study_algorithm_engine', None)
 

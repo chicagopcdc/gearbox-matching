@@ -247,7 +247,7 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`input_type` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `data_type` VARCHAR(45) NULL,
   `render_type` VARCHAR(45) NULL,
-  `name` VARCHAR(45) NULL,
+  `create_date` DATETIME NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -418,19 +418,19 @@ DROP TABLE IF EXISTS `pedal_dev_v_0`.`input_type_has_value` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`input_type_has_value` (
   `value_id` INT NOT NULL,
-  `input_type_id` INT NOT NULL,
+  `criterion_id` INT NOT NULL,
   `create_date` DATETIME NULL,
-  PRIMARY KEY (`input_type_id`),
+  PRIMARY KEY (`criterion_id`),
   INDEX `fk_input_type_has_value_value1_idx` (`value_id` ASC),
-  INDEX `fk_input_type_has_value_input_type1_idx` (`input_type_id` ASC),
+  INDEX `fk_input_type_has_value_criterion1_idx` (`criterion_id` ASC),
   CONSTRAINT `fk_input_type_has_value_value1`
     FOREIGN KEY (`value_id`)
     REFERENCES `pedal_dev_v_0`.`value` (`id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE,
-  CONSTRAINT `fk_input_type_has_value_input_type1`
-    FOREIGN KEY (`input_type_id`)
-    REFERENCES `pedal_dev_v_0`.`input_type` (`id`)
+  CONSTRAINT `fk_input_type_has_value_criterion1`
+    FOREIGN KEY (`criterion_id`)
+    REFERENCES `pedal_dev_v_0`.`criterion` (`id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB;

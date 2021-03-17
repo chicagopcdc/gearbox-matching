@@ -7,12 +7,12 @@ from app.main.controller.input_type_has_value_controller import InputTypeHasValu
 
 @pytest.fixture(scope="module")
 def input_type_has_valueA():
-    return InputTypeHasValue(value_id=1, input_type_id=1)
+    return InputTypeHasValue(value_id=1, criterion_id=1)
 
 
 @pytest.fixture(scope="module")
 def input_type_has_valueB():
-    return InputTypeHasValue(value_id=2, input_type_id=2)
+    return InputTypeHasValue(value_id=2, criterion_id=2)
 
 
 def test_setup(input_type_has_valueA, input_type_has_valueB, app, session):
@@ -31,10 +31,10 @@ def test_scope(input_type_has_valueA, input_type_has_valueB, app, session):
 
 def test_input_type_has_value_info(input_type_has_valueA, input_type_has_valueB, app, session):
     for ithv in [input_type_has_valueA.as_dict(), input_type_has_valueB.as_dict()]:
-        with app.test_request_context("/input_type_has_value/{}".format(ithv['input_type_id']), method="GET"):
-            pid = str(ithv['input_type_id'])
-            response = InputTypeHasValueInfo().get(ithv['input_type_id'])
-            assert pid == str(response['input_type_id'])
+        with app.test_request_context("/input_type_has_value/{}".format(ithv['criterion_id']), method="GET"):
+            pid = str(ithv['criterion_id'])
+            response = InputTypeHasValueInfo().get(ithv['criterion_id'])
+            assert pid == str(response['criterion_id'])
 
 
 def test_all_input_type_has_values_info(input_type_has_valueA, input_type_has_valueB, app, session):
@@ -50,7 +50,7 @@ def test_all_input_type_has_values_info(input_type_has_valueA, input_type_has_va
 
 
 def test_create_input_type_has_value(app, session):
-    payload= {"value_id":3, "input_type_id":3}
+    payload= {"value_id":3, "criterion_id":3}
     with app.test_request_context("/input_type_has_value/create_input_type_has_value", method="POST", json=payload):
         response, status_code = Create().post()
         print (response)
@@ -63,7 +63,7 @@ def test_scope_again(app, session):
         table_data = response.json['body']
         payload_seen = 0
         for row in table_data:
-            input_type_id = str(row['input_type_id'])
+            input_type_id = str(row['criterion_id'])
             if str(input_type_id) == '3':
                 payload_seen = 1
         assert payload_seen == 1
@@ -72,7 +72,7 @@ def test_scope_again(app, session):
 def test_update_input_type_has_value(input_type_has_valueA, input_type_has_valueB, app, session):
     #basic update test
     input_type_has_valueA_dict = input_type_has_valueA.as_dict()
-    pidA = str(input_type_has_valueA_dict['input_type_id'])
+    pidA = str(input_type_has_valueA_dict['criterion_id'])
     payload = {'value_id': 4} #update the name for input_type_has_valueA
     with app.test_request_context("/input_type_has_value/update_input_type_has_value/{}".format(pidA), method="PUT", json=payload):
         response = Update().put(pidA)
@@ -83,7 +83,7 @@ def test_update_input_type_has_value(input_type_has_valueA, input_type_has_value
 
 def test_delete_input_type_has_value(input_type_has_valueA, input_type_has_valueB, app, session):
     input_type_has_valueA_dict = input_type_has_valueA.as_dict()
-    pidA = str(input_type_has_valueA_dict['input_type_id'])
+    pidA = str(input_type_has_valueA_dict['criterion_id'])
 
     with app.test_request_context("/input_type_has_value/delete_input_type_has_value/{}".format(pidA), method="DELETE"):
         response = Delete().delete(pidA)

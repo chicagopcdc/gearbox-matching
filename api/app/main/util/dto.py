@@ -5,9 +5,9 @@ class StudyDto:
     api = Namespace('study', description='study related operations')
     study = api.model('study', {
     	'id': fields.String(required=True, description="study id"),
-        'name': fields.String(required=True, description='study name'),
-        'code': fields.String(required=True, description='study code'),
-        'create_date': fields.String(required=True, description='study creation time'),
+        'name': fields.String(description='study name'),
+        'code': fields.String(description='study code'),
+        'create_date': fields.String(description='study creation time'),
         'active': fields.String(description='is study active')
     })
 
@@ -16,9 +16,9 @@ class SiteDto:
     api = Namespace('site', description='site related operations')
     site = api.model('site', {
     	'id': fields.String(required=True, description="site id"),
-        'name': fields.String(required=True, description='site name'),
-        'code': fields.String(required=True, description='site code'),
-        'create_date': fields.String(required=True, description='site creation time'),
+        'name': fields.String(description='site name'),
+        'code': fields.String(description='site code'),
+        'create_date': fields.String(description='site creation time'),
         'active': fields.String(description='is site active')
     })    
 
@@ -28,7 +28,7 @@ class SiteHasStudyDto:
     site_has_study = api.model('site_has_study', {
     	'study_id': fields.String(required=True, description="study id"),
     	'site_id': fields.String(required=True, description="site id"),
-        'create_date': fields.String(required=True, description='site creation time'),
+        'create_date': fields.String(description='site creation time'),
         'active': fields.String(description='is site active')
     })    
 
@@ -48,7 +48,7 @@ class StudyVersionDto:
     study_version = api.model('study_version', {
     	'id': fields.String(required=True, description="study_version id"),
         'study_id': fields.String(required=True, description='study id'),
-        'create_date': fields.String(required=True, description='study_version creation time'),
+        'create_date': fields.String(description='study_version creation time'),
         'active': fields.String(description='is study_version active')
     })    
 
@@ -166,7 +166,7 @@ class InputTypeDto:
     	'id': fields.String(required=True, description="input_type id"),
         'data_type': fields.String(description='input_type data_type'),
         'render_type': fields.String(description='input_type render_type'),
-        'name': fields.String(description='input_type code')
+        'create_date': fields.String(description='input_type creation time')
     })
 
 
@@ -209,6 +209,6 @@ class InputTypeHasValueDto:
     api = Namespace('input_type_has_value', description='input_type_has_value related operations')
     input_type_has_value = api.model('input_type_has_value', {
     	'value_id': fields.String(description="input_type_has_value value_id"),
-    	'input_type_id': fields.String(required=True, description="input_type_has_value input_type_id"),
+    	'criterion_id': fields.String(required=True, description="input_type_has_value criterion_id"),
     	'create_date': fields.String(description="input_type_has_value create_date")
     })

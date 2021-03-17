@@ -69,6 +69,6 @@ insert into `study_algorithm_engine` (`study_version_id`, `algorithm_engine_id`)
 insert into `display_rules` (`id`, `criterion_id`, `priority`) values (1, 1, 1);
 insert into `display_rules` (`id`, `criterion_id`, `priority`) values (2, 2, 2);
 
-insert into `input_type` (`data_type`, `name`) values ('data_type_1', 'name_1');
-insert into `input_type` (`data_type`, `name`) values ('data_type_2', 'name_2');
-insert into `input_type` (`data_type`, `name`) values ('data_type_3', 'name_3');
+insert into `input_type` (`id`, `data_type`, `render_type`) values (1, 'data_type_1', 'render_1');
+insert into `input_type` (`id`, `data_type`, `render_type`) values (2, 'data_type_2', 'render_2');
+insert into `input_type` (`id`, `data_type`, `render_type`) values (3, 'data_type_3', 'render_3');
