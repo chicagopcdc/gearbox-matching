@@ -140,6 +140,7 @@ This is a special input type with a dedicated input component consisting of year
   {
     "id": 0, // unique id for the Trial
     "title": "",
+    "description": "",
     "locations": [""],
     "links": [
       {
