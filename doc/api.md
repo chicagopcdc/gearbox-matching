@@ -22,6 +22,8 @@ This is a summary of a discussion on GEARBOx API design on July 31, 2020.
 >     - modify `options` value into an object with "value", "label", and "descrtiption" attributes
 > - March 1, 2021
 >   - updated Match Form configuration API `options` value type
+> - March 18, 2012
+>   - updated Studies API based on feedback
 
 ## Highlights:
 
@@ -138,9 +140,13 @@ This is a special input type with a dedicated input component consisting of year
   {
     "id": 0, // unique id for the Trial
     "title": "",
-    "group": "",
-    "location": ""
-    // ...more information on the Trial
+    "locations": [""],
+    "links": [
+      {
+        "name": "",
+        "href": "" // URL
+      }
+    ]
   }
   // ...more Studies
 ]
