@@ -49,11 +49,11 @@ insert into `eligibility_criteria` (`id`, `study_version_id`) values (3, 3);
 insert into `eligibility_criteria` (`id`, `study_version_id`) values (4, 4);
 insert into `eligibility_criteria` (`id`, `study_version_id`) values (5, 5);
 
-insert into `value` (`id`, `code`, `type`, `value_string`, `upper_threshold`, `active`, `upper_modifier`) values (1, 'Age', 'Integer', '<22 years', 8030, 1, '<');
-insert into `value` (`id`, `code`, `type`, `value_string`, `lower_threshold`, `active`, `lower_modifier`) values (2, 'Age', 'Integer', '>12 mos', 365, 1, '>');
-insert into `value` (`id`, `code`, `type`, `value_string`, `lower_threshold`, `active`, `lower_modifier`) values (3, 'Weight', 'Integer', '>=5 kg', 5, 1, '>');
-insert into `value` (`id`, `code`, `type`, `value_string`, `value_bool`, `active`) values (4, 'true/false', 'Bool', 'TRUE', 'True', 1);
-insert into `value` (`id`, `code`, `type`, `value_string`, `value_bool`, `active`) values (5, 'true/false', 'Bool', 'FALSE', 'False', 1);
+insert into `value` (`id`, `code`, `description`, `type`, `value_string`, `unit`, `operator`, `active`) values (1, 'lt_22_yr', 'lower than 22 years', 'Integer', '22', 'years', 'lt', 1);
+insert into `value` (`id`, `code`, `description`, `type`, `value_string`, `operator`, `active`) values (2, 'Yes', 'is true', 'Boolean', 'Yes', 'eq', 1);
+insert into `value` (`id`, `code`, `description`, `type`, `value_string`, `unit`, `operator`, `active`) values (3, 'gte_5_p', 'greater than or equal to 5%', 'Float', '5', '%', 'gte', 1);
+insert into `value` (`id`, `code`, `description`, `type`, `value_string`, `unit`, `operator`, `active`) values (4, 'gte_1_p', 'greater than or equal to 1%', 'Float', '1', '%', 'gte', 1);
+insert into `value` (`id`, `code`, `description`, `type`, `value_string`, `unit`, `operator`, `active`) values (5, 'gte_0_1_p', 'greater than or equal to 0.1%', 'Float', '0.1', '%', 'gte', 1);
 
 insert into `el_criteria_has_criterion` (`id`, `criterion_id`, `eligibility_criteria_id`, `value_id`) values (1, 1, 1, 1);
 insert into `el_criteria_has_criterion` (`id`, `criterion_id`, `eligibility_criteria_id`, `value_id`) values (2, 2, 2, 2);
