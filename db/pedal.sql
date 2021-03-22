@@ -174,17 +174,14 @@ DROP TABLE IF EXISTS `pedal_dev_v_0`.`value` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`value` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `code` VARCHAR(45) NULL,
+  `code` VARCHAR(512) NULL,
+  `description` VARCHAR(512) NULL,
   `type` VARCHAR(45) NULL,
   `value_string` VARCHAR(45) NULL,
-  `upper_threshold` DECIMAL(19,4) NULL,
-  `lower_threshold` DECIMAL(19,4) NULL,
+  `unit` VARCHAR(45) NULL,
+  `operator` VARCHAR(45) NULL,
   `create_date` DATETIME NULL,
   `active` TINYINT NULL,
-  `value_list` VARCHAR(45) NULL,
-  `value_bool` VARCHAR(45) NULL,
-  `upper_modifier` VARCHAR(45) NULL,
-  `lower_modifier` VARCHAR(45) NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 

@@ -13,16 +13,13 @@ class ValueService(Services):
         if not value:
             new_value = Value(
                 code=data.get('code'),
+                description=data.get('description'),
                 type=data.get('type'),
                 value_string=data.get('value_string'),
-                upper_threshold=data.get('upper_threshold'),
-                lower_threshold=data.get('lower_threshold'),
+                unit=data.get('unit'),
+                operator=data.get('operator'),
                 create_date=datetime.datetime.utcnow(),
                 active=data.get('active'),
-                value_list=data.get('value_list'),
-                value_bool=data.get('value_bool'),
-                upper_modifier=data.get('upper_modifier'),
-                lower_modifier=data.get('lower_modifier'),                
             )
             Services.save_changes(new_value)
             response_object = {

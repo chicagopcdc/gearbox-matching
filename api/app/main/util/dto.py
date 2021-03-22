@@ -131,16 +131,13 @@ class ValueDto:
     value = api.model('value', {
     	'id': fields.String(required=True, description="value id"),
     	'code': fields.String(description="value code"),
+    	'description': fields.String(description="value description"),
     	'type': fields.String(description="value type"),
     	'value_string': fields.String(description="value value_string"),
-    	'upper_threshold': fields.String(description="value upper_threshold"),
-    	'lower_threshold': fields.String(description="value lower_threshold"),
+    	'unit': fields.String(description="value unit"),
+    	'operator': fields.String(description="value operator"),
     	'create_date': fields.String(description="value create_date"),
-    	'active': fields.String(description="value active"),
-    	'value_list': fields.String(description="value value_list"),
-    	'value_bool': fields.String(description="value value_bool"),  
-    	'upper_modifier': fields.String(description="value upper_modifier"),
-    	'lower_modifier': fields.String(description="value lower_modifier")
+    	'active': fields.String(description="value active")
     })
 
     
