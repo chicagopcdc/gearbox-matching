@@ -368,6 +368,8 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`display_rules` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `criterion_id` INT NOT NULL,
   `priority` INT NOT NULL,
+  `active` TINYINT NULL,
+  `version` INT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_display_rules_criterion1_idx` (`criterion_id` ASC),
   CONSTRAINT `fk_display_rules_criterion1`
@@ -383,11 +385,13 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `pedal_dev_v_0`.`triggered_by` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`triggered_by` (
+  `id` INT NOT NULL AUTO_INCREMENT,
   `display_rules_id` INT NOT NULL,
   `criterion_id` INT NOT NULL,
   `value_id` INT NOT NULL,
-  `path` VARCHAR(255) NOT NULL,
-  PRIMARY KEY (`criterion_id`),
+  `path` VARCHAR(255) NULL,
+  `active` TINYINT NULL,
+  PRIMARY KEY (`id`),
   INDEX `fk_triggered_by_display_rules1_idx` (`display_rules_id` ASC),
   INDEX `fk_triggered_by_criterion1_idx` (`criterion_id` ASC),
   INDEX `fk_triggered_by_value1_idx` (`value_id` ASC),

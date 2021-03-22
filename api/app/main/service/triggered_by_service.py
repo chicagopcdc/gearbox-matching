@@ -5,7 +5,7 @@ from app.main.service import Services
 class TriggeredByService(Services):
 
     def save_new_triggered_by(self, data):
-        triggered_by = self.get_a_triggered_by(self, data.get('criterion_id'))
+        triggered_by = self.get_a_triggered_by(self, data.get('id'))
 
         if not triggered_by:
             new_triggered_by = TriggeredBy(
@@ -13,6 +13,7 @@ class TriggeredByService(Services):
                 criterion_id=data.get('criterion_id'),
                 value_id=data.get('value_id'),
                 path=data.get('path'),
+                active=data.get('active')
             )
             Services.save_changes(new_triggered_by)
             response_object = {
@@ -27,7 +28,5 @@ class TriggeredByService(Services):
             }
             return response_object, 409
 
-    def get_a_triggered_by(self, criterion_id):
-        return DbSession.query(TriggeredBy).filter(
-            TriggeredBy.criterion_id==criterion_id,
-        ).first()
+    def get_a_triggered_by(self, id):
+        return DbSession.query(TriggeredBy).filter(TriggeredBy.id==id).first()

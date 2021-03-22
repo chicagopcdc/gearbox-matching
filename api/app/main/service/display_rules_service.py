@@ -11,6 +11,8 @@ class DisplayRulesService(Services):
             new_display_rules = DisplayRules(
                 criterion_id=data.get('criterion_id'),
                 priority=data.get('priority'),
+                active=data.get('active'),
+                version=data.get('version'),                
             )
             Services.save_changes(new_display_rules)
             response_object = {

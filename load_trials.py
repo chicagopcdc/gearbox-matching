@@ -44,20 +44,18 @@ def create(table, ignore):
 ########################################################
 
 
-create('study', ['id', 'create_date'])
-create('study_version', ['id', 'create_date'])
-create('value', ['id'])
-create('input_type', ['id'])
-create('tag', ['id'])
-create('criterion', ['id'])
+# create('study', ['id', 'create_date'])
+# create('study_version', ['id', 'create_date'])
+# create('value', ['id'])
+# create('input_type', ['id'])
+# create('tag', ['id'])
+# create('criterion', ['id'])
+# create('criterion_has_value', ['create_date'])
+# create('eligibility_criteria', ['id', 'create_date'])
 
-create('criterion_has_value', ['create_date'])
+# create('display_rules', ['id', 'active', 'version'])
 
-#create('eligibility_criteria', ['id', 'create_date'])
-
-#create('display_rules', ['id'])
-
-#create('triggered_by', ['id'])
+create('triggered_by', ['id', 'active'])
 
 #create('criterion_has_tag', None)
 

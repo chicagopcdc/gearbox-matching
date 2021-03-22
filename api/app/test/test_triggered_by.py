@@ -31,10 +31,10 @@ def test_scope(triggered_byA, triggered_byB, app, session):
 
 def test_triggered_by_info(triggered_byA, triggered_byB, app, session):
     for tb in [triggered_byA.as_dict(), triggered_byB.as_dict()]:
-        with app.test_request_context("/triggered_by/{}".format(tb['criterion_id']), method="GET"):
-            pid = str(tb['criterion_id'])
-            response = TriggeredByInfo().get(tb['criterion_id'])
-            assert pid == str(response['criterion_id'])
+        with app.test_request_context("/triggered_by/{}".format(tb['id']), method="GET"):
+            pid = str(tb['id'])
+            response = TriggeredByInfo().get(tb['id'])
+            assert pid == str(response['id'])
 
 
 def test_all_triggered_bys_info(triggered_byA, triggered_byB, app, session):
@@ -64,7 +64,8 @@ def test_scope_again(app, session):
         payload_seen = 0
         for row in table_data:
             criterion_id = str(row['criterion_id'])
-            if str(criterion_id) == '3':
+            value_id = str(row['value_id'])
+            if str(criterion_id) == '3' and str(value_id) == '4':
                 payload_seen = 1
         assert payload_seen == 1
 
@@ -72,7 +73,7 @@ def test_scope_again(app, session):
 def test_update_triggered_by(triggered_byA, triggered_byB, app, session):
     #basic update test
     triggered_byA_dict = triggered_byA.as_dict()
-    pidA = str(triggered_byA_dict['criterion_id'])
+    pidA = str(triggered_byA_dict['id'])
     payload = {'path': "1.2"} #update the name for triggered_byA
     with app.test_request_context("/triggered_by/update_triggered_by/{}".format(pidA), method="PUT", json=payload):
         response = Update().put(pidA)
@@ -83,7 +84,7 @@ def test_update_triggered_by(triggered_byA, triggered_byB, app, session):
 
 def test_delete_triggered_by(triggered_byA, triggered_byB, app, session):
     triggered_byA_dict = triggered_byA.as_dict()
-    pidA = str(triggered_byA_dict['criterion_id'])
+    pidA = str(triggered_byA_dict['id'])
 
     with app.test_request_context("/triggered_by/delete_triggered_by/{}".format(pidA), method="DELETE"):
         response = Delete().delete(pidA)

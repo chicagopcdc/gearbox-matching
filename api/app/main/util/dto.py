@@ -187,18 +187,22 @@ class DisplayRulesDto:
     api = Namespace('display_rules', description='display_rules related operations')
     display_rules = api.model('display_rules', {
     	'id': fields.String(required=True, description="display_rules id"),
-    	'criterion_id': fields.String(description="display_rules criterion_id"),
-    	'priority': fields.String(description="display_rules priority")
+    	'criterion_id': fields.String(required=True, description="display_rules criterion_id"),
+    	'priority': fields.String(required=True, description="display_rules priority"),
+    	'active': fields.String(description="is display_rules active"),
+    	'version': fields.String(description="display_rules version")
     })
 
 
 class TriggeredByDto:
     api = Namespace('triggered_by', description='triggered_by related operations')
     triggered_by = api.model('triggered_by', {
+    	'id': fields.String(required=True, description="triggered_by id"),        
     	'display_rules_id': fields.String(required=True, description="triggered_by display_rules_id"),
-    	'criterion_id': fields.String(description="triggered_by criterion_id"),
-    	'value_id': fields.String(description="triggered_by value_id"),
-    	'path': fields.String(description="triggered_by path")
+    	'criterion_id': fields.String(required=True, description="triggered_by criterion_id"),
+    	'value_id': fields.String(required=True, description="triggered_by value_id"),
+    	'path': fields.String(description="triggered_by path"),
+    	'active': fields.String(description="is triggered_by active")
     })
 
 
