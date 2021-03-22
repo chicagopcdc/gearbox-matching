@@ -417,7 +417,7 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`criterion_has_value` (
   `criterion_id` INT NOT NULL,
   `value_id` INT NOT NULL,
   `create_date` DATETIME NULL,
-  PRIMARY KEY (`criterion_id`),
+  PRIMARY KEY (`criterion_id`, `value_id`),
   INDEX `fk_criterion_has_value_criterion1_idx` (`criterion_id` ASC),
   INDEX `fk_criterion_has_value_value1_idx` (`value_id` ASC),
   CONSTRAINT `fk_criterion_has_value_criterion1`

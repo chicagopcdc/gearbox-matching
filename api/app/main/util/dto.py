@@ -206,6 +206,6 @@ class CriterionHasValueDto:
     api = Namespace('criterion_has_value', description='criterion_has_value related operations')
     criterion_has_value = api.model('criterion_has_value', {
     	'criterion_id': fields.String(required=True, description="criterion_has_value criterion_id"),
-    	'value_id': fields.String(description="criterion_has_value value_id"),
+    	'value_id': fields.String(required=True, description="criterion_has_value value_id"),
     	'create_date': fields.String(description="criterion_has_value create_date")
     })

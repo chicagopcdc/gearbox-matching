@@ -7,7 +7,7 @@ from . import Base
 class CriterionHasValue(Base):
     __tablename__ = 'criterion_has_value'
     criterion_id = Column(Integer, ForeignKey('criterion.id'), primary_key=True)
-    value_id = Column(Integer, ForeignKey('value.id'))
+    value_id = Column(Integer, ForeignKey('value.id'), primary_key=True)
     create_date = Column(DateTime, nullable=True)
 
     criterion = relationship("Criterion", back_populates="values")

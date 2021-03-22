@@ -15,15 +15,17 @@ api = CriterionHasValueDto.api
 _criterion_has_value = CriterionHasValueDto.criterion_has_value
 
 
-@api.route('/<public_id>')
-@api.param('public_id', 'The CriterionHasValue identifier')
+@api.route('')
 class CriterionHasValueInfo(Resource):
     @api.doc('get a criterion_has_value')
     @api.marshal_with(_criterion_has_value)
-    def get(self, public_id):
-        criterion_has_value = CriterionHasValueService.get_a_criterion_has_value(self, public_id)
+    def get(self):
+        data = api.payload
+        if not data or not isinstance(data, dict):
+            api.abort(400, message="null payload or payload not json/dict")        
+        criterion_has_value = CriterionHasValueService.get_a_criterion_has_value(self, data)
         if not criterion_has_value:
-            api.abort(404, message="criterion_has_value '{}' not found".format(public_id))
+            api.abort(404, message="criterion_has_value '{}' not found".format(data))
         else:
             return criterion_has_value.as_dict()
 
@@ -70,40 +72,16 @@ class Create(Resource):
             logging.error(e, exc_info=True)
 
 
-@api.route('/update_criterion_has_value/<public_id>')
-@api.param('public_id', 'The CriterionHasValue identifier')
-class Update(Resource):
-    @api.doc('update an existing criterion_has_value')
-    def put(self, public_id):
-        data = api.payload
-        if not data or not isinstance(data, dict):
-            api.abort(400, message="null payload or payload not json/dict")
-        criterion_has_value = CriterionHasValueService.get_a_criterion_has_value(self, public_id)
-        if not criterion_has_value:
-            api.abort(404, message="criterion_has_value '{}' not found".format(public_id))
-
-        #set new key/values
-        allowed_keys = criterion_has_value.as_dict().keys()
-        for key in data.keys():
-            if key in allowed_keys:
-                #DO NOT PREVENT PRIMARY KEY CHANGES
-                setattr(criterion_has_value, key, data[key])
-        try:
-            CriterionHasValueService.commit()
-            return criterion_has_value.as_dict()
-        except Exception as e:
-            logging.error(e, exc_info=True)
-            return e
-
-
-@api.route('/delete_criterion_has_value/<public_id>')
-@api.param('public_id', 'The CriterionHasValue identifier')
+@api.route('/delete_criterion_has_value')
 class Delete(Resource):
     @api.doc('delete a criterion_has_value')
-    def delete(self, public_id):
-        criterion_has_value = CriterionHasValueService.get_a_criterion_has_value(self, public_id)
+    def delete(self):
+        data = api.payload
+        if not data or not isinstance(data, dict):
+            api.abort(400, message="null payload or payload not json/dict")        
+        criterion_has_value = CriterionHasValueService.get_a_criterion_has_value(self, data)
         if not criterion_has_value:
-            api.abort(404, message="criterion_has_value '{}' not found".format(public_id))
+            api.abort(404, message="criterion_has_value '{}' not found".format(data))
 
         try:
             CriterionHasValueService.delete(criterion_has_value)

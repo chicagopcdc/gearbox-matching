@@ -7,7 +7,7 @@ from app.main.service import Services
 class CriterionHasValueService(Services):
 
     def save_new_criterion_has_value(self, data):
-        criterion_has_value = self.get_a_criterion_has_value(self, data.get('criterion_id'))
+        criterion_has_value = self.get_a_criterion_has_value(self, data)
 
         if not criterion_has_value:
             new_criterion_has_value = CriterionHasValue(
@@ -28,7 +28,8 @@ class CriterionHasValueService(Services):
             }
             return response_object, 409
 
-    def get_a_criterion_has_value(self, criterion_id):
+    def get_a_criterion_has_value(self, data):
         return DbSession.query(CriterionHasValue).filter(
-            CriterionHasValue.criterion_id==criterion_id,
+            CriterionHasValue.criterion_id==data.get('criterion_id'),
+            CriterionHasValue.value_id==data.get('value_id')
         ).first()

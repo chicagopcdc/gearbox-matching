@@ -2,7 +2,7 @@ import json
 import pytest
 
 from app.main.model.criterion_has_value import CriterionHasValue
-from app.main.controller.criterion_has_value_controller import CriterionHasValueInfo, AllCriterionHasValuesInfo, Create, Update, Delete
+from app.main.controller.criterion_has_value_controller import CriterionHasValueInfo, AllCriterionHasValuesInfo, Create, Delete
 
 
 @pytest.fixture(scope="module")
@@ -30,11 +30,12 @@ def test_scope(criterion_has_valueA, criterion_has_valueB, app, session):
 
 
 def test_criterion_has_value_info(criterion_has_valueA, criterion_has_valueB, app, session):
-    for ithv in [criterion_has_valueA.as_dict(), criterion_has_valueB.as_dict()]:
-        with app.test_request_context("/criterion_has_value/{}".format(ithv['criterion_id']), method="GET"):
-            pid = str(ithv['criterion_id'])
-            response = CriterionHasValueInfo().get(ithv['criterion_id'])
-            assert pid == str(response['criterion_id'])
+    for chv in [criterion_has_valueA.as_dict(), criterion_has_valueB.as_dict()]:
+        payload = {'criterion_id': chv.get('criterion_id'), 'value_id': chv.get('value_id')}
+        with app.test_request_context("/criterion_has_value", method="GET", json=payload):
+            response = CriterionHasValueInfo().get()
+            r = json.loads(json.dumps(response), object_hook=lambda d: {k: int(v) if v and v.isdigit() else v for k, v in d.items()})
+            assert chv == r
 
 
 def test_all_criterion_has_values_info(criterion_has_valueA, criterion_has_valueB, app, session):
@@ -69,29 +70,16 @@ def test_scope_again(app, session):
         assert payload_seen == 1
 
 
-def test_update_criterion_has_value(criterion_has_valueA, criterion_has_valueB, app, session):
-    #basic update test
-    criterion_has_valueA_dict = criterion_has_valueA.as_dict()
-    pidA = str(criterion_has_valueA_dict['criterion_id'])
-    payload = {'value_id': 4} #update the name for criterion_has_valueA
-    with app.test_request_context("/criterion_has_value/update_criterion_has_value/{}".format(pidA), method="PUT", json=payload):
-        response = Update().put(pidA)
-        expected_response = criterion_has_valueA_dict
-        expected_response.update(payload)
-        assert response == expected_response
-        
-
 def test_delete_criterion_has_value(criterion_has_valueA, criterion_has_valueB, app, session):
-    criterion_has_valueA_dict = criterion_has_valueA.as_dict()
-    pidA = str(criterion_has_valueA_dict['criterion_id'])
-
-    with app.test_request_context("/criterion_has_value/delete_criterion_has_value/{}".format(pidA), method="DELETE"):
-        response = Delete().delete(pidA)
-        assert response == criterion_has_valueA_dict
+    chvA_dict = criterion_has_valueA.as_dict()
+    payload = {'criterion_id': chvA_dict.get('criterion_id'), 'value_id': chvA_dict.get('value_id')}
+    with app.test_request_context("/criterion_has_value/delete_criterion_has_value", method="DELETE", json=payload):
+        response = Delete().delete()
+        assert response == chvA_dict
 
     #attempt to get what was deleted (expected 404)
-    with app.test_request_context("/criterion_has_value/{}".format(pidA), method="GET"):
+    with app.test_request_context("/criterion_has_value", method="GET", json=payload):
         try:
-            response = CriterionHasValueInfo().get(pidA)
+            response = CriterionHasValueInfo().get()
         except Exception as e:
             assert e.code == 404
