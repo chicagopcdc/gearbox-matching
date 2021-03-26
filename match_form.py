@@ -51,7 +51,6 @@ def triggers(row, triggered_by, value):
                     return {}
                 
                 path = tb.path
-
                 if not pd.isna(path):
                     crits = showIf.get('criteria')
                     new_crit = {
@@ -61,9 +60,9 @@ def triggers(row, triggered_by, value):
                             }
                     crits.append(new_crit)
                     showIf.update({'criteria': crits})
-                else: #no path, just one crit
+                else: #if path, it comes in 2nd, 3rd, etc crit. set showIf for building upon)
                     showIf = {
-                        'operator': 'OR',
+                        'operator': 'OR', #always OR as scripted for now
                         'criteria': [
                             {
                                 'id': criterion_id,
@@ -113,23 +112,8 @@ criterion = DF['criterion']
 display_rules = DF['display_rules']
 
 
-# #REQUIRED
-#'id', #unique id for the field
-#'groupId', #one of the IDs in "groups"
-#'name', #field name
-#'type', #one of the following: "checkbox", "radio", "number", "text", "select", "multiselect", "age"
-##OPTIONAL
-#'label', #label text to display; avilable for all field types
-#'showIf', #for conditional display; available for all field types    
-#'options', #options to choose from; available for field types "radio", "select", "multiselect"
-#'placeholder', #placeholder text to display; available for field types "number", "text", "select", "multiselect"
-
-
 #sort by priority
 df = display_rules.sort_values(by=['priority'])
-
-#DEBUG
-df = df.head(9)
 
 G = []
 for idx, row in tag.iterrows():
@@ -186,7 +170,8 @@ for i in range(0, len(df)):
                 if n_rows(chv) in [0, 1]:
                     pass
                 else: #criterion has multiple vals
-                    f.update({'placeholder': 'Select'})
+                    if f.get('type') == 'select':
+                        f.update({'placeholder': 'Select'})
 
                     options = []
                     vals = list(chv.value_id.values)
@@ -203,3 +188,9 @@ for i in range(0, len(df)):
 
                     f.update({'options': options})
     F.append(f)
+
+
+R = {"groups": G, "fields": F}
+
+with open("~/Desktop/matchform.json", "w") as outfile:
+    json.dump(R, outfile)
