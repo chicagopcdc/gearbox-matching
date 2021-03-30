@@ -16,6 +16,27 @@ from app.main.service.value_service import ValueService
 from app.main.model.algorithm_engine import AlgorithmEngine
 from app.main.service.algorithm_engine_service import AlgorithmEngineService
 
+from app.main.model.tag import Tag
+from app.main.service.tag_service import TagService
+
+from app.main.model.display_rules import DisplayRules
+from app.main.service.display_rules_service import DisplayRulesService
+
+from app.main.model.input_type import InputType
+from app.main.service.input_type_service import InputTypeService
+
+from app.main.model.criterion import Criterion
+from app.main.service.criterion_service import CriterionService
+
+from app.main.model.criterion_has_tag import CriterionHasTag
+from app.main.service.criterion_has_tag_service import CriterionHasTagService
+
+from app.main.model.criterion_has_value import CriterionHasValue
+from app.main.service.criterion_has_value_service import CriterionHasValueService
+
+from app.main.model.triggered_by import TriggeredBy
+from app.main.service.triggered_by_service import TriggeredByService
+
 import app.main.service.match_conditions as mc
 
 
@@ -137,3 +158,56 @@ class MatchMatchConditions(Resource):
             )
         except:
             api.abort(404, message="algorithm_engine table not found or has no data")
+
+
+@api.route('/match-form')
+class MatchMatchForm(Resource):
+    def get(self):
+        all_tags = TagService.get_all(Tag)
+        try:
+            if all_tags:
+                #get groups
+                tags = [x.as_dict() for x in all_tags]
+                G = mc.groups(tags)
+
+                all_display_rules = DisplayRulesService.get_all(DisplayRules)
+                all_input_type = InputTypeService.get_all(InputType)
+                all_criterion = CriterionService.get_all(Criterion)
+                all_criterion_has_tag = CriterionHasTagService.get_all(CriterionHasTag)
+                all_criterion_has_value = CriterionHasValueService.get_all(CriterionHasValue)
+                all_value = ValueService.get_all(Value)
+                all_triggered_by = TriggeredByService.get_all(TriggeredBy)
+                
+                display_rules = [x.as_dict() for x in all_display_rules]
+                input_type = [x.as_dict() for x in all_input_type]
+                criterion = [x.as_dict() for x in all_criterion]
+                criterion_has_tag = [x.as_dict() for x in all_criterion_has_tag]
+                criterion_has_value = [x.as_dict() for x in all_criterion_has_value]
+                value = [x.as_dict() for x in all_value]
+                triggered_by = [x.as_dict() for x in all_triggered_by]
+
+                F = mc.form(
+                    display_rules,
+                    input_type,
+                    criterion,
+                    criterion_has_tag,
+                    criterion_has_value,
+                    value,
+                    triggered_by
+                )
+
+                body = {"groups": G, "fields": F}
+                
+                return jsonify(
+                    {
+                        "current_date": date.today().strftime("%B %d, %Y"),
+                        "current_time": strftime("%H:%M:%S +0000", gmtime()),
+                        "status": "OK",
+                        "body": body
+                    }
+                )
+            else:
+                body = []
+        except:
+            api.abort(404, message="error: problem with data or form calculator")
+        
