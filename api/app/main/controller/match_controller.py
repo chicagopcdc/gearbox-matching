@@ -25,6 +25,9 @@ from app.main.service.display_rules_service import DisplayRulesService
 from app.main.model.input_type import InputType
 from app.main.service.input_type_service import InputTypeService
 
+from app.main.model.el_criteria_has_criterion import ElCriteriaHasCriterion
+from app.main.service.el_criteria_has_criterion_service import ElCriteriaHasCriterionService
+
 from app.main.model.criterion import Criterion
 from app.main.service.criterion_service import CriterionService
 
@@ -80,40 +83,30 @@ class MatchStudies(Resource):
 @api.route('/eligibility-criteria')
 class MatchEligibilityCriteria(Resource):
     def get(self):
-        values = ValueService.get_all(Value)
+        all_el_criteria_has_criterion = ElCriteriaHasCriterionService.get_all(ElCriteriaHasCriterion)
+        all_value = ValueService.get_all(Value)
         try:
-            if values:
-                vals = [v.as_dict() for v in values]
-                body=[]
-                id = 0
-                fieldId = 0
-                for val in vals:
-                    if val.get('active'):
-                        row = {
-                            'id': id,
-                            'fieldId': fieldId,
-                            }
-                        id+=1
-                        fieldId+=1
+            if all_el_criteria_has_criterion:
+                body = []
+                
+                el_criteria_has_criterion = [x.as_dict() for x in all_el_criteria_has_criterion]
+                value = [x.as_dict() for x in all_value]
+                
+                for echc in el_criteria_has_criterion:
+                    the_id = echc.get('id')
+                    fieldId = echc.get('criterion_id')
+                    fieldValue = echc.get('value_id')
 
-                        #assumes that these are mutually exclusive
-                        if val.get('upper_threshold'):
-                            fieldValue = val.get('upper_threshold')
-                            if val.get('upper_modifier'):
-                                operator = val.get('upper_modifier')
-                        elif val.get('lower_threshold'):
-                            fieldValue = val.get('lower_threshold')
-                            if val.get('lower_modifier'):
-                                operator = val.get('lower_modifier')
-                        elif val.get('value_bool'):
-                            raw_val = val.get('value_bool')
-                            if raw_val in ["TRUE", "True", "true", True, '1', 1]:
-                                fieldValue = True
-                            elif raw_val in ["FALSE", "False", "False", False, '0', 0]:
-                                fieldValue = False
-                            operator = 'eq'
-                        row.update({'fieldValue': fieldValue, 'operator': operator})
-                        body.append(row)
+                    the_value = list(filter(lambda x: x['id'] == fieldValue, value))[0]
+                    operator = the_value.get('operator')
+                    
+                    f = {
+                        'id': the_id,
+                        'fieldId': fieldId,
+                        'fieldValue': fieldValue,
+                        'operator': operator
+                    }
+                    body.append(f)
             else:
                 body = []
             return jsonify(
