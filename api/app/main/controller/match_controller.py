@@ -10,6 +10,9 @@ from app.main.util.dto import MatchDto
 from app.main.model.study import Study
 from app.main.service.study_service import StudyService
 
+from app.main.model.study_links import StudyLinks
+from app.main.service.study_links_service import StudyLinksService
+
 from app.main.model.value import Value
 from app.main.service.value_service import ValueService
 
@@ -49,22 +52,71 @@ _value = MatchDto.value
 _algorithm_engine = MatchDto.algorithm_engine
 
 
+# @api.route('/studies')
+# class MatchStudies(Resource):
+#     def get(self):
+#         studies = StudyService.get_all(Study)
+#         try:
+#             if studies:
+#                 rows = [x.as_dict() for x in studies]
+#                 body=[]
+#                 for row in rows:
+#                     if row.get('active'):
+#                         data = {
+#                             'id': row.get('id'),
+#                             'title': row.get('name'),
+#                             'group': row.get('group'),
+#                             'location': row.get('location'),
+#                             }
+#                         body.append(data)
+#             else:
+#                 body = []
+#             return jsonify(
+#                 {
+#                     "current_date": date.today().strftime("%B %d, %Y"),
+#                     "current_time": strftime("%H:%M:%S +0000", gmtime()),
+#                     "status": "OK",
+#                     "body": body
+#                 }
+#             )
+#         except:
+#             api.abort(404, message="study table not found or has no data")
 @api.route('/studies')
 class MatchStudies(Resource):
     def get(self):
-        studies = StudyService.get_all(Study)
-        try:
-            if studies:
-                rows = [x.as_dict() for x in studies]
+        all_studies = StudyService.get_all(Study)
+        all_study_links = StudyLinksService.get_all(StudyLinks)
+
+        try:                
+            if all_studies:
+                studies = [x.as_dict() for x in all_studies]
+                study_links = [x.as_dict() for x in all_study_links]
+
+                #DEBUG
+                logging.warning("HEREhereHEREhereHERE")
+                
+                
                 body=[]
-                for row in rows:
-                    if row.get('active'):
+                for study in studies:
+                    if study.get('active'):
                         data = {
-                            'id': row.get('id'),
-                            'title': row.get('name'),
-                            'group': row.get('group'),
-                            'location': row.get('location'),
+                            'id': study.get('id'),
+                            'title': study.get('name'),
+                            'description': study.get('description'),
+                            'location': ""
+                        }
+
+                        the_links = list(filter(lambda x: x['study_id'] == study.get('id'), study_links))
+
+                        links = []
+                        for link in the_links:
+                            L = {
+                                'name': link.get('name'),
+                                'href': link.get('href')
                             }
+                            links.append(L)
+                        data.update({'links': links})
+                        
                         body.append(data)
             else:
                 body = []

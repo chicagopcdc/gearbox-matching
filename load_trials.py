@@ -60,3 +60,4 @@ create('el_criteria_has_criterion', ['id'])
 create('algorithm_engine', ['id'])
 create('study_algorithm_engine', None)
 
+create('study_links', ['id'])
