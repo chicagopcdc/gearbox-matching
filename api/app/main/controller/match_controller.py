@@ -103,7 +103,7 @@ class MatchStudies(Resource):
                             'id': study.get('id'),
                             'title': study.get('name'),
                             'description': study.get('description'),
-                            'location': ""
+                            'locations': []
                         }
 
                         the_links = list(filter(lambda x: x['study_id'] == study.get('id'), study_links))
