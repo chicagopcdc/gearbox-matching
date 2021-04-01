@@ -5,6 +5,7 @@ from flask import Blueprint
 
 from .main.controller.login_controller import api as login_ns
 from .main.controller.study_controller import api as study_ns
+from .main.controller.study_links_controller import api as study_links_ns
 from .main.controller.site_controller import api as site_ns
 from .main.controller.site_has_study_controller import api as site_has_study_ns
 from .main.controller.study_version_controller import api as study_version_ns
@@ -39,6 +40,7 @@ api = Api(blueprint,
 
 api.add_namespace(login_ns, path='/login')
 api.add_namespace(study_ns, path='/study')
+api.add_namespace(study_links_ns, path='/study_links')
 api.add_namespace(site_ns, path='/site')
 api.add_namespace(site_has_study_ns, path='/site_has_study')
 api.add_namespace(study_version_ns, path='/study_version')
@@ -54,7 +56,6 @@ api.add_namespace(note_ns, path='/note')
 api.add_namespace(ontology_code_ns, path='/ontology_code')
 api.add_namespace(input_type_ns, path='/input_type')
 api.add_namespace(value_ns, path='/value')
-
 api.add_namespace(display_rules_ns, path='/display_rules')
 api.add_namespace(triggered_by_ns, path='/triggered_by')
 api.add_namespace(criterion_has_value_ns, path='/criterion_has_value')

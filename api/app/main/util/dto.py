@@ -7,11 +7,23 @@ class StudyDto:
     	'id': fields.String(required=True, description="study id"),
         'name': fields.String(description='study name'),
         'code': fields.String(description='study code'),
+        'description': fields.String(description='study description'),
         'create_date': fields.String(description='study creation time'),
         'active': fields.String(description='is study active')
     })
 
 
+class StudyLinksDto:
+    api = Namespace('study_links', description='study_links related operations')
+    study_links = api.model('study_links', {
+    	'id': fields.String(required=True, description="study_links id"),
+        'study_id': fields.String(description='study id'),
+        'name': fields.String(description='study_links name'),
+        'href': fields.String(description='study_links href'),
+        'active': fields.String(description='is study active')
+    })
+
+    
 class SiteDto:
     api = Namespace('site', description='site related operations')
     site = api.model('site', {

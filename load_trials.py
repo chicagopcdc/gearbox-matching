@@ -7,7 +7,7 @@ import requests
 ############################
 
 data_path = '~/Desktop/tables/'
-data_prefix = 'v18/load_trials_v18 - '
+data_prefix = 'v20/load_trials_v20 - '
 host = 'http://0.0.0.0:5000'
 headers = {'Content-type': 'application/json'}
 
@@ -44,24 +44,19 @@ def create(table, ignore):
 ########################################################
 
 
-# create('study', ['id', 'create_date'])
-# create('study_version', ['id', 'create_date'])
-# create('value', ['id'])
-# create('input_type', ['id'])
-# create('tag', ['id'])
-# create('criterion', ['id'])
-# create('criterion_has_value', ['create_date'])
-# create('eligibility_criteria', ['id', 'create_date'])
+create('study', ['id', 'create_date'])
+create('study_version', ['id', 'create_date'])
+create('value', ['id'])
+create('input_type', ['id'])
+create('tag', ['id'])
+create('criterion', ['id'])
+create('criterion_has_value', ['create_date'])
+create('eligibility_criteria', ['id', 'create_date'])
+create('display_rules', ['id'])
+create('triggered_by', ['id'])
+create('criterion_has_tag', None)
 
-# create('display_rules', ['id', 'active', 'version'])
-
-create('triggered_by', ['id', 'active'])
-
-#create('criterion_has_tag', None)
-
-#create('el_criteria_has_criterion', ['id'])
-
-#create('algorithm_engine', ['id'])
-
-#create('study_algorithm_engine', None)
+create('el_criteria_has_criterion', ['id'])
+create('algorithm_engine', ['id'])
+create('study_algorithm_engine', None)
 

@@ -27,9 +27,31 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`study` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NULL,
   `code` VARCHAR(45) NULL,
+  `description` VARCHAR(1024) NULL,
   `create_date` DATETIME NULL,
   `active` TINYINT NULL,
   PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `pedal_dev_v_0`.`study_links`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `pedal_dev_v_0`.`study_links` ;
+
+CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`study_links` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `study_id` INT NOT NULL,
+  `name` VARCHAR(512) NULL,
+  `href` VARCHAR(512) NULL,
+  `active` TINYINT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_study_links_study1_idx` (`study_id` ASC),
+  CONSTRAINT `fk_study_links_study1`
+    FOREIGN KEY (`study_id`)
+    REFERENCES `pedal_dev_v_0`.`study` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 

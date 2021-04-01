@@ -15,6 +15,7 @@ class StudyService(Services):
             new_study = Study(
                 name=data.get('name'),
                 code=data.get('code'),
+                description=data.get('description'),
                 create_date=datetime.datetime.utcnow(),
                 active=data.get('active')
             )
