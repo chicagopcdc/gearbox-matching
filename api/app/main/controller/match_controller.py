@@ -47,40 +47,8 @@ import app.main.service.match_conditions as mc
 
 
 api = MatchDto.api
-_study = MatchDto.study
-_value = MatchDto.value
-_algorithm_engine = MatchDto.algorithm_engine
 
 
-# @api.route('/studies')
-# class MatchStudies(Resource):
-#     def get(self):
-#         studies = StudyService.get_all(Study)
-#         try:
-#             if studies:
-#                 rows = [x.as_dict() for x in studies]
-#                 body=[]
-#                 for row in rows:
-#                     if row.get('active'):
-#                         data = {
-#                             'id': row.get('id'),
-#                             'title': row.get('name'),
-#                             'group': row.get('group'),
-#                             'location': row.get('location'),
-#                             }
-#                         body.append(data)
-#             else:
-#                 body = []
-#             return jsonify(
-#                 {
-#                     "current_date": date.today().strftime("%B %d, %Y"),
-#                     "current_time": strftime("%H:%M:%S +0000", gmtime()),
-#                     "status": "OK",
-#                     "body": body
-#                 }
-#             )
-#         except:
-#             api.abort(404, message="study table not found or has no data")
 @api.route('/studies')
 class MatchStudies(Resource):
     def get(self):
@@ -91,10 +59,6 @@ class MatchStudies(Resource):
             if all_studies:
                 studies = [x.as_dict() for x in all_studies]
                 study_links = [x.as_dict() for x in all_study_links]
-
-                #DEBUG
-                logging.warning("HEREhereHEREhereHERE")
-                
                 
                 body=[]
                 for study in studies:
@@ -137,28 +101,58 @@ class MatchEligibilityCriteria(Resource):
     def get(self):
         all_el_criteria_has_criterion = ElCriteriaHasCriterionService.get_all(ElCriteriaHasCriterion)
         all_value = ValueService.get_all(Value)
+
+        all_criterion = CriterionService.get_all(Criterion)
+        all_input_type = InputTypeService.get_all(InputType)
+
         try:
             if all_el_criteria_has_criterion:
                 body = []
                 
                 el_criteria_has_criterion = [x.as_dict() for x in all_el_criteria_has_criterion]
                 value = [x.as_dict() for x in all_value]
+
+                criterion = [x.as_dict() for x in all_criterion]
+                input_type = [x.as_dict() for x in all_input_type]
+                
                 
                 for echc in el_criteria_has_criterion:
-                    the_id = echc.get('id')
-                    fieldId = echc.get('criterion_id')
-                    fieldValue = echc.get('value_id')
+                    if mc.is_active(echc):
 
-                    the_value = list(filter(lambda x: x['id'] == fieldValue, value))[0]
-                    operator = the_value.get('operator')
-                    
-                    f = {
-                        'id': the_id,
-                        'fieldId': fieldId,
-                        'fieldValue': fieldValue,
-                        'operator': operator
-                    }
-                    body.append(f)
+                        the_id = echc.get('id')
+                        fieldId = echc.get('criterion_id')
+
+                        value_id = echc.get('value_id')
+                        the_value = list(filter(lambda x: x['id'] == value_id, value))[0]
+                        operator = the_value.get('operator')
+
+                        #choose fieldValue as value or value_id, depending on input_type
+                        crit = list(filter(lambda x: x['id'] == fieldId, criterion))[0]
+                        input_type_id = crit.get('input_type_id')
+                        it = list(filter(lambda x: x['id'] == input_type_id, input_type))[0]
+                        render_type = it.get('render_type')
+                        if render_type in ['radio', 'select']:
+                            fieldValue = value_id
+                        elif render_type in ['age']:
+                            unit = the_value.get('unit')
+                            if unit in ['years']:
+                                fieldValue = eval(the_value.get('value_string'))
+                            else:
+                                if unit in ['months']:
+                                    fieldValue = round(eval(the_value.get('value_string'))/12.0)
+                                elif unit in ['days']:
+                                    fieldValue = round(eval(the_value.get('value_string'))/365.0)
+                        else:
+                            fieldValue = eval(the_value.get('value_string'))
+
+
+                        f = {
+                            'id': the_id,
+                            'fieldId': fieldId,
+                            'fieldValue': fieldValue,
+                            'operator': operator
+                        }
+                        body.append(f)
             else:
                 body = []
             return jsonify(

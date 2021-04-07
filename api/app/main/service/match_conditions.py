@@ -205,6 +205,7 @@ def format(X):
 
     return R
 
+
 def groups(tags):
     G = []
     for tag in tags:
@@ -239,7 +240,6 @@ def is_active(row):
         return False
 
 
-
 def triggers(row, triggered_by, value):
     display_rules_id = row['id']
     tbs = list(filter(lambda x: x['display_rules_id'] == display_rules_id, triggered_by))
@@ -259,7 +259,8 @@ def triggers(row, triggered_by, value):
                     return {}
                 
                 path = tb['path']
-                if not path is None:
+                #if not path is None:
+                if path:
                     try:
                         crits = showIf.get('criteria')
                         new_crit = {
@@ -302,6 +303,7 @@ bounds = {
     'anthracycline dose': {'min': 0.1, 'step': 0.1},
     'Direct bilirubin (in mg/dL)': {'min': 0.1, 'step': 0.1},
 }
+
 
 def form(display_rules, input_type, criterion, criterion_has_tag, criterion_has_value, value, triggered_by):
     F = []
@@ -370,7 +372,8 @@ def form(display_rules, input_type, criterion, criterion_has_tag, criterion_has_
                             o.update({'label': v_row['code']})
 
                             #description not used anymore?
-                            o.update({'description': v_row['description']})
+                            #o.update({'description': v_row['description']})
+                            o.update({'description': ""})
 
                             options.append(o)
 

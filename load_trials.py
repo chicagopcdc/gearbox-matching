@@ -7,7 +7,7 @@ import requests
 ############################
 
 data_path = '~/Desktop/tables/'
-data_prefix = 'v20/load_trials_v20 - '
+data_prefix = 'v21/load_trials_v21 - '
 host = 'http://0.0.0.0:5000'
 headers = {'Content-type': 'application/json'}
 
