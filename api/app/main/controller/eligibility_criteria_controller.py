@@ -88,15 +88,7 @@ class Update(Resource):
         allowed_keys = eligibility_criteria.as_dict().keys()
         for key in data.keys():
             if key in allowed_keys:
-                if key=='code':
-                    existing_eligibility_criteria_with_new_code = EligibilityCriteriaService.get_a_eligibility_criteria(self, data[key])
-                    if not existing_eligibility_criteria_with_new_code:
-                        setattr(eligibility_criteria, key, data[key])
-                    else:
-                        #code values must be unique for each eligibility_criteria
-                        api.abort(409, message="eligibility_criteria code '{}' is duplicate".format(data[key]))
-                else:
-                    setattr(eligibility_criteria, key, data[key])
+                setattr(eligibility_criteria, key, data[key])
         try:
             EligibilityCriteriaService.commit()
             return eligibility_criteria.as_dict()

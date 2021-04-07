@@ -1,5 +1,4 @@
-from sqlalchemy import ForeignKey, Column, Integer, String
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String
 
 from . import Base
 
@@ -14,5 +13,3 @@ class OntologyCode(Base):
     value = Column(String, nullable=True)
     version = Column(String, nullable=True)
 
-
-    

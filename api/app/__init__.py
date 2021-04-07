@@ -5,6 +5,7 @@ from flask import Blueprint
 
 from .main.controller.login_controller import api as login_ns
 from .main.controller.study_controller import api as study_ns
+from .main.controller.study_links_controller import api as study_links_ns
 from .main.controller.site_controller import api as site_ns
 from .main.controller.site_has_study_controller import api as site_has_study_ns
 from .main.controller.study_version_controller import api as study_version_ns
@@ -19,6 +20,14 @@ from .main.controller.eligibility_criteria_has_note_controller import api as eli
 from .main.controller.note_controller import api as note_ns
 from .main.controller.ontology_code_controller import api as ontology_code_ns
 from .main.controller.input_type_controller import api as input_type_ns
+from .main.controller.value_controller import api as value_ns
+from .main.controller.display_rules_controller import api as display_rules_ns
+from .main.controller.triggered_by_controller import api as triggered_by_ns
+from .main.controller.criterion_has_value_controller import api as criterion_has_value_ns
+
+""" MATCH ENDPOINTS """
+from .main.controller.match_controller import api as match_ns
+
 
 blueprint = Blueprint('api', __name__)
 
@@ -28,8 +37,10 @@ api = Api(blueprint,
           description='a boilerplate for flask restplus web service'
           )
 
+
 api.add_namespace(login_ns, path='/login')
 api.add_namespace(study_ns, path='/study')
+api.add_namespace(study_links_ns, path='/study_links')
 api.add_namespace(site_ns, path='/site')
 api.add_namespace(site_has_study_ns, path='/site_has_study')
 api.add_namespace(study_version_ns, path='/study_version')
@@ -44,3 +55,10 @@ api.add_namespace(eligibility_criteria_has_note_ns, path='/eligibility_criteria_
 api.add_namespace(note_ns, path='/note')
 api.add_namespace(ontology_code_ns, path='/ontology_code')
 api.add_namespace(input_type_ns, path='/input_type')
+api.add_namespace(value_ns, path='/value')
+api.add_namespace(display_rules_ns, path='/display_rules')
+api.add_namespace(triggered_by_ns, path='/triggered_by')
+api.add_namespace(criterion_has_value_ns, path='/criterion_has_value')
+
+""" MATCH ENDPOINTS """
+api.add_namespace(match_ns, path='/match')

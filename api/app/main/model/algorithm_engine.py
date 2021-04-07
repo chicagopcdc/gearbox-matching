@@ -6,10 +6,11 @@ from . import Base
 
 class AlgorithmEngine(Base):
     __tablename__ = 'algorithm_engine'
+
     id = Column(Integer, primary_key=True, autoincrement=True)
-    criterion_id = Column(Integer, ForeignKey('criterion.id'), nullable=True)
-    parent_id = Column(Integer, nullable=True)
-    parent_path = Column(String(45), nullable=True)
-    operator = Column(String(45), nullable=True)
+    el_criteria_has_criterion_id = Column(Integer, ForeignKey('el_criteria_has_criterion.id'))
+    parent_id = Column(Integer)
+    parent_path = Column(String)
+    operator = Column(String, nullable=True)
 
     study_versions = relationship("StudyAlgorithmEngine", back_populates="algorithm_engine")   

@@ -5,20 +5,32 @@ class StudyDto:
     api = Namespace('study', description='study related operations')
     study = api.model('study', {
     	'id': fields.String(required=True, description="study id"),
-        'name': fields.String(required=True, description='study name'),
-        'code': fields.String(required=True, description='study code'),
-        'create_date': fields.String(required=True, description='study creation time'),
+        'name': fields.String(description='study name'),
+        'code': fields.String(description='study code'),
+        'description': fields.String(description='study description'),
+        'create_date': fields.String(description='study creation time'),
         'active': fields.String(description='is study active')
     })
 
 
+class StudyLinksDto:
+    api = Namespace('study_links', description='study_links related operations')
+    study_links = api.model('study_links', {
+    	'id': fields.String(required=True, description="study_links id"),
+        'study_id': fields.String(description='study id'),
+        'name': fields.String(description='study_links name'),
+        'href': fields.String(description='study_links href'),
+        'active': fields.String(description='is study active')
+    })
+
+    
 class SiteDto:
     api = Namespace('site', description='site related operations')
     site = api.model('site', {
     	'id': fields.String(required=True, description="site id"),
-        'name': fields.String(required=True, description='site name'),
-        'code': fields.String(required=True, description='site code'),
-        'create_date': fields.String(required=True, description='site creation time'),
+        'name': fields.String(description='site name'),
+        'code': fields.String(description='site code'),
+        'create_date': fields.String(description='site creation time'),
         'active': fields.String(description='is site active')
     })    
 
@@ -28,7 +40,7 @@ class SiteHasStudyDto:
     site_has_study = api.model('site_has_study', {
     	'study_id': fields.String(required=True, description="study id"),
     	'site_id': fields.String(required=True, description="site id"),
-        'create_date': fields.String(required=True, description='site creation time'),
+        'create_date': fields.String(description='site creation time'),
         'active': fields.String(description='is site active')
     })    
 
@@ -48,7 +60,7 @@ class StudyVersionDto:
     study_version = api.model('study_version', {
     	'id': fields.String(required=True, description="study_version id"),
         'study_id': fields.String(required=True, description='study id'),
-        'create_date': fields.String(required=True, description='study_version creation time'),
+        'create_date': fields.String(description='study_version creation time'),
         'active': fields.String(description='is study_version active')
     })    
 
@@ -66,7 +78,7 @@ class AlgorithmEngineDto:
     api = Namespace('algorithm_engine', description='algorithm_engine related operations')
     algorithm_engine = api.model('algorithm_engine', {
     	'id': fields.String(required=True, description="algorithm_engine id"),
-    	'criterion_id': fields.String(description="algorithm_engine criterion_id"),
+    	'el_criteria_has_criterion_id': fields.String(description="algorithm_engine el_criteria_has_criterion_id"),
     	'parent_id': fields.String(description="algorithm_engine parent_id"),
         'parent_path': fields.String(description="algorithm_engine parent_path"),
     	'operator': fields.String(description="algorithm_engine operator")
@@ -78,7 +90,8 @@ class EligibilityCriteriaDto:
     eligibility_criteria = api.model('eligibility_criteria', {
     	'id': fields.String(required=True, description="eligibility_criteria id"),
         'create_date': fields.String(description='eligibility_criteria create_date'),
-        'active': fields.String(description='is eligibility_criteria active')
+        'active': fields.String(description='is eligibility_criteria active'),
+        'study_version_id': fields.String(required=True, description='eligibility_criteria study_version_id')
     })
 
 
@@ -116,11 +129,12 @@ class CriterionHasTagDto:
 class ElCriteriaHasCriterionDto:
     api = Namespace('el_criteria_has_criterion', description='el_criteria_has_criterion related operations')
     el_criteria_has_criterion = api.model('el_criteria_has_criterion', {
+        'id': fields.String(required=True, description="el_criteria_has_criterion id"),
     	'criterion_id': fields.String(required=True, description="el_criteria_has_criterion criterion_id"),
         'eligibility_criteria_id': fields.String(required=True, description='el_criteria_has_criterion eligibility_criteria_id'),
         'create_date': fields.String(description='el_criteria_has_criterion create_date'),
         'active': fields.String(description='is el_criteria_has_criterion active'),
-        'value_id': fields.String(description='el_criteria_has_criterion value_id')
+        'value_id': fields.String(required=True, description='el_criteria_has_criterion value_id')
     })
 
 
@@ -129,14 +143,13 @@ class ValueDto:
     value = api.model('value', {
     	'id': fields.String(required=True, description="value id"),
     	'code': fields.String(description="value code"),
+    	'description': fields.String(description="value description"),
     	'type': fields.String(description="value type"),
     	'value_string': fields.String(description="value value_string"),
-    	'upper_threshold': fields.String(description="value upper_threshold"),
-    	'lower_threshold': fields.String(description="value lower_threshold"),
+    	'unit': fields.String(description="value unit"),
+    	'operator': fields.String(description="value operator"),
     	'create_date': fields.String(description="value create_date"),
-    	'active': fields.String(description="value active"),
-    	'value_list': fields.String(description="value value_list"),
-    	'value_bool': fields.String(description="value value_bool"),
+    	'active': fields.String(description="value active")
     })
 
     
@@ -160,8 +173,9 @@ class InputTypeDto:
     api = Namespace('input_type', description='input_type related operations')
     input_type = api.model('input_type', {
     	'id': fields.String(required=True, description="input_type id"),
-        'type': fields.String(description='input_type type'),
-        'name': fields.String(description='input_type code')
+        'data_type': fields.String(description='input_type data_type'),
+        'render_type': fields.String(description='input_type render_type'),
+        'create_date': fields.String(description='input_type creation time')
     })
 
 
@@ -174,4 +188,40 @@ class OntologyCodeDto:
     	'code': fields.String(description="ontology_code code"),
     	'value': fields.String(description="ontology_code value"),
     	'version': fields.String(description="ontology_code version")
+    })
+
+    
+class MatchDto(StudyDto, ValueDto, AlgorithmEngineDto):
+    api = Namespace('match', description='match related operations')
+
+    
+class DisplayRulesDto:
+    api = Namespace('display_rules', description='display_rules related operations')
+    display_rules = api.model('display_rules', {
+    	'id': fields.String(required=True, description="display_rules id"),
+    	'criterion_id': fields.String(required=True, description="display_rules criterion_id"),
+    	'priority': fields.String(required=True, description="display_rules priority"),
+    	'active': fields.String(description="is display_rules active"),
+    	'version': fields.String(description="display_rules version")
+    })
+
+
+class TriggeredByDto:
+    api = Namespace('triggered_by', description='triggered_by related operations')
+    triggered_by = api.model('triggered_by', {
+    	'id': fields.String(required=True, description="triggered_by id"),        
+    	'display_rules_id': fields.String(required=True, description="triggered_by display_rules_id"),
+    	'criterion_id': fields.String(required=True, description="triggered_by criterion_id"),
+    	'value_id': fields.String(required=True, description="triggered_by value_id"),
+    	'path': fields.String(description="triggered_by path"),
+    	'active': fields.String(description="is triggered_by active")
+    })
+
+
+class CriterionHasValueDto:
+    api = Namespace('criterion_has_value', description='criterion_has_value related operations')
+    criterion_has_value = api.model('criterion_has_value', {
+    	'criterion_id': fields.String(required=True, description="criterion_has_value criterion_id"),
+    	'value_id': fields.String(required=True, description="criterion_has_value value_id"),
+    	'create_date': fields.String(description="criterion_has_value create_date")
     })

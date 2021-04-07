@@ -30,6 +30,6 @@ class EligibilityCriteriaHasNoteService(Services):
 
     def get_a_eligibility_criteria_has_note(self, data):
         return DbSession.query(EligibilityCriteriaHasNote).filter(
-            EligibilityCriteriaHasNote.eligibility_criteria_id==data['eligibility_criteria_id'],
-            EligibilityCriteriaHasNote.note_id==data['note_id'],
+            EligibilityCriteriaHasNote.eligibility_criteria_id==data.get('eligibility_criteria_id'), 
+            EligibilityCriteriaHasNote.note_id==data.get('note_id'),
         ).first()

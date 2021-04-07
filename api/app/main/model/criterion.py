@@ -13,8 +13,10 @@ class Criterion(Base):
     description = Column(String, nullable=True)
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
-    ontology_code_id = Column(Integer, ForeignKey('ontology_code.id'))
-    input_type_id = Column(Integer, ForeignKey('input_type.id'))
+    ontology_code_id = Column(Integer, ForeignKey('ontology_code.id'), nullable=True)
+    input_type_id = Column(Integer, ForeignKey('input_type.id'), nullable=True)
     
     tags = relationship("CriterionHasTag", back_populates="criterion")
     el_criteria_has_criterions = relationship("ElCriteriaHasCriterion", back_populates="criterion")
+
+    values = relationship("CriterionHasValue", back_populates="criterion")

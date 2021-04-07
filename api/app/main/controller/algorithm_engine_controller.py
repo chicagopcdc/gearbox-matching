@@ -78,8 +78,6 @@ class Update(Resource):
         data = api.payload
         if not data or not isinstance(data, dict):
             api.abort(400, message="null payload or payload not json/dict")
-
-        #retrieve the algorithm_engine to be updated
         algorithm_engine = AlgorithmEngineService.get_a_algorithm_engine(self, public_id)
         if not algorithm_engine:
             api.abort(404, message="algorithm_engine '{}' not found".format(public_id))
@@ -88,15 +86,7 @@ class Update(Resource):
         allowed_keys = algorithm_engine.as_dict().keys()
         for key in data.keys():
             if key in allowed_keys:
-                if key=='id':
-                    existing_algorithm_engine_with_new_code = AlgorithmEngineService.get_a_algorithm_engine(self, data[key])
-                    if not existing_algorithm_engine_with_new_code:
-                        setattr(algorithm_engine, key, data[key])
-                    else:
-                        #code values must be unique for each algorithm_engine
-                        api.abort(409, message="algorithm_engine code '{}' is duplicate".format(data[key]))
-                else:
-                    setattr(algorithm_engine, key, data[key])
+                setattr(algorithm_engine, key, data[key])
         try:
             AlgorithmEngineService.commit()
             return algorithm_engine.as_dict()

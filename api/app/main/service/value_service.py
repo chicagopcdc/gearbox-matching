@@ -8,20 +8,18 @@ from app.main.service import Services
 class ValueService(Services):
 
     def save_new_value(self, data):
-        value = self.get_a_value(self, data.get('code'))
+        value = self.get_a_value(self, data.get('id'))
 
         if not value:
             new_value = Value(
-                id=data.get('id'),
                 code=data.get('code'),
+                description=data.get('description'),
                 type=data.get('type'),
                 value_string=data.get('value_string'),
-                upper_threshold=data.get('upper_threshold'),
-                lower_threshold=data.get('lower_threshold'),
+                unit=data.get('unit'),
+                operator=data.get('operator'),
                 create_date=datetime.datetime.utcnow(),
                 active=data.get('active'),
-                value_list=data.get('value_list'),
-                value_bool=data.get('value_bool'),
             )
             Services.save_changes(new_value)
             response_object = {
@@ -36,5 +34,7 @@ class ValueService(Services):
             }
             return response_object, 409
 
-    def get_a_value(self, code):
-        return DbSession.query(Value).filter(Value.code==code).first()
+    def get_a_value(self, id):
+        return DbSession.query(Value).filter(
+            Value.id==id
+         ).first()

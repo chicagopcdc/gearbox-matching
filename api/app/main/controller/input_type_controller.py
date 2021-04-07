@@ -21,7 +21,7 @@ class InputTypeInfo(Resource):
     @api.doc('get a input_type')
     @api.marshal_with(_input_type)
     def get(self, public_id):
-        input_type = InputTypeService.get_a_input_type(self,public_id)
+        input_type = InputTypeService.get_a_input_type(self, public_id)
         if not input_type:
             api.abort(404, message="input_type '{}' not found".format(public_id))
         else:
@@ -88,15 +88,7 @@ class Update(Resource):
         allowed_keys = input_type.as_dict().keys()
         for key in data.keys():
             if key in allowed_keys:
-                if key=='name':
-                    existing_input_type_with_new_code = InputTypeService.get_a_input_type(self, data[key])
-                    if not existing_input_type_with_new_code:
-                        setattr(input_type, key, data[key])
-                    else:
-                        #code input_types must be unique for each input_type
-                        api.abort(409, message="input_type name '{}' is duplicate".format(data[key]))
-                else:
-                    setattr(input_type, key, data[key])
+                setattr(input_type, key, data[key])
         try:
             InputTypeService.commit()
             return input_type.as_dict()

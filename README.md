@@ -1,51 +1,76 @@
-docker-compose exec -T mysql-development mysql -uroot -ppassword pedal_dev_v_0 < ../pedal_20191209.sql
+# Setting up GEARBOx backend
 
-docker-compose exec  mysql-development mysql -uroot -ppassword
+## Run Docker Compose
 
+```sh
+docker-compose up
+```
 
+This operations starts the DB and the API services. The API service will be available at `0.0.0.0:5000`. Visit the root (`/`) path to see the generated API documentation.
 
-mysql -h localhost -P 32000 --protocol=tcp -u root -p
+## Load data
 
+1. Create a `/Secrets/creds.json` to set the `client_id` for fence
+   - The app container will fail/crash without `Secrets/creds.json`. You can use the following dummy credential:
 
-clean unused volumes
-	docker volume prune
-
-remove container and associated volumes
-	docker rm -v [container]
-
-
-~~~~~~~~~~~~~~~~~~~
-
-config.env sets the environment (set as test).
-The env defaults to "dev" if not otherwise set.
-Again, the config is set as "test" in the repo, but will default to "dev" if this is removed.
-
-CRUD tests can be run from the app container:
-
-shell into container:
-"docker-compose exec app sh"
-
-start pipenv:
-"pipenv shell"
-
-run tests:
-"pytest"
-
-Tests use (and require) the pre-set data, in db/pedal_populate.sql
-
-Tests reference the data set in this way.
-New data is created in the tests themselves,
-but the data is flushed from the session at the end of the tests.
-
-Some tables use the "code" field, which can be used as a lookup code.
-Those that do not have "code" use primary keys, packages as dash separated ids (int) (format is {}-{}-...).
-
-~~~~~~~~~~~~~~~~~~~
-
-The app container will fail/crash unless Secrets/creds.json is created (in root dir of the app).
-
-creds.json holds the client_id for fence.
-
+```json
 {
-    "CLIENT_ID":""
+  "CLIENT_ID": ""
 }
+```
+
+2. Prepare files for trials data
+   - Trials data files have to be obtained separately. (Talk to Tom.)
+3. Modify `/load_trials.py` to use correct data files location
+   - Change `data_path` and `data_prefix`
+   - Default values:
+
+```py
+data_path = '~/Desktop/tables/'
+data_prefix = 'v17/load_trials_v17 - '
+```
+
+4. Install dependencies
+
+```bash
+# set up and use virtual environment (recommended)
+python -m venv venv
+source venv/bin/activate
+
+# install pip dependencies
+pip install -r requirements.txt
+```
+
+5. Run `/load_trials.py` to load trials data to the database
+   - Stdout shows `201`s when new table rows are successfully created from the loaded data
+
+## Run test
+
+> :warning: To enable test, first set the environment variable `BOILERPLATE_ENV` to `test`. You can use `./config.env` for this.
+
+CRUD tests can be run from the app container.
+
+```sh
+# 1. Get an interactive shell for the `app` container
+docker-compose exec app sh
+
+# 2. Start pipenv
+pipenv shell
+
+# 3. Run tests
+pytest
+```
+
+Tests use (and require) the pre-set data, in `./db/pedal_populate.sql`.
+
+When running tests, new data is created in the tests themselves and flushed from the session at the end of the tests.
+
+Some tables use the `"code"` field, which can be used as a lookup code. Those that do not have `"code"` use a primary key.
+
+## Stop Docker Compose
+
+```sh
+docker-compose down
+```
+
+This operation also clears the DB.

@@ -8,8 +8,9 @@ class Study(Base):
     __tablename__ = "study"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(45), nullable=True)
-    code = Column(String(45), nullable=True)
+    name = Column(String, nullable=True)
+    code = Column(String, nullable=True)
+    description = Column(String, nullable=True)
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
 

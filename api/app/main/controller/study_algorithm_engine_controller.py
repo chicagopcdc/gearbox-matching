@@ -15,20 +15,17 @@ api = StudyAlgorithmEngineDto.api
 _study_algorithm_engine = StudyAlgorithmEngineDto.study_algorithm_engine
 
 
-@api.route('/<public_id>')
-@api.param('public_id', 'The StudyAlgorithmEngine identifier')
+@api.route('')
 class StudyAlgorithmEngineInfo(Resource):
     @api.doc('get a study_algorithm_engine')
     @api.marshal_with(_study_algorithm_engine)
-    def get(self, public_id):
-        pid = public_id.split('-')
-        data = {
-            'study_version_id': pid[0],
-            'algorithm_engine_id': pid[1],
-        }
+    def get(self):
+        data = api.payload
+        if not data or not isinstance(data, dict):
+            api.abort(400, message="null payload or payload not json/dict")
         study_algorithm_engine = StudyAlgorithmEngineService.get_a_study_algorithm_engine(self, data)
         if not study_algorithm_engine:
-            api.abort(404, message="study_algorithm_engine '{}' not found".format(public_id))
+            api.abort(404, message="study_algorithm_engine '{}' not found".format(data))
         else:
             return study_algorithm_engine.as_dict()
 
@@ -75,52 +72,16 @@ class Create(Resource):
             logging.error(e, exc_info=True)
 
 
-@api.route('/update_study_algorithm_engine/<public_id>')
-@api.param('public_id', 'The StudyAlgorithmEngine identifier')
-class Update(Resource):
-    @api.doc('update an existing study_algorithm_engine')
-    def put(self, public_id):
-        data = api.payload
-        if not data or not isinstance(data, dict):
-            api.abort(400, message="null payload or payload not json/dict")
-
-        #retrieve the study_algorithm_engine to be updated
-        pid = public_id.split('-')
-        pid_data = {
-            'study_version_id': pid[0],
-            'algorithm_engine_id': pid[1],
-        }
-        study_algorithm_engine = StudyAlgorithmEngineService.get_a_study_algorithm_engine(self, pid_data)
-        if not study_algorithm_engine:
-            api.abort(404, message="study_algorithm_engine '{}' not found".format(public_id))
-
-        #set new key/values
-        allowed_keys = study_algorithm_engine.as_dict().keys()
-        for key in data.keys():
-            if key in allowed_keys:
-                #DO NOT PREVENT PRIMARY KEY CHANGES
-                setattr(study_algorithm_engine, key, data[key])
-        try:
-            StudyAlgorithmEngineService.commit()
-            return study_algorithm_engine.as_dict()
-        except Exception as e:
-            logging.error(e, exc_info=True)
-            return e
-
-
-@api.route('/delete_study_algorithm_engine/<public_id>')
-@api.param('public_id', 'The StudyAlgorithmEngine identifier')
+@api.route('/delete_study_algorithm_engine')
 class Delete(Resource):
     @api.doc('delete a study_algorithm_engine')
-    def delete(self, public_id):
-        pid = public_id.split('-')
-        pid_data = {
-            'study_version_id': pid[0],
-            'algorithm_engine_id': pid[1],
-        }
-        study_algorithm_engine = StudyAlgorithmEngineService.get_a_study_algorithm_engine(self, pid_data)
+    def delete(self):
+        data = api.payload
+        if not data or not isinstance(data, dict):
+            api.abort(400, message="null payload or payload not json/dict")        
+        study_algorithm_engine = StudyAlgorithmEngineService.get_a_study_algorithm_engine(self, data)
         if not study_algorithm_engine:
-            api.abort(404, message="study_algorithm_engine '{}' not found".format(public_id))
+            api.abort(404, message="study_algorithm_engine '{}' not found".format(data))
 
         try:
             StudyAlgorithmEngineService.delete(study_algorithm_engine)

@@ -31,6 +31,6 @@ class CriterionHasTagService(Services):
     def get_a_criterion_has_tag(self, data):
         return DbSession.query(CriterionHasTag).filter(
             CriterionHasTag.criterion_id==data.get('criterion_id'),
-            CriterionHasTag.tag_id==data.get('tag_id'),
+            CriterionHasTag.tag_id==data.get('tag_id')
         ).first()
 

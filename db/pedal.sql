@@ -27,9 +27,31 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`study` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NULL,
   `code` VARCHAR(45) NULL,
+  `description` VARCHAR(1024) NULL,
   `create_date` DATETIME NULL,
   `active` TINYINT NULL,
   PRIMARY KEY (`id`))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `pedal_dev_v_0`.`study_links`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `pedal_dev_v_0`.`study_links` ;
+
+CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`study_links` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `study_id` INT NOT NULL,
+  `name` VARCHAR(512) NULL,
+  `href` VARCHAR(512) NULL,
+  `active` TINYINT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_study_links_study1_idx` (`study_id` ASC),
+  CONSTRAINT `fk_study_links_study1`
+    FOREIGN KEY (`study_id`)
+    REFERENCES `pedal_dev_v_0`.`study` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 
@@ -39,11 +61,11 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `pedal_dev_v_0`.`study_version` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`study_version` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `study_id` INT NOT NULL,
   `create_date` DATETIME NULL,
   `active` TINYINT NULL,
-  PRIMARY KEY (`id`, `study_id`),
+  PRIMARY KEY (`id`),
   INDEX `fk_study_version_study1_idx` (`study_id` ASC),
   CONSTRAINT `fk_study_version_study1`
     FOREIGN KEY (`study_id`)
@@ -75,7 +97,7 @@ DROP TABLE IF EXISTS `pedal_dev_v_0`.`criterion` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`criterion` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `code` VARCHAR(45) NULL,
+  `code` VARCHAR(512) NULL,
   `display_name` VARCHAR(128) NULL,
   `description` VARCHAR(512) NULL,
   `create_date` DATETIME NULL,
@@ -139,12 +161,13 @@ ENGINE = InnoDB;
 DROP TABLE IF EXISTS `pedal_dev_v_0`.`el_criteria_has_criterion` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`el_criteria_has_criterion` (
+  `id` INT NOT NULL AUTO_INCREMENT,
   `criterion_id` INT NOT NULL,
   `eligibility_criteria_id` INT NOT NULL,
   `create_date` DATETIME NULL,
   `active` TINYINT NULL,
-  `value_id` INT NULL,
-  PRIMARY KEY (`criterion_id`, `eligibility_criteria_id`),
+  `value_id` INT NOT NULL,
+  PRIMARY KEY (`id`),
   INDEX `fk_el_criteria_has_criterion_criterion1_idx` (`criterion_id` ASC),
   INDEX `fk_el_criteria_has_criterion_eligibility_criteria1_idx` (`eligibility_criteria_id` ASC),
   INDEX `fk_el_criteria_has_criterion_value1_idx` (`value_id` ASC),
@@ -173,15 +196,14 @@ DROP TABLE IF EXISTS `pedal_dev_v_0`.`value` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`value` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `code` VARCHAR(45) NULL,
+  `code` VARCHAR(512) NULL,
+  `description` VARCHAR(512) NULL,
   `type` VARCHAR(45) NULL,
   `value_string` VARCHAR(45) NULL,
-  `upper_threshold` DECIMAL(19,4) NULL,
-  `lower_threshold` DECIMAL(19,4) NULL,
+  `unit` VARCHAR(45) NULL,
+  `operator` VARCHAR(45) NULL,
   `create_date` DATETIME NULL,
   `active` TINYINT NULL,
-  `value_list` VARCHAR(45) NULL,
-  `value_bool` VARCHAR(45) NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -242,8 +264,9 @@ DROP TABLE IF EXISTS `pedal_dev_v_0`.`input_type` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`input_type` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `type` VARCHAR(45) NULL,
-  `name` VARCHAR(45) NULL,
+  `data_type` VARCHAR(45) NULL,
+  `render_type` VARCHAR(45) NULL,
+  `create_date` DATETIME NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
 
@@ -255,15 +278,15 @@ DROP TABLE IF EXISTS `pedal_dev_v_0`.`algorithm_engine` ;
 
 CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`algorithm_engine` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `criterion_id` INT NULL,
-  `parent_id` INT NULL,
-  `parent_path` VARCHAR(45) NULL,
+  `el_criteria_has_criterion_id` INT NOT NULL,
+  `parent_id` INT NOT NULL,
+  `parent_path` VARCHAR(512) NOT NULL,
   `operator` VARCHAR(45) NULL,
   PRIMARY KEY (`id`),
-  INDEX `fk_algorithm_engine_criterion1_idx` (`criterion_id` ASC),
-  CONSTRAINT `fk_algorithm_engine_criterion1`
-    FOREIGN KEY (`criterion_id`)
-    REFERENCES `pedal_dev_v_0`.`criterion` (`id`)
+  INDEX `fk_algorithm_engine_el_criteria_has_criterion1_idx` (`el_criteria_has_criterion_id` ASC),
+  CONSTRAINT `fk_algorithm_engine_el_criteria_has_criterion1`
+    FOREIGN KEY (`el_criteria_has_criterion_id`)
+    REFERENCES `pedal_dev_v_0`.`el_criteria_has_criterion` (`id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB;
@@ -359,17 +382,80 @@ CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`logins` (
 ENGINE = InnoDB;
 
 -- -----------------------------------------------------
--- Table `pedal_dev_v_0`.`xyz`
+-- Table `pedal_dev_v_0`.`display_rules`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `pedal_dev_v_0`.`xyz` ;
+DROP TABLE IF EXISTS `pedal_dev_v_0`.`display_rules` ;
 
-CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`xyz` (
+CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`display_rules` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `code` VARCHAR(45) NULL,
-  `name` VARCHAR(45) NULL,
-  `create_date` DATETIME NULL,
+  `criterion_id` INT NOT NULL,
+  `priority` INT NOT NULL,
   `active` TINYINT NULL,
-  PRIMARY KEY (`id`))
+  `version` INT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_display_rules_criterion1_idx` (`criterion_id` ASC),
+  CONSTRAINT `fk_display_rules_criterion1`
+    FOREIGN KEY (`criterion_id`)
+    REFERENCES `pedal_dev_v_0`.`criterion` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `pedal_dev_v_0`.`triggered_by`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `pedal_dev_v_0`.`triggered_by` ;
+
+CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`triggered_by` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `display_rules_id` INT NOT NULL,
+  `criterion_id` INT NOT NULL,
+  `value_id` INT NOT NULL,
+  `path` VARCHAR(255) NULL,
+  `active` TINYINT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `fk_triggered_by_display_rules1_idx` (`display_rules_id` ASC),
+  INDEX `fk_triggered_by_criterion1_idx` (`criterion_id` ASC),
+  INDEX `fk_triggered_by_value1_idx` (`value_id` ASC),
+  CONSTRAINT `fk_triggered_by_display_rules1`
+    FOREIGN KEY (`display_rules_id`)
+    REFERENCES `pedal_dev_v_0`.`display_rules` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_triggered_by_criterion1`
+    FOREIGN KEY (`criterion_id`)
+    REFERENCES `pedal_dev_v_0`.`criterion` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_triggered_by_value1`
+    FOREIGN KEY (`value_id`)
+    REFERENCES `pedal_dev_v_0`.`value` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB;
+
+-- -----------------------------------------------------
+-- Table `pedal_dev_v_0`.`criterion_has_value`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `pedal_dev_v_0`.`criterion_has_value` ;
+
+CREATE TABLE IF NOT EXISTS `pedal_dev_v_0`.`criterion_has_value` (
+  `criterion_id` INT NOT NULL,
+  `value_id` INT NOT NULL,
+  `create_date` DATETIME NULL,
+  PRIMARY KEY (`criterion_id`, `value_id`),
+  INDEX `fk_criterion_has_value_criterion1_idx` (`criterion_id` ASC),
+  INDEX `fk_criterion_has_value_value1_idx` (`value_id` ASC),
+  CONSTRAINT `fk_criterion_has_value_criterion1`
+    FOREIGN KEY (`criterion_id`)
+    REFERENCES `pedal_dev_v_0`.`criterion` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_criterion_has_value_value1`
+    FOREIGN KEY (`value_id`)
+    REFERENCES `pedal_dev_v_0`.`value` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
 -- -----------------------------------------------------

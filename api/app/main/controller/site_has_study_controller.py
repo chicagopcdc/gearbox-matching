@@ -15,15 +15,17 @@ api = SiteHasStudyDto.api
 _site_has_study = SiteHasStudyDto.site_has_study
 
 
-@api.route('/<public_id>')
-@api.param('public_id', 'The Site_Has_Study identifier')
+@api.route('')
 class SiteHasStudyInfo(Resource):
     @api.doc('get a site_has_study')
     @api.marshal_with(_site_has_study)
-    def get(self, public_id):
-        site_has_study = SiteHasStudyService.get_a_site_has_study(self, public_id)
+    def get(self):
+        data = api.payload
+        if not data or not isinstance(data, dict):
+            api.abort(400, message="null payload or payload not json/dict")
+        site_has_study = SiteHasStudyService.get_a_site_has_study(self, data)
         if not site_has_study:
-            api.abort(404, message="site_has_study '{}' not found".format(public_id))
+            api.abort(404, message="site_has_study '{}' not found".format(data))
         else:
             return site_has_study.as_dict()
 
@@ -70,49 +72,16 @@ class Create(Resource):
             logging.error(e, exc_info=True)
 
 
-@api.route('/update_site_has_study/<public_id>')
-@api.param('public_id', 'The Site_Has_Study identifier')
-class Update(Resource):
-    @api.doc('update an existing site_has_study')
-    def put(self, public_id):
+@api.route('/delete_site_has_study')
+class Delete(Resource):
+    @api.doc('delete a site_has_study')
+    def delete(self):
         data = api.payload
         if not data or not isinstance(data, dict):
             api.abort(400, message="null payload or payload not json/dict")
-
-        #retrieve the site_has_study to be updated
-        site_has_study = SiteHasStudyService.get_a_site_has_study(self, public_id)
+        site_has_study = SiteHasStudyService.get_a_site_has_study(self, data)
         if not site_has_study:
-            api.abort(404, message="site_has_study '{}' not found".format(public_id))
-
-        #set new key/values
-        allowed_keys = site_has_study.as_dict().keys()
-        for key in data.keys():
-            if key in allowed_keys:
-                if key=='code':
-                    existing_site_has_study_with_new_code = SiteHasStudyService.get_a_site_has_study(self, data[key])
-                    if not existing_site_has_study_with_new_code:
-                        setattr(site_has_study, key, data[key])
-                    else:
-                        #code values must be unique for each site_has_study
-                        api.abort(409, message="site_has_study code '{}' is duplicate".format(data[key]))
-                else:
-                    setattr(site_has_study, key, data[key])
-        try:
-            SiteHasStudyService.commit()
-            return site_has_study.as_dict()
-        except Exception as e:
-            logging.error(e, exc_info=True)
-            return e
-
-
-@api.route('/delete_site_has_study/<public_id>')
-@api.param('public_id', 'The Site_Has_Study identifier')
-class Delete(Resource):
-    @api.doc('delete a site_has_study')
-    def delete(self, public_id):
-        site_has_study = SiteHasStudyService.get_a_site_has_study(self, public_id)
-        if not site_has_study:
-            api.abort(404, message="site_has_study '{}' not found".format(public_id))
+            api.abort(404, message="site_has_study '{}' not found".format(data))
 
         try:
             SiteHasStudyService.delete(site_has_study)

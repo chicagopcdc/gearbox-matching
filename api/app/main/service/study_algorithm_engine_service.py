@@ -34,6 +34,6 @@ class StudyAlgorithmEngineService(Services):
 
     def get_a_study_algorithm_engine(self, data):
         return DbSession.query(StudyAlgorithmEngine).filter(
-            StudyAlgorithmEngine.study_version_id==data['study_version_id'],
-            StudyAlgorithmEngine.algorithm_engine_id==data['algorithm_engine_id'],
+            StudyAlgorithmEngine.study_version_id==data.get('study_version_id'),
+            StudyAlgorithmEngine.algorithm_engine_id==data.get('algorithm_engine_id')
         ).first()

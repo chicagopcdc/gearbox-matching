@@ -12,7 +12,7 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 
-@pytest.yield_fixture(scope="session")
+@pytest.fixture(scope="session")
 def app():
     """
     Creates a new Flask application for a test duration.
@@ -37,9 +37,9 @@ def app():
     Base.metadata.drop_all(bind=_app.engine)
 
 
-#@pytest.yield_fixture(scope="function")
-@pytest.yield_fixture(scope="module")
-#@pytest.yield_fixture(scope="session")
+#@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
+#@pytest.fixture(scope="session")
 def session(app):
     """
     Creates a new database session (with working transaction)
@@ -60,10 +60,3 @@ def session(app):
     app.transaction.close()
     session.close()
     ctx.pop()
-
-
-# @pytest.yield_fixture(scope="function")
-# #@pytest.yield_fixture(scope="module")
-# #@pytest.yield_fixture(scope="session")
-# def test_client(app):
-#     yield app.test_client()
