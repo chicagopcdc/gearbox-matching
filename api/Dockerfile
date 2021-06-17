@@ -1,4 +1,5 @@
-FROM python:3.8.0-alpine
+# FROM python:3.8.0-alpine
+FROM python:3.8.0-slim
 
 LABEL image for a very simple flask application
 
