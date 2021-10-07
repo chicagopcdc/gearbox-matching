@@ -1,32 +1,17 @@
-# FROM quay.io/cdis/ubuntu:18.04
-FROM python:3.6-slim
+FROM quay.io/cdis/python:3.7-alpine as base
 
-# copy files app, uwsgi.ini, requirements.txt, start.sh
-# COPY . /srv/flask_app
-# WORKDIR /srv/flask_app
+FROM base as builder
+RUN apk add --no-cache --virtual .build-deps gcc musl-dev libffi-dev openssl-dev make postgresql-dev git curl rust cargo
+RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+COPY . /src/
+WORKDIR /src
+RUN python -m venv /env && . /env/bin/activate && $HOME/.poetry/bin/poetry install --no-interaction
 
-RUN apt-get clean \
-    && apt-get -y update
-
-RUN apt-get -y install nginx \
-    && apt-get -y install python3-dev \
-    && apt-get -y install build-essential
-
-# Directory to check out editable projects into. The default in a virtualenv is “<venv path>/src”. The default for global installs is “<current dir>/src”.
-# RUN pip install -r requirements.txt --src /usr/local/src
-
-RUN mkdir client
-# COPY --from=gear_front:test /app/build /client/build
-COPY --from=quay.io/pcdc/gearbox_fe:master_Wed__17_Feb_2021_15_39_28_GMT /app/build /client/build
-
-COPY start.sh .
-COPY nginx.conf /etc/nginx/
-RUN echo "daemon off;" >> /etc/nginx/nginx.conf
-RUN chmod +x ./start.sh
-CMD ["./start.sh"]
-
-# EXPOSE 80
-# CMD ["nginx", "-g", "daemon off;"]
-
-
-
+FROM base
+RUN apk add --no-cache postgresql-libs curl
+COPY --from=builder /root/.poetry /root/.poetry
+COPY --from=builder /env /env
+COPY --from=builder /src /src
+ENV PATH="/env/bin/:${PATH}"
+WORKDIR /src
+CMD ["/env/bin/gunicorn", "mds.asgi:app", "-b", "0.0.0.0:80", "-k", "uvicorn.workers.UvicornWorker", "-c", "gunicorn.conf.py"]
