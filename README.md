@@ -1,12 +1,6 @@
 # Metadata Service
 
-[![Docker release](https://img.shields.io/github/v/release/uc-cdis/metadata-service?logo=docker&logoColor=white)](https://quay.io/repository/cdis/metadata-service)
-[![GitHub workflow](https://img.shields.io/github/workflow/status/uc-cdis/metadata-service/CI%20Workflow?logo=github)](https://github.com/uc-cdis/metadata-service/actions?query=workflow%3A%22CI+Workflow%22)
-[![Coverage Status](https://coveralls.io/repos/github/uc-cdis/metadata-service/badge.svg?branch=master)](https://coveralls.io/github/uc-cdis/metadata-service?branch=master)
-[![Dependabot Badge](https://img.shields.io/badge/Dependabot-active-brightgreen?logo=dependabot)](https://dependabot.com/)
-[![License](https://img.shields.io/github/license/uc-cdis/metadata-service?logo=apache)](https://github.com/uc-cdis/metadata-service/blob/master/LICENSE)
-
-The Metadata Service provides API for retrieving JSON metadata of GUIDs.
+The Gearbox Service provides API for retrieving JSON metadata of GUIDs.
 
 The server is built with [FastAPI](https://fastapi.tiangolo.com/) and packaged with
 [Poetry](https://poetry.eustace.io/).
@@ -41,7 +35,6 @@ Create a file `.env` in the root directory of the checkout:
 # DB_USER = "..."           # default: current user
 # DB_PASSWORD = "..."       # default: empty
 # DB_DATABASE = "..."       # default: current user
-# GEN3_ES_ENDPOINT = "..."  # default: empty
 ```
 
 Run database schema migration:
