@@ -216,16 +216,33 @@ This is a special input type with a dedicated input component consisting of year
 
 ### Latest User Input
 
-- Endpoint: GET, POST `/latest-user-input`
-- API:
-
+#### Endpoint: POST `/latest-user-input` - Save new search body:
 ```jsonc
 // an array of field id-value pair
-[
-  {
-    "id": 0,
-    "value": // value type must conform to what the relevant input value allows
-  }
-  // ... more fields
-]
+{
+  "data": [
+    {
+      "id": 0,
+      "value": // value type must conform to what the relevant input value allows
+    }
+    // ... more fields
+  ]
+}  
 ```
+
+#### Endpoint: POST `/latest-user-input` - Update search body:
+```jsonc
+// an array of field id-value pair
+{
+  "data": [
+    {
+      "id": 0,
+      "value": // value type must conform to what the relevant input value allows
+    }
+    // ... more fields
+  ],
+  "id": 1. // id of the saved search to be updated
+}  
+```
+
+#### Endpoint: GET `/latest-user-input` - Get search body.
