@@ -1,14 +1,29 @@
-from gino.ext.starlette import Gino
-
 from .. import config
 
-db = Gino(
-    dsn=config.DB_DSN,
-    pool_min_size=config.DB_POOL_MIN_SIZE,
-    pool_max_size=config.DB_POOL_MAX_SIZE,
-    echo=config.DB_ECHO,
-    ssl=config.DB_SSL,
-    use_connection_for_request=config.DB_USE_CONNECTION_FOR_REQUEST,
-    retry_limit=config.DB_RETRY_LIMIT,
-    retry_interval=config.DB_RETRY_INTERVAL,
+# from gino.ext.starlette import Gino
+# db = Gino(
+#     dsn=config.DB_DSN,
+#     pool_min_size=config.DB_POOL_MIN_SIZE,
+#     pool_max_size=config.DB_POOL_MAX_SIZE,
+#     echo=config.DB_ECHO,
+#     ssl=config.DB_SSL,
+#     use_connection_for_request=config.DB_USE_CONNECTION_FOR_REQUEST,
+#     retry_limit=config.DB_RETRY_LIMIT,
+#     retry_interval=config.DB_RETRY_INTERVAL,
+# )
+
+
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+SQLALCHEMY_DATABASE_URI = config.DB_STRING
+
+
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URI,
+    # required for sqlite
+    # connect_args={"check_same_thread": False},
 )
+
+SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False, expire_on_commit=False)

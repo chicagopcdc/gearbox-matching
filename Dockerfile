@@ -1,11 +1,11 @@
 FROM quay.io/cdis/python:3.7-alpine as base
 
 FROM base as builder
-RUN apk add --no-cache --virtual .build-deps gcc musl-dev libffi-dev openssl-dev make postgresql-dev git curl rust cargo
+RUN apk add --no-cache --virtual .build-deps gcc g++ musl-dev libffi-dev openssl-dev make postgresql-dev git curl rust cargo
 RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
 COPY . /src/
 WORKDIR /src
-RUN python -m venv /env && . /env/bin/activate && $HOME/.poetry/bin/poetry install --no-interaction
+RUN python -m venv /env && . /env/bin/activate && python -m pip install --upgrade pip && $HOME/.poetry/bin/poetry install --no-interaction
 
 FROM base
 RUN apk add --no-cache postgresql-libs curl

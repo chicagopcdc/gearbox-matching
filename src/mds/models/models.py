@@ -1,7 +1,3 @@
-from sqlalchemy.dialects.postgresql import JSONB
-
-from .db import db
-
 from .saved_input import SavedInput
 # from .algorithm_engine import AlgorithmEngine
 # from .criterion import Criterion
@@ -23,10 +19,3 @@ from .saved_input import SavedInput
 # from .tag import Tag
 # from .triggered_by import TriggeredBy
 # from .value import Value
-
-
-class Metadata(db.Model):
-    __tablename__ = "metadata"
-
-    guid = db.Column(db.Unicode(), primary_key=True)
-    data = db.Column(JSONB())

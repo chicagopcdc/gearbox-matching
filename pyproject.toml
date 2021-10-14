@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mds"
-version = "1.6.0"
+version = "1.6.2"
 description = "Metadata Service"
 authors = ["CTDS UChicago <cdis@uchicago.edu>"]
 license = "Apache-2.0"
@@ -16,6 +16,7 @@ psycopg2-binary = "^2.8"
 gen3authz = "^1.0.0"
 indexclient = "^2.1.0"
 httpx = "^0.12.1"
+cryptography = "3.4.8"
 authutils = "^5.0.4"
 cdislogging = "^1.0"
 click = "==7.1.*,>=7.1.2"
@@ -27,6 +28,8 @@ jsonpath-ng = "^1.5.3"
 elasticsearch = "<7.0"
 bleach = ">=3.3.1"
 tenacity = ">=8.0.0"
+pydantic = {extras = ["email"], version = "~1.8.1"}
+SQLAlchemy = "^1.4.22"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.3"
@@ -37,11 +40,6 @@ respx = "*"
 nest-asyncio = "^1.5.1"
 
 [tool.poetry.plugins."mds.modules"]
-"query" = "mds.query"
-"maintain" = "mds.maintain"
-"index" = "mds.index"
-"objects" = "mds.objects"
-"agg_mds" = "mds.agg_mds"
 "save" = "mds.save"
 
 [build-system]

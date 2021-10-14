@@ -2,8 +2,7 @@ import logging
 import time
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 
@@ -20,12 +19,23 @@ fileConfig(config.config_file_name)
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 # target_metadata = None
-from mds.main import db as target_metadata, load_modules
-from mds.config import DB_DSN, DB_CONNECT_RETRIES
+from mds.main import load_modules
+from mds.config import DB_CONNECT_RETRIES
+
+from mds.models.base_class import Base
+from mds.models.db import SQLALCHEMY_DATABASE_URI
+
+target_metadata = Base.metadata
+
+
+def get_url():
+    return SQLALCHEMY_DATABASE_URI
+
+
 
 load_modules()
-logging.info(f"connecting to: {DB_DSN}")
-config.set_main_option("sqlalchemy.url", str(DB_DSN))
+# logging.info(f"connecting to: {DB_DSN}")
+# config.set_main_option("sqlalchemy.url", str(DB_DSN))
 
 
 # other values from the config, defined by the needs of env.py,
@@ -46,11 +56,12 @@ def run_migrations_offline():
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = get_url()
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
+        compare_type=True,
         dialect_opts={"paramstyle": "named"},
     )
 
@@ -65,8 +76,10 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
+    configuration = config.get_section(config.config_ini_section)
+    configuration["sqlalchemy.url"] = get_url()
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section),
+        configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
@@ -87,7 +100,7 @@ def run_migrations_online():
             break
 
     with connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(connection=connection, target_metadata=target_metadata, compare_type=True)
 
         with context.begin_transaction():
             context.run_migrations()

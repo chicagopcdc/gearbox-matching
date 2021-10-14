@@ -12,23 +12,30 @@ class CommaSeparatedLogins(CommaSeparatedStrings):
 
 config = Config(".env")
 
-# Server
 
+# Server
 DEBUG = config("DEBUG", cast=bool, default=True)
 TESTING = config("TESTING", cast=bool, default=False)
 URL_PREFIX = config("URL_PREFIX", default="/" if DEBUG else "/mds")
-USE_AGG_MDS = config("USE_AGG_MDS", cast=bool, default=False)
-AGG_MDS_NAMESPACE = config("AGG_MDS_NAMESPACE", default="default_namespace")
-ES_ENDPOINT = config("GEN3_ES_ENDPOINT", default="http://localhost:9200")
+
 
 # Database
-
 DB_DRIVER = config("DB_DRIVER", default="postgresql")
 DB_HOST = config("DB_HOST", default=None)
 DB_PORT = config("DB_PORT", cast=int, default=None)
 DB_USER = config("DB_USER", default=None)
 DB_PASSWORD = config("DB_PASSWORD", cast=Secret, default=None)
 DB_DATABASE = config("DB_DATABASE", default=None)
+
+DB_STRING = DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST + ":" + str(DB_PORT) + "/" + DB_DATABASE
+
+# host_server = os.environ.get('host_server', 'localhost')
+# db_server_port = urllib.parse.quote_plus(str(os.environ.get('db_server_port', '5432')))
+# database_name = os.environ.get('database_name', 'fastapi')
+# db_username = urllib.parse.quote_plus(str(os.environ.get('db_username', 'postgres')))
+# db_password = urllib.parse.quote_plus(str(os.environ.get('db_password', 'secret')))
+# ssl_mode = urllib.parse.quote_plus(str(os.environ.get('ssl_mode','prefer')))
+# DATABASE_URL = 'postgresql://{}:{}@{}:{}/{}?sslmode={}'.format(db_username, db_password, host_server, db_server_port, database_name, ssl_mode)
 
 if TESTING:
     DB_DATABASE = "test_" + (DB_DATABASE or "metadata")
@@ -61,9 +68,7 @@ DB_RETRY_INTERVAL = config("DB_RETRY_INTERVAL", cast=int, default=1)
 
 
 # Security
-
 ADMIN_LOGINS = config("ADMIN_LOGINS", cast=CommaSeparatedLogins, default=[])
-
 # option to force authutils to prioritize ALLOWED_ISSUERS setting over the issuer from
 # token when redirecting, used during local docker compose setup when the
 # services are on different containers but the hostname is still localhost
@@ -76,7 +81,6 @@ ALLOWED_ISSUERS = set(config("ALLOWED_ISSUERS", cast=CommaSeparatedStrings, defa
 
 
 # Other Services
-
 INDEXING_SERVICE_ENDPOINT = config(
     "INDEXING_SERVICE_ENDPOINT", cast=str, default="http://indexd-service"
 )

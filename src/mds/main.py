@@ -1,23 +1,17 @@
 import asyncio
-
 import click
 import pkg_resources
-from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Depends
 import httpx
-from urllib.parse import urlparse
-from starlette.status import (
-    HTTP_500_INTERNAL_SERVER_ERROR,
-)
-
-from mds.agg_mds import datastore as aggregate_datastore
+from sqlalchemy.orm import Session
+from . import logger, config
+from mds import deps
 
 try:
     from importlib.metadata import entry_points
 except ImportError:
     from importlib_metadata import entry_points
 
-from . import logger, config
-from .models.models import db
 
 
 def get_app():
@@ -28,27 +22,21 @@ def get_app():
         openapi_prefix=config.URL_PREFIX,
     )
     app.include_router(router)
-    db.init_app(app)
     app.add_middleware(ClientDisconnectMiddleware)
     load_modules(app)
     app.async_client = httpx.AsyncClient()
 
     @app.on_event("shutdown")
     async def shutdown_event():
-        if config.USE_AGG_MDS:
-            logger.info("Closing aggregate datastore.")
-            await aggregate_datastore.close()
         logger.info("Closing async client.")
         await app.async_client.aclose()
 
-    @app.on_event("startup")
-    async def startup_event():
-        if config.USE_AGG_MDS:
-            logger.info("Creating aggregate datastore.")
-            url_parts = urlparse(config.ES_ENDPOINT)
-            await aggregate_datastore.init(
-                hostname=url_parts.hostname, port=url_parts.port
-            )
+    # @app.on_event("startup")
+    # async def startup_event():
+    #     logger.info("Do something at startup")
+    #     await {blank}.init(
+    #         hostname=url_parts.hostname, port=url_parts.port
+    #     )
 
     return app
 
@@ -112,29 +100,12 @@ def get_version():
 
 
 @router.get("/_status")
-async def get_status():
-    """
-    Returns the status of the MDS:
-     * error: if there was no error this will be "none"
-     * last_update: timestamp of the last data pull from the commons
-     * count: number of entries
-    :return:
-    """
-    now = await db.scalar("SELECT now()")
-
-    if config.USE_AGG_MDS:
-        try:
-            await aggregate_datastore.get_status()
-        except Exception as error:
-            logger.error("error with aggregate datastore connection: %s", error)
-            raise HTTPException(
-                HTTP_500_INTERNAL_SERVER_ERROR,
-                {
-                    "message": "aggregate datastore offline",
-                    "code": HTTP_500_INTERNAL_SERVER_ERROR,
-                },
-            )
+async def get_status(db: Session = Depends(deps.get_db)):
+    # try:
+    now = await db.execute("SELECT now()")
+    # except Exception:
+    #     raise UnhealthyCheck("Unhealthy")
 
     return dict(
-        status="OK", timestamp=now, aggregate_metadata_enabled=config.USE_AGG_MDS
+        status="OK", timestamp=now
     )

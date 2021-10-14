@@ -1,10 +1,10 @@
 from sqlalchemy import ForeignKey, Column, Integer, DateTime, Text
 from sqlalchemy.dialects.postgresql import JSONB
 
-from .db import db
+from .base_class import Base
 
 
-class SavedInput(db.Model):
+class SavedInput(Base):
     __tablename__ = 'saved_input'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
