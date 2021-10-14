@@ -6,8 +6,8 @@ from asyncpg import InvalidCatalogNameError
 from requests import ReadTimeout
 from starlette.testclient import TestClient
 
-from mds.main import db
-from mds.main import get_app
+from gearbox.main import db
+from gearbox.main import get_app
 
 
 def test_version(client):

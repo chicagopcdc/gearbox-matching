@@ -13,8 +13,7 @@ from unittest.mock import MagicMock, patch
 import asyncio
 
 environ["TESTING"] = "TRUE"
-from mds import config
-from mds.agg_mds import datastore
+from gearbox import config
 
 
 # NOTE: AsyncMock is included in unittest.mock but ONLY in Python 3.8+
@@ -25,7 +24,7 @@ class AsyncMock(MagicMock):
 
 @pytest.fixture(autouse=True, scope="session")
 def setup_test_database():
-    from mds import config
+    from gearbox import config
 
     main(["--raiseerr", "upgrade", "head"])
 
@@ -38,8 +37,8 @@ def setup_test_database():
 
 @pytest.fixture()
 def client():
-    from mds import config
-    from mds.main import get_app
+    from gearbox import config
+    from gearbox.main import get_app
 
     importlib.reload(config)
 
@@ -76,7 +75,7 @@ def valid_upload_file_patcher(client, guid_mock, signed_url_mock):
 
     access_token_mock = MagicMock()
     patches.append(patch("authutils.token.fastapi.access_token", access_token_mock))
-    patches.append(patch("mds.save.access_token", access_token_mock))
+    patches.append(patch("gearbox.save.access_token", access_token_mock))
 
     async def get_access_token(*args, **kwargs):
         return {"sub": "1"}

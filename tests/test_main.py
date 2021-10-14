@@ -5,7 +5,7 @@ from conftest import AsyncMock
 
 
 def test_status_success(client):
-    patch("mds.main.db.scalar", AsyncMock(return_value="some time")).start()
+    patch("gearbox.main.db.scalar", AsyncMock(return_value="some time")).start()
 
     resp = client.get("/_status")
     resp.raise_for_status()
@@ -15,7 +15,7 @@ def test_status_success(client):
 
 
 def test_status_error(client):
-    patch("mds.main.db.scalar", AsyncMock(side_effect=Exception("some error"))).start()
+    patch("gearbox.main.db.scalar", AsyncMock(side_effect=Exception("some error"))).start()
 
     try:
         resp = client.get("/_status")

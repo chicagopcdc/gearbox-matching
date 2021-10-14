@@ -19,11 +19,11 @@ fileConfig(config.config_file_name)
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 # target_metadata = None
-from mds.main import load_modules
-from mds.config import DB_CONNECT_RETRIES
+from gearbox.main import load_modules
+from gearbox.config import DB_CONNECT_RETRIES
 
-from mds.models.base_class import Base
-from mds.models.db import SQLALCHEMY_DATABASE_URI
+from gearbox.models.base_class import Base
+from gearbox.models.db import SQLALCHEMY_DATABASE_URI
 
 target_metadata = Base.metadata
 

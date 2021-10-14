@@ -13,7 +13,7 @@ from starlette.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 
-from mds import config
+from gearbox import config
 
 
 def test_create_no_auth_header(client, valid_upload_file_patcher):
