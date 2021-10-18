@@ -2,8 +2,11 @@
 
 This is a summary of a discussion on GEARBOx API design on July 31, 2020.
 
-> _Updates_:
->
+<details>
+  <summary>
+    <em>Updates:</em>
+  </summary>
+  
 > - Auguest 3, 2020:
 >   - renamed endpoints
 >   - added a separate endpoint and API for Eligibility Criteria
@@ -24,6 +27,8 @@ This is a summary of a discussion on GEARBOx API design on July 31, 2020.
 >   - updated Match Form configuration API `options` value type
 > - March 18, 2012
 >   - updated Studies API based on feedback
+  
+</details>
 
 ## Highlights:
 
