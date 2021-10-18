@@ -25,8 +25,10 @@ This is a summary of a discussion on GEARBOx API design on July 31, 2020.
 >     - modify `options` value into an object with "value", "label", and "descrtiption" attributes
 > - March 1, 2021
 >   - updated Match Form configuration API `options` value type
-> - March 18, 2012
+> - March 18, 2021
 >   - updated Studies API based on feedback
+> - October 8, 2021:
+>   - added a new section for <s>Latest</s>Saved User Input
   
 </details>
 
@@ -219,26 +221,17 @@ This is a special input type with a dedicated input component consisting of year
 ]
 ```
 
-### Latest User Input
+### Saved User Input
 
-#### Endpoint: POST `/latest-user-input` - Save new search body:
-```jsonc
-// an array of field id-value pair
-{
-  "data": [
-    {
-      "id": 0,
-      "value": // value type must conform to what the relevant input value allows
-    }
-    // ... more fields
-  ]
-}  
-```
+#### Creating and updating 
 
-#### Endpoint: POST `/latest-user-input` - Update search body:
+- Endpoint: POST `/saved`
+- API:
+
 ```jsonc
-// an array of field id-value pair
+// Request body
 {
+  // an array of field id-value pair
   "data": [
     {
       "id": 0,
@@ -246,8 +239,17 @@ This is a special input type with a dedicated input component consisting of year
     }
     // ... more fields
   ],
-  "id": 1. // id of the saved search to be updated
-}  
+  
+  // optonal; unique id for the existing saved user input
+  // if present, the corresponding resource will be updated
+  // otherwise, a new resource will be created.
+  "id": 1
+}
+
+// Response data; same as the request body including "id"
 ```
 
-#### Endpoint: GET `/latest-user-input` - Get search body.
+#### Retrieving the latest
+
+- Endpoint: GET `/saved/latest`
+- API: same as the POST response data
