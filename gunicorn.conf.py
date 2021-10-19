@@ -2,7 +2,7 @@ import logging
 import gunicorn.glogging
 import cdislogging
 
-import mds.config
+import gearbox.config
 
 
 class CDISLogger(gunicorn.glogging.Logger):
@@ -26,11 +26,11 @@ class CDISLogger(gunicorn.glogging.Logger):
         super().__init__(cfg)
 
         self._remove_handlers(logging.getLogger())
-        cdislogging.get_logger(None, log_level="debug" if mds.config.DEBUG else "warn")
+        cdislogging.get_logger(None, log_level="debug" if gearbox.config.DEBUG else "warn")
         for logger_name in ["gunicorn", "gunicorn.error", "gunicorn.access"]:
             self._remove_handlers(logging.getLogger(logger_name))
             cdislogging.get_logger(
-                logger_name, log_level="debug" if mds.config.DEBUG else "info"
+                logger_name, log_level="debug" if gearbox.config.DEBUG else "info"
             )
 
 

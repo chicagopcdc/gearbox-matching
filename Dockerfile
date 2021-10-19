@@ -14,4 +14,4 @@ COPY --from=builder /env /env
 COPY --from=builder /src /src
 ENV PATH="/env/bin/:${PATH}"
 WORKDIR /src
-CMD ["/env/bin/gunicorn", "mds.asgi:app", "-b", "0.0.0.0:80", "-k", "uvicorn.workers.UvicornWorker", "-c", "gunicorn.conf.py"]
+CMD ["/env/bin/gunicorn", "gearbox.asgi:app", "-b", "0.0.0.0:80", "-k", "uvicorn.workers.UvicornWorker", "-c", "gunicorn.conf.py"]

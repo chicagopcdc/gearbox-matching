@@ -6,29 +6,12 @@ from asyncpg import InvalidCatalogNameError
 from requests import ReadTimeout
 from starlette.testclient import TestClient
 
-from mds.main import db
-from mds.main import get_app
+from gearbox.main import db
+from gearbox.main import get_app
 
 
 def test_version(client):
     client.get("/version").raise_for_status()
-
-
-@pytest.mark.skipif(
-    starlette.__version__ < "0.14",
-    reason="https://github.com/encode/starlette/pull/751",
-)
-@pytest.mark.skip(
-    reason="Above mentioned PR has not been merged, therefore the feature that this test depends on is not in starlette>=0.14",
-)
-def test_lost_client(client):
-    with pytest.raises(ReadTimeout):
-        client.post(
-            "/metadata",
-            json=[dict(guid=f"tlc_{i}", data=dict(tlc=1)) for i in range(1024)],
-            timeout=0.01,
-        )
-    assert len(client.get("/metadata?limit=1024&tlc=1").json()) < 1024
 
 
 def test_status(client):
