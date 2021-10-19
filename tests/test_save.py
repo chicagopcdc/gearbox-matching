@@ -27,7 +27,7 @@ def test_create_no_auth_header(client, valid_upload_file_patcher):
         "data": [{"id": 4, "value": "luca"}]
     }
 
-    resp = client.post("/save", json=data)
+    resp = client.post("/user_input", json=data)
     assert str(resp.status_code) == "401"
 
 
@@ -45,7 +45,7 @@ def test_create_invalid_token(client, valid_upload_file_patcher):
     }
 
     resp = client.post(
-        "/save", json=data, headers={"Authorization": f"bearer {fake_jwt}"}
+        "/user_input", json=data, headers={"Authorization": f"bearer {fake_jwt}"}
     )
     assert str(resp.status_code) == "401"
 
@@ -60,12 +60,12 @@ def test_create_invalid_token(client, valid_upload_file_patcher):
 )
 def test_create(client, valid_upload_file_patcher, data):
     """
-    Test create /save response for a valid user with authorization and
+    Test create /user_input response for a valid user with authorization and
     valid input, ensure correct response.
     """
     fake_jwt = "1.2.3"
     resp = client.post(
-        "/save", json=data, headers={"Authorization": f"bearer {fake_jwt}"}
+        "/user_input", json=data, headers={"Authorization": f"bearer {fake_jwt}"}
     )
     resp.raise_for_status()
 
@@ -84,12 +84,12 @@ def test_create(client, valid_upload_file_patcher, data):
 )
 def test_update(client, valid_upload_file_patcher, data):
     """
-    Test update /save response for a valid user with authorization and
+    Test update /user_input response for a valid user with authorization and
     valid input, ensure correct response.
     """
     fake_jwt = "1.2.3"
     resp = client.post(
-        "/save", json=data, headers={"Authorization": f"bearer {fake_jwt}"}
+        "/user_input", json=data, headers={"Authorization": f"bearer {fake_jwt}"}
     )
     resp.raise_for_status()
 
@@ -102,10 +102,10 @@ def test_update(client, valid_upload_file_patcher, data):
 @respx.mock
 def test_get_last_saved_input(client):
     """
-    Test that the /save endpoint returns a 200 and the id of the latest saved obj
+    Test that the /user_input endpoint returns a 200 and the id of the latest saved obj
     """
     fake_jwt = "1.2.3"
-    resp = client.get("/save/latest", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.get("/user_input/latest", headers={"Authorization": f"bearer {fake_jwt}"})
     assert resp.status_code == 200
     assert resp.json().get("id")  is not None 
 

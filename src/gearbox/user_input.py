@@ -40,7 +40,7 @@ bearer = HTTPBearer(auto_error=False)
 
 
 
-@mod.post("/save")
+@mod.post("/user-input")
 async def save_object(
     body: UploadSavedInput,
     request: Request,
@@ -99,7 +99,7 @@ async def save_object(
     return JSONResponse(response, HTTP_201_CREATED)
 
 
-@mod.get("/save/latest", response_model=SavedInputSearchResults)
+@mod.get("/user-input/latest", response_model=SavedInputSearchResults)
 async def get_object_latest(
     request: Request,
     db: Session = Depends(deps.get_db),
@@ -196,4 +196,4 @@ async def get_object_latest(
 
 
 def init_app(app):
-    app.include_router(mod, tags=["Save"])
+    app.include_router(mod, tags=["user_input"])
