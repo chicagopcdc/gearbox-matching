@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 
-createdb -U gearbox_trials_user test_gearbox_trials
+createdb -U gearbox_user test_gearbox
