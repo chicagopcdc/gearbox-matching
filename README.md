@@ -58,7 +58,7 @@ need to create that database first:
 
 ```bash
 psql
-CREATE DATABASE test_gearbox_trials;
+CREATE DATABASE test_gearbox;
 ```
 
 ```bash
