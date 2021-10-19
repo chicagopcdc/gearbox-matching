@@ -5,8 +5,8 @@ from .models.models import SavedInput
 from .schemas import SavedInputSearchResults, UploadSavedInput
 import datetime
 from typing import List
-from mds.crud.saved_input import add_saved_input, get_latest_saved_input, update_saved_input
-from mds import deps
+from gearbox.crud.saved_input import add_saved_input, get_latest_saved_input, update_saved_input
+from gearbox import deps
 from authutils.token.fastapi import access_token
 from asyncpg import UniqueViolationError
 from fastapi import HTTPException, APIRouter, Security

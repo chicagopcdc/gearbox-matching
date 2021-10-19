@@ -58,7 +58,7 @@ need to create that database first:
 
 ```bash
 psql
-CREATE DATABASE test_metadata;
+CREATE DATABASE test_gearbox;
 ```
 
 ```bash
@@ -90,7 +90,7 @@ docker-compose exec app pytest --cov=src --cov=migrations/versions tests
 For production, use [gunicorn](https://gunicorn.org/):
 
 ```bash
-gunicorn mds.asgi:app -k uvicorn.workers.UvicornWorker -c gunicorn.conf.py
+gunicorn gearbox.asgi:app -k uvicorn.workers.UvicornWorker -c gunicorn.conf.py
 ```
 
 Or use the Docker image built from the `Dockerfile`, using environment variables
@@ -114,4 +114,4 @@ Except that, don't use `123` or `456` as the password.
 
 `alembic revision -m "add_save"`
 
-`docker build -t mds:test .`
+`docker build -t gearbox:test .`

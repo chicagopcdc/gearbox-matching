@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "mds"
+name = "gearbox"
 version = "1.6.2"
-description = "Metadata Service"
+description = "Gearbox Service"
 authors = ["CTDS UChicago <cdis@uchicago.edu>"]
 license = "Apache-2.0"
 
@@ -39,8 +39,8 @@ requests = "^2.22"
 respx = "*"
 nest-asyncio = "^1.5.1"
 
-[tool.poetry.plugins."mds.modules"]
-"save" = "mds.save"
+[tool.poetry.plugins."gearbox.modules"]
+"save" = "gearbox.save"
 
 [build-system]
 requires = ["poetry>=0.12"]
