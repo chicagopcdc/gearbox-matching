@@ -38,7 +38,7 @@ DB_STRING = DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST
 # DATABASE_URL = 'postgresql://{}:{}@{}:{}/{}?sslmode={}'.format(db_username, db_password, host_server, db_server_port, database_name, ssl_mode)
 
 if TESTING:
-    DB_DATABASE = "test_" + (DB_DATABASE or "gearbox_trials")
+    DB_DATABASE = "test_" + (DB_DATABASE or "gearbox")
     TEST_KEEP_DB = config("TEST_KEEP_DB", cast=bool, default=False)
 
 DB_DSN = config(
