@@ -22,7 +22,7 @@ URL_PREFIX = config("URL_PREFIX", default="/" if DEBUG else "/gearbox")
 # Database
 DB_DRIVER = config("DB_DRIVER", default="postgresql")
 DB_HOST = config("DB_HOST", default=None)
-DB_PORT = config("DB_PORT", cast=int, default=None)
+DB_PORT = config("DB_PORT", cast=int, default=5432)
 DB_USER = config("DB_USER", default=None)
 DB_PASSWORD = config("DB_PASSWORD", cast=Secret, default=None)
 DB_DATABASE = config("DB_DATABASE", default=None)
