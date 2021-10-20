@@ -104,12 +104,11 @@ def get_version():
 def get_status(db: Session = Depends(deps.get_db)):
     # try:
     # now = await db.execute("SELECT now()")
-    now = db.execute("SELECT now()")
+    now = db.execute("SELECT now()").scalar()
     # except Exception:
     #     raise UnhealthyCheck("Unhealthy")
 
     return dict(
         status="OK", timestamp=now
     )
-
 
