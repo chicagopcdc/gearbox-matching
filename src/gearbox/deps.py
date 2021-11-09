@@ -1,6 +1,6 @@
 from typing import Generator
 
-from mds.models.db import SessionLocal
+from gearbox.models.db import SessionLocal
 
 
 def get_db() -> Generator:

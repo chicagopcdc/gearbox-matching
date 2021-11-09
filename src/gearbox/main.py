@@ -5,7 +5,7 @@ from fastapi import FastAPI, APIRouter, HTTPException, Depends
 import httpx
 from sqlalchemy.orm import Session
 from . import logger, config
-from mds import deps
+from gearbox import deps
 
 try:
     from importlib.metadata import entry_points
@@ -17,7 +17,7 @@ except ImportError:
 def get_app():
     app = FastAPI(
         title="Framework Services Object Management Service",
-        version=pkg_resources.get_distribution("mds").version,
+        version=pkg_resources.get_distribution("gearbox").version,
         debug=config.DEBUG,
         openapi_prefix=config.URL_PREFIX,
     )
@@ -79,7 +79,7 @@ class ClientDisconnectMiddleware:
 
 def load_modules(app=None):
     logger.info("Start to load modules.")
-    for ep in entry_points()["mds.modules"]:
+    for ep in entry_points()["gearbox.modules"]:
         mod = ep.load()
         if app and hasattr(mod, "init_app"):
             mod.init_app(app)
@@ -96,16 +96,19 @@ router = APIRouter()
 
 @router.get("/version")
 def get_version():
-    return pkg_resources.get_distribution("mds").version
+    return pkg_resources.get_distribution("gearbox").version
 
 
 @router.get("/_status")
-async def get_status(db: Session = Depends(deps.get_db)):
+# async def get_status(db: Session = Depends(deps.get_db)):
+def get_status(db: Session = Depends(deps.get_db)):
     # try:
-    now = await db.execute("SELECT now()")
+    # now = await db.execute("SELECT now()")
+    now = db.execute("SELECT now()").scalar()
     # except Exception:
     #     raise UnhealthyCheck("Unhealthy")
 
     return dict(
         status="OK", timestamp=now
     )
+
