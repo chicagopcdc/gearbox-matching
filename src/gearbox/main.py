@@ -101,14 +101,9 @@ def get_version():
 
 @router.get("/_status")
 # async def get_status(db: Session = Depends(deps.get_db)):
-def get_status(db: Session = Depends(deps.get_db)):
-    # try:
-    # now = await db.execute("SELECT now()")
-    now = db.execute("SELECT now()").scalar()
-    # except Exception:
-    #     raise UnhealthyCheck("Unhealthy")
-
-    return dict(
-        status="OK", timestamp=now
-    )
-
+async def get_status(db: Session = Depends(deps.get_session)):
+    try:
+        now = await db.execute("SELECT now()")
+        return dict( status="OK", timestamp=now.scalars().first())
+    except Exception:
+        raise UnhealthyCheck("Unhealthy")

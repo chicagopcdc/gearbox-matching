@@ -1,21 +1,24 @@
-import gino
+# import gino
 import pytest
 from unittest.mock import patch
 from conftest import AsyncMock
 
 
 def test_status_success(client):
-    patch("gearbox.main.db.scalar", AsyncMock(return_value="some time")).start()
+    # patch("gearbox.main.db.scalar", AsyncMock(return_value="some time")).start()
+    # TESTING COMMENTING OUT FOLLOWING LINE - DON'T THINK MOCK SESSION OBJ NEEDED HERE...
+    # patch("gearbox.models.db.async_session", AsyncMock(return_value="some time")).start()
 
     resp = client.get("/_status")
     resp.raise_for_status()
     assert resp.status_code == 200
-    assert resp.json().get("status") == "OK",
+    assert resp.json().get("status") == "OK"
 
 
 
 def test_status_error(client):
-    patch("gearbox.main.db.scalar", AsyncMock(side_effect=Exception("some error"))).start()
+    # patch("gearbox.main.db.scalar", AsyncMock(side_effect=Exception("some error"))).start()
+    patch("gearbox.models.db.async_session", AsyncMock(side_effect=Exception("some error"))).start()
 
     try:
         resp = client.get("/_status")

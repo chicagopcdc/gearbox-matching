@@ -6,8 +6,7 @@ from asyncpg import InvalidCatalogNameError
 from requests import ReadTimeout
 from starlette.testclient import TestClient
 
-from gearbox.main import db
-from gearbox.main import get_app
+from gearbox import deps
 
 
 def test_version(client):
@@ -17,6 +16,7 @@ def test_version(client):
 def test_status(client):
     try:
         client.get("/_status").raise_for_status()
+
     except:
         pass
 

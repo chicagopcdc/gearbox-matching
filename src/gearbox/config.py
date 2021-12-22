@@ -12,22 +12,30 @@ class CommaSeparatedLogins(CommaSeparatedStrings):
 
 config = Config(".env")
 
-
 # Server
-DEBUG = config("DEBUG", cast=bool, default=True)
+DEBUG = config("DEBUG", cast=bool, default=False)
 TESTING = config("TESTING", cast=bool, default=False)
 URL_PREFIX = config("URL_PREFIX", default="/" if DEBUG else "/gearbox")
-
+BYPASS_FENCE = config("BYPASS_FENCE", cast=bool, default=False)
 
 # Database
-DB_DRIVER = config("DB_DRIVER", default="postgresql")
+# ALEMBIC DOES NOT SUPPORT ASYNC DRIVERS YET, SO WE NEED THE SYNC 
+# DRIVER TO PERFORM THE MIGRATIONS
+ALEMBIC_DB_DRIVER = config("DB_DRIVER", default="postgresql")
+DB_DRIVER = config("DB_DRIVER", default="postgresql+asyncpg")
 DB_HOST = config("DB_HOST", default=None)
 DB_PORT = config("DB_PORT", cast=int, default=5432)
 DB_USER = config("DB_USER", default=None)
 DB_PASSWORD = config("DB_PASSWORD", cast=Secret, default=None)
 DB_DATABASE = config("DB_DATABASE", default=None)
 
+if TESTING:
+    DB_DATABASE = "test_" + (DB_DATABASE or "gearbox")
+    TEST_KEEP_DB = config("TEST_KEEP_DB", cast=bool, default=False)
+    TEST_KEEP_DB = True # KEEP TEST DATABASE AFTER TESTS
+
 DB_STRING = DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST + ":" + str(DB_PORT) + "/" + DB_DATABASE
+ALEMBIC_DB_STRING = ALEMBIC_DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST + ":" + str(DB_PORT) + "/" + DB_DATABASE
 
 # host_server = os.environ.get('host_server', 'localhost')
 # db_server_port = urllib.parse.quote_plus(str(os.environ.get('db_server_port', '5432')))
@@ -36,10 +44,6 @@ DB_STRING = DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST
 # db_password = urllib.parse.quote_plus(str(os.environ.get('db_password', 'secret')))
 # ssl_mode = urllib.parse.quote_plus(str(os.environ.get('ssl_mode','prefer')))
 # DATABASE_URL = 'postgresql://{}:{}@{}:{}/{}?sslmode={}'.format(db_username, db_password, host_server, db_server_port, database_name, ssl_mode)
-
-if TESTING:
-    DB_DATABASE = "test_" + (DB_DATABASE or "gearbox")
-    TEST_KEEP_DB = config("TEST_KEEP_DB", cast=bool, default=False)
 
 DB_DSN = config(
     "DB_DSN",
