@@ -5,7 +5,7 @@ import os
 
 from sqlalchemy.ext.asyncio.session import async_session
 from sqlalchemy.ext.asyncio import AsyncSession
-from . import config, logger
+from . import config, logger, auth
 from .models.models import SavedInput
 from .schemas import SavedInputSearchResults, UploadSavedInput
 import datetime
@@ -43,32 +43,6 @@ mod = APIRouter()
 # not recieve valid credentials
 bearer = HTTPBearer(auto_error=False)
 
-async def get_token_claims(token):
-
-    try:
-        issuer = None
-        allowed_issuers = None
-
-        # override token iss 
-        if config.FORCE_ISSUER:
-            issuer = config.USER_API
-            allowed_issuers =  list(config.ALLOWED_ISSUERS)
-
-        # NOTE: token can be None if no Authorization header was provided, we expect
-        #       this to cause a downstream exception since it is invalid
-        token_claims = await access_token("user", "openid", issuer=issuer, allowed_issuers=allowed_issuers, purpose="access")(token)
-
-    except Exception as exc:
-        logger.error(exc, exc_info=True)
-        raise HTTPException(
-            HTTP_401_UNAUTHORIZED,
-            f"Could not verify, parse, and/or validate scope from provided access token.",
-        )
-
-    return token_claims
-
-
-
 @mod.post("/user-input", response_model=SavedInputSearchResults)
 async def save_object(
     body: UploadSavedInput,
@@ -90,7 +64,7 @@ async def save_object(
     saved_input_id = body.id
 
     if not config.BYPASS_FENCE:
-        token_claims = await get_token_claims(token)
+        token_claims = await auth.get_token_claims(token)
         user_id = token_claims.get("sub")
     else:
         user_id = 4
@@ -132,7 +106,7 @@ async def get_object_latest(
     """
 
     if not config.BYPASS_FENCE:
-        token_claims = await get_token_claims(token)
+        token_claims = await auth.get_token_claims(token)
         user_id = token_claims.get("sub")
     else:
         user_id = 4
