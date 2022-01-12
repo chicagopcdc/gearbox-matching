@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, Float
 from sqlalchemy.orm import relationship
 
-from . import Base
-
+from .base_class import Base
 
 class Value(Base):
     __tablename__ = 'value'

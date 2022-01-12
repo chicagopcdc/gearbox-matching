@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Integer, String
 
-from . import Base
-
+from .base_class import Base
 
 class OntologyCode(Base):
     __tablename__ = 'ontology_code'

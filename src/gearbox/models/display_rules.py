@@ -1,8 +1,7 @@
 from sqlalchemy import ForeignKey, Column, Integer, Boolean
 from sqlalchemy.orm import relationship
 
-from . import Base
-
+from .base_class import Base
 
 class DisplayRules(Base):
     __tablename__ = 'display_rules'

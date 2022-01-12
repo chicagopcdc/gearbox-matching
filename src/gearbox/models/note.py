@@ -1,8 +1,7 @@
 from sqlalchemy import ForeignKey, Column, Integer, String
 from sqlalchemy.orm import relationship
 
-from . import Base
-
+from .base_class import Base
 
 class Note(Base):
     __tablename__ = 'note'

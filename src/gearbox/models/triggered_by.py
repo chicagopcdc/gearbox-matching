@@ -1,8 +1,7 @@
 from sqlalchemy import ForeignKey, Column, Integer, String, DateTime, Boolean, Float
 from sqlalchemy.orm import relationship
 
-from . import Base
-
+from .base_class import Base
 
 class TriggeredBy(Base):
     __tablename__ = 'triggered_by'

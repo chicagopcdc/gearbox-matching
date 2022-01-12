@@ -1,8 +1,7 @@
 from sqlalchemy import ForeignKey, Column, Integer
 from sqlalchemy.orm import relationship, backref
 
-from . import Base
-
+from .base_class import Base
 
 class EligibilityCriteriaHasNote(Base):
     __tablename__ = 'eligibility_criteria_has_note'

@@ -1,8 +1,7 @@
 from sqlalchemy import ForeignKey, Column, Integer, DateTime, Boolean
 from sqlalchemy.orm import relationship, backref
 
-from . import Base
-
+from .base_class import Base
 
 class StudyAlgorithmEngine(Base):
     __tablename__ = 'study_algorithm_engine'

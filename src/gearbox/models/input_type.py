@@ -1,8 +1,7 @@
 from sqlalchemy import ForeignKey, Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
-from . import Base
-
+from .base_class import Base
 
 class InputType(Base):
     __tablename__ = 'input_type'

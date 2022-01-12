@@ -1,7 +1,7 @@
 from sqlalchemy import ForeignKey, Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import relationship, backref
 
-from . import Base
+from .base_class import Base
 
 
 class Criterion(Base):

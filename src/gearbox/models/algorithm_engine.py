@@ -1,10 +1,9 @@
 from sqlalchemy import ForeignKey, Column, Integer, String
 from sqlalchemy.orm import relationship
 
-from .db import db
+from .base_class import Base
 
-
-class AlgorithmEngine(db.Model):
+class AlgorithmEngine(Base):
     __tablename__ = 'algorithm_engine'
 
     id = Column(Integer, primary_key=True, autoincrement=True)

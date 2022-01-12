@@ -1,8 +1,7 @@
 from sqlalchemy import ForeignKey, Column, Integer, DateTime, Boolean
 from sqlalchemy.orm import relationship, backref
 
-from . import Base
-
+from .base_class import Base
 
 class ElCriteriaHasCriterion(Base):
     __tablename__ = 'el_criteria_has_criterion'

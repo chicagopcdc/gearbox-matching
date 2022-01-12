@@ -1,8 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import relationship
 
-from . import Base
-
+from .base_class import Base
 
 class Study(Base):
     __tablename__ = "study"
