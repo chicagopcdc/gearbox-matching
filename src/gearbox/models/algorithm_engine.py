@@ -11,3 +11,5 @@ class AlgorithmEngine(Base):
     parent_id = Column(Integer)
     parent_path = Column(String)
     operator = Column(String, nullable=True)
+
+    study_versions = relationship("StudyAlgorithmEngine", back_populates="algorithm_engine")   

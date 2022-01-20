@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 
 from .base_class import Base
 
+
 class InputType(Base):
     __tablename__ = 'input_type'
     id = Column(Integer, primary_key=True, autoincrement=True)

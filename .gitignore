@@ -4,6 +4,11 @@
 #compiled code
 *.pyc
 
+.DS_Store
+DOCKER_LOG
+load_tables.sh
+clear_tables.sh
+
 #secrets
 Secrets/*
 doc/gearbox_table_data

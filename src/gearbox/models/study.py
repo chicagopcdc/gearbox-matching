@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 
 from .base_class import Base
 
+
 class Study(Base):
     __tablename__ = "study"
 
@@ -13,4 +14,4 @@ class Study(Base):
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
 
-    sites = relationship("Site", secondary="site_has_study")
+    sites = relationship("SiteHasStudy", back_populates="study")

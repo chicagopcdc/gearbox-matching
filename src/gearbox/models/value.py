@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 
 from .base_class import Base
 
+
 class Value(Base):
     __tablename__ = 'value'
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -15,3 +16,5 @@ class Value(Base):
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
 
+    el_criteria_has_criterions = relationship("ElCriteriaHasCriterion", back_populates="value")
+    criteria = relationship("CriterionHasValue", back_populates="value")
