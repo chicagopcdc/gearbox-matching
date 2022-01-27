@@ -22,7 +22,6 @@ def authenticate_user():
 
     return user_id
 
-# TODO: should this be async?
 def get_token_claims(token):
 
     try:
