@@ -5,7 +5,6 @@ from .. import logger
 from sqlalchemy.orm import Session
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from gearbox.models.models import SavedInput
-from gearbox.schemas import SavedInputDB
 from fastapi import HTTPException
 from asyncpg import UniqueViolationError
 from starlette.status import (

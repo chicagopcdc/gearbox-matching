@@ -14,7 +14,7 @@ from .site import Site
 from .site_has_study import SiteHasStudy
 from .study import Study
 from .study_algorithm_engine import StudyAlgorithmEngine
-from .study_links import StudyLinks
+from .study_link import StudyLink
 from .study_version import StudyVersion
 from .tag import Tag
 from .triggered_by import TriggeredBy

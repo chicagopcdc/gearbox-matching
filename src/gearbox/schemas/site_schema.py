@@ -2,12 +2,16 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Sequence, List, Any, Optional
 from pydantic.utils import GetterDict
-# from .site_has_study import SiteStudy
+from .study_link import StudyLink
+from .. import logger
 
 class SiteStudyGetter(GetterDict):
     # map and reformat study fields
     def get(self, key: str, default: Any = None) -> Any:
-        if key in ('id','name','code','description','create_date','active'):
+        logger.info(f" {key} HERE IN site_schema.py!!!!!!!!!******************************************************")
+        if key in ('id','name','code','description','create_date','active','links'):
+        # if key in ('id','name','code','description','create_date','active'):
+            logger.info(f"KEY: {key} VALUE: {getattr(self._obj.study, key)}")
             return getattr(self._obj.study, key)
         else:
             return super(SiteStudyGetter, self).get(key, default)
@@ -19,6 +23,9 @@ class SiteStudy(BaseModel):
     description: Optional[str]
     create_date: Optional[datetime]
     active: Optional[bool]
+    links: Optional[List[StudyLink]]
+    assoc_create_date: Optional[datetime]
+    assoc_active: Optional[bool]
 
     class Config:
         orm_mode = True

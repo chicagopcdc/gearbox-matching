@@ -1,11 +1,12 @@
 from datetime import datetime
-from typing import List, Any
+from typing import List, Any, Optional
 from pydantic import BaseModel
 from pydantic.utils import GetterDict
+from .study_link import StudyLink
 
 class SiteStudyGetter(GetterDict):
     def get(self, key: str, default: Any = None) -> Any:
-        if key in ('id','name','code','description','create_date','active'):
+        if key in ('id','name','code','description','create_date','active','links'):
             return getattr(self._obj.study, key)
         else:
             return super(SiteStudyGetter, self).get(key, default)
@@ -17,6 +18,7 @@ class SiteStudy(BaseModel):
     description: str
     create_date: datetime
     active: bool
+    links: Optional[List[StudyLink]]
 
     class Config:
         orm_mode = True

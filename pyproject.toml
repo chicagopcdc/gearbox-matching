@@ -41,6 +41,10 @@ nest-asyncio = "^1.5.1"
 
 [tool.poetry.plugins."gearbox.modules"]
 "user_input" = "gearbox.routers.user_input"
+"site" = "gearbox.routers.site"
+"study" = "gearbox.routers.study"
+"eligibility_criteria" = "gearbox.routers.eligibility_criteria"
+"match_conditions" = "gearbox.routers.match_conditions"
 
 [build-system]
 requires = ["poetry>=0.12"]

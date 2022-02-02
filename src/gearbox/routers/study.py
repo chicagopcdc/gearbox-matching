@@ -14,33 +14,32 @@ from starlette.status import (
 )
 from typing import List
 from .. import logger, auth
-from ..schemas import SiteSchema
-from ..crud.site import get_single_site, get_sites
+from ..schemas import StudySchema
+from ..crud.study import get_single_study, get_studies
 from .. import deps
 
 mod = APIRouter()
 
-@mod.get("/site/{site_id}", response_model=List[SiteSchema], status_code=HTTP_200_OK)
-async def get_site(
+@mod.get("/study/{study_id}", response_model=List[StudySchema], status_code=HTTP_200_OK)
+async def get_study(
     request: Request,
-    site_id: int,
+    study_id: int,
     session: Session = Depends(deps.get_session),
     user_id: int = Depends(auth.authenticate_user)
 ):
     auth_header = str(request.headers.get("Authorization", ""))
-    results = await get_single_site(session, site_id)
+    results = await get_single_study(session, study_id)
     return results
 
-@mod.get("/sites", response_model=List[SiteSchema], status_code=HTTP_200_OK)
-async def get_all_sites(
+@mod.get("/studies", response_model=List[StudySchema], status_code=HTTP_200_OK)
+async def get_all_studies(
     request: Request,
     session: Session = Depends(deps.get_session),
     user_id: int = Depends(auth.authenticate_user)
 ):
     auth_header = str(request.headers.get("Authorization", ""))
-    logger.info("HERE IN /sites ENDPOINT!!!!!!!!")
-    results = await get_sites(session)
+    results = await get_studies(session)
     return results
 
 def init_app(app):
-    app.include_router(mod, tags=["site"])
+    app.include_router(mod, tags=["study"])

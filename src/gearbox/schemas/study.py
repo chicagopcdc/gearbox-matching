@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Sequence, List, Optional
 from .site_has_study import StudySite
+from .study_link import StudyLink
 
 class Study(BaseModel):
     id: int
@@ -11,6 +12,7 @@ class Study(BaseModel):
     create_date: Optional[datetime]
     active: Optional[bool]
     sites: Optional[List[StudySite]]
+    links: Optional[List[StudyLink]]
 
     class Config:
         orm_mode = True
