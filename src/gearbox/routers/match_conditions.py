@@ -18,14 +18,14 @@ from starlette.status import (
 from typing import List
 from .. import logger, auth
 from ..schemas import AlgorithmEngine
-from ..crud.algorithm_engine import get_match_conditions
+from ..crud.match_conditions import get_match_conditions
 from .. import deps
 from ..util import match_conditions as mc
 
 mod = APIRouter()
 
 @mod.get("/match-conditions", response_model=List[AlgorithmEngine], status_code=HTTP_200_OK)
-async def get_site(
+async def get_mc(
     request: Request,
     session: Session = Depends(deps.get_session),
     user_id: int = Depends(auth.authenticate_user)

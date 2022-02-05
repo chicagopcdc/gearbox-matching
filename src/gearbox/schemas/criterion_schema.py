@@ -8,6 +8,7 @@ from .. import logger
 from .value import Value
 from .el_criterion_has_criterion_schema import ElCriterionHasCriterionSchema
 
+"""
 class CriterionValueGetter(GetterDict):
     # map and reformat 'value' fields
     def get(self, key: str, default: Any = None) -> Any:
@@ -32,6 +33,7 @@ class CriterionValue(BaseModel):
     class Config:
         orm_mode = True
         getter_dict = CriterionValueGetter
+"""
 
 class CriterionSchema(BaseModel):
     id: int
@@ -44,7 +46,7 @@ class CriterionSchema(BaseModel):
     input_type_id: Optional[int]
     tags: List[Tag]
     el_criteria_has_criterions: List[ElCriterionHasCriterionSchema]
-    values: List[CriterionValue]
+#    values: List[Value]
 
     class Config:
         orm_mode = True

@@ -10,3 +10,5 @@ class InputType(Base):
     data_type = Column(String, nullable=True)
     render_type = Column(String, nullable=True)
     create_date = Column(DateTime, nullable=True)
+
+    criterions = relationship("Criterion", back_populates="input_type", lazy='joined')

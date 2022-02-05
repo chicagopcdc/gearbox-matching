@@ -1,6 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 from datetime import datetime
-from typing import Sequence, List, Optional
+from typing import Optional
 
 class Value(BaseModel):
     id: int
@@ -14,7 +14,7 @@ class Value(BaseModel):
     active: Optional[bool]
     
     class Config:
-        orm_mode = True
+        orm_mode = True    
 
 class ValueCreate(BaseModel):
     pass

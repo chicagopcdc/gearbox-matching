@@ -18,5 +18,5 @@ class Criterion(Base):
     
     tags = relationship("CriterionHasTag", back_populates="criterion")
     el_criteria_has_criterions = relationship("ElCriteriaHasCriterion", back_populates="criterion")
-
     values = relationship("CriterionHasValue", back_populates="criterion")
+    input_type = relationship("InputType", back_populates="criterions")

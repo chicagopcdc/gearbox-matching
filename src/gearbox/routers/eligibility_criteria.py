@@ -1,6 +1,10 @@
-from fastapi import APIRouter
+from re import I
+from datetime import date
+from time import gmtime, strftime
+from fastapi import APIRouter, HTTPException
 from sqlalchemy.orm import Session
 from fastapi import Request, Depends
+from starlette.responses import JSONResponse 
 from starlette.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
@@ -28,7 +32,63 @@ async def get_ec(
 ):
     auth_header = str(request.headers.get("Authorization", ""))
     results = await get_eligibility_criteria(session)
-    return results
+
+    logger.info(f"--------------------------RESULTS LIST LENGTH: {len(results)}")
+
+    body = []
+    try:
+        if results:
+            for echc in results:
+                if echc.active == True:
+                    the_id = echc.id
+                    value_id = echc.value_id
+                    fieldId = echc.criterion_id
+                    the_value = echc.value
+                    operator = the_value.operator
+                    render_type = echc.criterion.input_type.render_type
+                    if render_type in ['radio','select']:
+                        fieldValue = value_id
+                    elif render_type in ['age']:
+                        unit = the_value.unit
+                        if unit in ['years']:
+                            fieldValue = the_value.value_string
+                        else:
+                            if unit == 'months':
+                                fieldValue = round(eval(the_value.value_string)/12.0)
+                            elif unit == 'days':
+                                fieldValue = round(eval(the_value.value_string)/365.0)
+                    else:
+                        fieldValue = eval(the_value.value_string)
+
+                    logger.info("ASSIGNING VALUES IN F DICTIONARY --------------------------")
+                    f = {
+                        'id': the_id,
+                        'fieldId': fieldId,
+                        'fieldValue': fieldValue,
+                        'operator': operator
+                    }
+                    logger.info(f"HERE IS WHAT WAS ADDED: {f}")
+                    body.append(f)
+        else:
+            body = []
+
+        response = {
+            "current_date": date.today().strftime("%B %d, %Y"),
+            "current_time": strftime("%H:%M:%S +0000", gmtime()),
+            "status": "OK",
+            "body": body
+        }
+        logger.info(f"HERE IS THE BODY??? {body}")
+        return JSONResponse(response, HTTP_200_OK)
+
+    except Exception as exc:
+        logger.error(exc, exc_info=True)
+        raise HTTPException(
+            HTTP_401_UNAUTHORIZED,
+            f"Could not verify, parse, and/or validate scope from provided access token.",
+        )
+        
+
 
 def init_app(app):
     app.include_router(mod, tags=["eligibility_criteria"])
