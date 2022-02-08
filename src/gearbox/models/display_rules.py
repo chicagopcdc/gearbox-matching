@@ -11,3 +11,7 @@ class DisplayRules(Base):
     priority = Column(Integer)
     active = Column(Boolean, nullable=True)
     version = Column(Integer, nullable=True)
+
+    # change table name from display_rules to display_rule?
+    triggered_bys = relationship("TriggeredBy", back_populates="display_rules")
+    criterion = relationship("Criterion", back_populates="display_rules")

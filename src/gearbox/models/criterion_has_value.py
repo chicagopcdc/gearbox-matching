@@ -11,4 +11,4 @@ class CriterionHasValue(Base):
     assoc_create_date = Column("create_date",DateTime, nullable=True)
 
     criterion = relationship("Criterion", back_populates="values")
-    value = relationship("Value", back_populates="criteria")
+    value = relationship("Value", back_populates="criteria", lazy="joined")

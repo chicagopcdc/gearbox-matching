@@ -12,3 +12,5 @@ class TriggeredBy(Base):
     value_id = Column(Integer, ForeignKey('value.id'))
     path = Column(String, nullable=True)
     active = Column(Boolean, nullable=True)
+
+    display_rules = relationship("DisplayRules", back_populates="triggered_bys")

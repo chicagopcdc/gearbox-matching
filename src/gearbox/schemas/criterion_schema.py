@@ -3,9 +3,10 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Sequence, List, Any, Optional
 from pydantic.utils import GetterDict
-from .tag import Tag
+from .criterion_has_tag import CriterionTag
 from .. import logger
-from .value import Value
+from .criterion_has_value import CriterionValue
+from .input_type import InputType
 from .el_criterion_has_criterion_schema import ElCriterionHasCriterionSchema
 
 """
@@ -44,9 +45,10 @@ class CriterionSchema(BaseModel):
     active: Optional[bool]
     ontology_code_id: Optional[int]
     input_type_id: Optional[int]
-    tags: List[Tag]
+    tags: Optional[List[CriterionTag]]
     el_criteria_has_criterions: List[ElCriterionHasCriterionSchema]
-#    values: List[Value]
+    input_type: InputType
+    values: Optional[List[CriterionValue]]
 
     class Config:
         orm_mode = True

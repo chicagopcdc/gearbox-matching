@@ -4,3 +4,4 @@ from .study_schema import StudySchema
 from .criterion_schema import ElCriterionHasCriterionSchema
 from .algorithm_engine import AlgorithmEngine
 from .value import Value
+from .display_rules import DisplayRules

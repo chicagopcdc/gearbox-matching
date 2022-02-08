@@ -12,7 +12,6 @@ async def get_sites(current_session: Session):
         )
     )
     result = await current_session.execute(stmt)
-    logger.info("HERE IN get_sites CRUD FUNCTION---------------- 2nd MESSAGEW!!!")
     sites = result.unique().scalars().all()
     return sites
 
