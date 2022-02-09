@@ -56,6 +56,7 @@ async def get_mc(
                 "body": body
         }
         return JSONResponse(response, HTTP_200_OK)
+
     except Exception as exc:
         logger.error(exc, exc_info=True)
         raise HTTPException(

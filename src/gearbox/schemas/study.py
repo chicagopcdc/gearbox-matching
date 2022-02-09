@@ -25,3 +25,10 @@ class StudyCreate(BaseModel):
 
 class StudySearchResults(BaseModel):
     results: Sequence[Study]
+
+"""
+class StudyResponse(BaseModel):
+    current_date: datetime
+    status: str
+    body: List[Study]
+"""

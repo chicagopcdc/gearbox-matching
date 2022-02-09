@@ -22,3 +22,4 @@ class Criterion(Base):
     input_type = relationship("InputType", back_populates="criterions")
 
     display_rules = relationship("DisplayRules", back_populates="criterion")
+    triggered_bys = relationship("TriggeredBy", back_populates="criterion")

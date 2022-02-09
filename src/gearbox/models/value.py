@@ -18,3 +18,4 @@ class Value(Base):
 
     el_criteria_has_criterions = relationship("ElCriteriaHasCriterion", back_populates="value")
     criteria = relationship("CriterionHasValue", back_populates="value")
+    triggered_bys = relationship("TriggeredBy", back_populates="value")

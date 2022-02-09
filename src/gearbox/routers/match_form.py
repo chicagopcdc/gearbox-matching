@@ -1,7 +1,10 @@
 import pprint
+from datetime import date
+from time import gmtime, strftime
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
 from fastapi import Request, Depends
+from starlette.responses import JSONResponse 
 from starlette.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
@@ -43,7 +46,6 @@ async def get_match_info(
             }
             G.append(g)
 
-        logger.info(f"BOUNDS KEYS: {bounds.keys()}")
         if display_rules.active:
             criterion_dict = {'id': display_rules.criterion_id}
             for ctag in display_rules.criterion.tags:
@@ -51,21 +53,70 @@ async def get_match_info(
             if display_rules.criterion.active:
                 code = display_rules.criterion.code
                 criterion_dict.update({'name': code})
-                logger.info(f"CODE: {code}")
                 # N O T E: criterion.code is null, so need to update 
                 # to create some test data
                 if code in bounds.keys():
                     criterion_dict.update({code: bounds[code]})
-                criterion_dict.update({'label':display_rules.criterion.display_name})
-                criterion_dict.update({'type':display_rules.criterion.input_type.render_type})
+                    criterion_dict.update({'label':display_rules.criterion.display_name})
+                    criterion_dict.update({'type':display_rules.criterion.input_type.render_type})
 
+                # showIf logic
+                showIf = {
+                    'operator': 'OR', #Tom's code says: "always OR as scripted for now"
+                    'criteria': []
+                }
                 for tb in display_rules.triggered_bys:
                     if tb.active:
-                        pass #N O T E - start here Tuesday...
+                        if tb.value.active:
+                            op = tb.value.operator
+                            vs = tb.value.value_string
+                            cid = tb.criterion_id
+                        # else return empty dict??
+                            try:
+                                crits = showIf.get('criteria')
+                                new_crit = {
+                                    'id': cid,
+                                    'operator:': op,
+                                    'value': eval(vs)
+                                }
+                                crits.append(new_crit)
+                                showIf.update(({'criteria': crits}))
+                            except Exception as e:
+                                logger.error(e)
+
+                # end showIf logic
+                criterion_dict.update({'showIf':showIf})
+
+                options = []
+                if len(display_rules.criterion.values) > 1:
+                    if display_rules.criterion.input_type.render_type == 'select':
+                        criterion_dict.update({'placeholder': 'Select'})
+                        chvalues = [x for x in display_rules.criterion.values]
+                        for chvalue in chvalues:
+                            o = {'value': chvalue.value.id}
+                            o.update({'label':chvalue.value.code})
+                    if display_rules.criterion.input_type.render_type == 'radio':
+                        chvalues = [x for x in display_rules.criterion.values]
+                        for chvalue in chvalues:
+                            o = {'value': chvalue.value.id}
+                            o.update({'description': ""})
+                    options.append(o)
+                if len(options) > 0:
+                    criterion_dict.update({'options': options})
+        F.append(criterion_dict)
+        logger.info(f"CRITERION DICT RESULT: {criterion_dict}")
+
+        body = {"groups": G, "fields": F}
+        response = {
+            "current_date": date.today().strftime("%B %d, %Y"),
+            "current_time": strftime("%H:%M:%S +0000", gmtime()),
+            "status": "OK",
+            "body": body
+        }
+        logger.info(f"HERE IS THE BODY??? {body}")
+        return JSONResponse(response, HTTP_200_OK)
 
 
-
-        logger.info(f"CRITERION_DICT {criterion_dict}") 
 
     return form_info
 

@@ -14,3 +14,5 @@ class TriggeredBy(Base):
     active = Column(Boolean, nullable=True)
 
     display_rules = relationship("DisplayRules", back_populates="triggered_bys")
+    criterion = relationship("Criterion", back_populates="triggered_bys")
+    value = relationship("Value", back_populates="triggered_bys")
