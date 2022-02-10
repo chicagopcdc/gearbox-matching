@@ -2,54 +2,54 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Sequence, List, Any, Optional
 from pydantic.utils import GetterDict
-from .study_link import StudyLink
 from .. import logger
+from .study_link import StudyLink
 
-class SiteStudyGetter(GetterDict):
-    # map and reformat study fields
+class StudySiteGetter(GetterDict):
+    # map and reformat site fields
     def get(self, key: str, default: Any = None) -> Any:
-        if key in ('id','name','code','description','create_date','active','links'):
-            return getattr(self._obj.study, key)
+        if key in ('id','code','name','create_date','active'):
+            return getattr(self._obj.site, key)
         else:
-            return super(SiteStudyGetter, self).get(key, default)
+            return super(StudySiteGetter, self).get(key, default)
 
-class SiteStudy(BaseModel):
-    id: int
-    name: Optional[str]
+class StudySite(BaseModel):
+    id: Optional[int]
     code: Optional[str]
-    description: Optional[str]
+    name: Optional[str]
     create_date: Optional[datetime]
     active: Optional[bool]
-    links: Optional[List[StudyLink]]
     assoc_create_date: Optional[datetime]
     assoc_active: Optional[bool]
 
     class Config:
         orm_mode = True
-        getter_dict = SiteStudyGetter
+        getter_dict = StudySiteGetter
 
-class SiteSchema(BaseModel):
+class StudySchema(BaseModel):
     id: int
     name: str
     code: str
+    description: str
     create_date: Optional[datetime]
     active: Optional[bool]
-    studies: Optional[List[SiteStudy]]
+    sites: Optional[List[StudySite]]
+    links: Optional[List[StudyLink]]
 
     class Config:
         orm_mode = True
 
-class SiteCreateSchema(BaseModel):
+class StudyCreateSchema(BaseModel):
     pass
 
-class SiteSearchResultsSchema(BaseModel):
+class StudySearchResultsSchema(BaseModel):
     pass
 
-class SiteResponse(BaseModel):
+class StudyResponse(BaseModel):
     current_date: str
     current_time: str
     status: str
-    body: List[SiteSchema]
+    body: List[StudySchema]
 
     class Config:
         orm_mode = True

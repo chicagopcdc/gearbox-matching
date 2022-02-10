@@ -1,6 +1,10 @@
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
 from fastapi import Request, Depends
+from fastapi.encoders import jsonable_encoder
+from datetime import date
+from time import gmtime, strftime
+from starlette.responses import JSONResponse 
 from starlette.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
@@ -14,13 +18,13 @@ from starlette.status import (
 )
 from typing import List
 from .. import logger, auth
-from ..schemas import SiteSchema
+from ..schemas import SiteSchema, SiteResponse
 from ..crud.site import get_single_site, get_sites
 from .. import deps
 
 mod = APIRouter()
 
-@mod.get("/site/{site_id}", response_model=List[SiteSchema], status_code=HTTP_200_OK)
+@mod.get("/site/{site_id}", response_model=SiteResponse, status_code=HTTP_200_OK)
 async def get_site(
     request: Request,
     site_id: int,
@@ -29,18 +33,33 @@ async def get_site(
 ):
     auth_header = str(request.headers.get("Authorization", ""))
     results = await get_single_site(session, site_id)
-    return results
 
-@mod.get("/sites", response_model=List[SiteSchema], status_code=HTTP_200_OK)
+    response = {
+                "current_date": date.today().strftime("%B %d, %Y"),
+                "current_time": strftime("%H:%M:%S +0000", gmtime()),
+                "status": "OK",
+                "body": results
+    }
+
+    return response
+
+@mod.get("/sites", response_model=SiteResponse, status_code=HTTP_200_OK)
 async def get_all_sites(
     request: Request,
     session: Session = Depends(deps.get_session),
     user_id: int = Depends(auth.authenticate_user)
 ):
     auth_header = str(request.headers.get("Authorization", ""))
-    logger.info("HERE IN /sites ENDPOINT!!!!!!!!")
     results = await get_sites(session)
-    return results
+
+    response = {
+                "current_date": date.today().strftime("%B %d, %Y"),
+                "current_time": strftime("%H:%M:%S +0000", gmtime()),
+                "status": "OK",
+                "body": results
+    }
+
+    return response
 
 def init_app(app):
     app.include_router(mod, tags=["site"])
