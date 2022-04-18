@@ -21,10 +21,11 @@ from .. import logger, auth
 from ..schemas import StudySchema, StudyResponse
 from ..crud.study import get_single_study, get_studies
 from .. import deps
+from ..util.study_response import format_study_response
 
 mod = APIRouter()
 
-@mod.get("/study/{study_id}", response_model=StudyResponse, status_code=HTTP_200_OK)
+@mod.get("/study/{study_id}", response_model=List[StudyResponse], status_code=HTTP_200_OK)
 async def get_study(
     request: Request,
     study_id: int,
@@ -34,16 +35,12 @@ async def get_study(
     auth_header = str(request.headers.get("Authorization", ""))
     results = await get_single_study(session, study_id)
 
-    response = {
-                "current_date": date.today().strftime("%B %d, %Y"),
-                "current_time": strftime("%H:%M:%S +0000", gmtime()),
-                "status": "OK",
-                "body": results
-    }
+    response_fmt = format_study_response(results)
+    logger.info(f"STUDY OUT: {json.dumps(response_fmt, indent=4)}")
 
-    return response
+    return response_fmt
 
-@mod.get("/studies", response_model=StudyResponse, status_code=HTTP_200_OK)
+@mod.get("/studies", response_model=List[StudyResponse], status_code=HTTP_200_OK)
 async def get_all_studies(
     request: Request,
     session: Session = Depends(deps.get_session),
@@ -51,14 +48,9 @@ async def get_all_studies(
 ):
     auth_header = str(request.headers.get("Authorization", ""))
     results = await get_studies(session)
-    response = {
-                "current_date": date.today().strftime("%B %d, %Y"),
-                "current_time": strftime("%H:%M:%S +0000", gmtime()),
-                "status": "OK",
-                "body": results
-    }
+    response_fmt = format_study_response(results)
 
-    return response
+    return response_fmt
 
 def init_app(app):
     app.include_router(mod, tags=["study"])

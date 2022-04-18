@@ -4,11 +4,11 @@ from datetime import datetime
 from typing import Sequence, List, Optional
 
 class StudyLink(BaseModel):
-    id: int
-    study_id: int
+#    id: int
+#    study_id: int
     name: Optional[str]
     href: Optional[HttpUrl]
-    active: Optional[bool]
+#    active: Optional[bool]
 
     class Config:
         orm_mode = True

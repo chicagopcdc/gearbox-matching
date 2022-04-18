@@ -104,7 +104,8 @@ async def get_object_latest(
         "id": saved_user_input.id
     }
 
-    return JSONResponse(response, HTTP_200_OK)
+#    return response # THIS RETURN WILL UNDERGO PYDANTIC VALIDATION
+    return JSONResponse(response, HTTP_200_OK) # THIS RETURN WILL NOT UNDERGO PYDANTIC VALIDATION
 
 #     try:
 #         endpoint = (

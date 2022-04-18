@@ -1,4 +1,4 @@
-import pprint
+import json
 from datetime import date
 from time import gmtime, strftime
 from fastapi import APIRouter
@@ -45,6 +45,9 @@ async def get_match_info(
                 'name': ctag.tag.code
             }
             G.append(g)
+            # get unique groups 
+            G = list({v['id']:v for v in G}.values())
+            G = sorted(G, key = lambda i: i['id'])
 
         if display_rules.active:
             criterion_dict = {'id': display_rules.criterion_id}
@@ -56,9 +59,10 @@ async def get_match_info(
                 # N O T E: criterion.code is null, so need to update 
                 # to create some test data
                 if code in bounds.keys():
-                    criterion_dict.update({code: bounds[code]})
-                    criterion_dict.update({'label':display_rules.criterion.display_name})
-                    criterion_dict.update({'type':display_rules.criterion.input_type.render_type})
+                    criterion_dict.update(bounds[code])
+
+                criterion_dict.update({'label':display_rules.criterion.description})
+                criterion_dict.update({'type':display_rules.criterion.input_type.render_type})
 
                 # showIf logic
                 showIf = {
@@ -85,7 +89,8 @@ async def get_match_info(
                                 logger.error(e)
 
                 # end showIf logic
-                criterion_dict.update({'showIf':showIf})
+                if showIf.get('criteria'):
+                    criterion_dict.update({'showIf':showIf})
 
                 options = []
                 if len(display_rules.criterion.values) > 1:
@@ -95,16 +100,17 @@ async def get_match_info(
                         for chvalue in chvalues:
                             o = {'value': chvalue.value.id}
                             o.update({'label':chvalue.value.code})
+                            options.append(o)
                     if display_rules.criterion.input_type.render_type == 'radio':
                         chvalues = [x for x in display_rules.criterion.values]
                         for chvalue in chvalues:
                             o = {'value': chvalue.value.id}
+                            o.update({'label': chvalue.value.value_string})
                             o.update({'description': ""})
-                    options.append(o)
+                            options.append(o)
                 if len(options) > 0:
                     criterion_dict.update({'options': options})
         F.append(criterion_dict)
-        logger.info(f"CRITERION DICT RESULT: {criterion_dict}")
 
         body = {"groups": G, "fields": F}
         response = {
@@ -113,12 +119,8 @@ async def get_match_info(
             "status": "OK",
             "body": body
         }
-        logger.info(f"HERE IS THE BODY??? {body}")
-        return JSONResponse(response, HTTP_200_OK)
+    return JSONResponse(response, HTTP_200_OK)
 
-
-
-    return form_info
 
 def init_app(app):
     app.include_router(mod, tags=["match_form"])

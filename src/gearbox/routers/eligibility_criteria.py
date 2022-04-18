@@ -18,13 +18,13 @@ from starlette.status import (
 )
 from typing import List
 from .. import logger, auth
-from ..schemas import ElCriterionHasCriterionSchema
+from ..schemas import EligibilityCriteriaResponse
 from ..crud.eligibility_criteria import get_eligibility_criteria
 from .. import deps
 
 mod = APIRouter()
 
-@mod.get("/eligibility-criteria", response_model=List[ElCriterionHasCriterionSchema], status_code=HTTP_200_OK)
+@mod.get("/eligibility-criteria", response_model=List[EligibilityCriteriaResponse], status_code=HTTP_200_OK)
 async def get_ec(
     request: Request,
     session: Session = Depends(deps.get_session),
@@ -32,8 +32,6 @@ async def get_ec(
 ):
     auth_header = str(request.headers.get("Authorization", ""))
     results = await get_eligibility_criteria(session)
-
-    logger.info(f"--------------------------RESULTS LIST LENGTH: {len(results)}")
 
     body = []
     try:
@@ -79,7 +77,8 @@ async def get_ec(
             "body": body
         }
         logger.info(f"HERE IS THE BODY??? {body}")
-        return JSONResponse(response, HTTP_200_OK)
+#        return JSONResponse(response, HTTP_200_OK)
+        return body
 
     except Exception as exc:
         logger.error(exc, exc_info=True)

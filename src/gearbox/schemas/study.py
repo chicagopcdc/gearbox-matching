@@ -13,6 +13,7 @@ class Study(BaseModel):
     active: Optional[bool]
     sites: Optional[List[StudySite]]
     links: Optional[List[StudyLink]]
+    fake: int
 
     class Config:
         orm_mode = True
@@ -26,9 +27,8 @@ class StudyCreate(BaseModel):
 class StudySearchResults(BaseModel):
     results: Sequence[Study]
 
-"""
 class StudyResponse(BaseModel):
-    current_date: datetime
+    current_date: str
+    current_time: str
     status: str
     body: List[Study]
-"""
