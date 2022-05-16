@@ -2,8 +2,10 @@ import json
 from datetime import date
 from time import gmtime, strftime
 from fastapi import APIRouter
+from fastapi import HTTPException, APIRouter, Security
 from sqlalchemy.orm import Session
 from fastapi import Request, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from starlette.responses import JSONResponse 
 from starlette.status import (
     HTTP_200_OK,
@@ -17,21 +19,26 @@ from starlette.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 from typing import List
-from .. import logger, auth
+from .. import auth
 from ..schemas import DisplayRules 
 from ..crud.match_form import get_form_info
 from .. import deps
 from ..util.bounds import bounds
 
+import logging
+logger = logging.getLogger('gb-logger')
+
 mod = APIRouter()
+bearer = HTTPBearer(auto_error=False)
 
 @mod.get("/match-form", response_model=List[DisplayRules], status_code=HTTP_200_OK)
 async def get_match_info(
     request: Request,
     session: Session = Depends(deps.get_session),
-    user_id: int = Depends(auth.authenticate_user)
+    token: HTTPAuthorizationCredentials = Security(bearer)
 ):
     auth_header = str(request.headers.get("Authorization", ""))
+    user_id = await auth.authenticate_user(token)
     form_info = await get_form_info(session)
 
     G = []

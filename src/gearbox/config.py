@@ -9,14 +9,18 @@ class CommaSeparatedLogins(CommaSeparatedStrings):
         super().__init__(value)
         self._items = [item.split(":") for item in self._items]
 
-
+# Note:
+# Configuration is in docker-compose.yml for Docker in compose services
 config = Config(".env")
+
+print("HERE RIGHT AFTER CONFIG IS CALLED........") 
 
 # Server
 DEBUG = config("DEBUG", cast=bool, default=False)
 TESTING = config("TESTING", cast=bool, default=False)
 URL_PREFIX = config("URL_PREFIX", default="/" if DEBUG else "/gearbox")
 BYPASS_FENCE = config("BYPASS_FENCE", cast=bool, default=False)
+
 
 # Database
 # ALEMBIC DOES NOT SUPPORT ASYNC DRIVERS YET, SO WE NEED THE SYNC 
@@ -31,9 +35,18 @@ DB_DATABASE = config("DB_DATABASE", default=None)
 
 if TESTING:
     DB_DATABASE = "test_" + (DB_DATABASE or "gearbox")
+    # DB_DATABASE = "pytest_test_" + (DB_DATABASE or "gearbox")
+    DB_PORT = config("DB_PORT_TESTING", cast=int)
     TEST_KEEP_DB = config("TEST_KEEP_DB", cast=bool, default=False)
     TEST_KEEP_DB = True # KEEP TEST DATABASE AFTER TESTS
-
+    print("HERE........")
+    print(f"DB DRIVER: {DB_DRIVER}")
+    print(f"DB USER: {DB_USER}")
+    print(f"DB PASSWORD: {DB_PASSWORD}")
+    print(f"DB HOST: {DB_HOST}")
+    print(f"DB PORT: {DB_PORT}")
+    print(f"DB DATABASE: {DB_DATABASE}")
+    print(f"BYPASS FENCE: {BYPASS_FENCE}")
 DB_STRING = DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST + ":" + str(DB_PORT) + "/" + DB_DATABASE
 ALEMBIC_DB_STRING = ALEMBIC_DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST + ":" + str(DB_PORT) + "/" + DB_DATABASE
 
@@ -48,7 +61,7 @@ ALEMBIC_DB_STRING = ALEMBIC_DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD)
 DB_DSN = config(
     "DB_DSN",
     cast=make_url,
-    default=URL(
+    default=URL.create(
         drivername=DB_DRIVER,
         username=DB_USER,
         password=DB_PASSWORD,

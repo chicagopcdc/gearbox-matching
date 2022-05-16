@@ -1,3 +1,6 @@
+from .study import Study
+from .base_class import Base
+
 # from sqlalchemy.ext.declarative import declarative_base
 # from app.main import DbSession
 

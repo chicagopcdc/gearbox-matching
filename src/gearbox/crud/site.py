@@ -1,9 +1,11 @@
 from re import I
 from sqlalchemy import func, update, select, exc
-from .. import logger
 from sqlalchemy.orm import Session, joinedload
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from gearbox.models.models import Site, SiteHasStudy, Study, StudyLink
+
+import logging
+logger = logging.getLogger('gb-logger')
 
 async def get_sites(current_session: Session):
     stmt = select(Site).options(

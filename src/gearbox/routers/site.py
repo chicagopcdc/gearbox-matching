@@ -2,6 +2,8 @@ from fastapi import APIRouter
 from sqlalchemy.orm import Session
 from fastapi import Request, Depends
 from fastapi.encoders import jsonable_encoder
+from fastapi import HTTPException, APIRouter, Security
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from datetime import date
 from time import gmtime, strftime
 from starlette.responses import JSONResponse 
@@ -17,21 +19,26 @@ from starlette.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 from typing import List
-from .. import logger, auth
+from .. import auth
 from ..schemas import SiteSchema, SiteResponse
 from ..crud.site import get_single_site, get_sites
 from .. import deps
 
+import logging
+logger = logging.getLogger('gb-logger')
+
 mod = APIRouter()
+bearer = HTTPBearer(auto_error=False)
 
 @mod.get("/site/{site_id}", response_model=SiteResponse, status_code=HTTP_200_OK)
 async def get_site(
     request: Request,
     site_id: int,
     session: Session = Depends(deps.get_session),
-    user_id: int = Depends(auth.authenticate_user)
+    token: HTTPAuthorizationCredentials = Security(bearer)
 ):
     auth_header = str(request.headers.get("Authorization", ""))
+    user_id = await auth.authenticate_user(token)
     results = await get_single_site(session, site_id)
 
     response = {
@@ -47,9 +54,10 @@ async def get_site(
 async def get_all_sites(
     request: Request,
     session: Session = Depends(deps.get_session),
-    user_id: int = Depends(auth.authenticate_user)
+    token: HTTPAuthorizationCredentials = Security(bearer)
 ):
     auth_header = str(request.headers.get("Authorization", ""))
+    user_id = await auth.authenticate_user(token)
     results = await get_sites(session)
 
     response = {

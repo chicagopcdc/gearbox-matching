@@ -1,17 +1,27 @@
 import asyncio
+import logging
 import click
 import pkg_resources
 from fastapi import FastAPI, APIRouter, HTTPException, Depends
 import httpx
 from sqlalchemy.orm import Session
-from . import logger, config
+from . import config
 from gearbox import deps
 
-try:
-    from importlib.metadata import entry_points
-except ImportError:
-    from importlib.metadata import entry_points
+from logging.config import dictConfig
+from .log_config import log_config
 
+dictConfig(log_config)
+
+logger = logging.getLogger('gb-logger')
+
+try:
+    # importlib.metadata works locally but not in Docker
+    # trying importlib_metadata
+    # from importlib.metadata import entry_points
+    from importlib_metadata import entry_points
+except ImportError:
+    from importlib_metadata import entry_points
 
 
 def get_app():

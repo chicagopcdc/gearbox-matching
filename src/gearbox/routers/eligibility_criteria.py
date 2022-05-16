@@ -2,6 +2,8 @@ from re import I
 from datetime import date
 from time import gmtime, strftime
 from fastapi import APIRouter, HTTPException
+from fastapi import HTTPException, APIRouter, Security
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from fastapi import Request, Depends
 from starlette.responses import JSONResponse 
@@ -17,20 +19,25 @@ from starlette.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 from typing import List
-from .. import logger, auth
+from .. import auth
 from ..schemas import EligibilityCriteriaResponse
 from ..crud.eligibility_criteria import get_eligibility_criteria
 from .. import deps
 
+import logging
+logger = logging.getLogger('gb-logger')
+
 mod = APIRouter()
+bearer = HTTPBearer(auto_error=False)
 
 @mod.get("/eligibility-criteria", response_model=List[EligibilityCriteriaResponse], status_code=HTTP_200_OK)
 async def get_ec(
     request: Request,
     session: Session = Depends(deps.get_session),
-    user_id: int = Depends(auth.authenticate_user)
+    token: HTTPAuthorizationCredentials = Security(bearer)
 ):
     auth_header = str(request.headers.get("Authorization", ""))
+    user_id = auth.authenticate_user(token)
     results = await get_eligibility_criteria(session)
 
     body = []
@@ -76,9 +83,8 @@ async def get_ec(
             "status": "OK",
             "body": body
         }
-        logger.info(f"HERE IS THE BODY??? {body}")
-#        return JSONResponse(response, HTTP_200_OK)
-        return body
+        return JSONResponse(response, HTTP_200_OK)
+#         return body
 
     except Exception as exc:
         logger.error(exc, exc_info=True)

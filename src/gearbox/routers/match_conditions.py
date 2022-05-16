@@ -2,6 +2,8 @@ import json
 from re import I
 from fastapi import APIRouter
 from fastapi.encoders import jsonable_encoder
+from fastapi import HTTPException, APIRouter, Security
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from datetime import date
 from time import gmtime, strftime
 from sqlalchemy.orm import Session
@@ -19,21 +21,26 @@ from starlette.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 from typing import List
-from .. import logger, auth
+from .. import auth
 from ..schemas import AlgorithmEngine, AlgorithmResponse, StudyResponse
 from ..crud.match_conditions import get_match_conditions
 from .. import deps
 from ..util import match_conditions as mc
 
+import logging
+logger = logging.getLogger('gb-logger')
+
 mod = APIRouter()
+bearer = HTTPBearer(auto_error=False)
 
 @mod.get("/match-conditions", response_model=List[AlgorithmResponse], status_code=HTTP_200_OK)
 async def get_mc(
     request: Request,
     session: Session = Depends(deps.get_session),
-    user_id: int = Depends(auth.authenticate_user)
+    token: HTTPAuthorizationCredentials = Security(bearer)
 ):
     auth_header = str(request.headers.get("Authorization", ""))
+    user_id = await auth.authenticate_user(token)
     all_algo_engs = await get_match_conditions(session)
     
     response = []
@@ -46,11 +53,8 @@ async def get_mc(
             ae_dict[ae.study_algo_engine.study_version.study_id] = [(ae.path,ae.sequence)]
 
     for i in sorted(ae_dict):
-        logger.info(f'PROCESSING STUDY ID: {i}')
         study_id = i
         paths = [ x[0] for x in sorted(ae_dict[i], key = lambda x: x[1])]
-        for path in paths:
-            logger.info(f"PATH: {path}")
         response.append(mc.get_tree(study_id, paths))
 
     return JSONResponse(response, HTTP_200_OK)

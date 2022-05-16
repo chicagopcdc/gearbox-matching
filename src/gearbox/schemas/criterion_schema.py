@@ -1,13 +1,15 @@
-from tkinter.tix import DisplayStyle
+# from tkinter.tix import DisplayStyle
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Sequence, List, Any, Optional
 from pydantic.utils import GetterDict
 from .criterion_has_tag import CriterionTag
-from .. import logger
 from .criterion_has_value import CriterionValue
 from .input_type import InputType
 from .el_criterion_has_criterion_schema import ElCriterionHasCriterionSchema
+
+import logging
+logger = logging.getLogger('gb-logger')
 
 """
 class CriterionValueGetter(GetterDict):

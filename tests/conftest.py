@@ -1,8 +1,16 @@
 import importlib
 import json
 from collections import defaultdict
+import tempfile
 
 import pytest
+# from pytest_postgresql import factories
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.engine.url import URL
+from sqlalchemy.engine import Engine
+
 from alembic.config import main
 import httpx
 import respx
@@ -12,31 +20,81 @@ from starlette.testclient import TestClient
 from unittest.mock import MagicMock, patch
 import asyncio
 
-environ["TESTING"] = "TRUE"
 from gearbox import config
+# from gearbox.models import base_class, study
+from gearbox.models import Base, Study
 
-
-# NOTE: AsyncMock is included in unittest.mock but ONLY in Python 3.8+
 class AsyncMock(MagicMock):
     async def __call__(self, *args, **kwargs):
         return super(AsyncMock, self).__call__(*args, **kwargs)
 
+"""
+    N O T E: as of 04/25/2022 
+    pytest-postgresql requires psycopg3, and the current version
+    of sqlalchemy is still using psycopg2. Once Sqlalchemy 2.0 is available, 
+    we can leverage pytest-postgresql in the test scripts. 
 
-@pytest.fixture(autouse=True, scope="session")
-def setup_test_database():
-    from gearbox import config
+socket_dir = tempfile.TemporaryDirectory()
 
-    main(["--raiseerr", "upgrade", "head"])
+postgresql_my_proc = factories.postgresql_proc(
+    port=config.DB_PORT,
+    user=config.DB_USER,
+    password="",
+    dbname=config.DB_DATABASE,
+    host=config.DB_HOST,
+    unixsocketdir=socket_dir.name
+)
 
-    yield
+postgresql_my = factories.postgresql('postgresql_my_proc')
+print(f"POSTGRESQL_MY TYPE: {type(postgresql_my)}")
+"""
 
-    importlib.reload(config)
-    if not config.TEST_KEEP_DB:
-        main(["--raiseerr", "downgrade", "base"])
+@pytest.fixture(scope="session")
+def connection():
+    engine = create_engine(config.ALEMBIC_DB_STRING)
+    return engine.connect()
+
+def file_to_table(conn, cursor, table_name, file_name):
+    with open(file_name, 'r') as f:
+        copy_sql = "COPY " + table_name + " FROM stdin DELIMITER E'\t' CSV HEADER"
+        cursor.copy_expert(sql=copy_sql, file=f)
+#        conn.commit()
 
 
-@pytest.fixture()
-def client():
+@pytest.fixture(scope="session")
+def setup_database(connection) -> Engine:
+
+    Session = sessionmaker(bind=connection)
+    session = Session()
+
+    main(["--raiseerr","downgrade","base"])
+    main(["--raiseerr","upgrade","head"])
+
+    cursor = session.connection().connection.cursor()
+    conn = session.connection().connection
+
+    # COPY DATA INTO TABLES
+    file_to_table(conn, cursor,'study', './postgres-data/gearbox_v_1_steve_edit - study.tsv')
+    file_to_table(conn, cursor,'study_version', './postgres-data/gearbox_v_1_steve_edit - study_version.tsv')
+    file_to_table(conn, cursor,'value', './postgres-data/gearbox_v_1_steve_edit - value.tsv')
+    file_to_table(conn, cursor,'input_type', './postgres-data/gearbox_v_1_steve_edit - input_type.tsv')
+    file_to_table(conn, cursor,'tag', './postgres-data/gearbox_v_1_steve_edit - tag.tsv')
+    file_to_table(conn, cursor,'criterion', './postgres-data/gearbox_v_1_steve_edit - criterion.tsv')
+    file_to_table(conn, cursor,'criterion_has_value', './postgres-data/gearbox_v_1_steve_edit - criterion_has_value.tsv')
+    file_to_table(conn, cursor,'eligibility_criteria', './postgres-data/gearbox_v_1_steve_edit - eligibility_criteria.tsv')
+    file_to_table(conn, cursor,'display_rules', './postgres-data/gearbox_v_1_steve_edit - display_rules.tsv')
+    file_to_table(conn, cursor,'triggered_by', './postgres-data/gearbox_v_1_steve_edit - triggered_by.tsv')
+    file_to_table(conn, cursor,'criterion_has_tag', './postgres-data/gearbox_v_1_steve_edit - criterion_has_tag.tsv')
+    file_to_table(conn, cursor,'el_criteria_has_criterion', './postgres-data/gearbox_v_1_steve_edit - el_criteria_has_criterion.tsv')
+    file_to_table(conn, cursor,'study_algorithm_engine', './postgres-data/gearbox_v_1_steve_edit - study_algorithm_engine.tsv')
+    file_to_table(conn, cursor,'algorithm_engine', './postgres-data/gearbox_v_1_steve_edit - algorithm_engine.tsv')
+
+    yield session
+    session.close()
+
+
+@pytest.fixture(scope="session")
+def client(event_loop):
     from gearbox import config
     from gearbox.main import get_app
 
@@ -66,16 +124,14 @@ def signed_url_mock():
     """
     yield "https://mock-signed-url"
 
-
-
-
 @pytest.fixture(scope="function")
 def valid_upload_file_patcher(client, guid_mock, signed_url_mock):
     patches = []
 
+    print(f"HERE IN valid_upload_file_patcher")
     access_token_mock = MagicMock()
     patches.append(patch("authutils.token.fastapi.access_token", access_token_mock))
-    patches.append(patch("gearbox.user_input.access_token", access_token_mock))
+    patches.append(patch("gearbox.routers.user_input.access_token", access_token_mock))
 
     async def get_access_token(*args, **kwargs):
         return {"sub": "1"}
@@ -93,19 +149,10 @@ def valid_upload_file_patcher(client, guid_mock, signed_url_mock):
         patched_function.stop()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+@pytest.yield_fixture(scope="session")
+def event_loop(request):
+    # Create an instance of the default event loop for each test
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+    loop.close()
 

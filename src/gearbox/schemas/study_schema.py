@@ -2,8 +2,10 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Sequence, List, Any, Optional
 from pydantic.utils import GetterDict
-from .. import logger
 from .study_link import StudyLink
+
+import logging
+logger = logging.getLogger('gb-logger')
 
 class StudySiteGetter(GetterDict):
     # map and reformat site fields

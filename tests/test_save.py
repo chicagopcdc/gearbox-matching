@@ -1,7 +1,12 @@
 import pytest
+import json
+import jwt
 
-import httpx
+from httpx import AsyncClient
+from fastapi import FastAPI
+
 import respx
+
 from fastapi import HTTPException
 from starlette.config import environ
 from starlette.status import (
@@ -15,102 +20,56 @@ from starlette.status import (
 
 from gearbox import config
 
-
-def test_create_no_auth_header(client, valid_upload_file_patcher):
-    """
-    Test that no token results in 401
-    """
-    valid_upload_file_patcher["access_token_mock"].side_effect = Exception(
-        "token not defined"
-    )
-    data = {
-        "data": [{"id": 4, "value": "luca"}]
-    }
-
-    # PROBLEM IN THE URL _ SHOULD HAVE BEEN - !!!
-    resp = client.post("/user-input", json=data)
-    assert str(resp.status_code) == "401"
-
-
-
-def test_create_invalid_token(client, valid_upload_file_patcher):
-    """
-    Test that a bad token results in 401
-    """
-    fake_jwt = "1.2.3"
-    valid_upload_file_patcher["access_token_mock"].side_effect = HTTPException(
-        HTTP_403_FORBIDDEN, "bad token"
-    )
-    data = {
-        "data": [{"id": 4, "value": "luca"}]
-    }
-
-    resp = client.post(
-        "/user-input", json=data, headers={"Authorization": f"bearer {fake_jwt}"}
-    )
-    assert str(resp.status_code) == "401"
-
-
-
-@respx.mock
-@pytest.mark.parametrize(
-    "data",
-    {
-        "data": [{"id": 4, "value": "luca"}]
-    },
-)
-def test_create(client, valid_upload_file_patcher, data):
-    """
-    Test create /user-input response for a valid user with authorization and
-    valid input, ensure correct response.
-    """
-    fake_jwt = "1.2.3"
-    resp = client.post(
-        "/user-input", json=data, headers={"Authorization": f"bearer {fake_jwt}"}
-    )
-    resp.raise_for_status()
-
-    assert str(resp.status_code).startswith("20")
-    assert resp.json().get("results") == data.get("data", {})
-    assert resp.json().get("id") is not None
-    
-
-@respx.mock
-@pytest.mark.parametrize(
-    "data",
-    {
-        "data": [{"id": 4, "value": "matteo"}],
-        "id": 1
-    },
-)
-def test_update(client, valid_upload_file_patcher, data):
-    """
-    Test update /user-input response for a valid user with authorization and
-    valid input, ensure correct response.
-    """
-    fake_jwt = "1.2.3"
-    resp = client.post(
-        "/user-input", json=data, headers={"Authorization": f"bearer {fake_jwt}"}
-    )
-    resp.raise_for_status()
-
-    assert str(resp.status_code).startswith("20")
-    assert resp.json().get("results") == data.get("data", {})
-    assert resp.json().get("id") == data.get("id")
-
-
-
 @respx.mock
 def test_get_last_saved_input(client):
     """
     Test that the /user-input endpoint returns a 200 and the id of the latest saved obj
     """
-    fake_jwt = "1.2.3"
-    resp = client.get("/user-input/latest", headers={"Authorization": f"bearer {fake_jwt}"})
+    # fake_jwt = "1111.2.3"
+    fake_payload = {"sub":"4242", "name":"luca"}
+    fake_jwt = jwt.encode(payload=fake_payload, key="12345")
+    print(f"FAKE_JWT TYPE: {type(fake_jwt)}")
+    print(f"FAKE_JWT:  {fake_jwt}")
+    # resp = client.get("/user-input/latest", headers={"Authorization": f"bearer {fake_jwt}"})
+    headers = {"Authorization":"Bearer {}".format(fake_jwt.decode())}
+    resp = client.get("/user-input/latest", headers=headers)
+    # resp = client.get("/user-input/latest", headers={"Authorization": f"bearer {fake_jwt}"})
     assert resp.status_code == 200
     assert resp.json().get("id")  is not None 
 
+@respx.mock
+@pytest.mark.parametrize(
+    "data", [ 
+        { 'data': [ {'id': 4, 'value': 'luca'} ] }
+    ]
+)
+@pytest.mark.asyncio
+def test_create(client, valid_upload_file_patcher, data):
+    """
+    Test create /user-input response for a valid user with authorization and
+    valid input, ensure correct response.
+    """
+    print(f"DATA PARAMETER TYPE: {type(data)} ")
+    print(f"DATA PARAMETER VALUE IN test_create: {data} ")
+    fake_jwt = "1.2.3"
+    resp = client.post(
+        "/user-input", json=data, headers={"Authorization": f"bearer {fake_jwt}"}
+    )
+    print("HERE AFTER THE POST.. 1")
+    full_res = resp.json()
+    print(f"FULL RESPONSE: {full_res}")
+    print(f"STATUS CODE: {resp.status_code}")
 
+    resp.raise_for_status()
+    print("HERE AFTER THE POST.. 2")
 
+    res = resp.json().get("results")
+    id = resp.json().get("id") 
 
+    print(f"STATUS CODE: {resp.status_code}")
+    print(f"RESULTS: {res}")
+    print(f"ID: {id}")
 
+    assert str(resp.status_code).startswith("20")
+    assert resp.json().get("results") == data.get("data", {})
+    assert resp.json().get("id") is not None

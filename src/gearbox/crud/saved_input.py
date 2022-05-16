@@ -1,7 +1,6 @@
 import datetime
 from re import I
 from sqlalchemy import func, update, select, exc
-from .. import logger
 from sqlalchemy.orm import Session
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from gearbox.models.models import SavedInput
@@ -18,6 +17,9 @@ from starlette.status import (
     HTTP_404_NOT_FOUND,
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
+
+import logging
+logger = logging.getLogger('gb-logger')
 
 
 

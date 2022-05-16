@@ -1,0 +1,15 @@
+bounds = { 
+    'age': {'min': 0}, 
+    'weight': {'min': 0}, 
+    'refractoryEvents': {'min': 0}, 
+    'chemoCycles': {'min': 0}, 
+    'relapseEvents': {'min': 0}, 
+    'blastPerc': {'min': 0, 'max': 100, 'step': 0.1},
+    'blastPercMethod': {'min': 0}, 
+    'Days since last dose of any cytotoxic agent (with exception of hydroxyurea)': {'min': 0}, 
+    'Days since last dose of any cytotoxic agent (with exception of low-dose cytarabine)': {'min': 0}, 
+    'Alanine transaminase (ALT), in IU/L': {'min': 0.1, 'step': 0.1},
+    'Days since last dose of steroids': {'min': 0}, 
+    'anthracycline dose': {'min': 0.1, 'step': 0.1},
+    'Direct bilirubin (in mg/dL)': {'min': 0.1, 'step': 0.1},
+}
