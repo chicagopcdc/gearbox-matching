@@ -38,6 +38,9 @@ from ..crud.saved_input import add_saved_input, get_latest_saved_input, update_s
 from .. import deps
 from .. import auth 
 
+### FOR TESTING ADMIN AUTHZ REMOVE AFTER TEST###
+from ..admin_login import admin_required
+### END FOR TESTING ADMIN AUTHZ ###
 import logging
 logger = logging.getLogger('gb-logger')
 
@@ -46,14 +49,17 @@ mod = APIRouter()
 # auto_error=False prevents FastAPI from raises a 403 when the request is missing
 # an Authorization header. Instead, we want to return a 401 to signify that we did
 # not recieve valid credentials
-bearer = HTTPBearer(auto_error=False)
+# bearer = HTTPBearer(auto_error=False)
 
 @mod.post("/user-input", response_model=SavedInputSearchResults)
+### FOR TESTING ADMIN AUTHZ REMOVE AFTER TEST###
+##@mod.post("/user-input", response_model=SavedInputSearchResults, dependencies=[Depends(admin_required) ])
+### END FOR TESTING ADMIN AUTHZ ###
 async def save_object(
     body: UploadSavedInput,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
-    token: HTTPAuthorizationCredentials = Security(bearer),
+    user_id: int = Depends(auth.authenticate_user)
 ):
     """
         Save user form input, return saved object list to the user.
@@ -63,9 +69,6 @@ async def save_object(
             request (Request): starlette request (which contains reference to FastAPI app)
             token (HTTPAuthorizationCredentials, optional): bearer token
     """
-    auth_header = str(request.headers.get("Authorization", ""))
-    user_id = await auth.authenticate_user(token)
-
     data = body.data
     data = data or []
     saved_input_id = body.id
@@ -87,7 +90,7 @@ async def save_object(
 async def get_object_latest(
     request: Request,
     session: Session = Depends(deps.get_session),
-    token: HTTPAuthorizationCredentials = Security(bearer),
+    user_id: int = Depends(auth.authenticate_user)
 ) -> JSONResponse:
     """
     Attempt to fetch the latest version of the user saved search, 
@@ -101,9 +104,7 @@ async def get_object_latest(
         200: { "results": [{id: 1, "value": ""}] }
         404: if the obj is not found
     """
-    auth_header = str(request.headers.get("Authorization", ""))
     #TODO add try catch around the int()
-    user_id = await auth.authenticate_user(token)
     saved_user_input = await get_latest_saved_input(session, int(user_id))
 
     if not saved_user_input:

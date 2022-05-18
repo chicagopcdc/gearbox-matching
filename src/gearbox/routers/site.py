@@ -30,15 +30,13 @@ logger = logging.getLogger('gb-logger')
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
 
-@mod.get("/site/{site_id}", response_model=SiteResponse, status_code=HTTP_200_OK)
+@mod.get("/site/{site_id}", response_model=SiteResponse, dependencies=[Depends(auth.authenticate)], status_code=HTTP_200_OK)
 async def get_site(
     request: Request,
     site_id: int,
     session: Session = Depends(deps.get_session),
     token: HTTPAuthorizationCredentials = Security(bearer)
 ):
-    auth_header = str(request.headers.get("Authorization", ""))
-    user_id = await auth.authenticate_user(token)
     results = await get_single_site(session, site_id)
 
     response = {
@@ -50,14 +48,12 @@ async def get_site(
 
     return response
 
-@mod.get("/sites", response_model=SiteResponse, status_code=HTTP_200_OK)
+@mod.get("/sites", response_model=SiteResponse, dependencies=[Depends(auth.authenticate)], status_code=HTTP_200_OK)
 async def get_all_sites(
     request: Request,
     session: Session = Depends(deps.get_session),
     token: HTTPAuthorizationCredentials = Security(bearer)
 ):
-    auth_header = str(request.headers.get("Authorization", ""))
-    user_id = await auth.authenticate_user(token)
     results = await get_sites(session)
 
     response = {

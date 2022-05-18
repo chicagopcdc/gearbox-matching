@@ -1,7 +1,12 @@
 from . import config
 from authutils.token.fastapi import access_token
-from fastapi import HTTPException, Security
-from fastapi.security import HTTPAuthorizationCredentials
+from fastapi import HTTPException, Security, Depends
+from fastapi.security import (
+    HTTPAuthorizationCredentials,
+    HTTPBasic,
+    HTTPBasicCredentials,
+    HTTPBearer,
+)
 from . import config
 from starlette.status import (
     HTTP_401_UNAUTHORIZED
@@ -10,19 +15,26 @@ from starlette.status import (
 import logging
 logger = logging.getLogger('gb-logger')
 
-async def authenticate_user(token):
-    # auto_error=False prevents FastAPI from raises a 403 when the request is missing
-    # an Authorization header. Instead, we want to return a 401 to signify that we did
-    # not recieve valid credentials
-    logger.info(f"HERE IS THE TOKEN: {token}")
-    logger.info(f"HERE IS THE TOKEN TYPE: {type(token)}")
+# auto_error=False prevents FastAPI from raises a 403 when the request is missing
+# an Authorization header. Instead, we want to return a 401 to signify that we did
+# not recieve valid credentials
+security = HTTPBasic(auto_error=False)
+bearer = HTTPBearer(auto_error=False)
+
+async def authenticate(
+    token: HTTPAuthorizationCredentials = Security(bearer)
+):
     if not config.BYPASS_FENCE:
         token_claims = await get_token_claims(token)
-        logger.info(f"HERE IS THE TOKEN CLAIM: {token_claims}")
+
+async def authenticate_user(
+    token: HTTPAuthorizationCredentials = Security(bearer)
+):
+    if not config.BYPASS_FENCE:
+        token_claims = await get_token_claims(token)
         user_id = token_claims.get("sub")
     else:
         user_id = 4
-
     return user_id
 
 async def get_token_claims(token):

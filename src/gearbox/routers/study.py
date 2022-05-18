@@ -33,28 +33,24 @@ logger = logging.getLogger('gb-logger')
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
 
-@mod.get("/study/{study_id}", response_model=List[StudyResponse], status_code=HTTP_200_OK)
+@mod.get("/study/{study_id}", response_model=List[StudyResponse], dependencies=[Depends(auth.authenticate)], status_code=HTTP_200_OK)
 async def get_study(
     request: Request,
     study_id: int,
-    session: Session = Depends(deps.get_session),
-    token: HTTPAuthorizationCredentials = Security(bearer)
+    session: Session = Depends(deps.get_session)
 ):
     auth_header = str(request.headers.get("Authorization", ""))
-    user_id = await auth.authenticate_user(token)
     results = await get_single_study(session, study_id)
 
     response_fmt = format_study_response(results)
     return response_fmt
 
-@mod.get("/studies", response_model=List[StudyResponse], status_code=HTTP_200_OK)
+@mod.get("/studies", response_model=List[StudyResponse], dependencies=[Depends(auth.authenticate)], status_code=HTTP_200_OK)
 async def get_all_studies(
     request: Request,
-    session: Session = Depends(deps.get_session),
-    token: HTTPAuthorizationCredentials = Security(bearer)
+    session: Session = Depends(deps.get_session)
 ):
     auth_header = str(request.headers.get("Authorization", ""))
-    user_id = await auth.authenticate_user(token)
     results = await get_studies(session)
     response_fmt = format_study_response(results)
 

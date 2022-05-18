@@ -30,14 +30,11 @@ logger = logging.getLogger('gb-logger')
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
 
-@mod.get("/eligibility-criteria", response_model=List[EligibilityCriteriaResponse], status_code=HTTP_200_OK)
+@mod.get("/eligibility-criteria", response_model=List[EligibilityCriteriaResponse], dependencies=[Depends(auth.authenticate)], status_code=HTTP_200_OK)
 async def get_ec(
     request: Request,
     session: Session = Depends(deps.get_session),
-    token: HTTPAuthorizationCredentials = Security(bearer)
 ):
-    auth_header = str(request.headers.get("Authorization", ""))
-    user_id = auth.authenticate_user(token)
     results = await get_eligibility_criteria(session)
 
     body = []

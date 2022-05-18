@@ -31,14 +31,11 @@ logger = logging.getLogger('gb-logger')
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
 
-@mod.get("/match-form", response_model=List[DisplayRules], status_code=HTTP_200_OK)
+@mod.get("/match-form", response_model=List[DisplayRules], dependencies=[Depends(auth.authenticate)], status_code=HTTP_200_OK)
 async def get_match_info(
     request: Request,
     session: Session = Depends(deps.get_session),
-    token: HTTPAuthorizationCredentials = Security(bearer)
 ):
-    auth_header = str(request.headers.get("Authorization", ""))
-    user_id = await auth.authenticate_user(token)
     form_info = await get_form_info(session)
 
     G = []

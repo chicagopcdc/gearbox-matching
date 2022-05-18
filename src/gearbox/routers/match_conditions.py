@@ -26,6 +26,7 @@ from ..schemas import AlgorithmEngine, AlgorithmResponse, StudyResponse
 from ..crud.match_conditions import get_match_conditions
 from .. import deps
 from ..util import match_conditions as mc
+from ..admin_login import admin_required
 
 import logging
 logger = logging.getLogger('gb-logger')
@@ -33,16 +34,13 @@ logger = logging.getLogger('gb-logger')
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
 
-@mod.get("/match-conditions", response_model=List[AlgorithmResponse], status_code=HTTP_200_OK)
+@mod.get("/match-conditions", response_model=List[AlgorithmResponse], dependencies=[ Depends(auth.authenticate), Depends(admin_required)], status_code=HTTP_200_OK)
 async def get_mc(
     request: Request,
-    session: Session = Depends(deps.get_session),
-    token: HTTPAuthorizationCredentials = Security(bearer)
+    session: Session = Depends(deps.get_session)
 ):
-    auth_header = str(request.headers.get("Authorization", ""))
-    user_id = await auth.authenticate_user(token)
+
     all_algo_engs = await get_match_conditions(session)
-    
     response = []
     ae_dict = {}
 

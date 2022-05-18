@@ -26,14 +26,11 @@ logger = logging.getLogger('gb-logger')
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
 
-@mod.get("/values", response_model=List[Value], status_code=HTTP_200_OK)
+@mod.get("/values", response_model=List[Value], dependencies=[Depends(auth.authenticate)], status_code=HTTP_200_OK)
 async def get_all_values(
     request: Request,
     session: Session = Depends(deps.get_session),
-    token: HTTPAuthorizationCredentials = Security(bearer)
 ):
-    auth_header = str(request.headers.get("Authorization", ""))
-    user_id = auth.authenticate_user(token)
     results = await get_values(session)
 
     for x in results:
