@@ -73,6 +73,9 @@ async def save_object(
     data = data or []
     saved_input_id = body.id
 
+    auth_header = str(request.headers.get("Authorization",""))
+    print(f"AUTH HEADER IN user_input.py POST: {auth_header}")
+
     if not saved_input_id:
         #TODO add try catch around the int()
         results = await add_saved_input(session, int(user_id), data)
@@ -105,6 +108,8 @@ async def get_object_latest(
         404: if the obj is not found
     """
     #TODO add try catch around the int()
+    auth_header = str(request.headers.get("Authorization",""))
+    print(f"AUTH HEADER IN user_input.py GET: {auth_header}")
     saved_user_input = await get_latest_saved_input(session, int(user_id))
 
     if not saved_user_input:

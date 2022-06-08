@@ -53,7 +53,7 @@ async def get_mc(
     for i in sorted(ae_dict):
         study_id = i
         paths = [ x[0] for x in sorted(ae_dict[i], key = lambda x: x[1])]
-        response.append(mc.get_tree(study_id, paths))
+        response.append(mc.get_tree(paths, study_id=study_id))
 
     return JSONResponse(response, HTTP_200_OK)
 

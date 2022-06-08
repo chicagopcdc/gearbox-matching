@@ -1,4 +1,5 @@
 import json
+import re
 from datetime import date
 from time import gmtime, strftime
 from fastapi import APIRouter
@@ -24,12 +25,28 @@ from ..schemas import DisplayRules
 from ..crud.match_form import get_form_info
 from .. import deps
 from ..util.bounds import bounds
+from ..util import match_conditions as mc
 
 import logging
 logger = logging.getLogger('gb-logger')
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
+
+def update_dict(d, critlookup):
+    for key in d:
+        if key == 'criteria':
+            if isinstance(d[key], list):
+                for i in range(0, len(d[key])):
+                    if not isinstance(d[key][i], dict):
+                        try:
+                            d[key][i] = critlookup[int(d[key][i])] 
+                        except KeyError:
+                            logger.error("Error message about improperly configured path - path ids do not exist for this...")
+
+                    else: 
+                        update_dict(d[key][i], critlookup)
+    return d
 
 @mod.get("/match-form", response_model=List[DisplayRules], dependencies=[Depends(auth.authenticate)], status_code=HTTP_200_OK)
 async def get_match_info(
@@ -56,45 +73,16 @@ async def get_match_info(
         if display_rules.active:
             criterion_dict = {'id': display_rules.criterion_id}
             for ctag in display_rules.criterion.tags:
-                criterion_dict.update({'groupId': ctag.tag.id})
+                if ctag.tag.type == 'form':
+                    criterion_dict.update({'groupId': ctag.tag.id})
             if display_rules.criterion.active:
                 code = display_rules.criterion.code
                 criterion_dict.update({'name': code})
-                # N O T E: criterion.code is null, so need to update 
-                # to create some test data
                 if code in bounds.keys():
                     criterion_dict.update(bounds[code])
 
                 criterion_dict.update({'label':display_rules.criterion.description})
                 criterion_dict.update({'type':display_rules.criterion.input_type.render_type})
-
-                # showIf logic
-                showIf = {
-                    'operator': 'OR', #Tom's code says: "always OR as scripted for now"
-                    'criteria': []
-                }
-                for tb in display_rules.triggered_bys:
-                    if tb.active:
-                        if tb.value.active:
-                            op = tb.value.operator
-                            vs = tb.value.value_string
-                            cid = tb.criterion_id
-                        # else return empty dict??
-                            try:
-                                crits = showIf.get('criteria')
-                                new_crit = {
-                                    'id': cid,
-                                    'operator:': op,
-                                    'value': eval(vs)
-                                }
-                                crits.append(new_crit)
-                                showIf.update(({'criteria': crits}))
-                            except Exception as e:
-                                logger.error(e)
-
-                # end showIf logic
-                if showIf.get('criteria'):
-                    criterion_dict.update({'showIf':showIf})
 
                 options = []
                 if len(display_rules.criterion.values) > 1:
@@ -112,16 +100,66 @@ async def get_match_info(
                             o.update({'label': chvalue.value.value_string})
                             o.update({'description': ""})
                             options.append(o)
+
                 if len(options) > 0:
                     criterion_dict.update({'options': options})
+
+                # Get paths from triggered bys
+                pathlist = []
+                critlookup = {}
+                path_tree = None
+                for tb in display_rules.triggered_bys:
+                    if tb.active:
+                        tb_value = ''
+                        if (tb.path):
+                            pathlist.append(tb.path)
+                        if tb.value.type in ('Integer','Float'):
+                            tb_value = tb.value.value_string
+                        else:
+                            tb_value = tb.value.id
+
+                        critdict = {
+                            "id": tb.criterion.id,
+                            "value": tb_value,
+                            "operator": tb.value.operator
+                        }
+                        critlookup[tb.id] = critdict
+
+                # build tree
+                # Q U E S T I O N : if len(pathlist) == 1?
+                if(pathlist):
+                    path_tree = mc.get_tree(pathlist, suppress_header=True)
+                    print(f"DR ID: {display_rules.id}")
+                    print(f"DR CRITERION: {display_rules.criterion.id}")
+                    path_tree = update_dict(path_tree, critlookup)
+
+                    print(f"PATH TREE STRING: {path_tree}")
+                elif len(critlookup) == 1:
+                    path_tree = {
+                        "operator": "AND",
+                        "criteria": [
+                            critlookup[tb.id]
+                        ]
+                    }
+                    path_tree = update_dict(path_tree, critlookup)
+
+                if path_tree:
+                    criterion_dict.update({'showIf':path_tree})
+                # elif len(critlookup) == 1:
+                #    criterion_dict.update({'showIf': critlookup[tb.id]})
+
+
+
         F.append(criterion_dict)
 
+        body = {"groups": json.dumps(G), "fields": json.dumps(F)}
+        # body = {"groups": json.dumps(G), "fields": json.dumps(F)}
         body = {"groups": G, "fields": F}
         response = {
             "current_date": date.today().strftime("%B %d, %Y"),
             "current_time": strftime("%H:%M:%S +0000", gmtime()),
             "status": "OK",
-            "body": body
+            "body": json.dumps(body)
         }
     return JSONResponse(response, HTTP_200_OK)
 

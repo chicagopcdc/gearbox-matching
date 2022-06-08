@@ -496,7 +496,7 @@ def build_tree(nodelist):
     # return the first node
     return crit_que[0]
 
-def get_tree(study_id, full_paths):
+def get_tree(full_paths, study_id=None, suppress_header=False):
     fp = expand_paths(full_paths)
     fpg = add_generation(fp)
     mgd = merged(fpg)
@@ -507,7 +507,11 @@ def get_tree(study_id, full_paths):
     if isinstance(criteria_tree, tuple):
         criteria_tree = criteria_tree[0]
 
-    criteria_tree_withid = { "studyId" : study_id,
-    "algorithm": criteria_tree }
+    if (suppress_header):
+        return_criteria = criteria_tree
+    else:
+        return_criteria = { "studyId" : study_id,
+            "algorithm": criteria_tree }
 
-    return criteria_tree_withid
+
+    return return_criteria
