@@ -13,8 +13,6 @@ class CommaSeparatedLogins(CommaSeparatedStrings):
 # Configuration is in docker-compose.yml for Docker in compose services
 config = Config(".env")
 
-print("HERE RIGHT AFTER CONFIG IS CALLED........") 
-
 # Server
 DEBUG = config("DEBUG", cast=bool, default=False)
 TESTING = config("TESTING", cast=bool, default=False)
@@ -33,13 +31,14 @@ DB_USER = config("DB_USER", default=None)
 DB_PASSWORD = config("DB_PASSWORD", cast=Secret, default=None)
 DB_DATABASE = config("DB_DATABASE", default=None)
 
+BYPASS_FENCE_DUMMY_USER_ID = config("BYPASS_FENCE_DUMMY_USER_ID", default=4)
+
 if TESTING:
     DB_DATABASE = "test_" + (DB_DATABASE or "gearbox")
     # DB_DATABASE = "pytest_test_" + (DB_DATABASE or "gearbox")
     DB_PORT = config("DB_PORT_TESTING", cast=int)
     TEST_KEEP_DB = config("TEST_KEEP_DB", cast=bool, default=False)
     TEST_KEEP_DB = True # KEEP TEST DATABASE AFTER TESTS
-    print("HERE........")
     print(f"DB DRIVER: {DB_DRIVER}")
     print(f"DB USER: {DB_USER}")
     print(f"DB PASSWORD: {DB_PASSWORD}")

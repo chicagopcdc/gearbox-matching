@@ -34,7 +34,7 @@ async def authenticate_user(
         token_claims = await get_token_claims(token)
         user_id = token_claims.get("sub")
     else:
-        user_id = 4
+        user_id = config.BYPASS_FENCE_DUMMY_USER_ID
     return user_id
 
 async def get_token_claims(token):
