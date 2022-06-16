@@ -41,7 +41,7 @@ async def get_mc(
 ):
 
     all_algo_engs = await get_match_conditions(session)
-    response = []
+    response_conditions = []
     ae_dict = {}
 
     for ae in all_algo_engs:
@@ -53,8 +53,14 @@ async def get_mc(
     for i in sorted(ae_dict):
         study_id = i
         paths = [ x[0] for x in sorted(ae_dict[i], key = lambda x: x[1])]
-        response.append(mc.get_tree(paths, study_id=study_id))
-
+        response_conditions.append(mc.get_tree(paths, study_id=study_id))
+    
+        response = {
+            "current_date": date.today().strftime("%B %d, %Y"),
+            "current_time": strftime("%H:%M:%S +0000", gmtime()),
+            "status": "OK",
+            "body": response_conditions
+        }
     return JSONResponse(response, HTTP_200_OK)
 
 def init_app(app):
