@@ -46,6 +46,7 @@ if TESTING:
     print(f"DB PORT: {DB_PORT}")
     print(f"DB DATABASE: {DB_DATABASE}")
     print(f"BYPASS FENCE: {BYPASS_FENCE}")
+    print(f"DEBUG: {DEBUG}")
 DB_STRING = DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST + ":" + str(DB_PORT) + "/" + DB_DATABASE
 ALEMBIC_DB_STRING = ALEMBIC_DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST + ":" + str(DB_PORT) + "/" + DB_DATABASE
 

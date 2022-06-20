@@ -7,7 +7,7 @@ COPY . /src/
 WORKDIR /src
 COPY . /tests/
 WORKDIR /tests
-RUN python -m venv /env && . /env/bin/activate && python -m pip install --upgrade pip && $HOME/.poetry/bin/poetry install --no-interaction
+RUN python -m venv /env && . /env/bin/activate && $HOME/.poetry/bin/poetry install --no-interaction
 
 FROM base
 RUN apk add --no-cache postgresql-libs curl
