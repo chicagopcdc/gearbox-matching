@@ -52,11 +52,11 @@ id	code	description	type	value_string	unit	operator	create_date	active
 51	gte_40	greater or equal than 40	Integer	40		gte		1
 52	gte_25	greater or equal than 25	Integer	25		gte		1
 53	lt_1	lower than 1	Integer	1		lt		1
-54	lt_6	lower than 6	Integer	6		lt		1
-55	gte_6	greater or equal than 6	Integer	6		gte		1
-56	lt_10	lower than 10	Integer	10		lt		1
-57	gte_10	greater or equal than 10	Integer	10		gte		1
-58	lt_13	lower than 13	Integer	13		lt		1
+54	lt_6	lower than 6	Integer	6	years	lt		1
+55	gte_6	greater or equal than 6	Integer	6	years	gte		1
+56	lt_10	lower than 10	Integer	10	years	lt		1
+57	gte_10	greater or equal than 10	Integer	10	years	gte		1
+58	lt_13	lower than 13	Integer	13	years	lt		1
 59	Ambiguous lineage acute leukemia (ALAL)	Ambiguous lineage acute leukemia (ALAL)	String	ALAL		eq		1
 60	Morphology	Morphology	String	Morphology		eq		1
 61	Flow cytometry	Flow cytometry	String	Flow cytometry		eq		1
@@ -68,9 +68,9 @@ id	code	description	type	value_string	unit	operator	create_date	active
 67	gt_60	greater than 60	Float	60		gt		1
 68	gt_3	greater than 3	Integer	3		gt		1
 69	lte_1_5	lower or equal than 1.5	Float	1.5	ULN	lte		1
-70	gte_13	greater or equal than 13	Integer	13		gte		1
-71	lt_16	lower than 16	Integer	16		lt		1
-72	gte_16	greater or equal than 16	Integer	16		gte		1
+70	gte_13	greater or equal than 13	Integer	13	years	gte		1
+71	lt_16	lower than 16	Integer	16	years	lt		1
+72	gte_16	greater or equal than 16	Integer	16	years	gte		1
 73	gte_30	greater or equal than 30	Integer	30		gte		1
 74	lte_0_5	lower or equal than 0.5	Float	0.5		lte		1
 75	lte_0_6	lower or equal than 0.6	Float	0.6		lte		1
@@ -78,7 +78,7 @@ id	code	description	type	value_string	unit	operator	create_date	active
 77	lte_1_2	lower or equal than 1.2	Float	1.2		lte		1
 78	lte_1_7	lower or equal than 1.7	Float	1.7		lte		1
 79	lte_1_4	lower or equal than 1.4	Float	1.4		lte		1
-80	lte_1	lower or equal than 1	Integer	1		lte		1
+80	lte_1	lower or equal than 1	Integer	1.0		lte		1
 81	lt_24_y	lower than 24 years	Integer	24	years	lt		1
 82	lte_4	lower or equan than 4	Integer	4		lte		1
 83	gte_60	greater or equal than 60	Integer	60		gte		1
@@ -119,3 +119,4 @@ id	code	description	type	value_string	unit	operator	create_date	active
 118	gte_2_y	greater or equal than 2	Integer	2		gte		1
 119	lte_2_5	lower or equal than 2.5	Float	2.5	ULN	lte		1
 120	lt_2_5	lower or equal than 2.5	Float	2.5		lt		1
+121	lt_1_y	lower than 1	Integer	1	years	lt		1
