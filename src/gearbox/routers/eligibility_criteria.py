@@ -53,7 +53,7 @@ async def get_ec(
                     elif render_type in ['age']:
                         unit = the_value.unit
                         if unit in ['years']:
-                            fieldValue = the_value.value_string
+                            fieldValue = eval(the_value.value_string)
                         else:
                             if unit == 'months':
                                 fieldValue = round(eval(the_value.value_string)/12.0)
@@ -62,14 +62,12 @@ async def get_ec(
                     else:
                         fieldValue = eval(the_value.value_string)
 
-                    logger.info("ASSIGNING VALUES IN F DICTIONARY --------------------------")
                     f = {
                         'id': the_id,
                         'fieldId': fieldId,
                         'fieldValue': fieldValue,
                         'operator': operator
                     }
-                    logger.info(f"HERE IS WHAT WAS ADDED: {f}")
                     body.append(f)
         else:
             body = []
@@ -81,7 +79,6 @@ async def get_ec(
             "body": body
         }
         return JSONResponse(response, HTTP_200_OK)
-#         return body
 
     except Exception as exc:
         logger.error(exc, exc_info=True)

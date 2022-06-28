@@ -229,7 +229,6 @@ async def get_match_info(
             "current_date": date.today().strftime("%B %d, %Y"),
             "current_time": strftime("%H:%M:%S +0000", gmtime()),
             "status": "OK",
-            # "body": json.dumps(body)
             "body": body
         }
     return JSONResponse(response, HTTP_200_OK)
