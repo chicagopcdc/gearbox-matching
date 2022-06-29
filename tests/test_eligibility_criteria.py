@@ -29,7 +29,7 @@ from gearbox import config
 bearer = HTTPBearer(auto_error=False)
 
 # @pytest.mark.asyncio
-def test_get_ec(client):
+def test_get_ec(setup_database, client):
     """
     Test create /eligibility_criteria endpoint
     valid input, ensure correct response.

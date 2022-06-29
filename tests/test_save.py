@@ -21,26 +21,9 @@ from starlette.status import (
 from gearbox import config
 
 @respx.mock
-def test_get_last_saved_input(client):
-    """
-    Test that the /user-input endpoint returns a 200 and the id of the latest saved obj
-    """
-    # fake_jwt = "1111.2.3"
-    fake_payload = {"sub":"4242", "name":"luca"}
-    fake_jwt = jwt.encode(payload=fake_payload, key="12345")
-    print(f"FAKE_JWT TYPE: {type(fake_jwt)}")
-    print(f"FAKE_JWT:  {fake_jwt}")
-    # resp = client.get("/user-input/latest", headers={"Authorization": f"bearer {fake_jwt}"})
-    headers = {"Authorization":"Bearer {}".format(fake_jwt.decode())}
-    resp = client.get("/user-input/latest", headers=headers)
-    # resp = client.get("/user-input/latest", headers={"Authorization": f"bearer {fake_jwt}"})
-    assert resp.status_code == 200
-    assert resp.json().get("id")  is not None 
-
-@respx.mock
 @pytest.mark.parametrize(
     "data", [ 
-        { 'data': [ {'id': 4, 'value': 'luca'} ] }
+        { 'data': [ {'id': 4, 'value': 'steve'} ] }
     ]
 )
 @pytest.mark.asyncio
@@ -73,3 +56,14 @@ def test_create(client, valid_upload_file_patcher, data):
     assert str(resp.status_code).startswith("20")
     assert resp.json().get("results") == data.get("data", {})
     assert resp.json().get("id") is not None
+
+@respx.mock
+def test_get_last_saved_input(client):
+    """
+    Test that the /user-input endpoint returns a 200 and the id of the latest saved obj
+    """
+    fake_jwt = "1.2.3"
+    print("ABOUT TO CALL /user-input/latest")
+    resp = client.get("/user-input/latest", headers={"Authorization": f"bearer {fake_jwt}"})
+    assert resp.status_code == 200
+    assert resp.json().get("id")  is not None 

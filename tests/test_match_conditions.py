@@ -29,7 +29,7 @@ from gearbox import config
 bearer = HTTPBearer(auto_error=False)
 
 # @pytest.mark.asyncio
-def test_get_match_conditions(client):
+def test_get_match_conditions(setup_database, client):
     """
     Test create /user-input response for a valid user with authorization and
     valid input, ensure correct response.

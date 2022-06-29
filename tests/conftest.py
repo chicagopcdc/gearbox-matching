@@ -58,8 +58,6 @@ def file_to_table(conn, cursor, table_name, file_name):
     with open(file_name, 'r') as f:
         copy_sql = "COPY " + table_name + " FROM stdin DELIMITER E'\t' CSV HEADER"
         cursor.copy_expert(sql=copy_sql, file=f)
-#        conn.commit()
-
 
 @pytest.fixture(scope="session")
 def setup_database(connection) -> Engine:
@@ -70,8 +68,10 @@ def setup_database(connection) -> Engine:
     main(["--raiseerr","downgrade","base"])
     main(["--raiseerr","upgrade","head"])
 
+
     cursor = session.connection().connection.cursor()
     conn = session.connection().connection
+
 
     # COPY DATA INTO TABLES
     file_to_table(conn, cursor,'study', './postgres-data/td_study.tsv')
@@ -88,6 +88,7 @@ def setup_database(connection) -> Engine:
     file_to_table(conn, cursor,'el_criteria_has_criterion', './postgres-data/td_el_criteria_has_criterion.tsv')
     file_to_table(conn, cursor,'study_algorithm_engine', './postgres-data/td_study_algorithm_engine.tsv')
     file_to_table(conn, cursor,'algorithm_engine', './postgres-data/td_algorithm_engine.tsv')
+    conn.commit()
 
     yield session
     session.close()
@@ -128,7 +129,6 @@ def signed_url_mock():
 def valid_upload_file_patcher(client, guid_mock, signed_url_mock):
     patches = []
 
-    print(f"HERE IN valid_upload_file_patcher")
     access_token_mock = MagicMock()
     patches.append(patch("authutils.token.fastapi.access_token", access_token_mock))
     patches.append(patch("gearbox.routers.user_input.access_token", access_token_mock))

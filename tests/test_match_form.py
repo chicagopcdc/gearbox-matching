@@ -29,7 +29,7 @@ from gearbox import config
 bearer = HTTPBearer(auto_error=False)
 
 # @pytest.mark.asyncio
-def test_get_match_form(client):
+def test_get_match_form(setup_database, client):
     """
     Test create /match_form endpoint
     valid input, ensure correct response.
@@ -38,7 +38,6 @@ def test_get_match_form(client):
     fake_jwt = "1.2.3"
     resp = client.get("/match-form", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
-    full_res_str = '\n'.join([str(item) for item in full_res])
 
     resp.raise_for_status()
     matchformdata_file = './tests/data/match_form_compare_dat.json'
@@ -51,10 +50,8 @@ def test_get_match_form(client):
     with open(matchformdata_file, 'r') as comp_file:
         match_form_compare = json.load(comp_file)
     
-    match_form_compare = match_form_compare['body']
     full_res = full_res['body']
 
-    print(f"MATCH FORM COMPARE: {match_form_compare}")
     # comp_study_id_list = [x['studyId'] for x i`n match_form_compare]
     comp_group_id_list = [x['id'] for x in match_form_compare['groups']]
     comp_field_id_list = [x['id'] for x in match_form_compare['fields']]

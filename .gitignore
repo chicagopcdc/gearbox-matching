@@ -16,3 +16,4 @@ doc/gearbox_table_data.zip
 env
 
 .env
+.DS_Store

@@ -19,7 +19,7 @@ from starlette.status import (
 from gearbox import config
 
 # @pytest.mark.asyncio
-def test_get_studies(client):
+def test_get_studies(setup_database, client):
     """
     Test create /user-input response for a valid user with authorization and
     valid input, ensure correct response.
