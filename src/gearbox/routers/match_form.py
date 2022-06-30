@@ -85,8 +85,6 @@ async def get_match_info(
                 criterion_dict.update({'label':display_rules.criterion.description})
                 criterion_dict.update({'type':display_rules.criterion.input_type.render_type})
 
-                print(f"DISPLAY RULES ID: {display_rules.criterion.id}")
-                print(f"DISPLAY RULES DATA TYPE: {display_rules.criterion.input_type.data_type.upper()}")
                 if display_rules.criterion.input_type.data_type.upper() == 'INTEGER':
                     criterion_dict.update({'min' : 0})
                 if display_rules.criterion.input_type.data_type.upper() == 'FLOAT':
@@ -156,74 +154,27 @@ async def get_match_info(
                         critlookup[tb.id] = critdict
 
                 # build tree
-                # Q U E S T I O N : if len(pathlist) == 1?
-                # if(pathlist):
-                if display_rules.criterion.id == 100:
-                    print(f"FOR 100 pathlist length {len(pathlist)}")
-                    print(f"FOR 100 critlookup length {len(critlookup)}")
                 if len(pathlist) == 2 or len(critlookup) == 1 or len(critlookup) == 2: 
                     critlist = []
                     for crit_key in critlookup:
                         if critlookup[crit_key]:
-                            if display_rules.criterion.id == 81:
-                                print(f"FOR 81 pathlist length {len(pathlist)}")
-                                print(f"FOR 81 critlookup length {len(critlookup)}")
-                                print(f"FOR 81 APPENDING: {critlookup[crit_key]}")
                             critlist.append(critlookup[crit_key])
 
                     path_tree = {
                         "operator": "AND",
                         "criteria": critlist 
                     }
-                    # path_tree = update_dict(path_tree, critlookup)
-                    if display_rules.criterion.id == 81:
-                        print(f"FIRST PATH TREE FOR 81: {path_tree}")
-
-
-                        # DO JUST 'AND' path_tree =
-
                     # if len(pathlist) == 1: # this shouldn't happen, but if it did...
-                        # DO SOMETHING path_tree =
-                        # ERROR???
                 elif (pathlist):
                     path_tree = mc.get_tree(pathlist, suppress_header=True)
-                    if display_rules.criterion.id == 100:
-                        print(f"DR ID: {display_rules.id}")
-                        print(f"DR CRITERION: {display_rules.criterion.id}")
-                        print(f"SECOND PATH TREE FOR 100: {path_tree}")
-
                     path_tree = update_dict(path_tree, critlookup)
-
-                    print(f"PATH TREE STRING: {path_tree}")
-                # if no path list and length of critlookup is 1
-                """
-                elif len(critlookup) == 1:
-                    path_tree = {
-                        "operator": "AND",
-                        "criteria": [
-                            critlookup[tb.id]
-                        ]
-                    }
-                    path_tree = update_dict(path_tree, critlookup)
-                """
 
                 if path_tree:
-                    print(f"DR CRITERION: {display_rules.criterion.id}")
-                    print(f"HERE IS THE PATH TREE: {path_tree}")
                     criterion_dict.update({'showIf':path_tree})
-                # elif len(critlookup) == 1:
-                #    criterion_dict.update({'showIf': critlookup[tb.id]})
 
-
-                if display_rules.criterion.id == 81:
-                    print(f"CRITERION DICT FOR 81: {criterion_dict}")
-                if display_rules.criterion.id == 16:
-                    print(f"CRITERION DICT FOR 16: {criterion_dict}")
-            print(f"APPENDING: {criterion_dict}")
             F.append(criterion_dict)
 
         body = {"groups": json.dumps(G), "fields": json.dumps(F)}
-        # body = {"groups": json.dumps(G), "fields": json.dumps(F)}
         body = {"groups": G, "fields": F}
         response = {
             "current_date": date.today().strftime("%B %d, %Y"),

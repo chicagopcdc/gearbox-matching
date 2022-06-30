@@ -52,7 +52,6 @@ def test_get_match_form(setup_database, client):
     
     full_res = full_res['body']
 
-    # comp_study_id_list = [x['studyId'] for x i`n match_form_compare]
     comp_group_id_list = [x['id'] for x in match_form_compare['groups']]
     comp_field_id_list = [x['id'] for x in match_form_compare['fields']]
 

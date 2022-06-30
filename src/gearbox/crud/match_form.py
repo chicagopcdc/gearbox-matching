@@ -16,12 +16,7 @@ async def get_form_info(current_session: Session):
         joinedload(DisplayRules.triggered_bys).options(
             joinedload(TriggeredBy.criterion).options(
                 noload(Criterion.el_criteria_has_criterions),
-                # noload(Criterion.input_type),
-                # noload(Criterion.values),
-                # noload(Criterion.tags)
             ),
-            # A D D noload el_criteria_has_criterions and criterion_has_tags 
-            # and criterion_has_value and input_type!!!
             joinedload(TriggeredBy.value).options(
                 noload(Value.criteria),
                 noload(Value.el_criteria_has_criterions)

@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import Sequence, List, Optional
 from .value import Value
 from .input_type import InputType
-# from .criterion_schema import CriterionSchema
 
 class CriterionSchema(BaseModel):
     id: int

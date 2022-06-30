@@ -9,8 +9,6 @@ class EligibilityCriteria(BaseModel):
     active: bool
     study_version_id: int
     el_criteria_has_criterions: List[ElCriterionHasCriterionSchema]
-    # notes: 
-
 
 class EligibilityCriteriaCreate(BaseModel):
     pass

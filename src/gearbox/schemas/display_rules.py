@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import Sequence, List, Optional
 from .value import Value
 from .criterion_schema import CriterionSchema
-# from .criterion_has_tag import CriterionHasTag
 
 # I S S U E: this schema does not produce accurate
 # dictionaries - it duplicates the tags and input_values

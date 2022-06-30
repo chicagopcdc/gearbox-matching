@@ -34,7 +34,6 @@ async def get_latest_saved_input(current_session: Session, user_id: int):
     stmt = select(SavedInput).where(SavedInput.user_id==user_id).order_by(SavedInput.create_date.desc())
     try:
         result = await current_session.execute(stmt)
-        # RETURNS OBJECT OF TYPE SavedInput
         saved_input = result.scalars().first()
         return saved_input
     except exc.SQLAlchemyError as e:

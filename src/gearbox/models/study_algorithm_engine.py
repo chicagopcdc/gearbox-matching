@@ -8,7 +8,6 @@ class StudyAlgorithmEngine(Base):
     __tablename__ = 'study_algorithm_engine'
     id = Column(Integer, primary_key=True, autoincrement=True)
     study_version_id = Column(Integer, ForeignKey('study_version.id'))
-#    algorithm_engine_id = Column(Integer, ForeignKey('algorithm_engine.id'), primary_key=True)
     start_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
 

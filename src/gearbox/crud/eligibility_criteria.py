@@ -19,6 +19,5 @@ async def get_eligibility_criteria(current_session: Session):
     )
 
     result = await current_session.execute(stmt)
-    # sites = result.unique().scalars().all()
     sites = result.unique().scalars().all()
     return sites

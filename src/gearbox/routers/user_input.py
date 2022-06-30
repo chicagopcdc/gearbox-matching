@@ -106,7 +106,6 @@ async def get_object_latest(
         200: { "results": [{id: 1, "value": ""}] }
         404: if the obj is not found
     """
-    #TODO add try catch around the int()
     auth_header = str(request.headers.get("Authorization",""))
     saved_user_input = await get_latest_saved_input(session, int(user_id))
 
@@ -118,40 +117,7 @@ async def get_object_latest(
         "id": saved_user_input.id
     }
 
-    return JSONResponse(response, HTTP_200_OK) # THIS RETURN WILL NOT UNDERGO PYDANTIC VALIDATION
-
-#     try:
-#         endpoint = (
-#             config.INDEXING_SERVICE_ENDPOINT.rstrip("/")
-#             + f"/index/{blank_guid}/aliases"
-#         )
-
-#         # pass along the authorization header to indexd request
-#         headers = {"Authorization": auth_header}
-#         response = await request.app.async_client.post(
-#             endpoint, json=aliases_data, headers=headers
-#         )
-#         response.raise_for_status()
-#     except httpx.HTTPError as err:
-#         # check if user has permission for resources specified
-#         if err.response and err.response.status_code in (401, 403):
-#             logger.error(
-#                 f"Creating aliases in indexd for guid {blank_guid} failed, status code: {err.response.status_code}. Response text: {getattr(err.response, 'text')}"
-#             )
-#             raise HTTPException(
-#                 HTTP_403_FORBIDDEN,
-#                 "You do not have access to create the aliases you are trying to assign: "
-#                 f"{aliases} to the guid {blank_guid}",
-#             )
-#         elif err.response and err.response.status_code == 409:
-#             logger.error(
-#                 f"Creating aliases in indexd for guid {blank_guid} failed, status code: {err.response.status_code}. Response text: {getattr(err.response, 'text')}"
-#             )
-#             raise HTTPException(
-#                 HTTP_409_CONFLICT,
-#                 f"Some of the aliases you are trying to assign to guid {blank_guid} ({aliases}) already exist",
-#             )
-
+    return JSONResponse(response, HTTP_200_OK) 
 
 def init_app(app):
     app.include_router(mod, tags=["user_input"])

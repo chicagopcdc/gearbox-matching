@@ -12,5 +12,4 @@ class AlgorithmEngine(Base):
     path = Column(String)
     sequence = Column(Integer)
 
-    # study_version = relationship("StudyAlgorithmEngine", back_populates="algorithm_engine")   
     study_algo_engine = relationship("StudyAlgorithmEngine", back_populates="algorithm_engine")   
