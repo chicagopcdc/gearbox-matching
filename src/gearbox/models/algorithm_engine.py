@@ -1,14 +1,15 @@
 from sqlalchemy import ForeignKey, Column, Integer, String
 from sqlalchemy.orm import relationship
 
-from .db import db
+from .base_class import Base
 
-
-class AlgorithmEngine(db.Model):
+class AlgorithmEngine(Base):
     __tablename__ = 'algorithm_engine'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    study_algorithm_engine_id = Column(Integer, ForeignKey('study_algorithm_engine.id'))
     el_criteria_has_criterion_id = Column(Integer, ForeignKey('el_criteria_has_criterion.id'))
-    parent_id = Column(Integer)
-    parent_path = Column(String)
-    operator = Column(String, nullable=True)
+    path = Column(String)
+    sequence = Column(Integer)
+
+    study_algo_engine = relationship("StudyAlgorithmEngine", back_populates="algorithm_engine")   

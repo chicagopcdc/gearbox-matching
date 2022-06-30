@@ -1,0 +1,123 @@
+id	code	description	type	value_string	unit	operator	create_date	active
+1	male	Male	String	Male		eq		1
+2	female	Female	String	Female		eq		1
+3	Yes	is true	Boolean	Yes		eq		1
+4	No	is false	Boolean	No		eq		1
+5	Not sure	Not sure	String	Not sure		eq		1
+6	Acute promyelocytic leukemia (APL)	Acute promyelocytic leukemia (APL)	String	APL		eq		1
+7	Acute myeloid leukemia (AML)	Acute myeloid leukemia (AML)	String	AML		eq		1
+8	Down syndrome acute myeloid leukemia (DS AML)	Down syndrome acute myeloid leukemia (DS AML)	String	DS AML		eq		1
+9	B-cell acute lymphoblastic leukemia (B-ALL)	B-cell acute lymphoblastic leukemia (B-ALL)	String	B-ALL		eq		1
+10	Juvenile myelomonocytic leukemia (JMML)	Juvenile myelomonocytic leukemia (JMML)	String	JMML		eq		1
+11	Mixed-phenotype acute leukemia (MPAL)	Mixed-phenotype acute leukemia (MPAL)	String	MPAL		eq		1
+12	Myelodysplastic syndromes (MDS)	Myelodysplastic syndromes (MDS)	String	MDS		eq		1
+13	mds_to_aml	Myelodysplastic syndrome (MDS) who have progressed to AML	String	MDS to AML		eq		1
+14	Treatment-related acute myeloid leukemia (tAML)	Treatment-related acute myeloid leukemia (tAML)	String	tAML		eq		1
+15	T-cell acute lymphoblastic leukemia (T-ALL)	T-cell acute lymphoblastic leukemia (T-ALL)	String	T-ALL		eq		1
+16	Acute lymphoblastic leukemia (ALL)	Acute lymphoblastic leukemia (ALL)	String	ALL		eq		1
+17	KMT2A acute lymphoblastic leukemia	KMT2A acute lymphoblastic leukemia	String	KMT2A		eq		1
+18	Early T-cell precursor acute lymphoblastic leukemia (ETP-ALL)	Early T-cell precursor acute lymphoblastic leukemia (ETP-ALL)	String	ETP-ALL		eq		1
+19	cns_1	CNS 1	String	CNS 1		eq		1
+20	cns_2	CNS 2	String	CNS 2		eq		1
+21	cns_3	CNS 3	String	CNS 3		eq		1
+22	lt_22_y	lower than 22 years	Integer	22	years	lt		1
+23	gte_12_m	greater or equal than 12 months	Integer	12	months	gte		1
+24	lt_18_y	lower than 18 years	Integer	18	years	lt		1
+25	gte_10_kg	greater or equal than 10 Kg	Float	10	kg	gte		1
+26	gte_5_p	greater or equal than 5%	Float	5	%	gte		1
+27	gte_1_p	greater or equal than 1%	Float	1	%	gte		1
+28	gte_0_1_p	greater or equal than 0.1%	Float	0.1	%	gte		1
+29	eq_0	equal to 0	Integer	0		eq		1
+30	gte_1	greater or equal than 1	Integer	1		gte		1
+31	gte_2	greater or equal than 2	Integer	2		gte		1
+32	gt_14_d	greater than 14 days	Integer	14	days	gt		1
+33	lt_1_5	lower than 1.5	Float	1.5	ULN	lt		1
+34	lt_3	lower than 3	Float	3	ULN	lt		1
+35	eq_1	equal to 1	Integer	1		eq		1
+36	lte_400_mg_m2	dose lower or equal to 400 mg/m2	Float	400 	mg/m2	lte		1
+37	gte_14_d	greater or equal than 14 days	Integer	14	days	gte		1
+38	lt_2	lower than 2	Float	2	ULN	lt		1
+39	lte_135	lower or equal to than 135	Float	135		lte		1
+40	gt_1_p	greater than 1%	Float	1	%	gt		1
+41	gte_7_d	greater or equal than 7 days	Integer	7	days	gte		1
+42	gt_0_1_p	greater than 0.1%	Float	0.1	%	gt		1
+43	lt_5_p	lower than 5%	Float	5	%	lt		1
+44	gt_28_d	greater than 28 days	Integer	28	days	gt		1
+45	gte_17_kg	greater or equal than 17 kg	Float	17	kg	gte		1
+46	eq_2	equal to 2	Integer	2		eq		1
+47	lt_5	lower than 5	Float	5		lt		1
+48	gt_135	greater than 135	Float	135		gt		1
+49	gt_2	greater than 2	Float	2		gt		1
+50	gt_2	greater than 2	Float	2		gt		1
+51	gte_40	greater or equal than 40	Integer	40		gte		1
+52	gte_25	greater or equal than 25	Integer	25		gte		1
+53	lt_1	lower than 1	Integer	1		lt		1
+54	lt_6	lower than 6	Integer	6	years	lt		1
+55	gte_6	greater or equal than 6	Integer	6	years	gte		1
+56	lt_10	lower than 10	Integer	10	years	lt		1
+57	gte_10	greater or equal than 10	Integer	10	years	gte		1
+58	lt_13	lower than 13	Integer	13	years	lt		1
+59	Ambiguous lineage acute leukemia (ALAL)	Ambiguous lineage acute leukemia (ALAL)	String	ALAL		eq		1
+60	Morphology	Morphology	String	Morphology		eq		1
+61	Flow cytometry	Flow cytometry	String	Flow cytometry		eq		1
+62	lte_30_y	lower or equal than 30 years	Integer	30	years	lte		1
+63	lte_365_d	lower or equal than 365 days	Integer	365	days	lte		1
+64	gte_5	greater or equal than 5%	Float	5		gte		1
+65	gte_0	greater or equal than 0	Integer	0		gte		1
+66	lte_2	lower or equan than 2	Integer	2		lte		1
+67	gt_60	greater than 60	Float	60		gt		1
+68	gt_3	greater than 3	Integer	3		gt		1
+69	lte_1_5	lower or equal than 1.5	Float	1.5	ULN	lte		1
+70	gte_13	greater or equal than 13	Integer	13	years	gte		1
+71	lt_16	lower than 16	Integer	16	years	lt		1
+72	gte_16	greater or equal than 16	Integer	16	years	gte		1
+73	gte_30	greater or equal than 30	Integer	30		gte		1
+74	lte_0_5	lower or equal than 0.5	Float	0.5		lte		1
+75	lte_0_6	lower or equal than 0.6	Float	0.6		lte		1
+76	lte_0_8	lower or equal than 0.8	Float	0.8		lte		1
+77	lte_1_2	lower or equal than 1.2	Float	1.2		lte		1
+78	lte_1_7	lower or equal than 1.7	Float	1.7		lte		1
+79	lte_1_4	lower or equal than 1.4	Float	1.4		lte		1
+80	lte_1	lower or equal than 1	Integer	1.0		lte		1
+81	lt_24_y	lower than 24 years	Integer	24	years	lt		1
+82	lte_4	lower or equan than 4	Integer	4		lte		1
+83	gte_60	greater or equal than 60	Integer	60		gte		1
+84	lt_21_y	lower than 21 years	Integer	21	years	lt		1
+85	gte_20_p	greater of equal than 20	Float	20	%	gte		1
+86	gte_21_d	greater or equal than 21 days	Integer	21	days	gte		1
+87	gte_84_d	greater or equal than 84 days	Integer	84	days	gte		1
+88	gte_42_d	greater or equal than 42 days	Integer	42	days	gte		1
+89	gte_50	greater or equal than 50	Integer	50		gte		1
+90	gte_27	greater or equal than 27	Integer	27		gte		1
+91	gte_70	greater or equal than 70	Integer	70		gte		1
+92	lte_3	lower or equan than 3	Integer	3		lte		1
+93	gte_20000	greater or equal than 20000	Integer	20000		gte		1
+94	gte_84_d	greater or equal than 84 days	Integer	8		gte		1
+95	grade_1	Grade 1	String	Grade 1		eq		1
+96	grade_2	Grade 2	String	Grade 2		eq		1
+97	grade_3	Grade 3	String	Grade 3		eq		1
+98	grade_4	Grade 4	String	Grade 4		eq		1
+99	gte_1_y	grater or equal than 1 years	Integer	1	years	gte		1
+100	lte_25_y	lower or equal than 25 years	Integer	25	years	lte		1
+101	gte_90	greater or equal 90	Integer	90		gte		1
+102	gte_3	greater or equal than 3	Integer	3		gte		1
+103	lte_5	lower or equal than 5	Integer	5		lte		1
+104	lte_21_y	lower or equal than 21 years	Integer	21	years	lte		1
+105	gte_183	greater or equal 183	Integer	183		gte		1
+106	lte_450_mgm2	lower or equal to 450 mg/m^2	Float	450	mg/m^2	lte		1
+107	lte_29_y	lower or equal than 29 years	Integer	29	years	lte		1
+108	gte_45	greater or equal 45	Integer	45		gte		1
+109	gte_28	greater or equal 28	Integer	28		gte		1
+110	gt_5	greater than 5	Integer	5		gt		1
+111	ecog_0	ECOG 0 (Lansky/Karnofsky 90-100)	String	ECOG 0		eq		1
+112	ecog_1	ECOG 1 (Lansky/Karnofsky 70-80)	String	ECOG 1		eq		1
+113	ecog_2	ECOG 2 (Lansky/Karnofsky 50-60)	String	ECOG 2		eq		1
+114	ecog_3	ECOG 3 (Lansky/Karnofsky 30-40)	String	ECOG 3		eq		1
+115	ecog_4	ECOG 4 (Lansky/Karnofsky 10-20)	String	ECOG 4		eq		1
+116	lte_1_y	lower or equal than 1 years	Integer	1	years	lte		1
+117	lt_2_y	lower than 2	Integer	2	years	lt		1
+118	gte_2_y	greater or equal than 2	Integer	2		gte		1
+119	lte_2_5	lower or equal than 2.5	Float	2.5	ULN	lte		1
+120	lt_2_5	lower or equal than 2.5	Float	2.5		lt		1
+121	lt_1_y	lower than 1	Integer	1	years	lt		1
+122	eq_4	equal to 4	Integer	4		eq		1

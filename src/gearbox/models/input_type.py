@@ -1,7 +1,7 @@
 from sqlalchemy import ForeignKey, Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
-from . import Base
+from .base_class import Base
 
 
 class InputType(Base):
@@ -10,3 +10,5 @@ class InputType(Base):
     data_type = Column(String, nullable=True)
     render_type = Column(String, nullable=True)
     create_date = Column(DateTime, nullable=True)
+
+    criterions = relationship("Criterion", back_populates="input_type", lazy='joined')

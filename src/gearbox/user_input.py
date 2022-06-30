@@ -1,6 +1,11 @@
 from collections.abc import Iterable
 from enum import Enum
-from . import config, logger
+
+import os
+
+from sqlalchemy.ext.asyncio.session import async_session
+from sqlalchemy.ext.asyncio import AsyncSession
+from . import config, logger, auth
 from .models.models import SavedInput
 from .schemas import SavedInputSearchResults, UploadSavedInput
 import datetime
@@ -38,58 +43,40 @@ mod = APIRouter()
 # not recieve valid credentials
 bearer = HTTPBearer(auto_error=False)
 
-
-
-@mod.post("/user-input")
+@mod.post("/user-input", response_model=SavedInputSearchResults)
 async def save_object(
     body: UploadSavedInput,
     request: Request,
-    db: Session = Depends(deps.get_db),
-    token: HTTPAuthorizationCredentials = Security(bearer),
-    response_model=SavedInputSearchResults
+    session: AsyncSession = Depends(deps.get_session),
+    token: HTTPAuthorizationCredentials = Security(bearer)
 ):
     """
-    Save user form input, return saved object list to the user.
+        Save user form input, return saved object list to the user.
 
-    Args:
-        body (UploadSavedInput): input body for saving input
-        request (Request): starlette request (which contains reference to FastAPI app)
-        token (HTTPAuthorizationCredentials, optional): bearer token
+        Args:
+            body (UploadSavedInput): input body for saving input
+            request (Request): starlette request (which contains reference to FastAPI app)
+            token (HTTPAuthorizationCredentials, optional): bearer token
     """
-    try:
-        issuer = None
-        allowed_issuers = None
-
-        # override token iss 
-        if config.FORCE_ISSUER:
-          issuer = config.USER_API
-          allowed_issuers =  list(config.ALLOWED_ISSUERS)
-          
-
-        # NOTE: token can be None if no Authorization header was provided, we expect
-        #       this to cause a downstream exception since it is invalid
-        token_claims = await access_token("user", "openid", issuer=issuer, allowed_issuers=allowed_issuers, purpose="access")(token)
-    except Exception as exc:
-        logger.error(exc, exc_info=True)
-        raise HTTPException(
-            HTTP_401_UNAUTHORIZED,
-            f"Could not verify, parse, and/or validate scope from provided access token.",
-        )
 
     data = body.data
     data = data or []
     saved_input_id = body.id
 
-    # get user id from token claims
-    user_id = token_claims.get("sub")
+    if not config.BYPASS_FENCE:
+        token_claims = await auth.get_token_claims(token)
+        user_id = token_claims.get("sub")
+    else:
+        user_id = 4
+
     auth_header = str(request.headers.get("Authorization", ""))
 
     if not saved_input_id:
         #TODO add try catch around the int()
         # data = await add_saved_input(db, int(user_id), data)
-        results = add_saved_input(db, int(user_id), data)
+        results = await add_saved_input(session, int(user_id), data)
     else:
-        results = update_saved_input(db, int(user_id), saved_input_id, data)
+        results = await update_saved_input(session, int(user_id), saved_input_id, data)
 
     response = {
         "results": results.data,
@@ -102,7 +89,7 @@ async def save_object(
 @mod.get("/user-input/latest", response_model=SavedInputSearchResults)
 async def get_object_latest(
     request: Request,
-    db: Session = Depends(deps.get_db),
+    session: Session = Depends(deps.get_session),
     token: HTTPAuthorizationCredentials = Security(bearer)
 ) -> JSONResponse:
     """
@@ -118,31 +105,15 @@ async def get_object_latest(
         404: if the obj is not found
     """
 
-    try:
-        issuer = None
-        allowed_issuers = None
-
-        # override token iss 
-        if config.FORCE_ISSUER:
-          issuer = config.USER_API
-          allowed_issuers =  list(config.ALLOWED_ISSUERS)
-          
-
-        # NOTE: token can be None if no Authorization header was provided, we expect
-        #       this to cause a downstream exception since it is invalid
-        token_claims = await access_token("user", "openid", issuer=issuer, allowed_issuers=allowed_issuers, purpose="access")(token)
-    except Exception as exc:
-        logger.error(exc, exc_info=True)
-        raise HTTPException(
-            HTTP_401_UNAUTHORIZED,
-            f"Could not verify, parse, and/or validate scope from provided access token.",
-        )
-
-    user_id = token_claims.get("sub")
+    if not config.BYPASS_FENCE:
+        token_claims = await auth.get_token_claims(token)
+        user_id = token_claims.get("sub")
+    else:
+        user_id = 4
 
     #TODO add try catch around the int()
     # saved_user_input = await get_latest_saved_input(db, int(user_id))
-    saved_user_input = get_latest_saved_input(db, int(user_id))
+    saved_user_input = await get_latest_saved_input(session, int(user_id))
 
     if not saved_user_input:
         raise HTTPException(HTTP_404_NOT_FOUND, f"Saved input not found for user '{user_id}'")
@@ -153,11 +124,6 @@ async def get_object_latest(
     }
 
     return JSONResponse(response, HTTP_200_OK)
-
-
-
-
-
 
 #     try:
 #         endpoint = (
@@ -190,9 +156,6 @@ async def get_object_latest(
 #                 HTTP_409_CONFLICT,
 #                 f"Some of the aliases you are trying to assign to guid {blank_guid} ({aliases}) already exist",
 #             )
-
-
-
 
 
 def init_app(app):

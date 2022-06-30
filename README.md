@@ -35,6 +35,14 @@ Create a file `.env` in the root directory of the checkout:
 # DB_USER = "..."           # default: current user
 # DB_PASSWORD = "..."       # default: empty
 # DB_DATABASE = "..."       # default: current user
+# DB_PORT_TESTING = ...           # default: 5432
+# ALLOWED_ISSUERS=http://fence-service/
+# USER_API=http://fence-service/
+# FORCE_ISSUER                  # default: True
+# BYPASS_FENCE                  # default:False
+# DEBUG                         # default: False
+# TESTING                       # default: False
+# BYPASS_FENCE_DUMMYER_USER_ID = ...  # default: 4
 ```
 
 Run database schema migration:

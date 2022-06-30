@@ -1,17 +1,27 @@
 import asyncio
+import logging
 import click
 import pkg_resources
 from fastapi import FastAPI, APIRouter, HTTPException, Depends
 import httpx
 from sqlalchemy.orm import Session
-from . import logger, config
+from . import config
 from gearbox import deps
 
+from logging.config import dictConfig
+from .log_config import log_config
+
+dictConfig(log_config)
+
+logger = logging.getLogger('gb-logger')
+
 try:
-    from importlib.metadata import entry_points
+    # importlib.metadata works locally but not in Docker
+    # trying importlib_metadata
+    # from importlib.metadata import entry_points
+    from importlib_metadata import entry_points
 except ImportError:
     from importlib_metadata import entry_points
-
 
 
 def get_app():
@@ -101,14 +111,9 @@ def get_version():
 
 @router.get("/_status")
 # async def get_status(db: Session = Depends(deps.get_db)):
-def get_status(db: Session = Depends(deps.get_db)):
-    # try:
-    # now = await db.execute("SELECT now()")
-    now = db.execute("SELECT now()").scalar()
-    # except Exception:
-    #     raise UnhealthyCheck("Unhealthy")
-
-    return dict(
-        status="OK", timestamp=now
-    )
-
+async def get_status(db: Session = Depends(deps.get_session)):
+    try:
+        now = await db.execute("SELECT now()")
+        return dict( status="OK", timestamp=now.scalars().first())
+    except Exception:
+        raise UnhealthyCheck("Unhealthy")
