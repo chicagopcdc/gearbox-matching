@@ -72,7 +72,6 @@ async def get_match_info(
 
         if display_rules.active:
             criterion_dict = {'id': display_rules.criterion_id}
-            print(f"APPENDING FOR: {display_rules.criterion_id}")
             for ctag in display_rules.criterion.tags:
                 if ctag.tag.type == 'form':
                     criterion_dict.update({'groupId': ctag.tag.id})
