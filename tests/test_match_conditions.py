@@ -54,8 +54,6 @@ def test_get_match_conditions(setup_database, client):
     comp_study_id_list = [x['studyId'] for x in match_conditions_compare['body']]
     for study_comp in match_conditions_compare['body']:
         for study in full_res['body']:
-            print(f"STUDY TYPE: {type(study)}")
-            print(f"STUDY: {study}")
             # DOES THE STUDY IN THE RESPONSE EXIST IN THE SAVED DICT LIST? 
             if not study['studyId'] in comp_study_id_list:
                 errors.append(f"STUDY: {study['studyId']} DOES NOT EXIT IN THE COMPARE FILE.")

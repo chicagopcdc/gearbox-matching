@@ -43,7 +43,13 @@ async def get_study(
     results = await get_single_study(session, study_id)
 
     response_fmt = format_study_response(results)
-    return response_fmt
+    response = {
+        "current_date": date.today().strftime("%B %d, %Y"),
+        "current_time": strftime("%H:%M:%S +0000", gmtime()),
+        "status": "OK",
+        "body": response_fmt
+    }
+    return JSONResponse(response, HTTP_200_OK)
 
 @mod.get("/studies", response_model=List[StudyResponse], dependencies=[Depends(auth.authenticate)], status_code=HTTP_200_OK)
 async def get_all_studies(
@@ -54,7 +60,14 @@ async def get_all_studies(
     results = await get_studies(session)
     response_fmt = format_study_response(results)
 
-    return response_fmt
+    response = {
+        "current_date": date.today().strftime("%B %d, %Y"),
+        "current_time": strftime("%H:%M:%S +0000", gmtime()),
+        "status": "OK",
+        "body": response_fmt
+    }
+
+    return JSONResponse(response, HTTP_200_OK)
 
 def init_app(app):
     app.include_router(mod, tags=["study"])
