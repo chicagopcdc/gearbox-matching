@@ -12,7 +12,7 @@ async def get_studies(current_session: Session):
         joinedload(Study.sites).options(
             joinedload(SiteHasStudy.site)
         ), joinedload(Study.links)
-    )
+    ).where(Study.active == True).order_by(Study.id)
     result = await current_session.execute(stmt)
     studies = result.unique().scalars().all()
     return studies

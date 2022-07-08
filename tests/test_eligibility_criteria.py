@@ -51,6 +51,11 @@ def test_get_ec(setup_database, client):
     with open(ecdata_file, 'r') as comp_file:
         ec_compare = json.load(comp_file)
 
-    diff = DeepDiff(full_res['body'], ec_compare, ignore_order=True)
+    diff = []
+
+    for i in range (len(ec_compare)):
+        ec_diff = DeepDiff(full_res['body'][i], ec_compare[i], ignore_order=True)
+        if ec_diff:
+            diff.append(ec_diff)
     
     assert not diff, "differences occurred: \n{}".format("\n".join(diff))            

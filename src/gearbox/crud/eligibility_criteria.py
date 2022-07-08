@@ -16,7 +16,7 @@ async def get_eligibility_criteria(current_session: Session):
             joinedload(Criterion.input_type)
         ),
         joinedload(ElCriteriaHasCriterion.value)
-    )
+    ).order_by(ElCriteriaHasCriterion.id)
 
     result = await current_session.execute(stmt)
     sites = result.unique().scalars().all()

@@ -75,6 +75,9 @@ def setup_database(connection) -> Engine:
 
     # COPY DATA INTO TABLES
     file_to_table(conn, cursor,'study', './postgres-data/td_study.tsv')
+    file_to_table(conn, cursor,'study_links', './postgres-data/td_study_links.tsv')
+    file_to_table(conn, cursor,'site', './postgres-data/td_site.tsv')
+    file_to_table(conn, cursor,'site_has_study', './postgres-data/td_site_has_study.tsv')
     file_to_table(conn, cursor,'study_version', './postgres-data/td_study_version.tsv')
     file_to_table(conn, cursor,'value', './postgres-data/td_value.tsv')
     file_to_table(conn, cursor,'input_type', './postgres-data/td_input_type.tsv')
