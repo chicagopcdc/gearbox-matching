@@ -349,7 +349,7 @@ def build_tree(nodelist):
                                 working_group_id = working_node[1]
                                 working_node = working_node[0]
                         except:
-                            print("no more nodes")
+                            # print("no more nodes")
                             break
 
                 ######################################################################
@@ -363,7 +363,7 @@ def build_tree(nodelist):
                                 working_group_id = working_node[1]
                                 working_node = working_node[0]
                         except:
-                            print("no more nodes")
+                            # print("no more nodes")
                             break
 
                 #################################################################

@@ -53,9 +53,7 @@ def get_truth_table(expr_string):
 
     return tt
 
-# with open('data/match_conditions_compare_dat.json','r') as c:
-#	conds_json = json.load(c)
-# @pytest.mark.asyncio
+@pytest.mark.asyncio
 def test_match_condition_logic(setup_database, client):
     errors = []
     fake_jwt = "1.2.3"
@@ -65,18 +63,28 @@ def test_match_condition_logic(setup_database, client):
     conds = full_res['body'][0]['algorithm']
     exp = get_expression([conds])
 
-    # prepend the criteria id with 'x' b/c sympy needs alphanumeric 
-    # to construct truth tables from a boolean exp
     print("boolean logic for study: ")
     print(''.join(f"{i}" for i in exp))
+
+    # prepend the criteria id with 'x' b/c sympy needs alphanumeric 
+    # to construct truth tables from a boolean exp
     exp_str = ''.join(f"{(i, 'x' + i)[i.isnumeric() == True]}" for i in exp)
     exp_univ = set([ i for i in exp if i.isnumeric() == True])
 
     tt = get_truth_table(exp_str)
 
-    test_form_crits = [1,2,55,88]
+    # TEST FAIL
+    test_form_crits = [1,4,5,8,12,9] # FAIL STUDY 1
     test_form_crits_cleaned = sorted([i for i in test_form_crits if str(i) in exp_univ])
+    print(f"Test form criteria: {test_form_crits_cleaned}")
+    if test_form_crits_cleaned in tt:
+        errors.append(f"Criteria {test_form_crits_cleaned} should not have met the requirements for study 1.")
 
-    # T O D O : FILTER OUT ANY EXTRA CRITERIA IN THE CRITERION SET WE ARE TESTING AGAINST,
-    # THEN SORT THAT LIST
-    assert not test_form_crits_cleaned in tt, "Criteria [1,2] does not meet the requirements for study 1."
+    # TEST PASS
+    test_form_crits = [1,2,13,8,99] # PASS STUDY 1
+    test_form_crits_cleaned = sorted([i for i in test_form_crits if str(i) in exp_univ])
+    print(f"Test form criteria: {test_form_crits_cleaned}")
+    if not test_form_crits_cleaned in tt:
+        errors.append(f"Criteria {test_form_crits_cleaned} should have met the requirements for study 1.")
+
+    assert not errors, f"Errors occurred: {errors}"
