@@ -35,18 +35,13 @@ def get_truth_table(expr_string):
 
     t_values = []
     tt = []
-    print("IN get_truth_table 1")
     expr = sympify(expr_string)
-    print("IN get_truth_table 2")
     variables = expr.free_symbols
-    print("IN get_truth_table 3")
 
     for truth_values in cartes([False, True], repeat=len(variables)):
         values = dict(zip(variables, truth_values))
         if str(expr.subs(values)) == 'True':
             t_values.append(values)
-
-        print("IN get_truth_table 4")
 
     for i in t_values:
         truth_vals = []
@@ -66,9 +61,7 @@ def test_match_condition_logic(setup_database, client):
     fake_jwt = "1.2.3"
     resp = client.get("/match-conditions", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
-    # full_res_str = '\n'.join([str(item) for item in full_res])
 
-    # conds_json = json.load(get_match_conditions(setup_database, client))
     conds = full_res['body'][0]['algorithm']
     exp = get_expression([conds])
 
@@ -77,9 +70,13 @@ def test_match_condition_logic(setup_database, client):
     print("boolean logic for study: ")
     print(''.join(f"{i}" for i in exp))
     exp_str = ''.join(f"{(i, 'x' + i)[i.isnumeric() == True]}" for i in exp)
+    exp_univ = set([ i for i in exp if i.isnumeric() == True])
 
     tt = get_truth_table(exp_str)
 
+    test_form_crits = [1,2,55,88]
+    test_form_crits_cleaned = sorted([i for i in test_form_crits if str(i) in exp_univ])
+
     # T O D O : FILTER OUT ANY EXTRA CRITERIA IN THE CRITERION SET WE ARE TESTING AGAINST,
     # THEN SORT THAT LIST
-    assert not [1,2] in tt, "Criteria [1,2] does not meet the requirements for study 1."
+    assert not test_form_crits_cleaned in tt, "Criteria [1,2] does not meet the requirements for study 1."
