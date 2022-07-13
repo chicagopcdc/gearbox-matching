@@ -1,7 +1,6 @@
-# GEARBOx study criteria transformation for the creation of match conditions
+# GEARBOx match condition transformation and database representation
 
-This document describes the transformation of study criteria from information extracted from 
-<href> clinicaltrials.gov </href> to their representation in the GEARBOx backend database. 
+This document describes the method of representing match condition criteria in the GEARBOx backend database and how those criteria are represented in the match condition json that is returned to the front end application by the match-condition endpoint.
 
 <details>
   <summary>
@@ -12,32 +11,39 @@ This document describes the transformation of study criteria from information ex
 >   - Initial revision
 </details>
 
-## General workflow and logic
+For the purposes of this document, it is assumed that study criteria have already been tranformed from the descriptions in <href> clinicaltrials.gov </href>  into boolean expressions as below. These expressions are stored as dot separated (EL_CRITERIA_HAS_CRITERION.path) path values in the ALGORITHM_ENGINE table. Tree traversal in the paths is depth first left (AND) before right (OR) except in cases where an explicit operator and group number are indicated in the path. 
 
-For the purposes of this document, it is assumed that the study criteria are represented by boolean expressions as below:
+Explicit operators are used when the default tree traversal is not sufficient to logically represent a match condition, or when it may be a more concise representation. Every explicit operator in a path includes the operator type ('AND','OR') along with a unique group number to indicate the scope to which the explicit operator applies. See examples below for illustration. 
 
-> > "( \
-> > ((diagnosis == 'Acute myeloid leukemia (AML)') and (ever_refractory == 'Yes' and current_refractory == 'Yes' and current_refractory_num_cycles >= 2)) \
-> > or \
-> > ((diagnosis == 'Ambiguous lineage acute leukemia (ALAL)') and (ever_refractory == 'Yes' and current_refractory == 'Yes' and current_refractory_num_cycles >= 2)) \
-> > or \
-> > ((diagnosis == 'Acute myeloid leukemia (AML)') and (ever_relapse == 'Yes' and current_relapse == 'Yes')) \
-> > or \
-> > ((diagnosis == 'Ambiguous lineage acute leukemia (ALAL)') and (ever_relapse == 'Yes' and current_relapse == 'Yes')) \
-> > )" \
+## Example default with no explicit operators:
+> ( \
+> ((diagnosis == 'Acute myeloid leukemia (AML)') and (ever_refractory == 'Yes' and current_refractory == 'Yes' and current_refractory_num_cycles >= 2)) \
+> or \
+> ((diagnosis == 'Ambiguous lineage acute leukemia (ALAL)') and (ever_refractory == 'Yes' and current_refractory == 'Yes' and current_refractory_num_cycles >= 2)) \
+> or \
+> ((diagnosis == 'Acute myeloid leukemia (AML)') and (ever_relapse == 'Yes' and current_relapse == 'Yes')) \
+> or \
+> ((diagnosis == 'Ambiguous lineage acute leukemia (ALAL)') and (ever_relapse == 'Yes' and current_relapse == 'Yes')) \
+> ) \
 
-Example default:
+ALGORITHM_ENGINE.path (EL_CRITERIA_HAS_CRITERION.id) tree representation
+> 80.81.82.83.84 \
+> 80.85.82.83.84 \
+> 80.81.86.87 \
+> 80.85.86.87 
 
-path
->> 80.81.82.83.84 \
->> 80.85.82.83.84 \
->> 80.81.86.87 \
->> 80.85.86.87 
+This series of paths is read as: \
+( \
+    (80 and 81 and 82 and 83 and 84) OR \
+    (80 and 85 and 82 and 83 and 84) OR \
+    (80 and 81 and 86 and 87)  OR \
+    (80 and 85 and 86 and 87) \
+)
 
-match condition endpoint output json
+And should be transformed into the following json:
 ```jsonc
         {       
-                "operator": "AND",
+                "operator": "AND", 
                 "criteria": [
                     "80", // (age <= 24 years)
                     {   
@@ -101,15 +107,17 @@ match condition endpoint output json
         }
 ```
 
-Example explicit operator:
+## Example explicit operator and group:
+This example illustrates one way an explicit operator might be used to represent 3 criteria grouped together by an 'OR':
 
-> (ecog == ECOG 0 or ecog == ECOG 1 or ecog == ECOG 2)
+> (ecog == ECOG 0 OR ecog == ECOG 1 OR ecog == ECOG 2)
 
-path
->> 80.102-OR-G2.103-OR-G2.467-OR-G2
+Here the node is represented in the form: criteria-explicit operator-group number where the group number is a marker for all nodes for which the explicit operator applies. In the simple example below, nodes 102, 103, and 467 all belong to the same logical group in the expression, and all are indicated with 'G2'
+
+ALGORITHM_ENGINE.path (EL_CRITERIA_HAS_CRITERION.id) tree representation
+> 102-OR-G2.103-OR-G2.467-OR-G2
 
 match condition endpoint output json
-
 ```jsonc
 {
     "operator": "OR",
@@ -121,17 +129,19 @@ match condition endpoint output json
 },
 ```
 
-Example explicit operator:
+## Example explicit operator:
+Here is an example of explicit operators in nested groups:
 
->> ((norm_cardiac = 'yes') or
->> (norm_cardiac = 'no' and norm_lv = 'yes') or
->> (norm_cardiac = 'no' and norm_lv = 'no' and (meas_ef >= 40 or meas_sf >= 25)))
+> ( \
+>   (norm_cardiac = 'yes') or \
+>   (norm_cardiac = 'no' and norm_lv = 'yes') or \
+>   (norm_cardiac = 'no' and norm_lv = 'no' and (meas_ef >= 40 or meas_sf >= 25)) \
+> )
 
-path
-
->> 80.502-OR-G4.503.110-OR-G5.111-OR-G5 \
->> 80.502-OR-G4.478 \
->> 80.477-OR-G4 \
+ALGORITHM_ENGINE.path (EL_CRITERIA_HAS_CRITERION.id) tree representation
+> 477-OR-G4 \
+> 502-OR-G4.478 \
+> 502-OR-G4.503.110-OR-G5.111-OR-G5 
 
 ```jsonc
 {
@@ -148,16 +158,16 @@ path
                         {
                             "operator": "OR",
                             "criteria": [
-                                "110",
-                                 "111"
+                                "110", //(most recent Ejection Fraction (EF) (in %) >= 40)
+                                 "111" // (Shortening Fraction (SF) (in %) >= 25)
                             ]
                         },
-                        "478"
+                        "478" // (normal left ventricular function = "true")
                     ]
                 }
             ]
         },
-        "477"
+        "477" // (normal cardiac function test result = "true")
     ]
 }
 ```
