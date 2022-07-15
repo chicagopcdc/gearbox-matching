@@ -139,9 +139,9 @@ Here is an example of explicit operators in nested groups:
 > )
 
 ALGORITHM_ENGINE.path (EL_CRITERIA_HAS_CRITERION.id) tree representation
-> 477-OR-G4 \
+> 502-OR-G4.503.110-OR-G5.111-OR-G5 \
 > 502-OR-G4.478 \
-> 502-OR-G4.503.110-OR-G5.111-OR-G5 
+> 477-OR-G4 
 
 ```jsonc
 {
