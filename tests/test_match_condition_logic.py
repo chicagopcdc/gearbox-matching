@@ -3,6 +3,9 @@ import json
 from sympy.core.sympify import sympify
 from sympy.utilities.iterables import cartes
 
+# T O D O:  create a test that compares truth table produced from API endpoint vs
+# truth table from mock data
+
 def get_expression(crit):
 	temp_crit_with_op = []
 
@@ -55,6 +58,12 @@ def get_truth_table(expr_string):
 
 @pytest.mark.asyncio
 def test_match_condition_logic(setup_database, client):
+    """
+    This test pulls match-conditions from the backend, transforms the json into 
+    a boolean expression, and then produces a table containing all possible criteria combinations
+    that satisfy the boolean expression. It then tests 2 sets of criteria
+    against this list, one complete and one incomplete. 
+    """
     errors = []
     fake_jwt = "1.2.3"
     resp = client.get("/match-conditions", headers={"Authorization": f"bearer {fake_jwt}"})
