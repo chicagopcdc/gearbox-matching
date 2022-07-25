@@ -2,27 +2,37 @@
 resource "aws_s3_bucket" "gearbox_mc_bucket" {
   bucket = "${local.clean_bucket_name}"
 
+
   tags = {
     Name        = "${local.clean_bucket_name}"
     Purpose     = "Bucket to store GEARBOx match conditions"
   }
 }
 
-/*
-resource "aws_s3control_bucket_lifecycle_configuration" "bucket_expiration" {
+# turn on versioning 
+resource "aws_s3_bucket_versioning" "mc_bucket_versioning" {
     bucket = aws_s3_bucket.gearbox_mc_bucket.id
-    rule {
-        expiration {
-            days = 365
-        }
-        filter {
-            # TO DO - add filter for match conditions file names only...
-        }
+    versioning_configuration {
+        status = "Enabled"
     }
-
-    id = "mc_bucket_expiration"
 }
-*/
+
+# - set noncurrent versions of match conditions file to expire in 180 days
+resource "aws_s3_bucket_lifecycle_configuration" "bucket_expiration" {
+    depends_on = [aws_s3_bucket_versioning.mc_bucket_versioning]
+    bucket = aws_s3_bucket.gearbox_mc_bucket.bucket
+    rule {
+        id = "mc_bucket_expiration"
+        filter {
+            prefix = "match_conditions/"
+        }
+        noncurrent_version_expiration {
+            noncurrent_days = 180
+        }
+        status = "Enabled"
+    }
+}
+
 
 resource "aws_s3_bucket_acl" "gearbox_mc_bucket_acl" {
     bucket = aws_s3_bucket.gearbox_mc_bucket.id

@@ -1,4 +1,5 @@
-import json
+import json, tempfile
+from .boto_temp import BotoManager
 from re import I
 from fastapi import APIRouter
 from fastapi.encoders import jsonable_encoder
@@ -62,6 +63,16 @@ async def get_mc(
         "body": response_conditions
     }
 
+    AWS_REGION = "us-east-2"
+    botomanager = BotoManager({'region_name': AWS_REGION}, logger)
+    params = [{'Content-Type':'application/json'}]
+
+    # create and upload match conditions from a temporary file
+    try:
+        botomanager.put_object('gearbox-match-conditions-bucket','mc.json', 10, params, response_conditions) 
+    except Exception as ex:
+            print(f"PUT EXCEPTION: {ex}")
+    
     return JSONResponse(response, HTTP_200_OK)
 
 def init_app(app):
