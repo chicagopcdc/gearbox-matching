@@ -41,39 +41,25 @@ async def get_mc(
     session: Session = Depends(deps.get_session)
 ):
 
-    all_algo_engs = await get_match_conditions(session)
-    response_conditions = []
-    ae_dict = {}
+    AWS_REGION = "us-east-2"
+    botomanager = BotoManager({'region_name': AWS_REGION}, logger)
+    params = []
 
-    for ae in all_algo_engs:
-        if ae.study_algo_engine.study_version.study_id in ae_dict:
-                ae_dict[ae.study_algo_engine.study_version.study_id].append((ae.path,ae.sequence))
-        else:
-            ae_dict[ae.study_algo_engine.study_version.study_id] = [(ae.path,ae.sequence)]
-
-    for i in sorted(ae_dict):
-        study_id = i
-        paths = [ x[0] for x in sorted(ae_dict[i], key = lambda x: x[1])]
-        response_conditions.append(mc.get_tree(paths, study_id=study_id))
-    
+    # create and upload match conditions from a temporary file
+    try:
+        # def get_object(self, bucket, key, expires, config):
+        match_conditions = botomanager.get_object('gearbox-match-conditions-bucket','mc.json', 300, params) 
+    except Exception as ex:
+            print(f"GET EXCEPTION: {ex}")
+        
     response = {
         "current_date": date.today().strftime("%B %d, %Y"),
         "current_time": strftime("%H:%M:%S +0000", gmtime()),
         "status": "OK",
-        "body": response_conditions
+        "body": match_conditions
     }
-
-    AWS_REGION = "us-east-2"
-    botomanager = BotoManager({'region_name': AWS_REGION}, logger)
-    params = [{'Content-Type':'application/json'}]
-
-    # create and upload match conditions from a temporary file
-    try:
-        botomanager.put_object('gearbox-match-conditions-bucket','mc.json', 10, params, response_conditions) 
-    except Exception as ex:
-            print(f"PUT EXCEPTION: {ex}")
     
     return JSONResponse(response, HTTP_200_OK)
 
 def init_app(app):
-    app.include_router(mod, tags=["match_conditions"])
+    app.include_router(mod, tags=["build_match_conditions"])

@@ -36,6 +36,7 @@ def test_get_match_conditions(setup_database, client):
     """
     errors = []
     fake_jwt = "1.2.3"
+    # resp = client.get("/build-match-conditions", headers={"Authorization": f"bearer {fake_jwt}"})
     resp = client.get("/match-conditions", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
     full_res_str = '\n'.join([str(item) for item in full_res])

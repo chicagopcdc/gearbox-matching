@@ -65,13 +65,13 @@ class BotoManager(object):
             params["ServerSideEncryption"] = "AES256"
         
         try:
-            return self.s3_client.generate_presigned_url(
+            url_info = self.s3_client.generate_presigned_url(
                 ClientMethod=method, Params=params, ExpiresIn=expires
             )
+            return url_info
         except Exception as ex:
             self.logger.exception(ex)
-            print(f"EXCEPTION: {ex}")
-            print("Failed to get pre-signed url")
+            print(f"Failed to get pre-signed url {ex}")
 
 
     def get_object(self, bucket, key, expires, config): 
@@ -83,14 +83,22 @@ class BotoManager(object):
             config (dict): additional parameters if necessary (e.g. updating access key)
         """
         try:
-            url = self.presigned_url(self, bucket, key, expires, config, method="get_object")
+            url = self.presigned_url(bucket, key, expires, [])
         except Exception as ex:
             self.logger.exception(ex)
-            print("Failed to get pre-signed url for get_object")
-        return requests.get(url, timeout=300)
+            print(f"Failed to get pre-signed url for get_object: {ex}")
 
-    def put_object(self, bucket, key, expires, config, mc_json): 
+        try:
+            retval = requests.get(url)
+        except Exception as ex:
+            self.logger.exception(ex)
+            print(f"GET FAILED: {ex}")
+
+        return retval.json()
+
+    def put_json_object(self, bucket, key, expires, config, json_in): 
         """
+        This function creates and uploads a file to an s3 bucket from a given json dict. 
         Args:
             bucket (str): bucket name
             key (str): key in bucket
@@ -98,28 +106,18 @@ class BotoManager(object):
             config (dict): additional parameters if necessary (e.g. updating access key)
         """
         try:
-            if self.s3_client:
-                print(f"YES s3 CLIENT EXISTS: {type(self.s3_client)}")
             url_info = self.s3_client.generate_presigned_post(Bucket = bucket, Key = key, ExpiresIn = 30)
-            print(f"URL INFO: {url_info}")
         except Exception as ex:
             self.logger.exception(ex)
-            print(f"EXCEPTION: {ex}")
-            print("Failed to get pre-signed url for put_object")
+            print(f"Failed to get pre-signed url for put_object: {ex}")
 
         with tempfile.NamedTemporaryFile(mode="w+") as f:
-            json.dump(mc_json, f)
+            json.dump(json_in, f)
             f.flush()
             f.seek(0)
             try:
-                # print(f"PUT URL: {url_info['url']}")
                 post_url = url_info['url']
-                print(f"POST URL: {post_url}")
                 data = url_info['fields']
-                print(f"POST FIELDS: {data}")
-                # response = requests.post(post_url, data, files={'file':f.name})
                 response = requests.post(post_url, data, files={'file':f})
-                # response = requests.post(post_url, data, files={'file': open(r'test.txt', 'rb')})
-                print(f"PUT RESPONSE: {response}")
             except Exception as ex:
                 print(f"PUT EXCEPTION: {ex}")
