@@ -41,6 +41,7 @@ def test_get_match_conditions(setup_database, client):
     full_res = resp.json()
     full_res_str = '\n'.join([str(item) for item in full_res])
 
+    print(f"RESPONSE IN TEST MATCH CONDITIONS FILE: {resp.raise_for_status()}")
     resp.raise_for_status()
     matchdata_file = './tests/data/match_conditions_compare_dat.json'
 
@@ -52,9 +53,12 @@ def test_get_match_conditions(setup_database, client):
     with open(matchdata_file, 'r') as comp_file:
         match_conditions_compare = json.load(comp_file)
 
-    comp_study_id_list = [x['studyId'] for x in match_conditions_compare['body']]
-    for study_comp in match_conditions_compare['body']:
-        for study in full_res['body']:
+    # comp_study_id_list = [x['studyId'] for x in match_conditions_compare['body']]
+    comp_study_id_list = [x['studyId'] for x in match_conditions_compare]
+    # for study_comp in match_conditions_compare['body']:
+    for study_comp in match_conditions_compare:
+        # for study in full_res['body']:
+        for study in full_res:
             # DOES THE STUDY IN THE RESPONSE EXIST IN THE SAVED DICT LIST? 
             if not study['studyId'] in comp_study_id_list:
                 errors.append(f"STUDY: {study['studyId']} DOES NOT EXIT IN THE COMPARE FILE.")

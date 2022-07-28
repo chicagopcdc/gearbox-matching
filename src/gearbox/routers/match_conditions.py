@@ -1,5 +1,8 @@
+from .. import config
 import json, tempfile
-from .boto_temp import BotoManager
+##### TEMPORARY BOTO FOR TESTING ###
+from pcdc_aws_client.boto import BotoManager
+# from pcdc_aws_client.boto import BotoManager
 from re import I
 from fastapi import APIRouter
 from fastapi.encoders import jsonable_encoder
@@ -35,7 +38,7 @@ logger = logging.getLogger('gb-logger')
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
 
-@mod.get("/match-conditions", response_model=List[AlgorithmResponse], dependencies=[ Depends(auth.authenticate), Depends(admin_required)], status_code=HTTP_200_OK)
+@mod.get("/match-conditions", response_model=List[AlgorithmResponse], dependencies=[ Depends(auth.authenticate)], status_code=HTTP_200_OK)
 async def get_mc(
     request: Request,
     session: Session = Depends(deps.get_session)
@@ -45,21 +48,27 @@ async def get_mc(
     botomanager = BotoManager({'region_name': AWS_REGION}, logger)
     params = []
 
-    # create and upload match conditions from a temporary file
     try:
-        # def get_object(self, bucket, key, expires, config):
-        match_conditions = botomanager.get_object('gearbox-match-conditions-bucket','mc.json', 300, params) 
+        match_conditions = botomanager.get_object(config.S3_BUCKET_NAME,config.S3_BUCKET_KEY_NAME, 300, params) 
+        # match_conditions = botomanager.get_object(config.S3_BUCKET_NAME + "xxx",config.S3_BUCKET_KEY_NAME, 300, params) # FAIL
     except Exception as ex:
-            print(f"GET EXCEPTION: {ex}")
-        
-    response = {
-        "current_date": date.today().strftime("%B %d, %Y"),
-        "current_time": strftime("%H:%M:%S +0000", gmtime()),
-        "status": "OK",
-        "body": match_conditions
-    }
-    
-    return JSONResponse(response, HTTP_200_OK)
+        raise HTTPException(get_starlette_status(ex.code), 
+            detail="Error fetching match condition object {}.".format(config.S3_BUCKET_NAME))
+
+    return JSONResponse(match_conditions, HTTP_200_OK)
+
+def get_starlette_status(status):
+    return {
+        200: HTTP_200_OK,
+        201: HTTP_201_CREATED,
+        204: HTTP_204_NO_CONTENT,
+        409: HTTP_409_CONFLICT,
+        400: HTTP_400_BAD_REQUEST,
+        401: HTTP_401_UNAUTHORIZED,
+        403: HTTP_403_FORBIDDEN,
+        404: HTTP_404_NOT_FOUND,
+        500: HTTP_500_INTERNAL_SERVER_ERROR,
+    }.get(status,HTTP_500_INTERNAL_SERVER_ERROR)
 
 def init_app(app):
     app.include_router(mod, tags=["build_match_conditions"])
