@@ -18,10 +18,8 @@ from starlette.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 
-import logging
-logger = logging.getLogger('gb-logger')
-
-
+from cdislogging import get_logger
+logger = get_logger(__name__)
 
 async def get_all_saved_input(current_session: Session, logged_user_id: int):
     stmt = select(SavedInput).where(SavedInput.user_id==logged_user_id)

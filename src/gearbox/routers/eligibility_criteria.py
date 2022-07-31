@@ -24,8 +24,8 @@ from ..schemas import EligibilityCriteriaResponse
 from ..crud.eligibility_criteria import get_eligibility_criteria
 from .. import deps
 
-import logging
-logger = logging.getLogger('gb-logger')
+from cdislogging import get_logger
+logger = get_logger(__name__)
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)

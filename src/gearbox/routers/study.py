@@ -27,8 +27,8 @@ from ..crud.study import get_single_study, get_studies
 from .. import deps
 from ..util.study_response import format_study_response
 
-import logging
-logger = logging.getLogger('gb-logger')
+from cdislogging import get_logger
+logger = get_logger(__name__)
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
@@ -41,6 +41,11 @@ async def get_study(
 ):
     auth_header = str(request.headers.get("Authorization", ""))
     results = await get_single_study(session, study_id)
+
+    logger.info("<-------------TEST LOG MESSAGE IN STUDY ROUTE INFO--------->")
+    logger.debug("<-------------TEST LOG MESSAGE IN STUDY ROUTE DEBUG--------->")
+    logger.warning("<-------------TEST LOG MESSAGE IN STUDY ROUTE WARNING--------->")
+    logger.error("<-------------TEST LOG MESSAGE IN STUDY ROUTE ERROR--------->")
 
     response_fmt = format_study_response(results)
     response = {
@@ -56,6 +61,11 @@ async def get_all_studies(
     request: Request,
     session: Session = Depends(deps.get_session)
 ):
+    logger.info("<-------------TEST LOG MESSAGE IN STUDY ROUTE INFO--------->")
+    logger.debug("<-------------TEST LOG MESSAGE IN STUDY ROUTE DEBUG--------->")
+    logger.warning("<-------------TEST LOG MESSAGE IN STUDY ROUTE WARNING--------->")
+    logger.error("<-------------TEST LOG MESSAGE IN STUDY ROUTE ERROR--------->")
+
     auth_header = str(request.headers.get("Authorization", ""))
     results = await get_studies(session)
     response_fmt = format_study_response(results)

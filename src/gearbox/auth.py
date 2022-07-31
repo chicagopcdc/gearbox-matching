@@ -11,9 +11,8 @@ from . import config
 from starlette.status import (
     HTTP_401_UNAUTHORIZED
 )
-
-import logging
-logger = logging.getLogger('gb-logger')
+from cdislogging import get_logger
+logger = get_logger('__name__')
 
 # auto_error=False prevents FastAPI from raises a 403 when the request is missing
 # an Authorization header. Instead, we want to return a 401 to signify that we did

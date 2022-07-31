@@ -1,8 +1,4 @@
 from gearbox.models.models import Study, StudyLink
-# from .. import logger
-
-import logging
-logger = logging.getLogger('gb-logger')
 
 def format_study_response(study_list):
     ret_val = []
@@ -27,7 +23,6 @@ def format_study_response(study_list):
 
         site_list = []        
         for site_has_study in study.sites:
-            logger.info(f"SITE TYPE: {type(site_has_study.site)}")
             site_list.append(site_has_study.site.name)
         study_dict['locations'] = site_list
 

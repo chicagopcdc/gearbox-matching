@@ -27,8 +27,8 @@ from .. import deps
 from ..util.bounds import bounds
 from ..util import match_conditions as mc
 
-import logging
-logger = logging.getLogger('gb-logger')
+from cdislogging import get_logger
+logger = get_logger(__name__)
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)

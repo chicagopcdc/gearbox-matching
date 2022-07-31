@@ -15,6 +15,7 @@ from gearbox.main import get_app
 
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+print("IN RUN.PY----> DEBUG: {gearbox.config.DEBUG}")
 
 cdislogging.get_logger(None, log_level="debug" if gearbox.config.DEBUG else "warn")
 for logger_name in ["uvicorn", "uvicorn.error", "uvicorn.access"]:

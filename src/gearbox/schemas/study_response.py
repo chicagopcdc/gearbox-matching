@@ -3,9 +3,6 @@ from datetime import datetime
 from typing import Sequence, List, Any, Optional
 from pydantic.utils import GetterDict
 
-import logging
-logger = logging.getLogger('gb-logger')
-
 class Link(BaseModel):
     name: Optional[str]
     href: Optional[str]

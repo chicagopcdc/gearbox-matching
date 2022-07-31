@@ -30,10 +30,13 @@ from ..schemas import AlgorithmEngine, AlgorithmResponse, StudyResponse
 from ..crud.match_conditions import get_match_conditions
 from .. import deps
 from ..util import match_conditions as mc
+from ..util import status
 from ..admin_login import admin_required
+import gearbox.config
 
-import logging
-logger = logging.getLogger('gb-logger')
+from cdislogging import get_logger
+logger = get_logger(__name__)
+print(f"MATCH CONDITIONS LOGGER: {logger}")
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
@@ -43,7 +46,6 @@ async def get_mc(
     request: Request,
     session: Session = Depends(deps.get_session)
 ):
-
     AWS_REGION = "us-east-2"
     botomanager = BotoManager({'region_name': AWS_REGION}, logger)
     params = []
@@ -52,23 +54,58 @@ async def get_mc(
         match_conditions = botomanager.get_object(config.S3_BUCKET_NAME,config.S3_BUCKET_KEY_NAME, 300, params) 
         # match_conditions = botomanager.get_object(config.S3_BUCKET_NAME + "xxx",config.S3_BUCKET_KEY_NAME, 300, params) # FAIL
     except Exception as ex:
-        raise HTTPException(get_starlette_status(ex.code), 
+        # raise HTTPException(get_starlette_status(ex.code), 
+        raise HTTPException(status.get_starlette_status(ex.code), 
             detail="Error fetching match condition object {}.".format(config.S3_BUCKET_NAME))
 
-    return JSONResponse(match_conditions, HTTP_200_OK)
+    response = {
+        "current_date": date.today().strftime("%B %d, %Y"),
+        "current_time": strftime("%H:%M:%S +0000", gmtime()),
+        "status": "OK",
+        "body": match_conditions
+    }
+    return JSONResponse(response, HTTP_200_OK)
 
-def get_starlette_status(status):
-    return {
-        200: HTTP_200_OK,
-        201: HTTP_201_CREATED,
-        204: HTTP_204_NO_CONTENT,
-        409: HTTP_409_CONFLICT,
-        400: HTTP_400_BAD_REQUEST,
-        401: HTTP_401_UNAUTHORIZED,
-        403: HTTP_403_FORBIDDEN,
-        404: HTTP_404_NOT_FOUND,
-        500: HTTP_500_INTERNAL_SERVER_ERROR,
-    }.get(status,HTTP_500_INTERNAL_SERVER_ERROR)
+@mod.get("/build-match-conditions", response_model=List[AlgorithmResponse], dependencies=[ Depends(auth.authenticate), Depends(admin_required)], status_code=HTTP_200_OK)
+async def get_mc(
+    request: Request,
+    session: Session = Depends(deps.get_session)
+):
+    all_algo_engs = await get_match_conditions(session)
+    match_conditions = []
+    ae_dict = {}
+
+    for ae in all_algo_engs:
+        if ae.study_algo_engine.study_version.study_id in ae_dict:
+                ae_dict[ae.study_algo_engine.study_version.study_id].append((ae.path,ae.sequence))
+        else:
+            ae_dict[ae.study_algo_engine.study_version.study_id] = [(ae.path,ae.sequence)]
+
+    for i in sorted(ae_dict):
+        study_id = i
+        paths = [ x[0] for x in sorted(ae_dict[i], key = lambda x: x[1])]
+        match_conditions.append(mc.get_tree(paths, study_id=study_id))
+    
+    AWS_REGION = "us-east-2"
+    botomanager = BotoManager({'region_name': AWS_REGION}, logger)
+    params = [{'Content-Type':'application/json'}]
+
+    # create and upload match conditions from a temporary file
+    try:
+        botomanager.put_object(config.S3_BUCKET_NAME, config.S3_BUCKET_KEY_NAME, 10, params, match_conditions) 
+    except Exception as ex:
+        raise HTTPException(status.get_starlette_status(ex.code), 
+            detail="Error fetching match condition object {}.".format(config.S3_BUCKET_NAME))
+    
+    response = {
+        "current_date": date.today().strftime("%B %d, %Y"),
+        "current_time": strftime("%H:%M:%S +0000", gmtime()),
+        "status": "OK",
+        "body": match_conditions
+    }
+
+    return JSONResponse(response, HTTP_200_OK)
 
 def init_app(app):
     app.include_router(mod, tags=["build_match_conditions"])
+    app.include_router(mod, tags=["match_conditions"])
