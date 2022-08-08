@@ -132,14 +132,14 @@ dev = ["pip-tools (==6.5.1)", "pytest (==7.1.1)", "flake8 (==4.0.1)", "tox (==3.
 
 [[package]]
 name = "boto3"
-version = "1.24.38"
+version = "1.24.46"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 
 [package.dependencies]
-botocore = ">=1.27.38,<1.28.0"
+botocore = ">=1.27.46,<1.28.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -148,7 +148,7 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.27.38"
+version = "1.27.46"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
@@ -775,9 +775,9 @@ retry = "*"
 
 [package.source]
 type = "git"
-url = "https://github.com/chicagopcdc/pcdc-aws-client"
-reference = "new_aws_api_steve"
-resolved_reference = "62011bd2baadf83dc726423bf654e2fab5bd5c12"
+url = "https://github.com/chicagopcdc/pcdc-aws-client.git"
+reference = "pcdc_dev"
+resolved_reference = "0f02bc811e78eda54c968109eeaa02ca242ff05d"
 
 [[package]]
 name = "pluggy"
@@ -1243,7 +1243,7 @@ python-versions = ">=3.6.1"
 
 [[package]]
 name = "werkzeug"
-version = "2.2.0"
+version = "2.2.1"
 description = "The comprehensive WSGI web application library."
 category = "main"
 optional = false
@@ -1278,7 +1278,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "8fe123254b23b9a9621e5ca6aace4879fe0cbab0500787eb6a0d8d7077f994a0"
+content-hash = "51dff987471d726fe157318a4e6ab33ca67c0a882d4d3b04b5a7e1728078e169"
 
 [metadata.files]
 alembic = [
