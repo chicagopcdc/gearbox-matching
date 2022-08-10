@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session, joinedload
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from gearbox.models.models import Site, SiteHasStudy, Study, StudyLink
 
-import logging
-logger = logging.getLogger('gb-logger')
+from cdislogging import get_logger
+logger = get_logger(__name__)
 
 async def get_sites(current_session: Session):
     stmt = select(Site).options(

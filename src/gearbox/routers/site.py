@@ -24,8 +24,8 @@ from ..schemas import SiteSchema, SiteResponse
 from ..crud.site import get_single_site, get_sites
 from .. import deps
 
-import logging
-logger = logging.getLogger('gb-logger')
+from cdislogging import get_logger
+logger = get_logger(__name__)
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)

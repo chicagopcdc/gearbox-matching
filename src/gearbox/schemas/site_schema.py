@@ -4,9 +4,6 @@ from typing import Sequence, List, Any, Optional
 from pydantic.utils import GetterDict
 from .study_link import StudyLink
 
-import logging
-logger = logging.getLogger('gb-logger')
-
 class SiteStudyGetter(GetterDict):
     # map and reformat study fields
     def get(self, key: str, default: Any = None) -> Any:

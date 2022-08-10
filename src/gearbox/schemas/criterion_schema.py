@@ -8,9 +8,6 @@ from .criterion_has_value import CriterionValue
 from .input_type import InputType
 from .el_criterion_has_criterion_schema import ElCriterionHasCriterionSchema
 
-import logging
-logger = logging.getLogger('gb-logger')
-
 class CriterionSchema(BaseModel):
     id: int
     code: Optional[str]

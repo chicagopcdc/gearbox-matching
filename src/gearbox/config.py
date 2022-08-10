@@ -104,3 +104,7 @@ INDEXING_SERVICE_ENDPOINT = config(
 DATA_ACCESS_SERVICE_ENDPOINT = config(
     "DATA_ACCESS_SERVICE_ENDPOINT", cast=str, default="http://fence-service"
 )
+
+# S3
+S3_BUCKET_NAME = config("S3_BUCKET_NAME", default='gearbox-match-conditions-bucket')
+S3_BUCKET_KEY_NAME = config("S3_BUCKET_KEY_NAME", default='mc.json')

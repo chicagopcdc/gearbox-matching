@@ -1,19 +1,23 @@
 import asyncio
-import logging
 import click
 import pkg_resources
 from fastapi import FastAPI, APIRouter, HTTPException, Depends
 import httpx
 from sqlalchemy.orm import Session
-from . import config
-from gearbox import deps
+from gearbox import deps, config
+from cdislogging import get_logger
 
-from logging.config import dictConfig
-from .log_config import log_config
+# from logging.config import dictConfig
+# from .log_config import log_config
 
-dictConfig(log_config)
+# dictConfig(log_config)
+# logger = logging.getLogger('gb-logger')
 
-logger = logging.getLogger('gb-logger')
+logger_name = 'gb-logger'
+# logger = cdislogging.get_logger(logger_name, log_level="debug" if config.DEBUG else "info")
+logger = get_logger(logger_name, log_level="debug" if config.DEBUG else "info")
+print(f"MAIN LOGGER: {logger}")
+# logger = cdislogging.get_logger(__name__)
 
 try:
     # importlib.metadata works locally but not in Docker
@@ -40,13 +44,6 @@ def get_app():
     async def shutdown_event():
         logger.info("Closing async client.")
         await app.async_client.aclose()
-
-    # @app.on_event("startup")
-    # async def startup_event():
-    #     logger.info("Do something at startup")
-    #     await {blank}.init(
-    #         hostname=url_parts.hostname, port=url_parts.port
-    #     )
 
     return app
 
@@ -110,10 +107,6 @@ def get_version():
 
 
 @router.get("/_status")
-# async def get_status(db: Session = Depends(deps.get_db)):
 async def get_status(db: Session = Depends(deps.get_session)):
-    try:
-        now = await db.execute("SELECT now()")
-        return dict( status="OK", timestamp=now.scalars().first())
-    except Exception:
-        raise UnhealthyCheck("Unhealthy")
+    now = await db.execute("SELECT now()")
+    return dict( status="OK", timestamp=now.scalars().first())

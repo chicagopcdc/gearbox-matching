@@ -41,8 +41,9 @@ from .. import auth
 ### FOR TESTING ADMIN AUTHZ REMOVE AFTER TEST###
 from ..admin_login import admin_required
 ### END FOR TESTING ADMIN AUTHZ ###
-import logging
-logger = logging.getLogger('gb-logger')
+
+from cdislogging import get_logger
+logger = get_logger(__name__)
 
 mod = APIRouter()
 

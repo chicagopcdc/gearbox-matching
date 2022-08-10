@@ -20,8 +20,8 @@ from ..schemas import Value
 from ..crud.criterion_value import get_values
 from .. import deps
 
-import logging
-logger = logging.getLogger('gb-logger')
+from cdislogging import get_logger
+logger = get_logger(__name__)
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
