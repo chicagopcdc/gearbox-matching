@@ -1,8 +1,6 @@
 from .. import config
 import json, tempfile
-##### TEMPORARY BOTO FOR TESTING ###
 from pcdc_aws_client.boto import BotoManager
-# from pcdc_aws_client.boto import BotoManager
 from re import I
 from fastapi import APIRouter
 from fastapi.encoders import jsonable_encoder
@@ -36,7 +34,6 @@ import gearbox.config
 
 from cdislogging import get_logger
 logger = get_logger(__name__)
-print(f"MATCH CONDITIONS LOGGER: {logger}")
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
@@ -46,15 +43,13 @@ async def get_mc(
     request: Request,
     session: Session = Depends(deps.get_session)
 ):
-    AWS_REGION = "us-east-2"
+    AWS_REGION = config.AWS_REGION
     botomanager = BotoManager({'region_name': AWS_REGION}, logger)
     params = []
 
     try:
         match_conditions = botomanager.get_object(config.S3_BUCKET_NAME,config.S3_BUCKET_KEY_NAME, 300, params) 
-        # match_conditions = botomanager.get_object(config.S3_BUCKET_NAME + "xxx",config.S3_BUCKET_KEY_NAME, 300, params) # FAIL
     except Exception as ex:
-        # raise HTTPException(get_starlette_status(ex.code), 
         raise HTTPException(status.get_starlette_status(ex.code), 
             detail="Error fetching match condition object {}.".format(config.S3_BUCKET_NAME))
 
@@ -86,11 +81,10 @@ async def get_mc(
         paths = [ x[0] for x in sorted(ae_dict[i], key = lambda x: x[1])]
         match_conditions.append(mc.get_tree(paths, study_id=study_id))
     
-    AWS_REGION = "us-east-2"
+    AWS_REGION = config.AWS_REGION
     botomanager = BotoManager({'region_name': AWS_REGION}, logger)
     params = [{'Content-Type':'application/json'}]
 
-    # create and upload match conditions from a temporary file
     try:
         botomanager.put_object(config.S3_BUCKET_NAME, config.S3_BUCKET_KEY_NAME, 10, params, match_conditions) 
     except Exception as ex:
