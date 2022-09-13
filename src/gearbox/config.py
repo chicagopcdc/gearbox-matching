@@ -108,4 +108,4 @@ DATA_ACCESS_SERVICE_ENDPOINT = config(
 # S3
 S3_BUCKET_NAME = config("S3_BUCKET_NAME", default='gearbox-match-conditions-bucket')
 S3_BUCKET_KEY_NAME = config("S3_BUCKET_KEY_NAME", default='mc.json')
-AWS_REGION = config("AWS_REGION", default='us-east-2')
+AWS_REGION = config("AWS_REGION", default='us-east-1')
