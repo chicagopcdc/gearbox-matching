@@ -121,3 +121,6 @@ id	code	description	type	value_string	unit	operator	create_date	active
 120	lt_2_5	lower or equal than 2.5	Float	2.5		lt		1
 121	lt_1_y	lower than 1	Integer	1	years	lt		1
 122	eq_4	equal to 4	Integer	4		eq		1
+123	gte_10000	greater or equal 10000	Integer	10000	count/mm3	gte		1
+124	lte_50000	less or equal 50000	Integer	50000		lte		1
+125	lte_60	less or equal 60	Integer	60		lte		1
