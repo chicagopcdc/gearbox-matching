@@ -12,7 +12,6 @@ RUN python -m venv /env && . /env/bin/activate && poetry install --no-interactio
 
 
 FROM base
-RUN apk add --no-cache postgresql-libs curl
 COPY --from=builder /env /env
 COPY --from=builder /src /src
 COPY --from=builder /tests /tests
