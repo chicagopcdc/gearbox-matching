@@ -1,6 +1,0 @@
-ImportError while loading conftest '/Users/skrasinsky/projects/other/gearbox/matching/gearbox-matching/tests/conftest.py'.
-../conftest.py:23: in <module>
-    from gearbox import config
-../../src/gearbox/config.py:45: in <module>
-    DB_STRING = DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST + ":" + str(DB_PORT) + "/" + DB_DATABASE
-E   TypeError: can only concatenate str (not "NoneType") to str
