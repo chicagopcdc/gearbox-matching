@@ -165,16 +165,20 @@ def build_tree(nodelist):
         # node or neighbor extract it 
         m = re.search(r'^(.*)-(.*)-(.*)$', node)
         if m:
-            node = m.group(1)
+            node = int(m.group(1))
             node_operator = m.group(2)
             group_id = m.group(3)
             groups_seen.add(group_id)
+        else:
+            node = int(node)
 
         m = re.search(r'^(.*)-(.*)-(.*)$', neighbor)
         if m:
-            neighbor = m.group(1)
+            neighbor = int(m.group(1))
             neighbor_operator = m.group(2)
             neighbor_group_id = m.group(3)
+        else:
+            neighbor = int(neighbor)
 
         # peek at next node - used to establish
         # the existence of a child node
@@ -182,15 +186,16 @@ def build_tree(nodelist):
             check_ahead_node = nodelist[i+1][0]
             m = re.search(r'^(.*)-(.*)-(.*)$', check_ahead_node)
             if m:
-                check_ahead_node = m.group(1)
+                check_ahead_node = int(m.group(1))
                 check_ahead_node_operator = m.group(2)
                 check_ahead_group_id = m.group(3)
+            else:
+                check_ahead_node = int(check_ahead_node)
 
         # start to build the tree
         if len(crit_que) == 0:
 
             root_node = get_new_node(node, 'AND')
-
             crit_que.append(root_node)
 
             if neighbor_operator:
@@ -230,7 +235,7 @@ def build_tree(nodelist):
             ################################################################
             #  MAIN CASE 1: NODE IS A DIRECT CHILD OF THE WORKING NODE
             ################################################################
-            if working_node['criteria'][-1] == str(node) and (neighbor_group_id == working_group_id or neighbor_group_id == ''):
+            if working_node['criteria'][-1] == node and (neighbor_group_id == working_group_id or neighbor_group_id == ''):
                 
                 ################################################################
                 # IF THERE IS NO EXPLICIT OPERATOR
@@ -356,7 +361,7 @@ def build_tree(nodelist):
                 # FIND PARENT NODE
                 ######################################################################
                 else:
-                    while str(node) not in working_node['criteria']:
+                    while node not in working_node['criteria']:
                         try:
                             working_node = crit_que.pop()
                             if type(working_node) is tuple:
