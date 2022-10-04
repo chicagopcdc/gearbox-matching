@@ -1,8 +1,9 @@
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
 from fastapi import Request, Depends
-from fastapi import HTTPException, APIRouter, Security
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import APIRouter, Security
+from fastapi.security import HTTPBearer 
+from . import logger
 from starlette.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
@@ -19,9 +20,6 @@ from .. import auth
 from ..schemas import Value
 from ..crud.criterion_value import get_values
 from .. import deps
-
-from cdislogging import get_logger
-logger = get_logger(__name__)
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)

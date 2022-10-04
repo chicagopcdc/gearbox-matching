@@ -24,7 +24,7 @@ from starlette.status import (
 from cdislogging import get_logger
 logger = get_logger(__name__)
 
-async def get_match_conditions(current_session: Session):
+async def get_algorithm_engines(current_session: Session):
 
     stmt = select(AlgorithmEngine).options(
         joinedload(AlgorithmEngine.study_algo_engine).options(

@@ -18,6 +18,7 @@ DEBUG = config("DEBUG", cast=bool, default=False)
 TESTING = config("TESTING", cast=bool, default=False)
 URL_PREFIX = config("URL_PREFIX", default="/" if DEBUG else "/gearbox")
 BYPASS_FENCE = config("BYPASS_FENCE", cast=bool, default=False)
+BYPASS_S3 = config("BYPASS_S3", cast=bool, default=False)
 
 
 # Database
@@ -46,6 +47,7 @@ if TESTING:
     print(f"DB PORT: {DB_PORT}")
     print(f"DB DATABASE: {DB_DATABASE}")
     print(f"BYPASS FENCE: {BYPASS_FENCE}")
+    print(f"BYPASS S3: {BYPASS_S3}")
     print(f"DEBUG: {DEBUG}")
 DB_STRING = DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST + ":" + str(DB_PORT) + "/" + DB_DATABASE
 ALEMBIC_DB_STRING = ALEMBIC_DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST + ":" + str(DB_PORT) + "/" + DB_DATABASE

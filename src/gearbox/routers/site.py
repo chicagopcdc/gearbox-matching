@@ -2,11 +2,11 @@ from fastapi import APIRouter
 from sqlalchemy.orm import Session
 from fastapi import Request, Depends
 from fastapi.encoders import jsonable_encoder
-from fastapi import HTTPException, APIRouter, Security
+from fastapi import APIRouter, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from datetime import date
 from time import gmtime, strftime
-from starlette.responses import JSONResponse 
+from . import logger
 from starlette.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
@@ -23,9 +23,6 @@ from .. import auth
 from ..schemas import SiteSchema, SiteResponse
 from ..crud.site import get_single_site, get_sites
 from .. import deps
-
-from cdislogging import get_logger
-logger = get_logger(__name__)
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)

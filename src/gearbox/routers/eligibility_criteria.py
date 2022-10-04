@@ -3,9 +3,10 @@ from datetime import date
 from time import gmtime, strftime
 from fastapi import APIRouter, HTTPException
 from fastapi import HTTPException, APIRouter, Security
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
 from fastapi import Request, Depends
+from . import logger
 from starlette.responses import JSONResponse 
 from starlette.status import (
     HTTP_200_OK,
@@ -23,9 +24,6 @@ from .. import auth
 from ..schemas import EligibilityCriteriaResponse
 from ..crud.eligibility_criteria import get_eligibility_criteria
 from .. import deps
-
-from cdislogging import get_logger
-logger = get_logger(__name__)
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)

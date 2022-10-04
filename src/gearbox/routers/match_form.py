@@ -7,6 +7,7 @@ from fastapi import HTTPException, APIRouter, Security
 from sqlalchemy.orm import Session
 from fastapi import Request, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from . import config, logger
 from starlette.responses import JSONResponse 
 from starlette.status import (
     HTTP_200_OK,
@@ -26,9 +27,6 @@ from ..crud.match_form import get_form_info
 from .. import deps
 from ..util.bounds import bounds
 from ..util import match_conditions as mc
-
-from cdislogging import get_logger
-logger = get_logger(__name__)
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)

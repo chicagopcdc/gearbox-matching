@@ -5,19 +5,10 @@ from fastapi import FastAPI, APIRouter, HTTPException, Depends
 import httpx
 from sqlalchemy.orm import Session
 from gearbox import deps, config
-from cdislogging import get_logger
-
-# from logging.config import dictConfig
-# from .log_config import log_config
-
-# dictConfig(log_config)
-# logger = logging.getLogger('gb-logger')
+import cdislogging
 
 logger_name = 'gb-logger'
-# logger = cdislogging.get_logger(logger_name, log_level="debug" if config.DEBUG else "info")
-logger = get_logger(logger_name, log_level="debug" if config.DEBUG else "info")
-print(f"MAIN LOGGER: {logger}")
-# logger = cdislogging.get_logger(__name__)
+logger = cdislogging.get_logger(logger_name, log_level="debug" if config.DEBUG else "info")
 
 try:
     # importlib.metadata works locally but not in Docker

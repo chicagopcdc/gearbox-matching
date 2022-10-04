@@ -6,6 +6,7 @@ from time import gmtime, strftime
 from fastapi import Request, Depends
 from fastapi import HTTPException, APIRouter, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from . import logger
 from starlette.responses import JSONResponse 
 from starlette.status import (
     HTTP_200_OK,
@@ -26,9 +27,6 @@ from ..schemas import StudySchema, StudyResponse
 from ..crud.study import get_single_study, get_studies
 from .. import deps
 from ..util.study_response import format_study_response
-
-from cdislogging import get_logger
-logger = get_logger(__name__)
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
