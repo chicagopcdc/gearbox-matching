@@ -69,11 +69,10 @@ def test_match_condition_logic(setup_database, client):
     resp = client.get("/match-conditions", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
 
-    conds = full_res['body'][0]['algorithm']
+    # conds = full_res['body'][0]['algorithm']
+    conds = full_res[0]['algorithm']
     exp = get_expression([conds])
-
-    print("boolean logic for study: ")
-    print(''.join(f"{i}" for i in exp))
+    exp = [str(x) for x in exp]
 
     # prepend the criteria id with 'x' b/c sympy needs alphanumeric 
     # to construct truth tables from a boolean exp

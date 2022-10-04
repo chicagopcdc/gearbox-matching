@@ -3,11 +3,11 @@ import re
 from datetime import date
 from time import gmtime, strftime
 from fastapi import APIRouter
-from fastapi import HTTPException, APIRouter, Security
+from fastapi import APIRouter, Security
 from sqlalchemy.orm import Session
 from fastapi import Request, Depends
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from . import config, logger
+from fastapi.security import HTTPBearer
+from . import logger
 from starlette.responses import JSONResponse 
 from starlette.status import (
     HTTP_200_OK,
@@ -171,15 +171,9 @@ async def get_match_info(
 
             F.append(criterion_dict)
 
-        body = {"groups": json.dumps(G), "fields": json.dumps(F)}
-        body = {"groups": G, "fields": F}
-        response = {
-            "current_date": date.today().strftime("%B %d, %Y"),
-            "current_time": strftime("%H:%M:%S +0000", gmtime()),
-            "status": "OK",
-            "body": body
-        }
-    return JSONResponse(response, HTTP_200_OK)
+        match_form = {"groups": G, "fields": F}
+
+    return JSONResponse(match_form, HTTP_200_OK)
 
 
 def init_app(app):

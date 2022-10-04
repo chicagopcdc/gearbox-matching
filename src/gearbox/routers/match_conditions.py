@@ -54,13 +54,7 @@ async def get_mc(
             raise HTTPException(status.get_starlette_status(ex.code), 
                 detail="Error fetching match condition object {}.".format(config.S3_BUCKET_NAME))
 
-    response = {
-        "current_date": date.today().strftime("%B %d, %Y"),
-        "current_time": strftime("%H:%M:%S +0000", gmtime()),
-        "status": "OK",
-        "body": match_conditions
-    }
-    return JSONResponse(response, HTTP_200_OK)
+    return JSONResponse(match_conditions, HTTP_200_OK)
 
 @mod.get("/build-match-conditions", response_model=List[AlgorithmResponse], dependencies=[ Depends(auth.authenticate), Depends(admin_required)], status_code=HTTP_200_OK)
 async def get_mc(
@@ -82,14 +76,7 @@ async def get_mc(
             raise HTTPException(status.get_starlette_status(ex.code), 
                 detail="Error fetching match condition object {}.".format(config.S3_BUCKET_NAME))
     
-    response = {
-        "current_date": date.today().strftime("%B %d, %Y"),
-        "current_time": strftime("%H:%M:%S +0000", gmtime()),
-        "status": "OK",
-        "body": match_conditions
-    }
-
-    return JSONResponse(response, HTTP_200_OK)
+    return JSONResponse(match_conditions, HTTP_200_OK)
 
 def init_app(app):
     app.include_router(mod, tags=["build_match_conditions"])

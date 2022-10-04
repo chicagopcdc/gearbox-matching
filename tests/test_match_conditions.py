@@ -39,13 +39,15 @@ def test_build_match_conditions(setup_database, client):
     fake_jwt = "1.2.3"
     resp = client.get("/build-match-conditions", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
+    print("HERE 1")
     full_res_str = '\n'.join([str(item) for item in full_res])
+    print("HERE 2")
 
     resp.raise_for_status()
     matchdata_file = './tests/data/match_conditions_compare_dat.json'
 
     """ SERIALIZE STUDIES TO COMPARE AGAINST - UNCOMMENT TO WRITE NEW COMPARE DATA
-        COMPARE DATA SHOULD BE MANUALLY VERIFIED BEFORE DUMPING TO FILE
+        COMPARE DATA SHOULD BE MANUALLY VERIFIED BEFORE UNCOMMENTING THIS
     with open(matchdata_file,'w') as comp_file:
         json.dump(full_res, comp_file)
     """
@@ -53,12 +55,18 @@ def test_build_match_conditions(setup_database, client):
     with open(matchdata_file, 'r') as comp_file:
         match_conditions_compare = json.load(comp_file)
 
-    comp_study_id_list = [x['studyId'] for x in match_conditions_compare['body']]
-    for study_comp in match_conditions_compare['body']:
-        for study in full_res['body']:
+    print("HERE 3")
+    print(match_conditions_compare)
+    print(f"TYPE MATCH CONDITIONS COPARE {type(match_conditions_compare)}")
+    comp_study_id_list = [x['studyId'] for x in match_conditions_compare]
+    print("HERE 4")
+    for study_comp in match_conditions_compare:
+        for study in full_res:
             # DOES THE STUDY IN THE RESPONSE EXIST IN THE SAVED DICT LIST? 
+            print("HERE 5")
             if not study['studyId'] in comp_study_id_list:
                 errors.append(f"STUDY: {study['studyId']} DOES NOT EXIT IN THE COMPARE FILE.")
+            print("HERE 6")
             if study_comp['studyId'] == study['studyId']:
                 diff = DeepDiff(study_comp, study)
                 if diff:
@@ -82,7 +90,7 @@ def test_get_match_conditions(setup_database, client):
     matchdata_file = './tests/data/match_conditions_compare_dat.json'
 
     """ SERIALIZE STUDIES TO COMPARE AGAINST - UNCOMMENT TO WRITE NEW COMPARE DATA
-        COMPARE DATA SHOULD BE MANUALLY VERIFIED BEFORE DUMPING TO FILE
+        COMPARE DATA SHOULD BE MANUALLY VERIFIED BEFORE UNCOMMENTING THIS
     with open(matchdata_file,'w') as comp_file:
         json.dump(full_res, comp_file)
     """
@@ -90,9 +98,9 @@ def test_get_match_conditions(setup_database, client):
     with open(matchdata_file, 'r') as comp_file:
         match_conditions_compare = json.load(comp_file)
 
-    comp_study_id_list = [x['studyId'] for x in match_conditions_compare['body']]
-    for study_comp in match_conditions_compare['body']:
-        for study in full_res['body']:
+    comp_study_id_list = [x['studyId'] for x in match_conditions_compare]
+    for study_comp in match_conditions_compare:
+        for study in full_res:
             # DOES THE STUDY IN THE RESPONSE EXIST IN THE SAVED DICT LIST? 
             if not study['studyId'] in comp_study_id_list:
                 errors.append(f"STUDY: {study['studyId']} DOES NOT EXIT IN THE COMPARE FILE.")
