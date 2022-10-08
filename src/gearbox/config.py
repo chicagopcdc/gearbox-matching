@@ -108,6 +108,10 @@ DATA_ACCESS_SERVICE_ENDPOINT = config(
 )
 
 # S3
-S3_BUCKET_NAME = config("S3_BUCKET_NAME", default='gearbox-match-conditions-bucket')
-S3_BUCKET_KEY_NAME = config("S3_BUCKET_KEY_NAME", default='mc.json')
+S3_BUCKET_NAME = config("S3_BUCKET_NAME", default='commons-gearbox-data-bucket-with-versioning')
+S3_BUCKET_MATCH_CONDITIONS_KEY_NAME = config("S3_BUCKET_MATCH_CONDITIONS_KEY_NAME", default='match_conditions.json')
+S3_BUCKET_MATCH_FORM_KEY_NAME = config("S3_BUCKET_MATCH_FORM_KEY_NAME", default='match_form.json')
+S3_BUCKET_STUDIES_KEY_NAME = config("S3_BUCKET_STUDIES_KEY_NAME", default='gearbox_studies.json')
+S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME = config("S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME", default='eligibility_criteria.json')
+
 AWS_REGION = config("AWS_REGION", default='us-east-1')

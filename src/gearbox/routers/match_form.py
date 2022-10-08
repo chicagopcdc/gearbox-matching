@@ -1,25 +1,16 @@
 import json
+from .. import config
+from pcdc_aws_client.boto import BotoManager
 import re
 from datetime import date
 from time import gmtime, strftime
 from fastapi import APIRouter
 from fastapi import APIRouter, Security
 from sqlalchemy.orm import Session
-from fastapi import Request, Depends
+from fastapi import Request, Depends, HTTPException
 from fastapi.security import HTTPBearer
 from . import logger
 from starlette.responses import JSONResponse 
-from starlette.status import (
-    HTTP_200_OK,
-    HTTP_201_CREATED,
-    HTTP_204_NO_CONTENT,
-    HTTP_409_CONFLICT,
-    HTTP_400_BAD_REQUEST,
-    HTTP_401_UNAUTHORIZED,
-    HTTP_403_FORBIDDEN,
-    HTTP_404_NOT_FOUND,
-    HTTP_500_INTERNAL_SERVER_ERROR,
-)
 from typing import List
 from .. import auth
 from ..schemas import DisplayRules 
@@ -27,154 +18,50 @@ from ..crud.match_form import get_form_info
 from .. import deps
 from ..util.bounds import bounds
 from ..util import match_conditions as mc
+from ..util import status
+from ..util import match_form as mf
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
 
-def update_dict(d, critlookup):
-    for key in d:
-        if key == 'criteria':
-            if isinstance(d[key], list):
-                for i in range(0, len(d[key])):
-                    if not isinstance(d[key][i], dict):
-                        try:
-                            d[key][i] = critlookup[int(d[key][i])] 
-                        except KeyError:
-                            logger.error("Error message about improperly configured path - path ids do not exist for this...")
-
-                    else: 
-                        update_dict(d[key][i], critlookup)
-    return d
-
-@mod.get("/match-form", response_model=List[DisplayRules], dependencies=[Depends(auth.authenticate)], status_code=HTTP_200_OK)
-async def get_match_info(
+@mod.get("/build-match-form", response_model=List[DisplayRules], dependencies=[Depends(auth.authenticate)], status_code=status.HTTP_200_OK)
+async def build_match_info(
     request: Request,
     session: Session = Depends(deps.get_session),
 ):
-    form_info = await get_form_info(session)
+    match_form = await mf.get_match_form(session)
 
-    G = []
-    F = []
+    if not config.BYPASS_S3:
+        botomanager = BotoManager({'region_name': config.AWS_REGION}, logger)
+        params = [{'Content-Type':'application/json'}]
+        try:
+            botomanager.put_object(config.S3_BUCKET_NAME, config.S3_BUCKET_MATCH_FORM_KEY_NAME, 10, params, match_form) 
+        except Exception as ex:
+            raise HTTPException(status.get_starlette_status(ex.code), 
+                detail="Error putting match condition object {}.".format(config.S3_BUCKET_NAME))
 
-    for display_rules in form_info:
-        criterion_dict = {}
-        for ctag in display_rules.criterion.tags:
-            g = {
-                'id': ctag.tag.id,
-                'name': ctag.tag.code
-            }
-            G.append(g)
-            # get unique groups 
-            G = list({v['id']:v for v in G}.values())
-            G = sorted(G, key = lambda i: i['id'])
+    return JSONResponse(match_form, status.HTTP_200_OK)
 
-        if display_rules.active:
-            criterion_dict = {'id': display_rules.criterion_id}
-            for ctag in display_rules.criterion.tags:
-                if ctag.tag.type == 'form':
-                    criterion_dict.update({'groupId': ctag.tag.id})
-            if display_rules.criterion.active:
-                code = display_rules.criterion.code
-                criterion_dict.update({'name': code})
-                if code in bounds.keys():
-                    criterion_dict.update(bounds[code])
+@mod.get("/match-form", dependencies=[ Depends(auth.authenticate)], status_code=status.HTTP_200_OK)
+async def get_match_form(
+    request: Request,
+    session: Session = Depends(deps.get_session)
+):
+    params = []
+    # build match form from database if running locally
+    if config.BYPASS_S3:
+        match_form = await mf.get_match_form(session)
+    else:
+        try:
+            botomanager = BotoManager({'region_name': config.AWS_REGION}, logger)
+            match_form = botomanager.presigned_url(config.S3_BUCKET_NAME,config.S3_BUCKET_MATCH_FORM_KEY_NAME, "1800", {}, "get_object") 
+        except Exception as ex:
+            raise HTTPException(status.get_starlette_status(ex.code), 
+                detail="Error fetching match form {}.".format(config.S3_BUCKET_NAME))
 
-                criterion_dict.update({'label':display_rules.criterion.description})
-                criterion_dict.update({'type':display_rules.criterion.input_type.render_type})
-
-                if display_rules.criterion.input_type.data_type.upper() == 'INTEGER':
-                    criterion_dict.update({'min' : 0})
-                if display_rules.criterion.input_type.data_type.upper() == 'FLOAT':
-                    criterion_dict.update({'min' : 0})
-                    criterion_dict.update({'step' : 0.1})
-                if display_rules.criterion.input_type.data_type.upper() == 'PERCENTAGE':
-                    criterion_dict.update({'min' : 0})
-                    criterion_dict.update({'max' : 100})
-                    criterion_dict.update({'step' : 0.1})
-
-                options = []
-                if len(display_rules.criterion.values) > 1:
-                    if display_rules.criterion.input_type.render_type == 'select':
-                        criterion_dict.update({'placeholder': 'Select'})
-                        chvalues = [x for x in display_rules.criterion.values]
-                        for chvalue in chvalues:
-                            o = {'value': chvalue.value.id}
-                            # o.update({'label':chvalue.value.code})
-                            o.update({'label':chvalue.value.description})
-                            options.append(o)
-                    if display_rules.criterion.input_type.render_type == 'radio':
-                        chvalues = [x for x in display_rules.criterion.values]
-                        for chvalue in chvalues:
-                            o = {'value': chvalue.value.id}
-                            o.update({'label': chvalue.value.value_string})
-                            o.update({'description': ""})
-                            options.append(o)
-
-
-
-                if len(options) > 0:
-                    options = sorted(options, key=lambda d: d['value'])
-                    # move unknown or not sure to end of the option list
-                    for o in options:
-                        if o['label'].upper() in ['UNKNOWN','NOT SURE']:
-                            options.append(options.pop(options.index(o)))
-
-                    criterion_dict.update({'options': options})
-
-                # Get paths from triggered bys
-                pathlist = []
-                critlookup = {}
-                path_tree = None
-                for tb in display_rules.triggered_bys:
-                    if tb.active:
-                        tb_value = ''
-                        if (tb.path):
-                            pathlist.append(tb.path)
-                        if tb.value.type == 'Integer':
-                            try:
-                                tb_value = int(tb.value.value_string)
-                            except ValueError:
-                                logger.error(f"Value {tb.value.value_string} cannot be converted to Integer") 
-                        elif tb.value.type == 'Float':
-                            try:
-                                tb_value = float(tb.value.value_string)
-                            except ValueError:
-                                logger.error(f"Value {tb.value.value_string} cannot be converted to Integer") 
-                        else:
-                            tb_value = tb.value.id
-
-                        critdict = {
-                            "id": tb.criterion.id,
-                            "value": tb_value,
-                            "operator": tb.value.operator
-                        }
-                        critlookup[tb.id] = critdict
-
-                # build tree
-                if len(pathlist) == 2 or len(critlookup) == 1 or len(critlookup) == 2: 
-                    critlist = []
-                    for crit_key in critlookup:
-                        if critlookup[crit_key]:
-                            critlist.append(critlookup[crit_key])
-
-                    path_tree = {
-                        "operator": "AND",
-                        "criteria": critlist 
-                    }
-                    # if len(pathlist) == 1: # this shouldn't happen, but if it did...
-                elif (pathlist):
-                    path_tree = mc.get_tree(pathlist, suppress_header=True)
-                    path_tree = update_dict(path_tree, critlookup)
-
-                if path_tree:
-                    criterion_dict.update({'showIf':path_tree})
-
-            F.append(criterion_dict)
-
-        match_form = {"groups": G, "fields": F}
-
-    return JSONResponse(match_form, HTTP_200_OK)
+    return JSONResponse(match_form, status.HTTP_200_OK)
 
 
 def init_app(app):
+    app.include_router(mod, tags=["build_match_form"])
     app.include_router(mod, tags=["match_form"])

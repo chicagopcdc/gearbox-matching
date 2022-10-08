@@ -2,6 +2,7 @@ import json
 import re
 from collections import deque
 from ..crud.match_conditions import get_algorithm_engines
+from ..routers import logger
 
 async def get_match_conditions(session):
     all_algo_engs = await get_algorithm_engines(session)
