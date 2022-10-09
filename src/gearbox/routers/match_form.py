@@ -20,11 +20,12 @@ from ..util.bounds import bounds
 from ..util import match_conditions as mc
 from ..util import status
 from ..util import match_form as mf
+from ..admin_login import admin_required
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
 
-@mod.get("/build-match-form", response_model=List[DisplayRules], dependencies=[Depends(auth.authenticate)], status_code=status.HTTP_200_OK)
+@mod.get("/build-match-form", response_model=List[DisplayRules], dependencies=[ Depends(auth.authenticate), Depends(admin_required)], status_code=status.HTTP_200_OK)
 async def build_match_info(
     request: Request,
     session: Session = Depends(deps.get_session),
@@ -38,7 +39,7 @@ async def build_match_info(
             botomanager.put_object(config.S3_BUCKET_NAME, config.S3_BUCKET_MATCH_FORM_KEY_NAME, 10, params, match_form) 
         except Exception as ex:
             raise HTTPException(status.get_starlette_status(ex.code), 
-                detail="Error putting match condition object {}.".format(config.S3_BUCKET_NAME))
+                detail="Error putting match form object {}.".format(config.S3_BUCKET_NAME))
 
     return JSONResponse(match_form, status.HTTP_200_OK)
 
