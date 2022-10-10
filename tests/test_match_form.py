@@ -36,7 +36,7 @@ def test_get_match_form(setup_database, client):
     """
     errors = []
     fake_jwt = "1.2.3"
-    resp = client.get("/match-form", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.get("/build-match-form", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
 
     resp.raise_for_status()

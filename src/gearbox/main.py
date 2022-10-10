@@ -6,9 +6,12 @@ import httpx
 from sqlalchemy.orm import Session
 from gearbox import deps, config
 import cdislogging
+from pcdc_aws_client.boto import BotoManager
 
 logger_name = 'gb-logger'
 logger = cdislogging.get_logger(logger_name, log_level="debug" if config.DEBUG else "info")
+
+
 
 try:
     # importlib.metadata works locally but not in Docker
@@ -30,6 +33,8 @@ def get_app():
     app.add_middleware(ClientDisconnectMiddleware)
     load_modules(app)
     app.async_client = httpx.AsyncClient()
+    app.boto_manager = BotoManager({'region_name': config.AWS_REGION}, logger)
+
 
     @app.on_event("shutdown")
     async def shutdown_event():

@@ -1,6 +1,5 @@
 from re import I
 from .. import config
-from pcdc_aws_client.boto import BotoManager
 from datetime import date
 from time import gmtime, strftime
 from fastapi import APIRouter, HTTPException
@@ -26,16 +25,11 @@ async def get_ec(
     request: Request,
     session: Session = Depends(deps.get_session),
 ):
-    # get eligibility criteria from database if running locally
-    if config.BYPASS_S3:
-        eligibility_criteria = await ec.get_eligibility_criteria(session)
-    else:
-        try:
-            botomanager = BotoManager({'region_name': config.AWS_REGION}, logger)
-            eligibility_criteria = botomanager.presigned_url(config.S3_BUCKET_NAME,config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, "1800", {}, "get_object") 
-        except Exception as ex:
-            raise HTTPException(status.get_starlette_status(ex.code), 
-                detail="Error fetching eligibility criteria {} {}.".format(config.S3_BUCKET_NAME, ex))
+    try:
+        eligibility_criteria = request.app.boto_manager.presigned_url(config.S3_BUCKET_NAME,config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, "1800", {}, "get_object") 
+    except Exception as ex:
+        raise HTTPException(status.get_starlette_status(ex.code), 
+            detail="Error fetching eligibility criteria {} {}.".format(config.S3_BUCKET_NAME, ex))
 
     return JSONResponse(eligibility_criteria, status.HTTP_200_OK)
 
@@ -47,11 +41,9 @@ async def build_eligibility_criteria(
     eligibility_criteria = await ec.get_eligibility_criteria(session)
 
     if not config.BYPASS_S3:
-        botomanager = BotoManager({'region_name': config.AWS_REGION}, logger)
         params = [{'Content-Type':'application/json'}]
         try:
-            # botomanager.put_object(config.S3_BUCKET_NAME, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, 10, params, eligibility_criteria) 
-            botomanager.put_object("nobucket", config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, 10, params, eligibility_criteria) 
+            request.app.boto_manager.put_object(config.S3_BUCKET_NAME, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, 10, params, eligibility_criteria) 
         except Exception as ex:
             raise HTTPException(status.get_starlette_status(ex.code), 
                 detail="Error putting eligibility criteria object {} {}.".format(config.S3_BUCKET_NAME, ex))

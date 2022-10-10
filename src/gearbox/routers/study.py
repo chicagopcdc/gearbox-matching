@@ -1,6 +1,5 @@
 import json
 from .. import config
-from pcdc_aws_client.boto import BotoManager
 from ..util import status
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
@@ -48,10 +47,9 @@ async def build_all_studies(
     study_response = format_study_response(results)
 
     if not config.BYPASS_S3:
-        botomanager = BotoManager({'region_name': config.AWS_REGION}, logger)
         params = [{'Content-Type':'application/json'}]
         try:
-            botomanager.put_object(config.S3_BUCKET_NAME, config.S3_BUCKET_STUDIES_KEY_NAME, 10, params, study_response) 
+            request.app.boto_manager.put_object(config.S3_BUCKET_NAME, config.S3_BUCKET_STUDIES_KEY_NAME, 10, params, study_response) 
         except Exception as ex:
             raise HTTPException(status.get_starlette_status(ex.code), 
                 detail="Error putting study object {} {}.".format(config.S3_BUCKET_NAME, ex))
@@ -64,16 +62,11 @@ async def get_all_studies(
     session: Session = Depends(deps.get_session)
 ):
 
-    if config.BYPASS_S3:
-        results = await get_studies(session)
-        study_response = format_study_response(results)
-    else:
-        try:
-            botomanager = BotoManager({'region_name': config.AWS_REGION}, logger)
-            study_response = botomanager.presigned_url(config.S3_BUCKET_NAME,config.S3_BUCKET_STUDIES_KEY_NAME, "1800", {}, "get_object") 
-        except Exception as ex:
-            raise HTTPException(status.get_starlette_status(ex.code), 
-                detail="Error fetching studies {} {}.".format(config.S3_BUCKET_NAME, ex))
+    try:
+        study_response = request.app.boto_manager.presigned_url(config.S3_BUCKET_NAME,config.S3_BUCKET_STUDIES_KEY_NAME, "1800", {}, "get_object") 
+    except Exception as ex:
+        raise HTTPException(status.get_starlette_status(ex.code), 
+            detail="Error fetching studies {} {}.".format(config.S3_BUCKET_NAME, ex))
 
     return JSONResponse(study_response, status.HTTP_200_OK)
 

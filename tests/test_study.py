@@ -29,7 +29,7 @@ def test_get_studies(setup_database, client):
     valid input, ensure correct response.
     """
     fake_jwt = "1.2.3"
-    resp = client.get("/studies", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.get("/build-studies", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
     resp.raise_for_status()
 
@@ -42,7 +42,7 @@ def test_get_studies_compare(setup_database, client):
     """
     errors = []
     fake_jwt = "1.2.3"
-    resp = client.get("/studies", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.get("/build-studies", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
     full_res_str = '\n'.join([str(item) for item in full_res])
 
