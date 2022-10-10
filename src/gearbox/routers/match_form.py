@@ -39,7 +39,7 @@ async def build_match_info(
             botomanager.put_object(config.S3_BUCKET_NAME, config.S3_BUCKET_MATCH_FORM_KEY_NAME, 10, params, match_form) 
         except Exception as ex:
             raise HTTPException(status.get_starlette_status(ex.code), 
-                detail="Error putting match form object {}.".format(config.S3_BUCKET_NAME))
+                detail="Error putting match form object {} {}.".format(config.S3_BUCKET_NAME, ex))
 
     return JSONResponse(match_form, status.HTTP_200_OK)
 
@@ -58,7 +58,7 @@ async def get_match_form(
             match_form = botomanager.presigned_url(config.S3_BUCKET_NAME,config.S3_BUCKET_MATCH_FORM_KEY_NAME, "1800", {}, "get_object") 
         except Exception as ex:
             raise HTTPException(status.get_starlette_status(ex.code), 
-                detail="Error fetching match form {}.".format(config.S3_BUCKET_NAME))
+                detail="Error fetching match form {} {}.".format(config.S3_BUCKET_NAME, ex))
 
     return JSONResponse(match_form, status.HTTP_200_OK)
 

@@ -35,7 +35,7 @@ async def get_ec(
             eligibility_criteria = botomanager.presigned_url(config.S3_BUCKET_NAME,config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, "1800", {}, "get_object") 
         except Exception as ex:
             raise HTTPException(status.get_starlette_status(ex.code), 
-                detail="Error fetching eligibility criteria {}.".format(config.S3_BUCKET_NAME))
+                detail="Error fetching eligibility criteria {} {}.".format(config.S3_BUCKET_NAME, ex))
 
     return JSONResponse(eligibility_criteria, status.HTTP_200_OK)
 
@@ -50,10 +50,11 @@ async def build_eligibility_criteria(
         botomanager = BotoManager({'region_name': config.AWS_REGION}, logger)
         params = [{'Content-Type':'application/json'}]
         try:
-            botomanager.put_object(config.S3_BUCKET_NAME, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, 10, params, eligibility_criteria) 
+            # botomanager.put_object(config.S3_BUCKET_NAME, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, 10, params, eligibility_criteria) 
+            botomanager.put_object("nobucket", config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, 10, params, eligibility_criteria) 
         except Exception as ex:
             raise HTTPException(status.get_starlette_status(ex.code), 
-                detail="Error putting eligibility criteria object {}.".format(config.S3_BUCKET_NAME))
+                detail="Error putting eligibility criteria object {} {}.".format(config.S3_BUCKET_NAME, ex))
 
     return JSONResponse(eligibility_criteria, status.HTTP_200_OK)
 

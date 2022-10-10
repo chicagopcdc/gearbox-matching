@@ -39,7 +39,7 @@ async def get_mc(
             match_conditions = botomanager.presigned_url(config.S3_BUCKET_NAME,config.S3_BUCKET_MATCH_CONDITIONS_KEY_NAME, "1800", {}, "get_object") 
         except Exception as ex:
             raise HTTPException(status.get_starlette_status(ex.code), 
-                detail="Error fetching match conditions {}.".format(config.S3_BUCKET_NAME))
+                detail="Error fetching match conditions {} {}.".format(config.S3_BUCKET_NAME, ex))
 
     return JSONResponse(match_conditions, status.HTTP_200_OK)
 
@@ -58,7 +58,7 @@ async def build_mc(
             botomanager.put_object(config.S3_BUCKET_NAME, config.S3_BUCKET_MATCH_CONDITIONS_KEY_NAME, 10, params, match_conditions) 
         except Exception as ex:
             raise HTTPException(status.get_starlette_status(ex.code), 
-                detail="Error putting match condition object {}.".format(config.S3_BUCKET_NAME))
+                detail="Error putting match condition object {} {}.".format(config.S3_BUCKET_NAME, ex))
     
     return JSONResponse(match_conditions, status.HTTP_200_OK)
 

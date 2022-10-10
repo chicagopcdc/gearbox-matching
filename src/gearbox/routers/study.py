@@ -54,11 +54,11 @@ async def build_all_studies(
             botomanager.put_object(config.S3_BUCKET_NAME, config.S3_BUCKET_STUDIES_KEY_NAME, 10, params, study_response) 
         except Exception as ex:
             raise HTTPException(status.get_starlette_status(ex.code), 
-                detail="Error putting study object {}.".format(config.S3_BUCKET_NAME))
+                detail="Error putting study object {} {}.".format(config.S3_BUCKET_NAME, ex))
 
     return JSONResponse(study_response, status.HTTP_200_OK)
 
-@mod.get("/studies", response_model=List[StudyResponse], dependencies=[ Depends(auth.authenticate)], status_code=status.HTTP_200_OK)
+@mod.get("/studies", dependencies=[ Depends(auth.authenticate)], status_code=status.HTTP_200_OK)
 async def get_all_studies(
     request: Request,
     session: Session = Depends(deps.get_session)
@@ -73,7 +73,7 @@ async def get_all_studies(
             study_response = botomanager.presigned_url(config.S3_BUCKET_NAME,config.S3_BUCKET_STUDIES_KEY_NAME, "1800", {}, "get_object") 
         except Exception as ex:
             raise HTTPException(status.get_starlette_status(ex.code), 
-                detail="Error fetching studies {}.".format(config.S3_BUCKET_NAME))
+                detail="Error fetching studies {} {}.".format(config.S3_BUCKET_NAME, ex))
 
     return JSONResponse(study_response, status.HTTP_200_OK)
 
