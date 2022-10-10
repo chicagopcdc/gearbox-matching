@@ -149,3 +149,4 @@ id	code	display_name	description	create_date	active	ontology_code_id	input_type_
 148	diag_chf	Has the patient been diagnosed with: congestive heart failure (CHF)	Has the patient been diagnosed with: congestive heart failure (CHF)		1		2
 149	meas_alp_uln	What is the patient's most recent measure of: Alkaline phosphatase (ALP) (in ULN)	What is the patient's most recent measure of: Alkaline phosphatase (ALP) (in ULN)		1		4
 150	expression_flt3_itd	Is there evidence of FLT3 / internal tandem duplication (ITD) mutation?	Is there evidence of FLT3 / internal tandem duplication (ITD) mutation?		1		2
+151	diag_cong_blood_disorder	Has the patient been diagnosed with any congenital bleeding disorders, including but not limited to hemophilia?	Has the patient been diagnosed with any congenital bleeding disorders, including but not limited to hemophilia?		1		2

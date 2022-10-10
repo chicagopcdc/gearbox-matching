@@ -43,6 +43,7 @@ def test_get_match_form(setup_database, client):
     matchformdata_file = './tests/data/match_form_compare_dat.json'
 
     """ SERIALIZE STUDIES TO COMPARE AGAINST - UNCOMMENT TO WRITE NEW COMPARE DATA
+        MANUALLY VALIDATE MATCH FORM BEFORE UNCOMMENTING 
     with open(matchformdata_file,'w') as comp_file:
         json.dump(full_res, comp_file)
     """
@@ -50,8 +51,6 @@ def test_get_match_form(setup_database, client):
     with open(matchformdata_file, 'r') as comp_file:
         match_form_compare = json.load(comp_file)
     
-    full_res = full_res['body']
-
     comp_group_id_list = [x['id'] for x in match_form_compare['groups']]
     comp_field_id_list = [x['id'] for x in match_form_compare['fields']]
 

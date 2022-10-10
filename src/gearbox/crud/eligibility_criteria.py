@@ -8,7 +8,7 @@ from gearbox.models.models import ElCriteriaHasCriterion, Criterion, InputType
 from cdislogging import get_logger
 logger = get_logger(__name__)
 
-async def get_eligibility_criteria(current_session: Session):
+async def get_eligibility_criteria_info(current_session: Session):
 
     stmt = select(ElCriteriaHasCriterion).options(
         joinedload(ElCriteriaHasCriterion.criterion).options(

@@ -18,6 +18,7 @@ from urllib.parse import urljoin
 from pydantic import BaseModel
 from fastapi import Request, Depends
 from sqlalchemy.orm import Session
+from . import logger
 from starlette.responses import JSONResponse
 from starlette.status import (
     HTTP_200_OK,
@@ -38,13 +39,6 @@ from ..crud.saved_input import add_saved_input, get_latest_saved_input, update_s
 from .. import deps
 from .. import auth 
 
-### FOR TESTING ADMIN AUTHZ REMOVE AFTER TEST###
-from ..admin_login import admin_required
-### END FOR TESTING ADMIN AUTHZ ###
-
-from cdislogging import get_logger
-logger = get_logger(__name__)
-
 mod = APIRouter()
 
 # auto_error=False prevents FastAPI from raises a 403 when the request is missing
@@ -53,9 +47,6 @@ mod = APIRouter()
 # bearer = HTTPBearer(auto_error=False)
 
 @mod.post("/user-input", response_model=SavedInputSearchResults)
-### FOR TESTING ADMIN AUTHZ REMOVE AFTER TEST###
-##@mod.post("/user-input", response_model=SavedInputSearchResults, dependencies=[Depends(admin_required) ])
-### END FOR TESTING ADMIN AUTHZ ###
 async def save_object(
     body: UploadSavedInput,
     request: Request,

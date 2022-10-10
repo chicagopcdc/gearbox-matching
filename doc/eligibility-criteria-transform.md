@@ -133,9 +133,9 @@ match condition endpoint output json
 Here is an example of explicit operators in nested groups:
 
 > ( \
->   (norm_cardiac = 'yes') or \
->   (norm_cardiac = 'no' and norm_lv = 'yes') or \
 >   (norm_cardiac = 'no' and norm_lv = 'no' and (meas_ef >= 40 or meas_sf >= 25)) \
+>   (norm_cardiac = 'no' and norm_lv = 'yes') or \
+>   (norm_cardiac = 'yes') or \
 > )
 
 ALGORITHM_ENGINE.path (EL_CRITERIA_HAS_CRITERION.id) tree representation

@@ -34,11 +34,10 @@ def test_get_ec(setup_database, client):
     Test create /eligibility_criteria endpoint
     valid input, ensure correct response.
     """
-    errors = []
+    
     fake_jwt = "1.2.3"
-    resp = client.get("/eligibility-criteria", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.get("/build-eligibility-criteria", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
-    full_res_str = '\n'.join([str(item) for item in full_res])
 
     resp.raise_for_status()
     ecdata_file = './tests/data/eligibilityCriteria.json'
@@ -52,9 +51,8 @@ def test_get_ec(setup_database, client):
         ec_compare = json.load(comp_file)
 
     diff = []
-
     for i in range (len(ec_compare)):
-        ec_diff = DeepDiff(full_res['body'][i], ec_compare[i], ignore_order=True)
+        ec_diff = DeepDiff(full_res[i], ec_compare[i], ignore_order=True)
         if ec_diff:
             diff.append(ec_diff)
     

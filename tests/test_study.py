@@ -60,7 +60,7 @@ def test_get_studies_compare(setup_database, client):
     diff = []
     # Diff all studies in the reponse that exist in the mock file
     for i in range (len(study_compare)):
-        study_diff = DeepDiff(full_res['body'][i], study_compare[i], ignore_order=True)
+        study_diff = DeepDiff(full_res[i], study_compare[i], ignore_order=True)
         if (study_diff):
             diff.append(study_diff)
     

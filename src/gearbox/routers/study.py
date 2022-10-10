@@ -1,4 +1,7 @@
 import json
+from .. import config
+from pcdc_aws_client.boto import BotoManager
+from ..util import status
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
 from datetime import date
@@ -6,34 +9,22 @@ from time import gmtime, strftime
 from fastapi import Request, Depends
 from fastapi import HTTPException, APIRouter, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from . import logger
 from starlette.responses import JSONResponse 
-from starlette.status import (
-    HTTP_200_OK,
-    HTTP_201_CREATED,
-    HTTP_204_NO_CONTENT,
-    HTTP_409_CONFLICT,
-    HTTP_400_BAD_REQUEST,
-    HTTP_401_UNAUTHORIZED,
-    HTTP_403_FORBIDDEN,
-    HTTP_404_NOT_FOUND,
-    HTTP_500_INTERNAL_SERVER_ERROR,
-)
 from typing import List
 
 from .. import auth
+from ..admin_login import admin_required
 
 from ..schemas import StudySchema, StudyResponse
 from ..crud.study import get_single_study, get_studies
 from .. import deps
 from ..util.study_response import format_study_response
 
-from cdislogging import get_logger
-logger = get_logger(__name__)
-
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
 
-@mod.get("/study/{study_id}", response_model=List[StudyResponse], dependencies=[Depends(auth.authenticate)], status_code=HTTP_200_OK)
+@mod.get("/study/{study_id}", response_model=List[StudyResponse], dependencies=[Depends(auth.authenticate)], status_code=status.HTTP_200_OK)
 async def get_study(
     request: Request,
     study_id: int,
@@ -42,33 +33,51 @@ async def get_study(
     auth_header = str(request.headers.get("Authorization", ""))
     results = await get_single_study(session, study_id)
 
-    response_fmt = format_study_response(results)
-    response = {
-        "current_date": date.today().strftime("%B %d, %Y"),
-        "current_time": strftime("%H:%M:%S +0000", gmtime()),
-        "status": "OK",
-        "body": response_fmt
-    }
-    return JSONResponse(response, HTTP_200_OK)
+    study_response = format_study_response(results)
+    return JSONResponse(study_response, status.HTTP_200_OK)
 
-@mod.get("/studies", response_model=List[StudyResponse], dependencies=[Depends(auth.authenticate)], status_code=HTTP_200_OK)
-async def get_all_studies(
+# MAKE ADMIN ONLY
+@mod.get("/build-studies", response_model=List[StudyResponse], dependencies=[ Depends(auth.authenticate), Depends(admin_required)], status_code=status.HTTP_200_OK)
+async def build_all_studies(
     request: Request,
     session: Session = Depends(deps.get_session)
 ):
 
     auth_header = str(request.headers.get("Authorization", ""))
     results = await get_studies(session)
-    response_fmt = format_study_response(results)
+    study_response = format_study_response(results)
 
-    response = {
-        "current_date": date.today().strftime("%B %d, %Y"),
-        "current_time": strftime("%H:%M:%S +0000", gmtime()),
-        "status": "OK",
-        "body": response_fmt
-    }
+    if not config.BYPASS_S3:
+        botomanager = BotoManager({'region_name': config.AWS_REGION}, logger)
+        params = [{'Content-Type':'application/json'}]
+        try:
+            botomanager.put_object(config.S3_BUCKET_NAME, config.S3_BUCKET_STUDIES_KEY_NAME, 10, params, study_response) 
+        except Exception as ex:
+            raise HTTPException(status.get_starlette_status(ex.code), 
+                detail="Error putting study object {} {}.".format(config.S3_BUCKET_NAME, ex))
 
-    return JSONResponse(response, HTTP_200_OK)
+    return JSONResponse(study_response, status.HTTP_200_OK)
+
+@mod.get("/studies", dependencies=[ Depends(auth.authenticate)], status_code=status.HTTP_200_OK)
+async def get_all_studies(
+    request: Request,
+    session: Session = Depends(deps.get_session)
+):
+
+    if config.BYPASS_S3:
+        results = await get_studies(session)
+        study_response = format_study_response(results)
+    else:
+        try:
+            botomanager = BotoManager({'region_name': config.AWS_REGION}, logger)
+            study_response = botomanager.presigned_url(config.S3_BUCKET_NAME,config.S3_BUCKET_STUDIES_KEY_NAME, "1800", {}, "get_object") 
+        except Exception as ex:
+            raise HTTPException(status.get_starlette_status(ex.code), 
+                detail="Error fetching studies {} {}.".format(config.S3_BUCKET_NAME, ex))
+
+    return JSONResponse(study_response, status.HTTP_200_OK)
+
 
 def init_app(app):
     app.include_router(mod, tags=["study"])
+    app.include_router(mod, tags=["build_studies"])
