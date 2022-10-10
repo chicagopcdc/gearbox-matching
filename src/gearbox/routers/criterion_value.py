@@ -3,18 +3,9 @@ from sqlalchemy.orm import Session
 from fastapi import Request, Depends
 from fastapi import APIRouter, Security
 from fastapi.security import HTTPBearer 
+# from . import logger
 from . import logger
-from starlette.status import (
-    HTTP_200_OK,
-    HTTP_201_CREATED,
-    HTTP_204_NO_CONTENT,
-    HTTP_409_CONFLICT,
-    HTTP_400_BAD_REQUEST,
-    HTTP_401_UNAUTHORIZED,
-    HTTP_403_FORBIDDEN,
-    HTTP_404_NOT_FOUND,
-    HTTP_500_INTERNAL_SERVER_ERROR,
-)
+from ..util import status
 from typing import List
 from .. import auth
 from ..schemas import Value
@@ -24,7 +15,7 @@ from .. import deps
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
 
-@mod.get("/values", response_model=List[Value], dependencies=[Depends(auth.authenticate)], status_code=HTTP_200_OK)
+@mod.get("/values", response_model=List[Value], dependencies=[Depends(auth.authenticate)], status_code=status.HTTP_200_OK)
 async def get_all_values(
     request: Request,
     session: Session = Depends(deps.get_session),
