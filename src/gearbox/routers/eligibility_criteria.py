@@ -9,12 +9,11 @@ from sqlalchemy.orm import Session
 from fastapi import Request, Depends
 from . import logger
 from starlette.responses import JSONResponse 
-from ..util import status
 from typing import List
 from .. import auth
 from ..schemas import EligibilityCriteriaResponse
 from .. import deps
-from ..util import eligibility_criteria as ec
+from ..util import eligibility_criteria as ec, bucket_utils, status
 from ..admin_login import admin_required
 
 mod = APIRouter()
@@ -25,15 +24,11 @@ async def get_ec(
     request: Request,
     session: Session = Depends(deps.get_session),
 ):
-    try:
-        eligibility_criteria = request.app.boto_manager.presigned_url(config.S3_BUCKET_NAME,config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, "1800", {}, "get_object") 
-    except Exception as ex:
-        raise HTTPException(status.get_starlette_status(ex.code), 
-            detail="Error fetching eligibility criteria {} {}.".format(config.S3_BUCKET_NAME, ex))
+    params = []
+    presigned_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, params, "get_object")
+    return JSONResponse(presigned_url, status.HTTP_200_OK) 
 
-    return JSONResponse(eligibility_criteria, status.HTTP_200_OK)
-
-@mod.get("/build-eligibility-criteria", response_model=List[EligibilityCriteriaResponse], dependencies=[ Depends(auth.authenticate), Depends(admin_required)], status_code=status.HTTP_200_OK)
+@mod.post("/build-eligibility-criteria", response_model=List[EligibilityCriteriaResponse], dependencies=[ Depends(auth.authenticate), Depends(admin_required)], status_code=status.HTTP_200_OK)
 async def build_eligibility_criteria(
     request: Request,
     session: Session = Depends(deps.get_session),
@@ -42,11 +37,7 @@ async def build_eligibility_criteria(
 
     if not config.BYPASS_S3:
         params = [{'Content-Type':'application/json'}]
-        try:
-            request.app.boto_manager.put_object(config.S3_BUCKET_NAME, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, 10, params, eligibility_criteria) 
-        except Exception as ex:
-            raise HTTPException(status.get_starlette_status(ex.code), 
-                detail="Error putting eligibility criteria object {} {}.".format(config.S3_BUCKET_NAME, ex))
+        bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, eligibility_criteria)
 
     return JSONResponse(eligibility_criteria, status.HTTP_200_OK)
 

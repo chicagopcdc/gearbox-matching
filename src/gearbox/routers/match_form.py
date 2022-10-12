@@ -16,15 +16,13 @@ from ..schemas import DisplayRules
 from ..crud.match_form import get_form_info
 from .. import deps
 from ..util.bounds import bounds
-from ..util import match_conditions as mc
-from ..util import status
-from ..util import match_form as mf
+from ..util import match_conditions as mc, status, match_form as mf, bucket_utils
 from ..admin_login import admin_required
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
 
-@mod.get("/build-match-form", response_model=List[DisplayRules], dependencies=[ Depends(auth.authenticate), Depends(admin_required)], status_code=status.HTTP_200_OK)
+@mod.post("/build-match-form", response_model=List[DisplayRules], dependencies=[ Depends(auth.authenticate), Depends(admin_required)], status_code=status.HTTP_200_OK)
 async def build_match_info(
     request: Request,
     session: Session = Depends(deps.get_session),
@@ -33,12 +31,7 @@ async def build_match_info(
 
     if not config.BYPASS_S3:
         params = [{'Content-Type':'application/json'}]
-        try:
-            request.app.boto_manager.put_object(config.S3_BUCKET_NAME, config.S3_BUCKET_MATCH_FORM_KEY_NAME, 10, params, match_form) 
-        except Exception as ex:
-            raise HTTPException(status.get_starlette_status(ex.code), 
-                detail="Error putting match form object {} {}.".format(config.S3_BUCKET_NAME, ex))
-
+        bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_MATCH_FORM_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, match_form)
     return JSONResponse(match_form, status.HTTP_200_OK)
 
 @mod.get("/match-form", dependencies=[ Depends(auth.authenticate)], status_code=status.HTTP_200_OK)
@@ -47,14 +40,8 @@ async def get_match_form(
     session: Session = Depends(deps.get_session)
 ):
     params = []
-    try:
-        match_form = request.app.boto_manager.presigned_url(config.S3_BUCKET_NAME,config.S3_BUCKET_MATCH_FORM_KEY_NAME, "1800", {}, "get_object") 
-    except Exception as ex:
-        raise HTTPException(status.get_starlette_status(ex.code), 
-            detail="Error fetching match form {} {}.".format(config.S3_BUCKET_NAME, ex))
-
-    return JSONResponse(match_form, status.HTTP_200_OK)
-
+    presigned_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_MATCH_FORM_KEY_NAME, params, "get_object")
+    return JSONResponse(presigned_url, status.HTTP_200_OK) 
 
 def init_app(app):
     app.include_router(mod, tags=["build_match_form"])
