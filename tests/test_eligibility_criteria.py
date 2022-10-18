@@ -1,5 +1,6 @@
 import pytest
 import json
+from .test_utils import is_aws_url
 
 from deepdiff import DeepDiff
 
@@ -29,14 +30,14 @@ from gearbox import config
 bearer = HTTPBearer(auto_error=False)
 
 # @pytest.mark.asyncio
-def test_get_ec(setup_database, client):
+def test_build_ec(setup_database, client):
     """
     Test create /eligibility_criteria endpoint
     valid input, ensure correct response.
     """
     
     fake_jwt = "1.2.3"
-    resp = client.get("/build-eligibility-criteria", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.post("/build-eligibility-criteria", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
 
     resp.raise_for_status()
@@ -57,3 +58,11 @@ def test_get_ec(setup_database, client):
             diff.append(ec_diff)
     
     assert not diff, "differences occurred: \n{}".format("\n".join(diff))            
+
+def test_get_ec(setup_database, client):
+    errors = []
+    fake_jwt = "1.2.3"
+    url = client.get("/eligibility-criteria", headers={"Authorization": f"bearer {fake_jwt}"})
+    url_str =  url.content.decode('ascii').strip('\"')
+
+    assert is_aws_url(url_str)

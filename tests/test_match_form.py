@@ -1,5 +1,6 @@
 import pytest
 import json
+from .test_utils import is_aws_url
 
 from deepdiff import DeepDiff
 
@@ -29,14 +30,14 @@ from gearbox import config
 bearer = HTTPBearer(auto_error=False)
 
 # @pytest.mark.asyncio
-def test_get_match_form(setup_database, client):
+def test_build_match_form(setup_database, client):
     """
     Test create /match_form endpoint
     valid input, ensure correct response.
     """
     errors = []
     fake_jwt = "1.2.3"
-    resp = client.get("/match-form", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.post("/build-match-form", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
 
     resp.raise_for_status()
@@ -73,3 +74,11 @@ def test_get_match_form(setup_database, client):
                     errors.append(f"FIELD ID: {field_comp['id']} DOES NOT MATCH {diff}")
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))            
+
+def test_get_match_form(setup_database, client):
+    errors = []
+    fake_jwt = "1.2.3"
+    url = client.get("/match-form", headers={"Authorization": f"bearer {fake_jwt}"})
+    url_str =  url.content.decode('ascii').strip('\"')
+
+    assert is_aws_url(url_str)

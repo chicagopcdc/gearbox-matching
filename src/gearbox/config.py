@@ -18,7 +18,20 @@ DEBUG = config("DEBUG", cast=bool, default=False)
 TESTING = config("TESTING", cast=bool, default=False)
 URL_PREFIX = config("URL_PREFIX", default="/" if DEBUG else "/gearbox")
 BYPASS_FENCE = config("BYPASS_FENCE", cast=bool, default=False)
+
+#S3
 BYPASS_S3 = config("BYPASS_S3", cast=bool, default=False)
+# DUMMY_S3 - use a public dummy S3 bucket for docker compose testing presigned urls
+DUMMY_S3 = config("DUMMY_S3", cast=bool, default=False)
+S3_BUCKET_NAME = config("S3_BUCKET_NAME", default='commons-gearbox-data-bucket-with-versioning')
+S3_TEST_COMPOSE_BUCKET_NAME = config("S3_TEST_COMPOSE_BUCKET_NAME", default='test-compose-gearbox-data-bucket-with-versioning')
+S3_TEST_BUCKET_NAME = config("S3_TEST_BUCKET_NAME", default='test-gearbox-data-bucket-with-versioning')
+S3_BUCKET_MATCH_CONDITIONS_KEY_NAME = config("S3_BUCKET_MATCH_CONDITIONS_KEY_NAME", default='match_conditions.json')
+S3_BUCKET_MATCH_FORM_KEY_NAME = config("S3_BUCKET_MATCH_FORM_KEY_NAME", default='match_form.json')
+S3_BUCKET_STUDIES_KEY_NAME = config("S3_BUCKET_STUDIES_KEY_NAME", default='gearbox_studies.json')
+S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME = config("S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME", default='eligibility_criteria.json')
+S3_PRESIGNED_URL_EXPIRES=config("S3_PRESIGNED_URL_EXPIRES", default="1800")
+S3_PUT_OBJECT_EXPIRES=config("S3_PUT_OBJECT_EXPIRES", default="10")
 
 
 # Database
