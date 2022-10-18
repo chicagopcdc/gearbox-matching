@@ -40,7 +40,7 @@ async def build_mc(
 
     if not config.BYPASS_S3:
         params = [{'Content-Type':'application/json'}]
-        bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_MATCH_CONDITIONS_NAME, config.S3_PUT_OBJECT_EXPIRES, params, match_conditions)
+        bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_MATCH_CONDITIONS_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, match_conditions)
     return JSONResponse(match_conditions, status.HTTP_200_OK)
 
 def init_app(app):

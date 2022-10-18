@@ -1,4 +1,5 @@
 import pytest
+from .test_utils import is_aws_url
 
 import json
 
@@ -23,13 +24,13 @@ from starlette.status import (
 from gearbox import config
 
 # @pytest.mark.asyncio
-def test_get_studies(setup_database, client):
+def test_build_studies(setup_database, client):
     """
     Test create /user-input response for a valid user with authorization and
     valid input, ensure correct response.
     """
     fake_jwt = "1.2.3"
-    resp = client.get("/build-studies", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.post("/build-studies", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
     resp.raise_for_status()
 
@@ -42,7 +43,7 @@ def test_get_studies_compare(setup_database, client):
     """
     errors = []
     fake_jwt = "1.2.3"
-    resp = client.get("/build-studies", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.post("/build-studies", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
     full_res_str = '\n'.join([str(item) for item in full_res])
 
@@ -65,3 +66,11 @@ def test_get_studies_compare(setup_database, client):
             diff.append(study_diff)
     
     assert not diff, "differences occurred: \n{}".format("\n".join(diff))            
+
+def test_get_studies(setup_database, client):
+    errors = []
+    fake_jwt = "1.2.3"
+    url = client.get("/studies", headers={"Authorization": f"bearer {fake_jwt}"})
+    url_str =  url.content.decode('ascii').strip('\"')
+
+    assert is_aws_url(url_str)

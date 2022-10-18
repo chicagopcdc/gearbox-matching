@@ -66,7 +66,7 @@ def test_match_condition_logic(setup_database, client):
     """
     errors = []
     fake_jwt = "1.2.3"
-    resp = client.get("/build-match-conditions", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.post("/build-match-conditions", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
 
     # conds = full_res['body'][0]['algorithm']

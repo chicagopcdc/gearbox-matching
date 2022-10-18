@@ -2,11 +2,28 @@ from .. import config
 from . import status
 from fastapi import HTTPException
 
-def get_bucket_name():
-    return config.S3_TEST_BUCKET_NAME if config.DUMMY_S3 else config.S3_BUCKET_NAME
+# SHOULD RETURN:
+# 1.) PRODUCTION BUCKET IF PROD
+# 2.) TEST BUCKET IF TESTING
+# 3.) TEST COMPOSE BUCKET IF TESTING PD-URL (DUMMY_S3)
+# 4.) BUT - WE DON'T WANT TO CALL THE BUILD ENDPOINTS ON THE COMPOSE BUCKET!!!
+def get_bucket_name(request):
+    # THE S3_TEST_COMPOSE_BUCKET_NAME is used for compose testing and points to
+    # a public S3 bucket containting fake mock data. The fake mock data is not used 
+    # for match condition or match form logic tests, so use the regular test
+    # bucket for testing post requests which actually build the match and form logic and 
+    # post them to the back end.
+    if config.DUMMY_S3 and request.method == 'GET':
+        return config.S3_TEST_COMPOSE_BUCKET_NAME
+    elif config.TESTING:
+        return config.S3_TEST_BUCKET_NAME
+    else:
+        return config.S3_BUCKET_NAME
+
 
 def get_presigned_url(request, key_name, pu_config, method):
-    bucket_name = get_bucket_name()
+    print(f"---------------------------- REQUEST: {request.method}")
+    bucket_name = get_bucket_name(request)
     presigned_url = ''
     try:
         presigned_url = request.app.boto_manager.presigned_url(bucket_name,key_name, config.S3_PRESIGNED_URL_EXPIRES, pu_config, method) 
