@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = 'e3e1f15dc40d'
-down_revision = None
+down_revision = 'ce0dbc6f9a8f'
 branch_labels = None
 depends_on = None
 
@@ -37,15 +37,6 @@ def upgrade():
     sa.Column('code', sa.String(), nullable=True),
     sa.Column('value', sa.String(), nullable=True),
     sa.Column('version', sa.String(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_table('saved_input',
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('patient_id', sa.Integer(), nullable=True),
-    sa.Column('create_date', sa.DateTime(), nullable=False),
-    sa.Column('update_date', sa.DateTime(), nullable=False),
-    sa.Column('data', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('site',
