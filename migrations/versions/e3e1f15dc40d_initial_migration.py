@@ -216,7 +216,6 @@ def downgrade():
     op.drop_table('tag')
     op.drop_table('study')
     op.drop_table('site')
-    op.drop_table('saved_input')
     op.drop_table('ontology_code')
     op.drop_table('note')
     op.drop_table('input_type')
