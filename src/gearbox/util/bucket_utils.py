@@ -2,11 +2,6 @@ from .. import config
 from . import status
 from fastapi import HTTPException
 
-# SHOULD RETURN:
-# 1.) PRODUCTION BUCKET IF PROD
-# 2.) TEST BUCKET IF TESTING
-# 3.) TEST COMPOSE BUCKET IF TESTING PD-URL (DUMMY_S3)
-# 4.) BUT - WE DON'T WANT TO CALL THE BUILD ENDPOINTS ON THE COMPOSE BUCKET!!!
 def get_bucket_name(request):
     # THE S3_TEST_COMPOSE_BUCKET_NAME is used for compose testing and points to
     # a public S3 bucket containting fake mock data. The fake mock data is not used 
@@ -22,7 +17,6 @@ def get_bucket_name(request):
 
 
 def get_presigned_url(request, key_name, pu_config, method):
-    print(f"---------------------------- REQUEST: {request.method}")
     bucket_name = get_bucket_name(request)
     presigned_url = ''
     try:

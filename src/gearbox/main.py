@@ -33,7 +33,14 @@ def get_app():
     app.add_middleware(ClientDisconnectMiddleware)
     load_modules(app)
     app.async_client = httpx.AsyncClient()
-    app.boto_manager = BotoManager({'region_name': config.AWS_REGION}, logger)
+
+    app.boto_manager = BotoManager(
+        {
+            'region_name': config.AWS_REGION,
+            'aws_access_key_id': config.S3_AWS_ACCESS_KEY_ID,
+            'aws_secret_access_key': config.S3_AWS_SECRET_ACCESS_KEY
+        }, 
+        logger)
 
 
     @app.on_event("shutdown")
