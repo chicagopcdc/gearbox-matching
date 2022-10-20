@@ -15,8 +15,17 @@ services:
       - DB_PORT=5432
       - TESTING=True
       - BYPASS_FENCE_DUMMYER_USER_ID=4
-      - S3_BUCKET_NAME="gearbox-match-conditions-bucket"
-      - S3_BUCKET_KEY_NAME="mc.json"
+      - S3_BUCKET_NAME="commons-gearbox-data-bucket-with-versioning"
+      - S3_TEST_BUCKET_NAME="test-compose-gearbox-data-bucket-with-versioning"
+      - S3_BUCKET_MATCH_CONDITIONS_KEY_NAME ="match_conditions.json"
+      - S3_BUCKET_MATCH_FORM_KEY_NAME = "match_form.json"
+      - S3_BUCKET_STUDIES_KEY_NAME = "gearbox_studies.json"
+      - S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME = "eligibility_criteria.json"
+      # TO DO: figure out how to inject these in docker, for now
+      # hard code when testing on docker. These are used in the
+      # boto manager to create the presiged urls.
+      - S3_AWS_ACCESS_KEY_ID = "your access key id here"
+      - S3_AWS_SECRET_ACCESS_KEY = "your secret access key here"
     command: /env/bin/uvicorn --host 0.0.0.0 --port 80 gearbox.asgi:app --reload
   db_migration:
     build: .
