@@ -21,6 +21,11 @@ def get_presigned_url(request, key_name, pu_config, method):
     presigned_url = ''
     try:
         presigned_url = request.app.boto_manager.presigned_url(bucket_name,key_name, config.S3_PRESIGNED_URL_EXPIRES, pu_config, method) 
+
+        if config.DUMMY_S3:
+            start_idx = presigned_url.find("Signature")
+            end_idx = presigned_url.find("&", start_idx)
+            presigned_url = presigned_url[:start_idx] + presigned_url[end_idx + 1:]
     except Exception as ex:
         raise HTTPException(status.get_starlette_status(ex.code), 
             detail="Error creating presigned_url for {} {}.".format(bucket_name, ex))
