@@ -28,8 +28,6 @@ class SavedInput(SavedInputDB):
 class SavedInputSearchResults(BaseModel):
     results: List[dict]
     id: int
-    # results: Sequence[SavedInputDB]
-    
 
 class UploadSavedInput(BaseModel):
     data: List[dict]

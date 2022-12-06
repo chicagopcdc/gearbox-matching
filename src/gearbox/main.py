@@ -4,14 +4,22 @@ import pkg_resources
 from fastapi import FastAPI, APIRouter, HTTPException, Depends
 import httpx
 from sqlalchemy.orm import Session
-from . import logger, config
-from gearbox import deps
+from gearbox import deps, config
+import cdislogging
+from pcdc_aws_client.boto import BotoManager
+
+logger_name = 'gb-logger'
+logger = cdislogging.get_logger(logger_name, log_level="debug" if config.DEBUG else "info")
+
+
 
 try:
-    from importlib.metadata import entry_points
+    # importlib.metadata works locally but not in Docker
+    # trying importlib_metadata
+    # from importlib.metadata import entry_points
+    from importlib_metadata import entry_points
 except ImportError:
     from importlib_metadata import entry_points
-
 
 
 def get_app():
@@ -26,17 +34,19 @@ def get_app():
     load_modules(app)
     app.async_client = httpx.AsyncClient()
 
+    app.boto_manager = BotoManager(
+        {
+            'region_name': config.AWS_REGION,
+            'aws_access_key_id': config.S3_AWS_ACCESS_KEY_ID,
+            'aws_secret_access_key': config.S3_AWS_SECRET_ACCESS_KEY
+        }, 
+        logger)
+
+
     @app.on_event("shutdown")
     async def shutdown_event():
         logger.info("Closing async client.")
         await app.async_client.aclose()
-
-    # @app.on_event("startup")
-    # async def startup_event():
-    #     logger.info("Do something at startup")
-    #     await {blank}.init(
-    #         hostname=url_parts.hostname, port=url_parts.port
-    #     )
 
     return app
 
@@ -100,15 +110,6 @@ def get_version():
 
 
 @router.get("/_status")
-# async def get_status(db: Session = Depends(deps.get_db)):
-def get_status(db: Session = Depends(deps.get_db)):
-    # try:
-    # now = await db.execute("SELECT now()")
-    now = db.execute("SELECT now()").scalar()
-    # except Exception:
-    #     raise UnhealthyCheck("Unhealthy")
-
-    return dict(
-        status="OK", timestamp=now
-    )
-
+async def get_status(db: Session = Depends(deps.get_session)):
+    now = await db.execute("SELECT now()")
+    return dict( status="OK", timestamp=now.scalars().first())

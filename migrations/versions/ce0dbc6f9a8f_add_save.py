@@ -33,5 +33,3 @@ def upgrade():
 
 def downgrade():
     op.drop_table("saved_input")
-
-

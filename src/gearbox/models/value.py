@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, Float
 from sqlalchemy.orm import relationship
 
-from . import Base
+from .base_class import Base
 
 
 class Value(Base):
@@ -16,3 +16,6 @@ class Value(Base):
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
 
+    el_criteria_has_criterions = relationship("ElCriteriaHasCriterion", back_populates="value")
+    criteria = relationship("CriterionHasValue", back_populates="value")
+    triggered_bys = relationship("TriggeredBy", back_populates="value")

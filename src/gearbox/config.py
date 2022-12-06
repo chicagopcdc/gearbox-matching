@@ -9,25 +9,63 @@ class CommaSeparatedLogins(CommaSeparatedStrings):
         super().__init__(value)
         self._items = [item.split(":") for item in self._items]
 
-
+# Note:
+# Configuration is in docker-compose.yml for Docker in compose services
 config = Config(".env")
 
-
 # Server
-DEBUG = config("DEBUG", cast=bool, default=True)
+DEBUG = config("DEBUG", cast=bool, default=False)
 TESTING = config("TESTING", cast=bool, default=False)
 URL_PREFIX = config("URL_PREFIX", default="/" if DEBUG else "/gearbox")
+BYPASS_FENCE = config("BYPASS_FENCE", cast=bool, default=False)
+
+#S3
+BYPASS_S3 = config("BYPASS_S3", cast=bool, default=False)
+# DUMMY_S3 - use a public dummy S3 bucket for docker compose testing presigned urls
+DUMMY_S3 = config("DUMMY_S3", cast=bool, default=False)
+S3_BUCKET_NAME = config("S3_BUCKET_NAME", default='commons-gearbox-data-bucket-with-versioning')
+S3_TEST_COMPOSE_BUCKET_NAME = config("S3_TEST_COMPOSE_BUCKET_NAME", default='test-compose-gearbox-data-bucket-with-versioning')
+S3_TEST_BUCKET_NAME = config("S3_TEST_BUCKET_NAME", default='test-gearbox-data-bucket-with-versioning')
+S3_BUCKET_MATCH_CONDITIONS_KEY_NAME = config("S3_BUCKET_MATCH_CONDITIONS_KEY_NAME", default='match_conditions.json')
+S3_BUCKET_MATCH_FORM_KEY_NAME = config("S3_BUCKET_MATCH_FORM_KEY_NAME", default='match_form.json')
+S3_BUCKET_STUDIES_KEY_NAME = config("S3_BUCKET_STUDIES_KEY_NAME", default='gearbox_studies.json')
+S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME = config("S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME", default='eligibility_criteria.json')
+S3_PRESIGNED_URL_EXPIRES=config("S3_PRESIGNED_URL_EXPIRES", default="1800")
+S3_PUT_OBJECT_EXPIRES=config("S3_PUT_OBJECT_EXPIRES", default="10")
+S3_AWS_ACCESS_KEY_ID=config("S3_AWS_ACCESS_KEY_ID", default='')
+S3_AWS_SECRET_ACCESS_KEY=config("S3_AWS_SECRET_ACCESS_KEY", default='')
 
 
 # Database
-DB_DRIVER = config("DB_DRIVER", default="postgresql")
+# ALEMBIC DOES NOT SUPPORT ASYNC DRIVERS YET, SO WE NEED THE SYNC 
+# DRIVER TO PERFORM THE MIGRATIONS
+ALEMBIC_DB_DRIVER = config("DB_DRIVER", default="postgresql")
+DB_DRIVER = config("DB_DRIVER", default="postgresql+asyncpg")
 DB_HOST = config("DB_HOST", default=None)
 DB_PORT = config("DB_PORT", cast=int, default=5432)
 DB_USER = config("DB_USER", default=None)
 DB_PASSWORD = config("DB_PASSWORD", cast=Secret, default=None)
 DB_DATABASE = config("DB_DATABASE", default=None)
 
+BYPASS_FENCE_DUMMY_USER_ID = config("BYPASS_FENCE_DUMMY_USER_ID", default=4)
+
+if TESTING:
+    DB_DATABASE = "test_" + (DB_DATABASE or "gearbox")
+    # DB_DATABASE = "pytest_test_" + (DB_DATABASE or "gearbox")
+    DB_PORT = config("DB_PORT_TESTING", cast=int)
+    TEST_KEEP_DB = config("TEST_KEEP_DB", cast=bool, default=False)
+    TEST_KEEP_DB = True # KEEP TEST DATABASE AFTER TESTS
+    print(f"DB DRIVER: {DB_DRIVER}")
+    print(f"DB USER: {DB_USER}")
+    print(f"DB PASSWORD: {DB_PASSWORD}")
+    print(f"DB HOST: {DB_HOST}")
+    print(f"DB PORT: {DB_PORT}")
+    print(f"DB DATABASE: {DB_DATABASE}")
+    print(f"BYPASS FENCE: {BYPASS_FENCE}")
+    print(f"BYPASS S3: {BYPASS_S3}")
+    print(f"DEBUG: {DEBUG}")
 DB_STRING = DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST + ":" + str(DB_PORT) + "/" + DB_DATABASE
+ALEMBIC_DB_STRING = ALEMBIC_DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST + ":" + str(DB_PORT) + "/" + DB_DATABASE
 
 # host_server = os.environ.get('host_server', 'localhost')
 # db_server_port = urllib.parse.quote_plus(str(os.environ.get('db_server_port', '5432')))
@@ -37,14 +75,10 @@ DB_STRING = DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST
 # ssl_mode = urllib.parse.quote_plus(str(os.environ.get('ssl_mode','prefer')))
 # DATABASE_URL = 'postgresql://{}:{}@{}:{}/{}?sslmode={}'.format(db_username, db_password, host_server, db_server_port, database_name, ssl_mode)
 
-if TESTING:
-    DB_DATABASE = "test_" + (DB_DATABASE or "gearbox")
-    TEST_KEEP_DB = config("TEST_KEEP_DB", cast=bool, default=False)
-
 DB_DSN = config(
     "DB_DSN",
     cast=make_url,
-    default=URL(
+    default=URL.create(
         drivername=DB_DRIVER,
         username=DB_USER,
         password=DB_PASSWORD,
@@ -87,3 +121,12 @@ INDEXING_SERVICE_ENDPOINT = config(
 DATA_ACCESS_SERVICE_ENDPOINT = config(
     "DATA_ACCESS_SERVICE_ENDPOINT", cast=str, default="http://fence-service"
 )
+
+# S3
+S3_BUCKET_NAME = config("S3_BUCKET_NAME", default='commons-gearbox-data-bucket-with-versioning')
+S3_BUCKET_MATCH_CONDITIONS_KEY_NAME = config("S3_BUCKET_MATCH_CONDITIONS_KEY_NAME", default='match_conditions.json')
+S3_BUCKET_MATCH_FORM_KEY_NAME = config("S3_BUCKET_MATCH_FORM_KEY_NAME", default='match_form.json')
+S3_BUCKET_STUDIES_KEY_NAME = config("S3_BUCKET_STUDIES_KEY_NAME", default='gearbox_studies.json')
+S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME = config("S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME", default='eligibility_criteria.json')
+
+AWS_REGION = config("AWS_REGION", default='us-east-1')

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import relationship
 
-from . import Base
+from .base_class import Base
 
 
 class Site(Base):
@@ -11,5 +11,7 @@ class Site(Base):
     code = Column(String, nullable=True)
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
+
+    studies = relationship("SiteHasStudy", back_populates="site")
 
 

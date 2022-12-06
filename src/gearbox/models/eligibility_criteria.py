@@ -1,7 +1,7 @@
 from sqlalchemy import ForeignKey, Column, Integer, DateTime, Boolean
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship
 
-from . import Base
+from .base_class import Base
 
 
 class EligibilityCriteria(Base):
@@ -9,6 +9,7 @@ class EligibilityCriteria(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
-
     study_version_id = Column(Integer, ForeignKey('study_version.id'))
-    study_version = relationship("StudyVersion", backref=backref("eligibility_criteria"))
+
+    notes = relationship("EligibilityCriteriaHasNote", back_populates="eligibility_criteria")
+    el_criteria_has_criterions = relationship("ElCriteriaHasCriterion", back_populates="eligibility_criteria")

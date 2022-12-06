@@ -23,13 +23,13 @@ from gearbox.main import load_modules
 from gearbox.config import DB_CONNECT_RETRIES
 
 from gearbox.models.base_class import Base
-from gearbox.models.db import SQLALCHEMY_DATABASE_URI
+from gearbox.models.db import SQLALCHEMY_ALEMBIC_DATABASE_URI
 
 target_metadata = Base.metadata
 
 
 def get_url():
-    return SQLALCHEMY_DATABASE_URI
+    return SQLALCHEMY_ALEMBIC_DATABASE_URI
 
 
 

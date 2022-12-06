@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import relationship
 
-from . import Base
+from .base_class import Base
 
 
 class Study(Base):
@@ -14,4 +14,11 @@ class Study(Base):
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
 
-    sites = relationship("Site", secondary="site_has_study")
+    sites = relationship("SiteHasStudy", back_populates="study")
+    # explicitly setting lazy='joined' here solved the problem of
+    # pydantic trying to execute a join outside of the async 
+    # program stream when lazy loading the study-links - this was happening even 
+    # though joinedload is used in the query...
+    # this only happens when trying to access via sites join to study
+    # and not the other way around
+    links = relationship("StudyLink", back_populates="study", lazy='joined')
