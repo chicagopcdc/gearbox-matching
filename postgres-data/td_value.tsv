@@ -48,29 +48,28 @@ id	code	description	type	value_string	unit	operator	create_date	active
 47	lt_5	lower than 5	Float	5		lt		1
 48	gt_135	greater than 135	Float	135		gt		1
 49	gt_2	greater than 2	Float	2		gt		1
-50	gt_2	greater than 2	Float	2		gt		1
 51	gte_40	greater or equal than 40	Integer	40		gte		1
 52	gte_25	greater or equal than 25	Integer	25		gte		1
 53	lt_1	lower than 1	Integer	1		lt		1
-54	lt_6	lower than 6	Integer	6	years	lt		1
-55	gte_6	greater or equal than 6	Integer	6	years	gte		1
-56	lt_10	lower than 10	Integer	10	years	lt		1
+54	lt_6_y	lower than 6	Integer	6	years	lt		1
+55	gte_6_y	greater or equal than 6	Integer	6	years	gte		1
+56	lt_10_y	lower than 10	Integer	10	years	lt		1
 57	gte_10	greater or equal than 10	Integer	10	years	gte		1
-58	lt_13	lower than 13	Integer	13	years	lt		1
+58	lt_13_y	lower than 13	Integer	13	years	lt		1
 59	Ambiguous lineage acute leukemia (ALAL)	Ambiguous lineage acute leukemia (ALAL)	String	ALAL		eq		1
 60	Morphology	Morphology	String	Morphology		eq		1
 61	Flow cytometry	Flow cytometry	String	Flow cytometry		eq		1
 62	lte_30_y	lower or equal than 30 years	Integer	30	years	lte		1
 63	lte_365_d	lower or equal than 365 days	Integer	365	days	lte		1
-64	gte_5	greater or equal than 5%	Float	5		gte		1
+64	gte_5	greater or equal than 5%	Float	5	%	gte		1
 65	gte_0	greater or equal than 0	Integer	0		gte		1
 66	lte_2	lower or equan than 2	Integer	2		lte		1
 67	gt_60	greater than 60	Float	60		gt		1
 68	gt_3	greater than 3	Integer	3		gt		1
 69	lte_1_5	lower or equal than 1.5	Float	1.5	ULN	lte		1
-70	gte_13	greater or equal than 13	Integer	13	years	gte		1
-71	lt_16	lower than 16	Integer	16	years	lt		1
-72	gte_16	greater or equal than 16	Integer	16	years	gte		1
+70	gte_13_y	greater or equal than 13	Integer	13	years	gte		1
+71	lt_16_y	lower than 16	Integer	16	years	lt		1
+72	gte_16_y	greater or equal than 16	Integer	16	years	gte		1
 73	gte_30	greater or equal than 30	Integer	30		gte		1
 74	lte_0_5	lower or equal than 0.5	Float	0.5		lte		1
 75	lte_0_6	lower or equal than 0.6	Float	0.6		lte		1
@@ -92,7 +91,6 @@ id	code	description	type	value_string	unit	operator	create_date	active
 91	gte_70	greater or equal than 70	Integer	70		gte		1
 92	lte_3	lower or equan than 3	Integer	3		lte		1
 93	gte_20000	greater or equal than 20000	Integer	20000		gte		1
-94	gte_84_d	greater or equal than 84 days	Integer	8		gte		1
 95	grade_1	Grade 1	String	Grade 1		eq		1
 96	grade_2	Grade 2	String	Grade 2		eq		1
 97	grade_3	Grade 3	String	Grade 3		eq		1
@@ -104,7 +102,7 @@ id	code	description	type	value_string	unit	operator	create_date	active
 103	lte_5	lower or equal than 5	Integer	5		lte		1
 104	lte_21_y	lower or equal than 21 years	Integer	21	years	lte		1
 105	gte_183	greater or equal 183	Integer	183		gte		1
-106	lte_450_mgm2	lower or equal to 450 mg/m^2	Float	450	mg/m^2	lte		1
+106	lte_450_mg_m2	lower or equal to 450 mg/m2	Float	450	mg/m^2	lte		1
 107	lte_29_y	lower or equal than 29 years	Integer	29	years	lte		1
 108	gte_45	greater or equal 45	Integer	45		gte		1
 109	gte_28	greater or equal 28	Integer	28		gte		1
@@ -116,9 +114,9 @@ id	code	description	type	value_string	unit	operator	create_date	active
 115	ecog_4	ECOG 4 (Lansky/Karnofsky 10-20)	String	ECOG 4		eq		1
 116	lte_1_y	lower or equal than 1 years	Integer	1	years	lte		1
 117	lt_2_y	lower than 2	Integer	2	years	lt		1
-118	gte_2_y	greater or equal than 2	Integer	2		gte		1
+118	gte_2_y	greater or equal than 2	Integer	2	years	gte		1
 119	lte_2_5	lower or equal than 2.5	Float	2.5	ULN	lte		1
-120	lt_2_5	lower or equal than 2.5	Float	2.5		lt		1
+120	lt_2_5	lower than 2.5	Float	2.5		lt		1
 121	lt_1_y	lower than 1	Integer	1	years	lt		1
 122	eq_4	equal to 4	Integer	4		eq		1
 123	gte_10000	greater or equal 10000	Integer	10000	count/mm3	gte		1

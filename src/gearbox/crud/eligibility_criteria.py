@@ -18,5 +18,5 @@ async def get_eligibility_criteria_info(current_session: Session):
     ).order_by(ElCriteriaHasCriterion.id)
 
     result = await current_session.execute(stmt)
-    sites = result.unique().scalars().all()
-    return sites
+    ec = result.unique().scalars().all()
+    return ec
