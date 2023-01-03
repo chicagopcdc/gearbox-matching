@@ -93,6 +93,22 @@ def setup_database(connection) -> Engine:
     file_to_table(conn, cursor,'algorithm_engine', './postgres-data/td_algorithm_engine.tsv')
     conn.commit()
 
+    cursor.execute("SELECT setval('algorithm_engine_id_seq', (SELECT MAX(id) FROM algorithm_engine));")
+    cursor.execute("SELECT setval('criterion_id_seq', (SELECT MAX(id) FROM criterion));")
+    cursor.execute("SELECT setval('display_rules_id_seq', (SELECT MAX(id) FROM display_rules));")
+    cursor.execute("SELECT setval('el_criteria_has_criterion_id_seq', (SELECT MAX(id) FROM el_criteria_has_criterion));")
+    cursor.execute("SELECT setval('eligibility_criteria_id_seq', (SELECT MAX(id) FROM eligibility_criteria));")
+    cursor.execute("SELECT setval('input_type_id_seq', (SELECT MAX(id) FROM input_type));")
+    cursor.execute("SELECT setval('site_id_seq', (SELECT MAX(id) FROM site));")
+    cursor.execute("SELECT setval('study_id_seq', (SELECT MAX(id) FROM study));")
+    cursor.execute("SELECT setval('study_algorithm_engine_id_seq', (SELECT MAX(id) FROM study_algorithm_engine));")
+    cursor.execute("SELECT setval('study_links_id_seq', (SELECT MAX(id) FROM study_links));")
+    cursor.execute("SELECT setval('study_version_id_seq', (SELECT MAX(id) FROM study_version));")
+    cursor.execute("SELECT setval('tag_id_seq', (SELECT MAX(id) FROM tag));")
+    cursor.execute("SELECT setval('triggered_by_id_seq', (SELECT MAX(id) FROM triggered_by));")
+    cursor.execute("SELECT setval('value_id_seq', (SELECT MAX(id) FROM value));")
+    conn.commit()
+
     yield session
     session.close()
 
