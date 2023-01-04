@@ -1,5 +1,5 @@
 from .saved_input import SavedInputSearchResults, UploadSavedInput
-from .site_schema import SiteResponse
+from .site import SiteResponse
 from .algorithm_engine import AlgorithmResponse
 from .value import Value, ValueSearchResult, ValueCreate
 from .display_rules import DisplayRules
