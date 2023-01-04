@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Sequence, List, Optional
 from .value import Value
-from .criterion import CriterionSchema
+from .criterion import Criterion
 
 # I S S U E: this schema does not produce accurate
 # dictionaries - it duplicates the tags and input_values
@@ -19,7 +19,7 @@ class TriggeredBy(BaseModel):
     value_id: int
     active: Optional[bool]
     path: Optional[str]
-    criterion: CriterionSchema
+    criterion: Criterion
     value: Value
 
     class Config:
@@ -32,7 +32,7 @@ class DisplayRules(BaseModel):
     version: Optional[int]
     active: Optional[bool]
     triggered_bys: Optional[List[TriggeredBy]]
-    criterion: Optional[CriterionSchema]
+    criterion: Optional[Criterion]
 
     class Config:
         orm_mode = True

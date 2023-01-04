@@ -4,7 +4,7 @@ from typing import Sequence, List, Optional
 from .value import Value
 from .input_type import InputType
 
-class CriterionSchema(BaseModel):
+class Criterion(BaseModel):
     id: int
     code: Optional[str]
     display_name: Optional[str]
@@ -17,14 +17,14 @@ class CriterionSchema(BaseModel):
     class Config:
         orm_mode = True
 
-class ElCriterionHasCriterionSchema(BaseModel):
+class ElCriterionHasCriterion(BaseModel):
     id: int
     criterion_id: int
     eligibility_criteria_id: int
     create_date: Optional[datetime]
     active: Optional[bool]
     value_id: int
-    criterion: CriterionSchema
+    criterion: Criterion
     value: Value
     class Config:
         orm_mode = True

@@ -27,10 +27,10 @@ class SiteStudy(BaseModel):
         orm_mode = True
         getter_dict = SiteStudyGetter
 
-class SiteSchema(BaseModel):
+class Site(BaseModel):
     id: int
     name: str
-    code: str
+    code: Optional[str]
     create_date: Optional[datetime]
     active: Optional[bool]
     studies: Optional[List[SiteStudy]]
@@ -38,17 +38,17 @@ class SiteSchema(BaseModel):
     class Config:
         orm_mode = True
 
-class SiteCreateSchema(BaseModel):
+class SiteCreate(BaseModel):
     pass
 
-class SiteSearchResultsSchema(BaseModel):
+class SiteSearchResults(BaseModel):
     pass
 
 class SiteResponse(BaseModel):
     current_date: str
     current_time: str
     status: str
-    body: List[SiteSchema]
+    body: List[Site]
 
     class Config:
         orm_mode = True
