@@ -54,7 +54,6 @@ nest-asyncio = "^1.5.1"
 "study" = "gearbox.routers.study"
 "eligibility_criteria" = "gearbox.routers.eligibility_criteria"
 "match_conditions" = "gearbox.routers.match_conditions"
-"criterion_value" = "gearbox.routers.criterion_value"
 "match_form" = "gearbox.routers.match_form"
 "value" = "gearbox.routers.value"
 
