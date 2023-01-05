@@ -32,7 +32,8 @@ class DisplayRules(BaseModel):
     version: Optional[int]
     active: Optional[bool]
     triggered_bys: Optional[List[TriggeredBy]]
-    criterion: Optional[Criterion]
+    # criterion: Optional[Criterion]
+    criterion: Criterion
 
     class Config:
         orm_mode = True

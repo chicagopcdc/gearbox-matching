@@ -3,31 +3,22 @@ from datetime import datetime
 from typing import Sequence, List, Optional
 from .value import Value
 from .input_type import InputType
+# from .criterion import CriterionBase
 
-class Criterion(BaseModel):
-    id: int
-    code: Optional[str]
-    display_name: Optional[str]
-    description: Optional[str]
-    create_date: Optional[datetime]
-    active: Optional[bool]
-    ontology_code_id: Optional[int]
-    input_type_id: Optional[int]
-    input_type: InputType
-    class Config:
-        orm_mode = True
-
-class ElCriterionHasCriterion(BaseModel):
+class ElCriterionHasCriterionBase(BaseModel):
     id: int
     criterion_id: int
     eligibility_criteria_id: int
     create_date: Optional[datetime]
     active: Optional[bool]
     value_id: int
-    criterion: Criterion
     value: Value
     class Config:
         orm_mode = True
+
+class ElCriterionHasCriterion(ElCriterionHasCriterionBase):
+    pass
+#    criterion: CriterionBase
 
 class ElCriterionHasCriterionCreate(BaseModel):
     pass

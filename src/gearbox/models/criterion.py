@@ -19,7 +19,7 @@ class Criterion(Base):
     tags = relationship("CriterionHasTag", back_populates="criterion", lazy='joined')
     el_criteria_has_criterions = relationship("ElCriteriaHasCriterion", back_populates="criterion")
     values = relationship("CriterionHasValue", back_populates="criterion", lazy="joined")
-    input_type = relationship("InputType", back_populates="criterions")
+    input_type = relationship("InputType", back_populates="criterions", lazy="joined")
 
-    display_rules = relationship("DisplayRules", back_populates="criterion")
-    triggered_bys = relationship("TriggeredBy", back_populates="criterion")
+    display_rules = relationship("DisplayRules", back_populates="criterion", lazy="joined")
+    triggered_bys = relationship("TriggeredBy", back_populates="criterion", lazy="joined")

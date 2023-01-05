@@ -5,3 +5,5 @@ from .value import Value, ValueSearchResult, ValueCreate
 from .display_rules import DisplayRules
 from .study_response import StudyResponse
 from .eligibility_criteria_response import EligibilityCriteriaResponse
+from .criterion import Criterion
+# from .el_criterion_has_criterion import ElCriterionHasCriterionBase

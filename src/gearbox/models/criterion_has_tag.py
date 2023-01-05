@@ -10,4 +10,4 @@ class CriterionHasTag(Base):
     tag_id = Column(Integer, ForeignKey('tag.id'), primary_key=True)
 
     criterion = relationship("Criterion", back_populates="tags")
-    tag = relationship("Tag", back_populates="criterions")
+    tag = relationship("Tag", back_populates="criterions", lazy="joined")
