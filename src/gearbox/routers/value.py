@@ -35,8 +35,7 @@ mod = APIRouter()
 # auto_error=False prevents FastAPI from raises a 403 when the request is missing
 # an Authorization header. Instead, we want to return a 401 to signify that we did
 # not recieve valid credentials
-# bearer = HTTPBearer(auto_error=False)
-
+bearer = HTTPBearer(auto_error=False)
 
 @mod.get("/values", response_model=ValueSearchResults, dependencies=[ Depends(auth.authenticate)])
 async def get_values(
@@ -80,13 +79,14 @@ async def update_object(
     """
     Comments:
     """
-
+    # TO DO: try / exception value_in not found & db exceptions
     auth_header = str(request.headers.get("Authorization",""))
+    logger.info(f"ABOUT TO GET OBJECT FOR UPDATE")
     value_in = await value.get(db=session, id=value_id)
+    logger.info(f"GOT OBJECT FOR UPDATE: {type(value_in)}")
     upd_value = await value.update(db=session, db_obj=value_in, obj_in=body)
+    logger.info(f"PERFORMED UPDATE: {upd_value}")
     return JSONResponse(jsonable_encoder(upd_value), status.HTTP_201_CREATED)
-
-#TO DO: endpoint that returns all values to the front-end
 
 def init_app(app):
     app.include_router(mod, tags=["value","values","update-value"])
