@@ -6,17 +6,7 @@ from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from gearbox.models.models import SavedInput
 from fastapi import HTTPException
 from asyncpg import UniqueViolationError
-from starlette.status import (
-    HTTP_200_OK,
-    HTTP_201_CREATED,
-    HTTP_204_NO_CONTENT,
-    HTTP_409_CONFLICT,
-    HTTP_400_BAD_REQUEST,
-    HTTP_401_UNAUTHORIZED,
-    HTTP_403_FORBIDDEN,
-    HTTP_404_NOT_FOUND,
-    HTTP_500_INTERNAL_SERVER_ERROR,
-)
+from ..util import status
 
 from cdislogging import get_logger
 logger = get_logger(__name__)
@@ -35,7 +25,7 @@ async def get_latest_saved_input(current_session: Session, user_id: int):
         saved_input = result.scalars().first()
         return saved_input
     except exc.SQLAlchemyError as e:
-        raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}")
     
 
 
@@ -49,9 +39,9 @@ async def add_saved_input(current_session: Session, user_id: int, data: dict):
         await current_session.commit()
         return new_input
     except UniqueViolationError:
-        raise HTTPException(HTTP_409_CONFLICT, f"Metadata GUID conflict: {user_id}")
+        raise HTTPException(status.HTTP_409_CONFLICT, f"Metadata GUID conflict: {user_id}")
     except exc.SQLAlchemyError as e:
-        raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}")
 
 async def update_saved_input(current_session: Session, user_id: int, saved_input_id: int, data: dict):
     # SELECT AND LOCK ROW FOR UPDATE
@@ -63,12 +53,12 @@ async def update_saved_input(current_session: Session, user_id: int, saved_input
         saved_input = result.scalars().first()
         saved_input.data = data
     except exc.SQLAlchemyError as e:
-        raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}")
 
     try:
         await current_session.commit()
         return saved_input 
     except UniqueViolationError:
-        raise HTTPException(HTTP_409_CONFLICT, f"User id conflict: {user_id}")
+        raise HTTPException(status.HTTP_409_CONFLICT, f"User id conflict: {user_id}")
     except exc.SQLAlchemyError as e:
-        raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}")

@@ -25,8 +25,8 @@ from starlette.responses import JSONResponse
 from ..admin_login import admin_required
 
 from .. import config
-from ..schemas import ValueCreate, ValueSearchResult
-from ..crud.value import add_value, get_all_values
+from ..schemas import ValueCreate, ValueSearchResults
+from ..crud import value
 from .. import deps
 from .. import auth 
 
@@ -38,16 +38,26 @@ mod = APIRouter()
 # bearer = HTTPBearer(auto_error=False)
 
 
-@mod.get("/values", response_model=List[ValueSearchResult], dependencies=[ Depends(auth.authenticate)])
+@mod.get("/values", response_model=ValueSearchResults, dependencies=[ Depends(auth.authenticate)])
 async def get_values(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
     auth_header = str(request.headers.get("Authorization",""))
-    values = await get_all_values(session)
+    values = await value.get_multi(session)
     return JSONResponse(jsonable_encoder(values), status.HTTP_200_OK)
 
-@mod.post("/value", response_model=ValueSearchResult,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.get("/value/{value_id}", response_model=ValueSearchResults, dependencies=[ Depends(auth.authenticate)])
+async def get_value(
+    value_id: int,
+    request: Request,
+    session: AsyncSession = Depends(deps.get_session),
+):
+    auth_header = str(request.headers.get("Authorization",""))
+    ret_value = await value.get(db=session, id=value_id)
+    return JSONResponse(jsonable_encoder(ret_value), status.HTTP_200_OK)
+
+@mod.post("/value", response_model=ValueSearchResults,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
     body: ValueCreate,
     request: Request,
@@ -57,10 +67,26 @@ async def save_object(
     Comments:
     """
     auth_header = str(request.headers.get("Authorization",""))
-    value = await add_value(session, body)
-    return JSONResponse(jsonable_encoder(value), status.HTTP_201_CREATED)
+    new_value = await value.create(db=session, obj_in=body)
+    return JSONResponse(jsonable_encoder(new_value), status.HTTP_201_CREATED)
+
+@mod.post("/update-value/{value_id}", response_model=ValueSearchResults,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+async def update_object(
+    value_id: int,
+    body: dict,
+    request: Request,
+    session: AsyncSession = Depends(deps.get_session),
+):
+    """
+    Comments:
+    """
+
+    auth_header = str(request.headers.get("Authorization",""))
+    value_in = await value.get(db=session, id=value_id)
+    upd_value = await value.update(db=session, db_obj=value_in, obj_in=body)
+    return JSONResponse(jsonable_encoder(upd_value), status.HTTP_201_CREATED)
 
 #TO DO: endpoint that returns all values to the front-end
 
 def init_app(app):
-    app.include_router(mod, tags=["value","values"])
+    app.include_router(mod, tags=["value","values","update-value"])

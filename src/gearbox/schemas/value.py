@@ -1,9 +1,8 @@
 from pydantic import BaseModel, Extra
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Sequence
 
-class Value(BaseModel):
-    id: int
+class ValueBase(BaseModel):
     code: Optional[str]
     description: Optional[str]
     type: Optional[str]
@@ -12,32 +11,19 @@ class Value(BaseModel):
     operator: Optional[str]
     create_date: Optional[datetime]
     active: Optional[bool]
-    
+
     class Config:
         orm_mode = True    
 
-class ValueCreate(BaseModel):
-    code: Optional[str]
-    description: Optional[str]
-    type: Optional[str]
-    value_string: Optional[str]
-    unit: Optional[str]
-    operator: Optional[str]
-    active: Optional[bool]
-    
-    class Config:
-        orm_mode = True
 
-class ValueSearchResult(BaseModel):
+class Value(ValueBase):
     id: int
-    code: Optional[str]
-    description: Optional[str]
-    type: Optional[str]
-    value_string: Optional[str]
-    unit: Optional[str]
-    operator: Optional[str]
-    create_date: Optional[datetime]
-    active: Optional[bool]
-    
-    class Config:
-        orm_mode = True    
+
+class ValueCreate(ValueBase):
+    pass
+
+class ValueUpdate(BaseModel):
+    pass
+
+class ValueSearchResults(BaseModel):
+    results: Sequence[Value]    

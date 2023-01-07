@@ -15,7 +15,7 @@ from typing import List
 from .. import auth
 from ..admin_login import admin_required
 
-from ..schemas import StudySchema, StudyResponse
+from ..schemas import StudyResponse
 from ..crud.study import get_single_study, get_studies
 from .. import deps
 from ..util.study_response import format_study_response

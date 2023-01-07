@@ -14,6 +14,8 @@ async def get_sites(current_session: Session):
         )
     )
     result = await current_session.execute(stmt)
+    # The unique() method must be invoked on this Result, as it contains results that include joined eager loads against collections
+    # scalars (with an 's') returns model objects without it we get sqlalchemy.engine.row.Row objects
     sites = result.unique().scalars().all()
     return sites
 
