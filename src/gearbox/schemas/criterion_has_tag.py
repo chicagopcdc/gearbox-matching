@@ -3,24 +3,18 @@ from datetime import datetime
 from typing import Sequence, List, Any, Optional
 from pydantic.utils import GetterDict
 
-class CriterionTagGetter(GetterDict):
-    def get(self, key: str, default: Any = None) -> Any:
-        if key in ('id','code','type'):
-            return getattr(self._obj.tag, key)
-        else:
-            return super(CriterionTagGetter, self).get(key, default)
-
-class CriterionTag(BaseModel):
-    id: Optional[int]
-    code: Optional[str]
-    type: Optional[str]
+class CriterionHasTagBase(BaseModel):
+    criterion_id: int
+    tag_id: int
 
     class Config:
         orm_mode = True
-        getter_dict = CriterionTagGetter
 
-class CriterionHasTagCreate(BaseModel):
+class CriterionHasTag(CriterionHasTagBase):
     pass
 
-class CriterionHasTagSearchResults(BaseModel):
+class CriterionHasTagCreate(CriterionHasTagBase):
     pass
+
+class CriterionHasTagSearchResults(CriterionHasTagBase):
+    results: Sequence[CriterionHasTag]

@@ -29,6 +29,17 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """
         self.model = model
 
+
+    async def check_key(self, db:Session, ids_to_check: Union[List[int], int]):
+        error_msg = None
+        if isinstance(ids_to_check, list):
+            errors = '.'.join([str(id) for id in ids_to_check if not await self.get(db, id)])
+        else:
+            errors = ids_to_check if not await self.get(db,ids_to_check) else None
+        if errors:
+            error_msg = f"ids: {errors} do not exist in {self.model}."
+        return error_msg
+
     async def get(self, db: Session, id: Any) -> Optional[ModelType]:
         stmt = select(self.model).where(self.model.id == id)
         try:
@@ -44,7 +55,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         stmt = select(self.model)
         try:
             result_db = await db.execute(stmt)
-            result = result_db.scalars().all()
+            result = result_db.unique().scalars().all()
             return result
         except exc.SQLAlchemyError as e:
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        

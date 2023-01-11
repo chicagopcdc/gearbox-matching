@@ -27,8 +27,7 @@ class SiteStudy(BaseModel):
         orm_mode = True
         getter_dict = SiteStudyGetter
 
-class Site(BaseModel):
-    id: int
+class SiteBase(BaseModel):
     name: str
     code: Optional[str]
     create_date: Optional[datetime]
@@ -38,12 +37,16 @@ class Site(BaseModel):
     class Config:
         orm_mode = True
 
-class SiteCreate(BaseModel):
+class Site(SiteBase):
+    id: int
+
+class SiteCreate(SiteBase):
     pass
 
 class SiteSearchResults(BaseModel):
-    pass
+    results: Sequence[Site]
 
+"""
 class SiteResponse(BaseModel):
     current_date: str
     current_time: str
@@ -52,3 +55,4 @@ class SiteResponse(BaseModel):
 
     class Config:
         orm_mode = True
+"""

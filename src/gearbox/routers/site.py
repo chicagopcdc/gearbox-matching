@@ -11,14 +11,14 @@ from ..util import status
 from starlette.responses import JSONResponse
 from typing import List
 from .. import auth
-from ..schemas import SiteResponse
+from ..schemas import SiteSearchResults
 from ..crud.site import get_single_site, get_sites
 from .. import deps
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
 
-@mod.get("/site/{site_id}", response_model=SiteResponse, dependencies=[Depends(auth.authenticate)], status_code=status.HTTP_200_OK)
+@mod.get("/site/{site_id}", response_model=SiteSearchResults, dependencies=[Depends(auth.authenticate)], status_code=status.HTTP_200_OK)
 async def get_site(
     request: Request,
     site_id: int,
@@ -36,7 +36,7 @@ async def get_site(
 
     return response
 
-@mod.get("/sites", response_model=SiteResponse, dependencies=[Depends(auth.authenticate)])
+@mod.get("/sites", response_model=SiteSearchResults, dependencies=[Depends(auth.authenticate)])
 async def get_all_sites(
     request: Request,
     session: Session = Depends(deps.get_session),
