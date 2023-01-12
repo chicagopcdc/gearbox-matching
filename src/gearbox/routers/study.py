@@ -1,6 +1,6 @@
 import json
-from .. import config
-from ..util import status, bucket_utils
+from gearbox import config
+from gearbox.util import status, bucket_utils
 from fastapi import APIRouter
 from sqlalchemy.orm import Session
 from datetime import date
@@ -12,13 +12,13 @@ from . import logger
 from starlette.responses import JSONResponse 
 from typing import List
 
-from .. import auth
-from ..admin_login import admin_required
+from gearbox import auth
+from gearbox.admin_login import admin_required
 
-from ..schemas import StudyResponse
-from ..crud.study import get_single_study, get_studies
-from .. import deps
-from ..util.study_response import format_study_response
+from gearbox.schemas import StudyResponse
+from gearbox.crud.study import get_single_study, get_studies
+from gearbox import deps
+from gearbox.util.study_response import format_study_response
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)

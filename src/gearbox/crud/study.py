@@ -2,7 +2,7 @@ from re import I
 from sqlalchemy import func, update, select, exc
 from sqlalchemy.orm import Session, joinedload
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
-from gearbox.models.models import Study, SiteHasStudy
+from gearbox.models import Study, SiteHasStudy
 
 from cdislogging import get_logger
 logger = get_logger(__name__)

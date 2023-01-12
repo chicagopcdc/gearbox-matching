@@ -10,4 +10,6 @@ from .criterion_has_value import CriterionHasValue, CriterionHasValueCreate, Cri
 from .study_response import StudyResponse
 from .eligibility_criteria_response import EligibilityCriteriaResponse
 from .criterion import CriterionCreate, CriterionSearchResults, CriterionCreateIn
+from .input_type import InputTypeCreate, InputTypeSearchResults, InputType
+from .ontology_code import OntologyCodeCreate, OntologyCodeSearchResults, OntologyCode
 # from .el_criterion_has_criterion import ElCriterionHasCriterionBase

@@ -1,5 +1,5 @@
 import json
-from .. import config
+from gearbox import config
 import re
 from datetime import date
 from time import gmtime, strftime
@@ -11,13 +11,13 @@ from fastapi.security import HTTPBearer
 from . import logger
 from starlette.responses import JSONResponse 
 from typing import List
-from .. import auth
-from ..schemas import DisplayRules 
-from ..crud.match_form import get_form_info
-from .. import deps
-from ..util.bounds import bounds
-from ..util import match_conditions as mc, status, match_form as mf, bucket_utils
-from ..admin_login import admin_required
+from gearbox import auth
+from gearbox.schemas import DisplayRules 
+from gearbox.crud.match_form import get_form_info
+from gearbox import deps
+from gearbox.util.bounds import bounds
+from gearbox.util import match_conditions as mc, status, match_form as mf, bucket_utils
+from gearbox.admin_login import admin_required
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)

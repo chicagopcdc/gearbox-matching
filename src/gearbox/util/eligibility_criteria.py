@@ -1,4 +1,4 @@
-from ..crud.eligibility_criteria import get_eligibility_criteria_info
+from gearbox.crud.eligibility_criteria import get_eligibility_criteria_info
 
 async def get_eligibility_criteria(session):
 

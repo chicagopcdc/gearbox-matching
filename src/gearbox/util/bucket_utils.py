@@ -1,4 +1,4 @@
-from .. import config
+from gearbox import config
 from . import status
 from fastapi import HTTPException
 

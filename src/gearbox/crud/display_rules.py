@@ -1,6 +1,6 @@
 from .base import CRUDBase
-from gearbox.models.models import DisplayRules
-from ..schemas import DisplayRulesCreate, DisplayRulesSearchResults
+from gearbox.models import DisplayRules
+from gearbox.schemas import DisplayRulesCreate, DisplayRulesSearchResults
 
 class CRUDDisplayRules(CRUDBase [DisplayRules, DisplayRulesCreate, DisplayRulesSearchResults]):
     ...

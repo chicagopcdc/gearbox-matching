@@ -5,7 +5,7 @@ from sqlalchemy import func, update, select, exc
 from gearbox.schemas.algorithm_engine import AlgorithmResponse
 from sqlalchemy.orm import Session, joinedload
 
-from gearbox.models.models import AlgorithmEngine, StudyAlgorithmEngine
+from gearbox.models import AlgorithmEngine, StudyAlgorithmEngine
 
 from cdislogging import get_logger
 logger = get_logger(__name__)

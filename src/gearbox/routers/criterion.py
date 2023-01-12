@@ -22,15 +22,15 @@ from sqlalchemy.orm import Session
 
 from gearbox.models import display_rules
 from . import logger
-from ..util import status
+from gearbox.util import status
 from starlette.responses import JSONResponse
-from ..admin_login import admin_required
+from gearbox.admin_login import admin_required
 
-from .. import config
-from ..schemas import CriterionSearchResults, CriterionCreateIn, CriterionCreate, CriterionHasValueCreate, CriterionHasTagCreate, DisplayRulesCreate, TriggeredByCreate
-from ..crud import criterion, criterion_has_value, criterion_has_tag, display_rules_crud, triggered_by_crud, value, tag
-from .. import deps
-from .. import auth 
+# from gearbox import config
+from gearbox.schemas import CriterionSearchResults, CriterionCreateIn, CriterionCreate, CriterionHasValueCreate, CriterionHasTagCreate, DisplayRulesCreate, TriggeredByCreate
+from gearbox.crud import criterion_crud, criterion_has_value_crud, criterion_has_tag_crud, display_rules_crud, triggered_by_crud, value_crud, tag_crud
+from gearbox import deps
+from gearbox import auth 
 
 mod = APIRouter()
 
@@ -46,7 +46,7 @@ async def get_criteria(
 ):
 
     auth_header = str(request.headers.get("Authorization",""))
-    criteria = await criterion.get_multi(session)
+    criteria = await criterion_crud.get_multi(session)
     return JSONResponse(jsonable_encoder(criteria), status.HTTP_200_OK)    
 
 @mod.post("/criterion", response_model=CriterionSearchResults,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
@@ -64,29 +64,29 @@ async def save_object(
     # criteria and all associated rows in other tables
 
     # CREATE A FUNCTION FOR THE FOLLOWING CHECKS AND PUT IN util
-    check_id_errors = await value.check_key(db=session, ids_to_check=body.values)
+    check_id_errors = await value_crud.check_key(db=session, ids_to_check=body.values)
     if check_id_errors:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: creating criterion: {check_id_errors}")        
 
-    check_id_errors = await value.check_key(db=session, ids_to_check=body.triggered_by_value_id)
+    check_id_errors = await value_crud.check_key(db=session, ids_to_check=body.triggered_by_value_id)
     if check_id_errors:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: creating criterion triggered_by: {check_id_errors}")        
 
-    check_id_errors = await tag.check_key(db=session, ids_to_check=body.tags)
+    check_id_errors = await tag_crud.check_key(db=session, ids_to_check=body.tags)
     if check_id_errors:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: creating criterion tag: {check_id_errors}")        
 
     # Build CriterionCreate object from input
     criterion_create = { key:value for key,value in body_conv.items() if key in CriterionCreate.__fields__.keys() }
-    new_criterion = await criterion.create(db=session, obj_in=criterion_create)
+    new_criterion = await criterion_crud.create(db=session, obj_in=criterion_create)
   
     for v_id in body.values:
         chv = CriterionHasValueCreate(criterion_id=new_criterion.id, value_id=v_id)
-        new_value = await criterion_has_value.create(db=session,obj_in=chv)
+        new_value = await criterion_has_value_crud.create(db=session,obj_in=chv)
     
     for t_id in body.tags:
         thv = CriterionHasTagCreate(criterion_id=new_criterion.id, tag_id=t_id)
-        new_value = await criterion_has_tag.create(db=session,obj_in=thv)
+        new_value = await criterion_has_tag_crud.create(db=session,obj_in=thv)
 
     dr = DisplayRulesCreate(criterion_id=new_criterion.id, 
         priority=body.display_rules_priority,

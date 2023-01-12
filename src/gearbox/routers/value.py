@@ -20,15 +20,15 @@ from fastapi import Request, Depends
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from . import logger
-from ..util import status
+from gearbox.util import status
 from starlette.responses import JSONResponse
-from ..admin_login import admin_required
+from gearbox.admin_login import admin_required
 
-from .. import config
-from ..schemas import ValueCreate, ValueSearchResults
-from ..crud import value
-from .. import deps
-from .. import auth 
+from gearbox import config
+from gearbox.schemas import ValueCreate, ValueSearchResults
+from gearbox.crud import value_crud
+from gearbox import deps
+from gearbox import auth 
 
 mod = APIRouter()
 
@@ -43,7 +43,7 @@ async def get_values(
     session: AsyncSession = Depends(deps.get_session),
 ):
     auth_header = str(request.headers.get("Authorization",""))
-    values = await value.get_multi(session)
+    values = await value_crud.get_multi(session)
     return JSONResponse(jsonable_encoder(values), status.HTTP_200_OK)
 
 @mod.get("/value/{value_id}", response_model=ValueSearchResults, dependencies=[ Depends(auth.authenticate)])
@@ -53,7 +53,7 @@ async def get_value(
     session: AsyncSession = Depends(deps.get_session),
 ):
     auth_header = str(request.headers.get("Authorization",""))
-    ret_value = await value.get(db=session, id=value_id)
+    ret_value = await value_crud.get(db=session, id=value_id)
     return JSONResponse(jsonable_encoder(ret_value), status.HTTP_200_OK)
 
 @mod.post("/value", response_model=ValueSearchResults,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
@@ -66,7 +66,7 @@ async def save_object(
     Comments:
     """
     auth_header = str(request.headers.get("Authorization",""))
-    new_value = await value.create(db=session, obj_in=body)
+    new_value = await value_crud.create(db=session, obj_in=body)
     return JSONResponse(jsonable_encoder(new_value), status.HTTP_201_CREATED)
 
 @mod.post("/update-value/{value_id}", response_model=ValueSearchResults,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
@@ -81,11 +81,8 @@ async def update_object(
     """
     # TO DO: try / exception value_in not found & db exceptions
     auth_header = str(request.headers.get("Authorization",""))
-    logger.info(f"ABOUT TO GET OBJECT FOR UPDATE")
-    value_in = await value.get(db=session, id=value_id)
-    logger.info(f"GOT OBJECT FOR UPDATE: {type(value_in)}")
-    upd_value = await value.update(db=session, db_obj=value_in, obj_in=body)
-    logger.info(f"PERFORMED UPDATE: {upd_value}")
+    value_in = await value_crud.get(db=session, id=value_id)
+    upd_value = await value_crud.update(db=session, db_obj=value_in, obj_in=body)
     return JSONResponse(jsonable_encoder(upd_value), status.HTTP_201_CREATED)
 
 def init_app(app):

@@ -1,7 +1,7 @@
 from .base import CRUDBase
-from gearbox.models.models import Tag
-from ..schemas import TagCreate, TagSearchResults
+from gearbox.models import Tag
+from gearbox.schemas import TagCreate, TagSearchResults
 
 class CRUDTag(CRUDBase [Tag, TagCreate, TagSearchResults]):
     ...
-tag = CRUDTag(Tag)
+tag_crud = CRUDTag(Tag)

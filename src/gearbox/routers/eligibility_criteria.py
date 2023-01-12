@@ -1,5 +1,5 @@
 from re import I
-from .. import config
+from gearbox import config
 from datetime import date
 from time import gmtime, strftime
 from fastapi import APIRouter, HTTPException
@@ -10,11 +10,11 @@ from fastapi import Request, Depends
 from . import logger
 from starlette.responses import JSONResponse 
 from typing import List
-from .. import auth
-from ..schemas import EligibilityCriteriaResponse
-from .. import deps
-from ..util import eligibility_criteria as ec, bucket_utils, status
-from ..admin_login import admin_required
+from gearbox import auth
+from gearbox.schemas import EligibilityCriteriaResponse
+from gearbox import deps
+from gearbox.util import eligibility_criteria as ec, bucket_utils, status
+from gearbox.admin_login import admin_required
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)

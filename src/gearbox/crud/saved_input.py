@@ -3,7 +3,7 @@ from re import I
 from sqlalchemy import func, update, select, exc
 from sqlalchemy.orm import Session
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
-from gearbox.models.models import SavedInput
+from gearbox.models import SavedInput
 from fastapi import HTTPException
 from asyncpg import UniqueViolationError
 from ..util import status

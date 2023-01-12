@@ -3,7 +3,7 @@ from telnetlib import EL
 from sqlalchemy import func, update, select, exc
 from sqlalchemy.orm import Session, joinedload, join
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
-from gearbox.models.models import ElCriteriaHasCriterion, Criterion, InputType
+from gearbox.models import ElCriteriaHasCriterion, Criterion, InputType
 
 from cdislogging import get_logger
 logger = get_logger(__name__)

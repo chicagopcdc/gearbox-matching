@@ -1,6 +1,6 @@
 from .base import CRUDBase
-from gearbox.models.models import TriggeredBy
-from ..schemas import TriggeredByCreate, TriggeredBySearchResults
+from gearbox.models import TriggeredBy
+from gearbox.schemas import TriggeredByCreate, TriggeredBySearchResults
 
 class CRUDTriggeredBy(CRUDBase [TriggeredBy, TriggeredByCreate, TriggeredBySearchResults]):
     ...

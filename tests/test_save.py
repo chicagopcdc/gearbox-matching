@@ -4,6 +4,7 @@ import jwt
 
 from httpx import AsyncClient
 from fastapi import FastAPI
+from sqlalchemy.orm import sessionmaker
 
 import respx
 
@@ -19,6 +20,7 @@ from starlette.status import (
 )
 
 from gearbox import config
+from gearbox.models import SavedInput
 
 @respx.mock
 @pytest.mark.parametrize(
@@ -56,3 +58,19 @@ def test_get_last_saved_input(client):
     resp = client.get("/user-input/latest", headers={"Authorization": f"bearer {fake_jwt}"})
     assert resp.status_code == 200
     assert resp.json().get("id")  is not None 
+
+"""
+@respx.mock
+def test_db_select_input(client, connection):
+    fake_jwt = "1.2.3"
+    resp = client.get("/user-input/latest", headers={"Authorization": f"bearer {fake_jwt}"})
+    # import model
+
+    Session = sessionmaker(bind=connection)
+    session = Session()
+    si = session.query(SavedInput).first()
+    session.close()
+    
+    assert resp.status_code == 200
+    assert resp.json().get("id")  is not None 
+"""

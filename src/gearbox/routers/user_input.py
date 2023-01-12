@@ -20,24 +20,14 @@ from fastapi import Request, Depends
 from sqlalchemy.orm import Session
 from . import logger
 from starlette.responses import JSONResponse
-from starlette.status import (
-    HTTP_200_OK,
-    HTTP_201_CREATED,
-    HTTP_204_NO_CONTENT,
-    HTTP_409_CONFLICT,
-    HTTP_400_BAD_REQUEST,
-    HTTP_401_UNAUTHORIZED,
-    HTTP_403_FORBIDDEN,
-    HTTP_404_NOT_FOUND,
-    HTTP_500_INTERNAL_SERVER_ERROR,
-)
+from gearbox.util import status
 
-from .. import config
-from ..models.models import SavedInput
-from ..schemas import SavedInputSearchResults, UploadSavedInput
-from ..crud.saved_input import add_saved_input, get_latest_saved_input, update_saved_input
-from .. import deps
-from .. import auth 
+from gearbox import config
+from gearbox.models import SavedInput
+from gearbox.schemas import SavedInputSearchResults, UploadSavedInput
+from gearbox.crud.saved_input import add_saved_input, get_latest_saved_input, update_saved_input
+from gearbox import deps
+from gearbox import auth 
 
 mod = APIRouter()
 
@@ -78,7 +68,7 @@ async def save_object(
         "id": results.id
     }
 
-    return JSONResponse(response, HTTP_201_CREATED)
+    return JSONResponse(response, status.HTTP_201_CREATED)
 
 @mod.get("/user-input/latest", response_model=SavedInputSearchResults)
 async def get_object_latest(
@@ -102,14 +92,14 @@ async def get_object_latest(
     saved_user_input = await get_latest_saved_input(session, int(user_id))
 
     if not saved_user_input:
-        raise HTTPException(HTTP_404_NOT_FOUND, f"Saved input not found for user '{user_id}'")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Saved input not found for user '{user_id}'")
 
     response = {
         "results": saved_user_input.data,
         "id": saved_user_input.id
     }
 
-    return JSONResponse(response, HTTP_200_OK) 
+    return JSONResponse(response, status.HTTP_200_OK) 
 
 def init_app(app):
     app.include_router(mod, tags=["user_input"])

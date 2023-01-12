@@ -1,8 +1,8 @@
 import json
 import re
 from collections import deque
-from ..crud.match_conditions import get_algorithm_engines
-from ..routers import logger
+from gearbox.crud.match_conditions import get_algorithm_engines
+from gearbox.routers import logger
 
 async def get_match_conditions(session):
     all_algo_engs = await get_algorithm_engines(session)
@@ -243,6 +243,7 @@ def build_tree(nodelist):
             ####################################################
             working_node = crit_que.pop()
             working_group_id = ''
+            # print(f"WORKING NODE: {working_node['criteria']} {working_node['operator']}")
 
             #######################################################
             #  GET GROUP ID IF WORKING NODE IS PART OF A GROUP
@@ -526,6 +527,7 @@ def get_tree(full_paths, study_id=None, suppress_header=False):
     fpg = add_generation(fp)
     mgd = merged(fpg)
     dfd = get_nodes_and_children(set(), {}, mgd, fpg[0])
+
     node_list = dfs(set(), [], dfd, fpg[0])
     criteria_tree = build_tree(node_list)
 

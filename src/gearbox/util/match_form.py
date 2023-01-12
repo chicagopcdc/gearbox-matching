@@ -1,7 +1,7 @@
 
 from .bounds import bounds
-from ..routers import logger
-from ..crud.match_form import get_form_info
+from gearbox.routers import logger
+from gearbox.crud.match_form import get_form_info
 from .match_conditions import get_tree
 
 def update_dict(d, critlookup):

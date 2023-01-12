@@ -10,10 +10,10 @@ from . import logger
 from ..util import status
 from starlette.responses import JSONResponse
 from typing import List
-from .. import auth
-from ..schemas import SiteSearchResults
-from ..crud.site import get_single_site, get_sites
-from .. import deps
+from gearbox import auth
+from gearbox.schemas import SiteSearchResults
+from gearbox.crud.site import get_single_site, get_sites
+from gearbox import deps
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
