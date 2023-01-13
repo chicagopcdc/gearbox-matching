@@ -73,12 +73,20 @@ def test_create_criterion(client, valid_upload_file_patcher, data, connection):
         tb = session.query(TriggeredBy).filter(TriggeredBy.criterion_id==crit.id).first()
         if not tb: errors.append("CRITERION TRIGGERED BY FOR CRITERION CODE: {test_criterion_code} not created")
 
+        # cleanup
+        d = session.query(CriterionHasValue).filter(CriterionHasValue.criterion_id==crit.id).delete()
+        d = session.query(CriterionHasTag).filter(CriterionHasTag.criterion_id==crit.id).delete()
+        d = session.query(DisplayRules).filter(DisplayRules.criterion_id==crit.id).delete()
+        d = session.query(TriggeredBy).filter(DisplayRules.criterion_id==crit.id).delete()
+        d = session.query(Criterion).filter(Criterion.id==crit.id).delete()
+        session.commit()
         session.close()
-    except:
-        pass
-    
+    except Exception as e:
+        print(f"Exception creating new criterion: {e}")
+
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))
 
+# TO DO: create test for violating unique constraint
 """
 @respx.mock
 def test_get_values(client):

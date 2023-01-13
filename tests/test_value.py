@@ -55,3 +55,5 @@ def test_get_values(client):
     fake_jwt = "1.2.3"
     resp = client.get("/values", headers={"Authorization": f"bearer {fake_jwt}"})
     assert resp.status_code == 200
+
+# TO DO: create test for violating unique constraint
