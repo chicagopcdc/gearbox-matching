@@ -35,6 +35,7 @@ class CriterionCreateIn(CriterionBase):
     values: Optional[List[int]]
     display_rules_priority: int
     display_rules_version: Optional[int]
+    triggered_by_criterion_id: Optional[int]
     triggered_by_value_id: Optional[int]
     triggered_by_path: Optional[str]
 

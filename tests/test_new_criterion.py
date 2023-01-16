@@ -37,6 +37,7 @@ from gearbox import config
         "values": [3],
         "display_rules_priority": 1001,
         "display_rules_version": 5,
+        "triggered_by_criterion_id": 1,
         "triggered_by_value_id": 1,
         "triggered_by_path": "2.3.4"
     }
@@ -67,22 +68,31 @@ def test_create_criterion(client, valid_upload_file_patcher, data, connection):
         cht = session.query(CriterionHasTag).filter(CriterionHasTag.criterion_id==crit.id).all()
         if not cht: errors.append("CRITERION CRITERION HAS TAG FOR CRITERION CODE: {test_criterion_code} not created")
 
+        tb = session.query(TriggeredBy).filter(TriggeredBy.value_id==data['triggered_by_value_id']).first()
+        if not tb: errors.append("CRITERION TRIGGERED BY FOR CRITERION CODE: {test_criterion_code} not created")
+
         dr = session.query(DisplayRules).filter(DisplayRules.criterion_id==crit.id).first()
         if not cht: errors.append("CRITERION CRITERION HAS TAG FOR CRITERION CODE: {test_criterion_code} not created")
 
-        tb = session.query(TriggeredBy).filter(TriggeredBy.criterion_id==crit.id).first()
-        if not tb: errors.append("CRITERION TRIGGERED BY FOR CRITERION CODE: {test_criterion_code} not created")
+        print(f"--------------> HERE AFTER ALL QUERIES --------------------------->")
 
         # cleanup
         d = session.query(CriterionHasValue).filter(CriterionHasValue.criterion_id==crit.id).delete()
+        print(f"--------------> HERE AFTER ALL QUERIES 1 --------------------------->")
         d = session.query(CriterionHasTag).filter(CriterionHasTag.criterion_id==crit.id).delete()
+        print(f"--------------> HERE AFTER ALL QUERIES 2 --------------------------->")
+        d = session.query(TriggeredBy).filter(TriggeredBy.criterion_id==data['triggered_by_value_id']).delete()
+        print(f"--------------> HERE AFTER ALL QUERIES 3 --------------------------->")
         d = session.query(DisplayRules).filter(DisplayRules.criterion_id==crit.id).delete()
-        d = session.query(TriggeredBy).filter(DisplayRules.criterion_id==crit.id).delete()
+        print(f"--------------> HERE AFTER ALL QUERIES 4 --------------------------->")
         d = session.query(Criterion).filter(Criterion.id==crit.id).delete()
+        print(f"--------------> HERE AFTER ALL QUERIES 5 --------------------------->")
         session.commit()
+        print(f"--------------> HERE AFTER ALL QUERIES 6 --------------------------->")
         session.close()
     except Exception as e:
-        print(f"Exception creating new criterion: {e}")
+        print(f"Exception validating new criterion: {e}")
+        errors.append(e)
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))
 

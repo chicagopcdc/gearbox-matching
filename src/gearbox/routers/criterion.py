@@ -56,25 +56,16 @@ async def save_object(
     session: AsyncSession = Depends(deps.get_session),
 ):
     auth_header = str(request.headers.get("Authorization",""))
-    logger.info(f"-----------------------------> HERE???")
-    # CREATE ORM OBJECTS FROM tag, value ids - do queries to get vals?
     body_conv = jsonable_encoder(body)
-    # TO DO: validate incoming value_ids and tag_ids to make sure they already
-    # exist, if not then throw an exception - do this before creating the 
-    # criteria and all associated rows in other tables
 
-    # CREATE A FUNCTION FOR THE FOLLOWING CHECKS AND PUT IN util
-    check_id_errors = await value_crud.check_key(db=session, ids_to_check=body.values)
-    if check_id_errors:
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: creating criterion: {check_id_errors}")        
-
-    check_id_errors = await value_crud.check_key(db=session, ids_to_check=body.triggered_by_value_id)
-    if check_id_errors:
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: creating criterion triggered_by: {check_id_errors}")        
-
-    check_id_errors = await tag_crud.check_key(db=session, ids_to_check=body.tags)
-    if check_id_errors:
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: creating criterion tag: {check_id_errors}")        
+    # check input fks exist
+    check_id_errors = []
+    check_id_errors.append(await value_crud.check_key(db=session, ids_to_check=body.values))
+    check_id_errors.append(await value_crud.check_key(db=session, ids_to_check=body.triggered_by_value_id))
+    check_id_errors.append(await tag_crud.check_key(db=session, ids_to_check=body.tags))
+    check_id_errors.append(await criterion_crud.check_key(db=session, ids_to_check=body.triggered_by_criterion_id))
+    if not all(i is None for i in check_id_errors):
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: missing FKs for criterion creation: {check_id_errors}")        
 
     # Build CriterionCreate object from input
     criterion_create = { key:value for key,value in body_conv.items() if key in CriterionCreate.__fields__.keys() }
@@ -95,22 +86,11 @@ async def save_object(
     new_display_rule = await display_rules_crud.create(db=session, obj_in=dr)
 
     tb = TriggeredByCreate(display_rules_id=new_display_rule.id,
-        criterion_id=new_criterion.id,
+        criterion_id=body.triggered_by_criterion_id,
         value_id=body.triggered_by_value_id,
         path=body.triggered_by_path
     )
     new_triggered_by = await triggered_by_crud.create(db=session, obj_in=tb)
-    """
-   display_rules_id: int
-    criterion_id: int
-    value_id: int
-    path: Optional[str]
-
-    display_rules_priority: int
-    display_rules_version: Optional[int]
-    triggered_by_value_id: Optional[int]
-    triggered_by_path: Optional[str]
-    """
 
     return JSONResponse(jsonable_encoder(new_criterion), status.HTTP_201_CREATED)
 
