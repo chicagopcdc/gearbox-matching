@@ -60,12 +60,20 @@ async def save_object(
 
     # check input fks exist
     check_id_errors = []
+
+    # triggered_by_value_id and triggered_by_criterion_id must both be populated or both null
+    if not (body.triggered_by_value_id == None) == (body.triggered_by_criterion_id == None):
+        check_id_errors.append('Input data must include both or neither triggered_by_value_id and triggered_by_criterion_id')
+    elif body.triggered_by_value_id:
+        check_id_errors.append(await value_crud.check_key(db=session, ids_to_check=body.triggered_by_value_id))
+        check_id_errors.append(await criterion_crud.check_key(db=session, ids_to_check=body.triggered_by_criterion_id))
+
     check_id_errors.append(await value_crud.check_key(db=session, ids_to_check=body.values))
-    check_id_errors.append(await value_crud.check_key(db=session, ids_to_check=body.triggered_by_value_id))
     check_id_errors.append(await tag_crud.check_key(db=session, ids_to_check=body.tags))
-    check_id_errors.append(await criterion_crud.check_key(db=session, ids_to_check=body.triggered_by_criterion_id))
+    check_id_errors.append(await tag_crud.check_key(db=session, ids_to_check=body.tags))
+
     if not all(i is None for i in check_id_errors):
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: missing FKs for criterion creation: {check_id_errors}")        
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: missing FKs for criterion creation: {[error for error in check_id_errors if error]}")        
 
     # Build CriterionCreate object from input
     criterion_create = { key:value for key,value in body_conv.items() if key in CriterionCreate.__fields__.keys() }

@@ -5,7 +5,7 @@ import random
 
 from httpx import AsyncClient
 from fastapi import FastAPI
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 
 from gearbox.models import Criterion, CriterionHasTag, CriterionHasValue, DisplayRules, TriggeredBy
 
@@ -58,45 +58,54 @@ def test_create_criterion(client, valid_upload_file_patcher, data, connection):
 
     try: 
         Session = sessionmaker(bind=connection)
-        session = Session()
-        crit = session.query(Criterion).filter(Criterion.code==test_criterion_code).first()
+        db_session = Session()
+
+        crit = db_session.query(Criterion).filter(Criterion.code==test_criterion_code).first()
         if not crit: errors.append("CRITERION: {test_criterion_code} not created")
 
-        chv = session.query(CriterionHasValue).filter(CriterionHasValue.criterion_id==crit.id).all()
+        chv = db_session.query(CriterionHasValue).filter(CriterionHasValue.criterion_id==crit.id).all()
         if not chv: errors.append("CRITERION CRITERION HAS VALUE FOR CRITERION CODE: {test_criterion_code} not created")
 
-        cht = session.query(CriterionHasTag).filter(CriterionHasTag.criterion_id==crit.id).all()
+        cht = db_session.query(CriterionHasTag).filter(CriterionHasTag.criterion_id==crit.id).all()
         if not cht: errors.append("CRITERION CRITERION HAS TAG FOR CRITERION CODE: {test_criterion_code} not created")
 
-        tb = session.query(TriggeredBy).filter(TriggeredBy.value_id==data['triggered_by_value_id']).first()
+        tb = db_session.query(TriggeredBy).filter(TriggeredBy.value_id==data['triggered_by_value_id']).first()
         if not tb: errors.append("CRITERION TRIGGERED BY FOR CRITERION CODE: {test_criterion_code} not created")
 
-        dr = session.query(DisplayRules).filter(DisplayRules.criterion_id==crit.id).first()
+        dr = db_session.query(DisplayRules).filter(DisplayRules.criterion_id==crit.id).first()
         if not cht: errors.append("CRITERION CRITERION HAS TAG FOR CRITERION CODE: {test_criterion_code} not created")
 
-        print(f"--------------> HERE AFTER ALL QUERIES --------------------------->")
-
         # cleanup
-        d = session.query(CriterionHasValue).filter(CriterionHasValue.criterion_id==crit.id).delete()
-        print(f"--------------> HERE AFTER ALL QUERIES 1 --------------------------->")
-        d = session.query(CriterionHasTag).filter(CriterionHasTag.criterion_id==crit.id).delete()
-        print(f"--------------> HERE AFTER ALL QUERIES 2 --------------------------->")
-        d = session.query(TriggeredBy).filter(TriggeredBy.criterion_id==data['triggered_by_value_id']).delete()
-        print(f"--------------> HERE AFTER ALL QUERIES 3 --------------------------->")
-        d = session.query(DisplayRules).filter(DisplayRules.criterion_id==crit.id).delete()
-        print(f"--------------> HERE AFTER ALL QUERIES 4 --------------------------->")
-        d = session.query(Criterion).filter(Criterion.id==crit.id).delete()
-        print(f"--------------> HERE AFTER ALL QUERIES 5 --------------------------->")
-        session.commit()
-        print(f"--------------> HERE AFTER ALL QUERIES 6 --------------------------->")
-        session.close()
+        d = db_session.query(CriterionHasValue).filter(CriterionHasValue.criterion_id==crit.id).delete()
+        d = db_session.query(CriterionHasTag).filter(CriterionHasTag.criterion_id==crit.id).delete()
+        d = db_session.query(TriggeredBy).filter(TriggeredBy.criterion_id==data['triggered_by_value_id']).delete()
+        d = db_session.query(DisplayRules).filter(DisplayRules.criterion_id==crit.id).delete()
+        d = db_session.query(Criterion).filter(Criterion.id==crit.id).delete()
+        db_session.commit()
+        db_session.close()
     except Exception as e:
         print(f"Exception validating new criterion: {e}")
-        errors.append(e)
+        errors.append(str(e))
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))
 
-# TO DO: create test for violating unique constraint
+@pytest.mark.asyncio
+def test_create_criterion_fail_triggered_by(client, valid_upload_file_patcher, mock_new_criterion, connection):
+    """
+    Test create /user-input response for a valid user with authorization and
+    valid input, ensure correct response.
+    """
+    errors=[]
+    fake_jwt = "1.2.3"
+    test_criterion_code = 'PYTEST TESTCODE' + str(random.randint(0,9999))
+    mock_new_criterion.triggered_by_value_id = None
+    mock_json = mock_new_criterion.to_json()
+    resp = client.post("/criterion", json=mock_new_criterion.to_json(), headers={"Authorization": f"bearer {fake_jwt}"})
+    assert resp.status_code == 500 
+
+# TO DO: create test for violating unique constraint,
+# TO DO: test if no triggered_by exists in input dict 
+
 """
 @respx.mock
 def test_get_values(client):
@@ -104,3 +113,4 @@ def test_get_values(client):
     resp = client.get("/criteria", headers={"Authorization": f"bearer {fake_jwt}"})
     assert resp.status_code == 200
 """
+# TO DO: create test for violating unique constraint,

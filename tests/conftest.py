@@ -1,5 +1,6 @@
 import importlib
 import json
+from json import JSONEncoder
 from collections import defaultdict
 import tempfile
 
@@ -7,7 +8,7 @@ import pytest
 # from pytest_postgresql import factories
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.engine.url import URL
 from sqlalchemy.engine import Engine
 
@@ -123,8 +124,6 @@ def client(event_loop):
     with TestClient(get_app()) as client:
         yield client
 
-
-
 @pytest.fixture(
     params=[
         "dg.TEST/87fced8d-b9c8-44b5-946e-c465c8f8f3d6",
@@ -176,3 +175,36 @@ def event_loop(request):
     yield loop
     loop.close()
 
+@pytest.fixture
+def mock_new_criterion():
+
+    class MockNewCriterion(object):
+        code = "test_criteria"
+        display_name = "this is a test criterion"
+        description = "test is a test criterion"
+        active = False
+        input_type_id = 1
+        tags = [1]
+        values = [3]
+        display_rules_priority = 1001
+        display_rules_version = 5
+        triggered_by_criterion_id = 1
+        triggered_by_value_id = 1
+        triggered_by_path = "2.3.4"
+
+        def to_json(self):
+            return {
+                "code": self.code,
+                "display_name": self.display_name,
+                "description": self.description,
+                "active": self.active,
+                "input_type_id": self.input_type_id,
+                "tags": self.tags,
+                "values": self.values,
+                "display_rules_priority": self.display_rules_priority,
+                "display_rules_version": self.display_rules_version,
+                "triggered_by_criterion_id": self.triggered_by_criterion_id,
+                "triggered_by_value_id": self.triggered_by_value_id,
+                "triggered_by_path": self.triggered_by_path
+            }
+    return MockNewCriterion()
