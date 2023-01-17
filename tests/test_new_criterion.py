@@ -24,27 +24,8 @@ from starlette.status import (
 
 from gearbox import config
 
-@respx.mock
-@pytest.mark.parametrize(
-    "data", [ 
-    {       
-        "code": "test_criteria",
-        "display_name": "this is a test criteria",
-        "description": "this is a test criteria",
-        "active": False,
-        "input_type_id": 1,
-        "tags": [1],
-        "values": [3],
-        "display_rules_priority": 1001,
-        "display_rules_version": 5,
-        "triggered_by_criterion_id": 1,
-        "triggered_by_value_id": 1,
-        "triggered_by_path": "2.3.4"
-    }
-    ]
-)
 @pytest.mark.asyncio
-def test_create_criterion(client, valid_upload_file_patcher, data, connection):
+def test_create_criterion(client, valid_upload_file_patcher, mock_new_criterion, connection):
     """
     Test create /user-input response for a valid user with authorization and
     valid input, ensure correct response.
@@ -52,8 +33,8 @@ def test_create_criterion(client, valid_upload_file_patcher, data, connection):
     errors=[]
     fake_jwt = "1.2.3"
     test_criterion_code = 'PYTEST TESTCODE' + str(random.randint(0,9999))
-    data['code'] = test_criterion_code
-    resp = client.post("/criterion", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    mock_new_criterion.code = test_criterion_code
+    resp = client.post("/criterion", json=mock_new_criterion.to_json(), headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
 
     try: 
@@ -69,7 +50,7 @@ def test_create_criterion(client, valid_upload_file_patcher, data, connection):
         cht = db_session.query(CriterionHasTag).filter(CriterionHasTag.criterion_id==crit.id).all()
         if not cht: errors.append("CRITERION CRITERION HAS TAG FOR CRITERION CODE: {test_criterion_code} not created")
 
-        tb = db_session.query(TriggeredBy).filter(TriggeredBy.value_id==data['triggered_by_value_id']).first()
+        tb = db_session.query(TriggeredBy).filter(TriggeredBy.value_id==mock_new_criterion.triggered_by_value_id).first()
         if not tb: errors.append("CRITERION TRIGGERED BY FOR CRITERION CODE: {test_criterion_code} not created")
 
         dr = db_session.query(DisplayRules).filter(DisplayRules.criterion_id==crit.id).first()
@@ -78,7 +59,7 @@ def test_create_criterion(client, valid_upload_file_patcher, data, connection):
         # cleanup
         d = db_session.query(CriterionHasValue).filter(CriterionHasValue.criterion_id==crit.id).delete()
         d = db_session.query(CriterionHasTag).filter(CriterionHasTag.criterion_id==crit.id).delete()
-        d = db_session.query(TriggeredBy).filter(TriggeredBy.criterion_id==data['triggered_by_value_id']).delete()
+        d = db_session.query(TriggeredBy).filter(TriggeredBy.criterion_id==mock_new_criterion.triggered_by_value_id).delete()
         d = db_session.query(DisplayRules).filter(DisplayRules.criterion_id==crit.id).delete()
         d = db_session.query(Criterion).filter(Criterion.id==crit.id).delete()
         db_session.commit()
