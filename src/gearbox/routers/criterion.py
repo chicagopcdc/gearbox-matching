@@ -75,14 +75,17 @@ async def save_object(
     if not all(i is None for i in check_id_errors):
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: missing FKs for criterion creation: {[error for error in check_id_errors if error]}")        
 
-    # Build CriterionCreate object from input
+    # Build CriterionCreate object from input - exclude triggered_by, display_rules, tags, and values
+    # which are separate inserts
     criterion_create = { key:value for key,value in body_conv.items() if key in CriterionCreate.__fields__.keys() }
     new_criterion = await criterion_crud.create(db=session, obj_in=criterion_create)
-  
-    for v_id in body.values:
-        chv = CriterionHasValueCreate(criterion_id=new_criterion.id, value_id=v_id)
-        new_value = await criterion_has_value_crud.create(db=session,obj_in=chv)
-    
+
+    if body.values:
+        for v_id in body.values:
+            chv = CriterionHasValueCreate(criterion_id=new_criterion.id, value_id=v_id)
+            new_value = await criterion_has_value_crud.create(db=session,obj_in=chv)
+
+    # if it is determined that tags are not required, check if exists here before create 
     for t_id in body.tags:
         thv = CriterionHasTagCreate(criterion_id=new_criterion.id, tag_id=t_id)
         new_value = await criterion_has_tag_crud.create(db=session,obj_in=thv)
@@ -93,12 +96,13 @@ async def save_object(
         )
     new_display_rule = await display_rules_crud.create(db=session, obj_in=dr)
 
-    tb = TriggeredByCreate(display_rules_id=new_display_rule.id,
-        criterion_id=body.triggered_by_criterion_id,
-        value_id=body.triggered_by_value_id,
-        path=body.triggered_by_path
-    )
-    new_triggered_by = await triggered_by_crud.create(db=session, obj_in=tb)
+    if body.triggered_by_criterion_id:
+        tb = TriggeredByCreate(display_rules_id=new_display_rule.id,
+            criterion_id=body.triggered_by_criterion_id,
+            value_id=body.triggered_by_value_id,
+            path=body.triggered_by_path
+        )
+        new_triggered_by = await triggered_by_crud.create(db=session, obj_in=tb)
 
     return JSONResponse(jsonable_encoder(new_criterion), status.HTTP_201_CREATED)
 

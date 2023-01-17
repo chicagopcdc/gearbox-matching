@@ -8,6 +8,8 @@ from sqlalchemy import func, update, select, exc
 from sqlalchemy.exc import IntegrityError
 from ..util import status
 
+from datetime import datetime
+
 # from app.db.base_class import Base
 from ..models import Base
 
@@ -63,6 +65,17 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
     async def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
         obj_in_data = jsonable_encoder(obj_in)
+        # db_obj = self.model(**obj_in_data)  # type: ignore
+        logger.info(f"----------> OBJ IN DATA STEVE {obj_in_data}")
+        # set create_date here if not already set and it is in the schema
+        if "create_date" in obj_in_data.keys():
+            obj_in_data["create_date"] = datetime.now() if not obj_in_data["create_date"] else obj_in_data["create_date"]
+
+        logger.info(f"OBJ IN DATA STEVE: {type(obj_in_data)}")
+
+        for k in obj_in_data:
+            logger.info(f"KEY: {k} VALUE: {obj_in_data[k]} TYPE: {type(obj_in_data[k])}")
+
         db_obj = self.model(**obj_in_data)  # type: ignore
         try:
             db.add(db_obj)

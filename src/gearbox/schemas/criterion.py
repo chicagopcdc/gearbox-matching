@@ -28,10 +28,15 @@ class Criterion(CriterionBase):
     el_criteria_has_criterions: List[ElCriteriaHasCriterionBase]
 
 class CriterionCreate(CriterionBase):
+    code: str
+    display_name: str
+    # input_type_id: int ???
     pass
 
 class CriterionCreateIn(CriterionBase):
-    tags: Optional[List[int]]
+    # tags: Optional[List[int]]
+    code: str
+    tags: List[int]
     values: Optional[List[int]]
     display_rules_priority: int
     display_rules_version: Optional[int]
