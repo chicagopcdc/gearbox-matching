@@ -5,18 +5,29 @@ from sqlalchemy.orm import Session, joinedload, join
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from gearbox.models import ElCriteriaHasCriterion, Criterion, InputType
 
-from cdislogging import get_logger
-logger = get_logger(__name__)
+from fastapi import HTTPException
+from gearbox.util import status
 
-async def get_eligibility_criteria_info(current_session: Session):
+from .base import CRUDBase
+from gearbox.models import EligibilityCriteria
+from gearbox.schemas import EligibilityCriteriaSearchResults, EligibilityCriteriaCreate
 
-    stmt = select(ElCriteriaHasCriterion).options(
-        joinedload(ElCriteriaHasCriterion.criterion).options(
-            joinedload(Criterion.input_type)
-        ),
-        joinedload(ElCriteriaHasCriterion.value)
-    ).order_by(ElCriteriaHasCriterion.id)
+class CRUDEligibilityCriteria(CRUDBase [EligibilityCriteria, EligibilityCriteriaCreate, EligibilityCriteriaSearchResults]):
 
-    result = await current_session.execute(stmt)
-    ec = result.unique().scalars().all()
-    return ec
+
+    async def get_eligibility_criteria_info(self, current_session: Session):
+
+        stmt = select(ElCriteriaHasCriterion).options(
+            joinedload(ElCriteriaHasCriterion.criterion).options(
+                joinedload(Criterion.input_type)
+            ),
+            joinedload(ElCriteriaHasCriterion.value)
+        ).order_by(ElCriteriaHasCriterion.id)
+        try:
+            result = await current_session.execute(stmt)
+            ec = result.unique().scalars().all()
+            return ec
+        except exc.SQLAlchemyError as e:
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")
+
+eligibility_criteria_crud = CRUDEligibilityCriteria(EligibilityCriteria)

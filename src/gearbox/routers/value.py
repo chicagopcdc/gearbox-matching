@@ -32,17 +32,11 @@ from gearbox import auth
 
 mod = APIRouter()
 
-# auto_error=False prevents FastAPI from raises a 403 when the request is missing
-# an Authorization header. Instead, we want to return a 401 to signify that we did
-# not recieve valid credentials
-bearer = HTTPBearer(auto_error=False)
-
 @mod.get("/values", response_model=ValueSearchResults, dependencies=[ Depends(auth.authenticate)])
 async def get_values(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    auth_header = str(request.headers.get("Authorization",""))
     values = await value_crud.get_multi(session)
     return JSONResponse(jsonable_encoder(values), status.HTTP_200_OK)
 
@@ -52,7 +46,6 @@ async def get_value(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    auth_header = str(request.headers.get("Authorization",""))
     ret_value = await value_crud.get(db=session, id=value_id)
     return JSONResponse(jsonable_encoder(ret_value), status.HTTP_200_OK)
 
@@ -65,7 +58,6 @@ async def save_object(
     """
     Comments:
     """
-    auth_header = str(request.headers.get("Authorization",""))
     new_value = await value_crud.create(db=session, obj_in=body)
     return JSONResponse(jsonable_encoder(new_value), status.HTTP_201_CREATED)
 
@@ -80,7 +72,6 @@ async def update_object(
     Comments:
     """
     # TO DO: try / exception value_in not found & db exceptions
-    auth_header = str(request.headers.get("Authorization",""))
     value_in = await value_crud.get(db=session, id=value_id)
     upd_value = await value_crud.update(db=session, db_obj=value_in, obj_in=body)
     return JSONResponse(jsonable_encoder(upd_value), status.HTTP_201_CREATED)

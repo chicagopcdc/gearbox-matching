@@ -6,3 +6,4 @@ from .criterion_has_value import criterion_has_value_crud
 from .display_rules import display_rules_crud
 from .triggered_by import triggered_by_crud
 from .tag import tag_crud
+from .eligibility_criteria import eligibility_criteria_crud

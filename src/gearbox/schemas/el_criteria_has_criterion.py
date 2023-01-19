@@ -20,8 +20,8 @@ class ElCriteriaHasCriterion(ElCriteriaHasCriterionBase):
     id: int
 #    criterion: CriterionBase
 
-class ElCriterionHasCriterionCreate(ElCriteriaHasCriterionBase):
+class ElCriteriaHasCriterionCreate(ElCriteriaHasCriterionBase):
     pass
 
-class ElCriterionHasCriterionSearchResults(BaseModel):
+class ElCriteriaHasCriterionSearchResults(BaseModel):
     results: Sequence[ElCriteriaHasCriterion]
