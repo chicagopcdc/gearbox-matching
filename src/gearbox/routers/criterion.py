@@ -1,15 +1,6 @@
-import os
-import datetime
-import httpx
-import fastapi
 from fastapi import Depends
-import jwt
 
-from collections.abc import Iterable
-from enum import Enum
 from typing import List
-from asyncpg import UniqueViolationError
-from sqlalchemy.ext.asyncio.session import async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from authutils.token.fastapi import access_token
 from fastapi import HTTPException, APIRouter, Security
@@ -20,7 +11,6 @@ from fastapi import Request, Depends
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
-from gearbox.models import display_rules
 from . import logger
 from gearbox.util import status
 from starlette.responses import JSONResponse
@@ -45,7 +35,6 @@ async def get_criteria(
     session: AsyncSession = Depends(deps.get_session),
 ):
 
-    auth_header = str(request.headers.get("Authorization",""))
     criteria = await criterion_crud.get_multi(session)
     return JSONResponse(jsonable_encoder(criteria), status.HTTP_200_OK)    
 
@@ -55,7 +44,6 @@ async def save_object(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    auth_header = str(request.headers.get("Authorization",""))
     body_conv = jsonable_encoder(body)
 
     # check input fks exist
@@ -105,11 +93,6 @@ async def save_object(
         new_triggered_by = await triggered_by_crud.create(db=session, obj_in=tb)
 
     return JSONResponse(jsonable_encoder(new_criterion), status.HTTP_201_CREATED)
-
-#    Comments:
-#    auth_header = str(request.headers.get("Authorization",""))
-#    value = await add_value(session, body)
-#    return JSONResponse(jsonable_encoder(value), status.HTTP_201_CREATED)
 
 def init_app(app):
     app.include_router(mod, tags=["criteria","criterion"])

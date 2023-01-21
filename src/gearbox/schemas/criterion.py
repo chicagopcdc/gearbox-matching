@@ -15,8 +15,7 @@ class CriterionBase(BaseModel):
     create_date: Optional[datetime]
     active: Optional[bool]
     ontology_code_id: Optional[int]
-    input_type_id: Optional[int]
-    # input_type: InputType move to Criterion if needed for ORM select
+    input_type_id: int
 
     class Config:
         orm_mode = True

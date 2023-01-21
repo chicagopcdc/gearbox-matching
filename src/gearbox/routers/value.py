@@ -37,7 +37,7 @@ async def get_values(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    values = await value_crud.get_multi(session)
+    values = await value_crud.get_multi(session, where="THIS IS A WHERE CLAUSE")
     return JSONResponse(jsonable_encoder(values), status.HTTP_200_OK)
 
 @mod.get("/value/{value_id}", response_model=ValueSearchResults, dependencies=[ Depends(auth.authenticate)])

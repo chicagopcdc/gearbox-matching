@@ -15,7 +15,9 @@ class Value(Base):
     operator = Column(String, nullable=True)
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
-    UniqueConstraint(code, type, unit, value_string, operator, name='value_code_unit_uix')
+
+    UniqueConstraint(code, name='value_code_uix')
+    UniqueConstraint(type, unit, value_string, operator, name='value_code_unit_uix')
 
     el_criteria_has_criterions = relationship("ElCriteriaHasCriterion", back_populates="value")
     criteria = relationship("CriterionHasValue", back_populates="value")

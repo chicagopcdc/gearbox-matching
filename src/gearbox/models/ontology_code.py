@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, UniqueConstraint
 
 from .base_class import Base
 
@@ -12,4 +12,5 @@ class OntologyCode(Base):
     code = Column(String, nullable=True)
     value = Column(String, nullable=True)
     version = Column(String, nullable=True)
+    UniqueConstraint(name, code, version, name='ontology_code_uix')
 

@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, Column, Integer, String, DateTime, Boolean
+from sqlalchemy import ForeignKey, Column, Integer, String, DateTime, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from .base_class import Base
@@ -15,6 +15,9 @@ class Criterion(Base):
     active = Column(Boolean, nullable=True)
     ontology_code_id = Column(Integer, ForeignKey('ontology_code.id'), nullable=True)
     input_type_id = Column(Integer, ForeignKey('input_type.id'), nullable=True)
+
+    UniqueConstraint(code, name='criterion_code_uix')
+    UniqueConstraint(display_name, name='criterion_display_name_uix')
     
     tags = relationship("CriterionHasTag", back_populates="criterion", lazy='joined')
     el_criteria_has_criterions = relationship("ElCriteriaHasCriterion", back_populates="criterion")
