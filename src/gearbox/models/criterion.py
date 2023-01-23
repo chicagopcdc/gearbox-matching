@@ -8,13 +8,13 @@ class Criterion(Base):
     __tablename__ = 'criterion'
     
     id = Column(Integer, primary_key=True, autoincrement=True)
-    code = Column(String, nullable=True)
-    display_name = Column(String, nullable=True)
+    code = Column(String)
+    display_name = Column(String)
     description = Column(String, nullable=True)
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
     ontology_code_id = Column(Integer, ForeignKey('ontology_code.id'), nullable=True)
-    input_type_id = Column(Integer, ForeignKey('input_type.id'), nullable=True)
+    input_type_id = Column(Integer, ForeignKey('input_type.id') )
 
     UniqueConstraint(code, name='criterion_code_uix')
     UniqueConstraint(display_name, name='criterion_display_name_uix')
