@@ -24,7 +24,6 @@ id	code	description	type	value_string	unit	operator	create_date	active
 23	gte_12_m	greater or equal than 12 months	Integer	12	months	gte		1
 24	lt_18_y	lower than 18 years	Integer	18	years	lt		1
 25	gte_10_kg	greater or equal than 10 Kg	Float	10	kg	gte		1
-26	gte_5_p	greater or equal than 5%	Float	5	%	gte		1
 27	gte_1_p	greater or equal than 1%	Float	1	%	gte		1
 28	gte_0_1_p	greater or equal than 0.1%	Float	0.1	%	gte		1
 29	eq_0	equal to 0	Integer	0		eq		1
@@ -61,7 +60,7 @@ id	code	description	type	value_string	unit	operator	create_date	active
 61	Flow cytometry	Flow cytometry	String	Flow cytometry		eq		1
 62	lte_30_y	lower or equal than 30 years	Integer	30	years	lte		1
 63	lte_365_d	lower or equal than 365 days	Integer	365	days	lte		1
-64	gte_5	greater or equal than 5%	Float	5	%	gte		1
+64	gte_5_p	greater or equal than 5%	Float	5	%	gte		1
 65	gte_0	greater or equal than 0	Integer	0		gte		1
 66	lte_2	lower or equan than 2	Integer	2		lte		1
 67	gt_60	greater than 60	Float	60		gt		1
