@@ -25,6 +25,7 @@ from starlette.responses import JSONResponse
 from gearbox.admin_login import admin_required
 
 from gearbox import config
+from gearbox.models import Value
 from gearbox.schemas import ValueCreate, ValueSearchResults
 from gearbox.crud import value_crud
 from gearbox import deps
@@ -37,7 +38,7 @@ async def get_values(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    values = await value_crud.get_multi(session, where="THIS IS A WHERE CLAUSE")
+    values = await value_crud.get(session)
     return JSONResponse(jsonable_encoder(values), status.HTTP_200_OK)
 
 @mod.get("/value/{value_id}", response_model=ValueSearchResults, dependencies=[ Depends(auth.authenticate)])
@@ -46,7 +47,9 @@ async def get_value(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    ret_value = await value_crud.get(db=session, id=value_id)
+    # ret_value = await value_crud.get(db=session, id=value_id)
+    # ret_value = await value_crud.get(db=session, where=f"Value.id == {value_id}")
+    ret_value = await value_crud.get(db=session, where=f"Value.id = {value_id}") 
     return JSONResponse(jsonable_encoder(ret_value), status.HTTP_200_OK)
 
 @mod.post("/value", response_model=ValueSearchResults,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])

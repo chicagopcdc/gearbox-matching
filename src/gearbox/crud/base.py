@@ -3,15 +3,14 @@ from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from fastapi.encoders import jsonable_encoder
 from fastapi import HTTPException
 from pydantic import BaseModel
-from sqlalchemy.orm import Session, load_only
+from sqlalchemy.orm import Session
+from sqlalchemy.sql import text
 from sqlalchemy import func, update, select, exc
 from sqlalchemy.exc import IntegrityError
 from gearbox.util import status
 
 from datetime import datetime
-
-# from app.db.base_class import Base
-from ..models import Base
+from ..models import *
 
 from cdislogging import get_logger
 logger = get_logger(__name__)
@@ -42,23 +41,14 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             error_msg = f"ids: {errors} do not exist in {self.model}."
         return error_msg
 
-    async def get(self, db: Session, id: Any) -> Optional[ModelType]:
-        stmt = select(self.model).where(self.model.id == id)
-        try:
-            result_db = await db.execute(stmt)
-            result = result_db.scalars().first()
-            return result
-        except exc.SQLAlchemyError as e:
-            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
-
-    async def get_multi( self, db: Session, *, where: str=None, load_only: str=None, skip: int = 0, limit: int = 5000) -> List[ModelType]:
-        # stmt_str = "select(self.model)"
-        # stmt = stmt_str
-        # CONSTRUCT WHERE (if param exists) USING EVAL TO CREATE THE STATEMENT
-        stmt_str = "select(self.model)"
-        stmt_str += f".where({where})" if where else stmt_str 
-        stmt_str += f".load_only({load_only})" if load_only else stmt_str
-        stmt = eval(stmt_str)
+    async def get( self, db: Session, *, where: str=None, with_only_cols: str=None, skip: int = 0, limit: int = 5000) -> List[ModelType]:
+        stmt = select(self.model)
+        # TO DO: make where a list in case we want to filter by more than 1 attribute
+        if where:
+            stmt = stmt.where(text(where))
+        # TO DO: make where a list in case we want to include more than 1 column
+        if with_only_cols:    
+            stmt = stmt.with_only_columns(text(with_only_cols), maintain_column_froms=True)
         try:
             result_db = await db.execute(stmt)
             result = result_db.unique().scalars().all()

@@ -12,7 +12,7 @@ class CRUDElCriteriaHasCriterion(CRUDBase [ElCriteriaHasCriterion, ElCriteriaHas
         async def get_ec_ids(self , current_session: Session, ec_id: int) -> List[int]:
             return self.get_multi(current_session, 
                 where=f"ElCriteriaHasCriterion.eligibility_criteria_id == {ec_id}", 
-                load_only="ElCriteriaHasCriterion.id"
+                with_only_cols="ElCriteriaHasCriterion.id"
             )
             """
             stmt = select(ElCriteriaHasCriterion).where(ElCriteriaHasCriterion.eligibility_criteria_id == ec_id).load_only(ElCriteriaHasCriterion.id)

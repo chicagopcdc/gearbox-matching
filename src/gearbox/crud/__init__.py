@@ -7,3 +7,4 @@ from .display_rules import display_rules_crud
 from .triggered_by import triggered_by_crud
 from .tag import tag_crud
 from .eligibility_criteria import eligibility_criteria_crud
+from .algorithm_engine import algorithm_engine_crud

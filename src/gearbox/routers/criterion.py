@@ -35,7 +35,7 @@ async def get_criteria(
     session: AsyncSession = Depends(deps.get_session),
 ):
 
-    criteria = await criterion_crud.get_multi(session)
+    criteria = await criterion_crud.get(session)
     return JSONResponse(jsonable_encoder(criteria), status.HTTP_200_OK)    
 
 @mod.post("/criterion", response_model=CriterionSearchResults,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
