@@ -24,6 +24,7 @@ from . import logger
 from gearbox.util import status
 from starlette.responses import JSONResponse
 from gearbox.admin_login import admin_required
+from gearbox.models import AlgorithmEngine
 
 from gearbox import config
 from gearbox.schemas import AlgorithmEngineCreate, AlgorithmEngineSearchResults
@@ -48,7 +49,9 @@ async def get_ae(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    ret_value = await algorithm_engine_crud.get(db=session, where=f"AlgorithmEngine.id == {algorithm_engine_id}")
+    where_list = [ f"{AlgorithmEngine.__tablename__}.id = {algorithm_engine_id}" ]
+    with_only_cols_list = ["id"]
+    ret_value = await algorithm_engine_crud.get(db=session, where=where_list, with_only_cols=with_only_cols_list)
     return JSONResponse(jsonable_encoder(ret_value), status.HTTP_200_OK)
 
 @mod.post("/algorithm-engine", response_model=AlgorithmEngineSearchResults,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
@@ -60,8 +63,6 @@ async def save_ae(
     """
     Comments:
     """
-    logger.info(f"---------------> ALGORITHM LOGIC: {body.algorithm_logic}")
-    algo_str = json.loads(body.algorithm_logic)
     new_ae = await algorithm_engine_crud.create(db=session, obj_in=body)
     return JSONResponse(jsonable_encoder(new_ae), status.HTTP_201_CREATED)
 

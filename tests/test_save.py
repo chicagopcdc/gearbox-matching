@@ -29,7 +29,7 @@ from gearbox.models import SavedInput
     ]
 )
 @pytest.mark.asyncio
-def test_create(client, valid_upload_file_patcher, data):
+def test_create(setup_database, client, valid_upload_file_patcher, data):
     """
     Test create /user-input response for a valid user with authorization and
     valid input, ensure correct response.
@@ -50,7 +50,7 @@ def test_create(client, valid_upload_file_patcher, data):
     assert resp.json().get("id") is not None
 
 @respx.mock
-def test_get_last_saved_input(client):
+def test_get_last_saved_input(setup_database, client):
     """
     Test that the /user-input endpoint returns a 200 and the id of the latest saved obj
     """

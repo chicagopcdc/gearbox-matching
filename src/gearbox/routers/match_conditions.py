@@ -1,3 +1,4 @@
+from gearbox.services import match_conditions as mc
 from .. import config
 from re import I
 from fastapi import APIRouter
@@ -15,7 +16,7 @@ from .. import auth
 from ..schemas import AlgorithmResponse 
 from ..crud.match_conditions import get_algorithm_engines
 from .. import deps
-from ..util import match_conditions as mc, status, bucket_utils
+from ..util import status, bucket_utils
 from ..admin_login import admin_required
 
 mod = APIRouter()

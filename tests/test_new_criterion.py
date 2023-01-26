@@ -25,7 +25,7 @@ from starlette.status import (
 from gearbox import config
 
 @pytest.mark.asyncio
-def test_create_criterion(client, valid_upload_file_patcher, mock_new_criterion, connection):
+def test_create_criterion(setup_database, client, valid_upload_file_patcher, mock_new_criterion, connection):
     """
     Test create /user-input response for a valid user with authorization and
     valid input, ensure correct response.
@@ -34,6 +34,8 @@ def test_create_criterion(client, valid_upload_file_patcher, mock_new_criterion,
     fake_jwt = "1.2.3"
     test_criterion_code = 'PYTEST TESTCODE' + str(random.randint(0,9999))
     mock_new_criterion.code = test_criterion_code
+    # adding code to ensure unique display name
+    mock_new_criterion.display_name += test_criterion_code
     resp = client.post("/criterion", json=mock_new_criterion.to_json(), headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
 
@@ -65,13 +67,12 @@ def test_create_criterion(client, valid_upload_file_patcher, mock_new_criterion,
         db_session.commit()
         db_session.close()
     except Exception as e:
-        print(f"Exception validating new criterion: {e}")
         errors.append(str(e))
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))
 
 @pytest.mark.asyncio
-def test_create_criterion_fail_missing_criterion_code(client, valid_upload_file_patcher, mock_new_criterion, connection):
+def test_create_criterion_fail_missing_criterion_code(setup_database, client, valid_upload_file_patcher, mock_new_criterion, connection):
     """
     Test create /user-input response for a valid user with authorization and
     valid input, ensure correct response.
@@ -83,7 +84,7 @@ def test_create_criterion_fail_missing_criterion_code(client, valid_upload_file_
     assert resp.status_code == 422
 
 @pytest.mark.asyncio
-def test_create_criterion_fail_triggered_by(client, valid_upload_file_patcher, mock_new_criterion, connection):
+def test_create_criterion_fail_triggered_by(setup_database, client, valid_upload_file_patcher, mock_new_criterion, connection):
     """
     Test create /user-input response for a valid user with authorization and
     valid input, ensure correct response.
@@ -100,7 +101,7 @@ def test_create_criterion_fail_triggered_by(client, valid_upload_file_patcher, m
 # TO DO: test if no triggered_by exists in input dict 
 
 @pytest.mark.asyncio
-def test_create_criterion_minimum_values_required(client, valid_upload_file_patcher, mock_new_criterion, connection):
+def test_create_criterion_minimum_values_required(setup_database, client, valid_upload_file_patcher, mock_new_criterion, connection):
     """
     Test create /user-input response for a valid user with authorization and
     valid input, ensure correct response.
@@ -116,6 +117,8 @@ def test_create_criterion_minimum_values_required(client, valid_upload_file_patc
     mock_new_criterion.triggered_by_value_id = None
     mock_new_criterion.triggered_by_criterion_id = None
     mock_new_criterion.triggered_by_path = None
+    # adding code to ensure unique display name
+    mock_new_criterion.display_name += test_criterion_code
 
     resp = client.post("/criterion", json=mock_new_criterion.to_json(), headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
@@ -140,7 +143,6 @@ def test_create_criterion_minimum_values_required(client, valid_upload_file_patc
         db_session.commit()
         db_session.close()
     except Exception as e:
-        print(f"Exception validating new criterion: {e}")
         errors.append(str(e))
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))

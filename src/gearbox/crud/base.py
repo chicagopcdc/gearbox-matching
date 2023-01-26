@@ -33,28 +33,31 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
     async def check_key(self, db:Session, ids_to_check: Union[List[int], int]):
         error_msg = None
+        logger.info("---------------------------- HERE STEVE --------------------")
         if isinstance(ids_to_check, list):
-            errors = '.'.join([str(id) for id in ids_to_check if not await self.get(db, id)])
+            errors = '.'.join([str(id) for id in ids_to_check if not await self.get(db, where=[f"{self.model.__tablename__}.id = id"])])
         else:
-            errors = ids_to_check if not await self.get(db,ids_to_check) else None
+            errors = ids_to_check if not await self.get(db, where=[f"{self.model.__tablename__}.id = {ids_to_check}"]) else None
         if errors:
             error_msg = f"ids: {errors} do not exist in {self.model}."
         return error_msg
 
-    async def get( self, db: Session, *, where: str=None, with_only_cols: str=None, skip: int = 0, limit: int = 5000) -> List[ModelType]:
+    async def get( self, db: Session, *, where: list[str]=None, with_only_cols: list[str]=None, skip: int = 0, limit: int = 5000) -> List[ModelType]:
         stmt = select(self.model)
         # TO DO: make where a list in case we want to filter by more than 1 attribute
+        logger.info(f"---------------> HERE IN GET WHERE: {where}")
         if where:
-            stmt = stmt.where(text(where))
-        # TO DO: make where a list in case we want to include more than 1 column
-        if with_only_cols:    
-            stmt = stmt.with_only_columns(text(with_only_cols), maintain_column_froms=True)
+            for w in where:
+                stmt = stmt.where(text(w))
+        logger.info(f"---------------> HERE IN GET STMT: {stmt}")
         try:
             result_db = await db.execute(stmt)
             result = result_db.unique().scalars().all()
             return result
         except exc.SQLAlchemyError as e:
+            logger.info(f"SQL ERROR IN base.get method: {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
+
 
     async def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
         obj_in_data = jsonable_encoder(obj_in)
@@ -67,8 +70,10 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             await db.commit()
             return db_obj
         except IntegrityError as e:
+            logger.info(f"CREATE CRUD IntegrityError ERROR {e}")
             raise HTTPException(status.HTTP_409_CONFLICT, f"INTEGRITY SQL ERROR: {type(e)}: {e}")
         except exc.SQLAlchemyError as e:
+            logger.info(f"CREATE CRUD SQLAlchemyError ERROR {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
 
     async def update(

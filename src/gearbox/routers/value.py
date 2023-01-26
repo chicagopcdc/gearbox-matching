@@ -47,9 +47,8 @@ async def get_value(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    # ret_value = await value_crud.get(db=session, id=value_id)
-    # ret_value = await value_crud.get(db=session, where=f"Value.id == {value_id}")
-    ret_value = await value_crud.get(db=session, where=f"Value.id = {value_id}") 
+    where_list = [f"{Value.__tablename__}.id = {value_id}"]
+    ret_value = await value_crud.get(db=session, where=where_list)
     return JSONResponse(jsonable_encoder(ret_value), status.HTTP_200_OK)
 
 @mod.post("/value", response_model=ValueSearchResults,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])

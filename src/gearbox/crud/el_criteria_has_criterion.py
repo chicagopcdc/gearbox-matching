@@ -10,8 +10,8 @@ from gearbox.util import status
 class CRUDElCriteriaHasCriterion(CRUDBase [ElCriteriaHasCriterion, ElCriteriaHasCriterionCreate, ElCriteriaHasCriterionSearchResults]):
 
         async def get_ec_ids(self , current_session: Session, ec_id: int) -> List[int]:
-            return self.get_multi(current_session, 
-                where=f"ElCriteriaHasCriterion.eligibility_criteria_id == {ec_id}", 
+            return self.get(current_session, 
+                where=f"ElCriteriaHasCriterion.eligibility_criteria_id = {ec_id}", 
                 with_only_cols="ElCriteriaHasCriterion.id"
             )
             """

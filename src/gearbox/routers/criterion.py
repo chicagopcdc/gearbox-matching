@@ -50,15 +50,18 @@ async def save_object(
     check_id_errors = []
 
     # triggered_by_value_id and triggered_by_criterion_id must both be populated or both null
-    if not (body.triggered_by_value_id == None) == (body.triggered_by_criterion_id == None):
+    if not ((body.triggered_by_value_id == None) == (body.triggered_by_criterion_id == None)):
         check_id_errors.append('Input data must include both or neither triggered_by_value_id and triggered_by_criterion_id')
     elif body.triggered_by_value_id:
         check_id_errors.append(await value_crud.check_key(db=session, ids_to_check=body.triggered_by_value_id))
         check_id_errors.append(await criterion_crud.check_key(db=session, ids_to_check=body.triggered_by_criterion_id))
 
-    check_id_errors.append(await value_crud.check_key(db=session, ids_to_check=body.values))
+    if body.values:
+        check_id_errors.append(await value_crud.check_key(db=session, ids_to_check=body.values))
+
     check_id_errors.append(await tag_crud.check_key(db=session, ids_to_check=body.tags))
-    check_id_errors.append(await tag_crud.check_key(db=session, ids_to_check=body.tags))
+    # make sure another key validation is not necessary here...
+
 
     if not all(i is None for i in check_id_errors):
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: missing FKs for criterion creation: {[error for error in check_id_errors if error]}")        
@@ -91,6 +94,7 @@ async def save_object(
             path=body.triggered_by_path
         )
         new_triggered_by = await triggered_by_crud.create(db=session, obj_in=tb)
+
 
     return JSONResponse(jsonable_encoder(new_criterion), status.HTTP_201_CREATED)
 

@@ -36,19 +36,21 @@ from gearbox import config
     ]
 )
 @pytest.mark.asyncio
-def test_create_value(client, valid_upload_file_patcher, data):
+def test_create_value(setup_database, client, valid_upload_file_patcher, data):
     """
     Test create /user-input response for a valid user with authorization and
     valid input, ensure correct response.
     """
     fake_jwt = "1.2.3"
     data['code'] = 'PYTEST TESTCODE' + str(random.randint(0,9999))
+    # add random value string to satisfy unique constraint for test
+    data['value_string'] += data['code']
     resp = client.post("/value", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
     assert str(resp.status_code).startswith("20")
 
 @respx.mock
-def test_get_values(client):
+def test_get_values(setup_database, client):
     """
     Test that the /user-input endpoint returns a 200 and the id of the latest saved obj
     """

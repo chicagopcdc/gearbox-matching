@@ -7,13 +7,15 @@ from fastapi import HTTPException, APIRouter, Security
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
 from fastapi import Request, Depends
+
+from gearbox.services import eligibility_criteria as ec
 from . import logger
 from starlette.responses import JSONResponse 
 from typing import List
 from gearbox import auth
 from gearbox.schemas import EligibilityCriteriaResponse
 from gearbox import deps
-from gearbox.util import eligibility_criteria as ec, bucket_utils, status
+from gearbox.util import bucket_utils, status
 from gearbox.admin_login import admin_required
 
 mod = APIRouter()
