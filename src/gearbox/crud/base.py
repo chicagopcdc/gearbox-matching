@@ -44,12 +44,9 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
     async def get( self, db: Session, *, where: list[str]=None, with_only_cols: list[str]=None, skip: int = 0, limit: int = 5000) -> List[ModelType]:
         stmt = select(self.model)
-        # TO DO: make where a list in case we want to filter by more than 1 attribute
-        logger.info(f"---------------> HERE IN GET WHERE: {where}")
         if where:
             for w in where:
                 stmt = stmt.where(text(w))
-        logger.info(f"---------------> HERE IN GET STMT: {stmt}")
         try:
             result_db = await db.execute(stmt)
             result = result_db.unique().scalars().all()
@@ -58,16 +55,29 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             logger.info(f"SQL ERROR IN base.get method: {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
 
+    async def get( self, db: Session, *, where: list[str]=None, with_only_cols: list[str]=None, skip: int = 0, limit: int = 5000) -> List[ModelType]:
+        stmt = select(self.model)
+        if where:
+            for w in where:
+                stmt = stmt.where(text(w))
+        try:
+            result_db = await db.execute(stmt)
+            result = result_db.unique().scalars().all()
+            return result
+        except exc.SQLAlchemyError as e:
+            logger.info(f"SQL ERROR IN base.get method: {e}")
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
 
     async def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
         obj_in_data = jsonable_encoder(obj_in)
         # set create_date here if not already set and it is in the schema
         if "create_date" in obj_in_data.keys():
             obj_in_data["create_date"] = datetime.now() if not obj_in_data["create_date"] else obj_in_data["create_date"]
-        db_obj = self.model(**obj_in_data)  # type: ignore
+        db_obj = self.model(**obj_in_data)
         try:
             db.add(db_obj)
-            await db.commit()
+            # await db.commit()
+            await db.flush()
             return db_obj
         except IntegrityError as e:
             logger.info(f"CREATE CRUD IntegrityError ERROR {e}")
