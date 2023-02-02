@@ -2,7 +2,6 @@ from .study import Study
 from .base_class import Base
 
 from .saved_input import SavedInput
-from .algorithm_engine import AlgorithmEngine
 from .criterion_has_tag import CriterionHasTag
 from .criterion_has_value import CriterionHasValue
 from .criterion import Criterion

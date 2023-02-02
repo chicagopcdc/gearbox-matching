@@ -32,40 +32,75 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
 
     async def check_key(self, db:Session, ids_to_check: Union[List[int], int]):
+        """
+        method checks if a key or list of keys exist
+        """
         error_msg = None
-        logger.info("---------------------------- HERE STEVE --------------------")
         if isinstance(ids_to_check, list):
-            errors = '.'.join([str(id) for id in ids_to_check if not await self.get(db, where=[f"{self.model.__tablename__}.id = id"])])
+            errors = '.'.join([str(id) for id in ids_to_check if not await self.get(db, id=id)])
         else:
-            errors = ids_to_check if not await self.get(db, where=[f"{self.model.__tablename__}.id = {ids_to_check}"]) else None
+            errors = ids_to_check if not await self.get(db, id=ids_to_check) else None
         if errors:
             error_msg = f"ids: {errors} do not exist in {self.model}."
         return error_msg
 
-    async def get( self, db: Session, *, where: list[str]=None, with_only_cols: list[str]=None, skip: int = 0, limit: int = 5000) -> List[ModelType]:
-        stmt = select(self.model)
-        if where:
-            for w in where:
-                stmt = stmt.where(text(w))
+    async def get( self, db: Session, id: int ) -> ModelType:
+        stmt = select(self.model).where(self.model.id == id)
         try:
+            print(f"THIS IS THE ID: {id}")
+            print(stmt)
             result_db = await db.execute(stmt)
-            result = result_db.unique().scalars().all()
+            # result = result_db.unique().scalar_one()
+            result = result_db.unique().scalars().first()
             return result
         except exc.SQLAlchemyError as e:
-            logger.info(f"SQL ERROR IN base.get method: {e}")
+            print(f"----------------> ERROR: {e}")
+            logger.error(f"SQL ERROR IN base.get method: {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
 
-    async def get( self, db: Session, *, where: list[str]=None, with_only_cols: list[str]=None, skip: int = 0, limit: int = 5000) -> List[ModelType]:
+    async def get_active( self, db: Session, id: int ) -> ModelType:
+
+        if not 'active' in self.model.__fields__.keys():
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{self.model.__tablename__} does not inlude 'active' attribute")        
+
+        stmt = select(self.model).where(self.model.id == id).where(self.model.active == True)
+        try:
+            result_db = await db.execute(stmt)
+            # not using scalar_one here because we don't necessarily
+            # want to throw an error if we get more than one row here
+            result = result_db.unique().scalars().first()
+            if not result:
+                raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"No 'active' rows in {self.model.__tablename__} ")        
+            return result
+        except exc.SQLAlchemyError as e:
+            logger.error(f"SQL ERROR IN base.get method: {e}")
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
+
+    async def get_multi( self, db: Session, *, skip: int = 0, limit: int = 5000) -> List[ModelType]:
         stmt = select(self.model)
-        if where:
-            for w in where:
-                stmt = stmt.where(text(w))
         try:
             result_db = await db.execute(stmt)
             result = result_db.unique().scalars().all()
             return result
         except exc.SQLAlchemyError as e:
-            logger.info(f"SQL ERROR IN base.get method: {e}")
+            logger.error(f"SQL ERROR IN base.get method: {e}")
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
+
+    async def get_active_multi( self, db: Session, id: int ) -> List[ModelType]:
+
+        if not 'active' in self.model.__fields__.keys():
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{self.model.__tablename__} does not inlude 'active' attribute")        
+
+        stmt = select(self.model).where(self.model.active == True)
+        try:
+            result_db = await db.execute(stmt)
+            result = result_db.unique().scalars().all()
+            if not result:
+                raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"No 'active' rows in {self.model.__tablename__} ")        
+            return result
+
+        except exc.SQLAlchemyError as e:
+            logger.error(f"SQL ERROR IN base.get method: {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
 
     async def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
@@ -80,11 +115,26 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             await db.flush()
             return db_obj
         except IntegrityError as e:
-            logger.info(f"CREATE CRUD IntegrityError ERROR {e}")
+            logger.error(f"CREATE CRUD IntegrityError ERROR {e}")
             raise HTTPException(status.HTTP_409_CONFLICT, f"INTEGRITY SQL ERROR: {type(e)}: {e}")
         except exc.SQLAlchemyError as e:
-            logger.info(f"CREATE CRUD SQLAlchemyError ERROR {e}")
+            logger.error(f"CREATE CRUD SQLAlchemyError ERROR {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
+
+    async def set_active(self, db: Session, id: int, active: bool) -> ModelType: 
+        # update object to set status 'active'
+        # raise error if 'active' not an attribute
+        # raise error if object with id does not exist
+        # update 'active' T if F, F if T
+        if not 'active' in self.model.__fields__.keys():
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{self.model.__tablename__} does not inlude 'active' attribute")        
+
+        upd_obj = db.execute(select (self.model)).where(self.model.id == id)
+        if not upd_obj:
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"id: {id} does not exist in {self.model.__tablename__}")        
+
+        upd_obj.active = active
+        db.flush()
 
     async def update(
         self,

@@ -24,47 +24,46 @@ from . import logger
 from gearbox.util import status
 from starlette.responses import JSONResponse
 from gearbox.admin_login import admin_required
-from gearbox.models import AlgorithmEngine
+from gearbox.models import StudyAlgorithmEngine
+from gearbox.services import study_algorithm_engine
 
 from gearbox import config
-from gearbox.schemas import AlgorithmEngineCreate, AlgorithmEngineSearchResults 
-from gearbox.crud import algorithm_engine_crud
+from gearbox.schemas import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSearchResults 
 from gearbox import deps
 from gearbox import auth 
 
 mod = APIRouter()
 
-@mod.get("/algorithm-engines", response_model=AlgorithmEngineSearchResults, dependencies=[ Depends(auth.authenticate)])
-async def get_aes(
+@mod.get("/study-algorithm-engines", response_model=StudyAlgorithmEngineSearchResults, dependencies=[ Depends(auth.authenticate)])
+async def get_saes(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    aes = await algorithm_engine_crud.get(session)
+    # pull active
+    aes = await study_algorithm_engine.get_study_algorithm_engines(session=session)
     return JSONResponse(jsonable_encoder(aes), status.HTTP_200_OK)
 
 # think about params here - 
-@mod.get("/algorithm-engine/{algorithm_engine_id}", response_model=AlgorithmEngineSearchResults, dependencies=[ Depends(auth.authenticate)])
-async def get_ae(
+@mod.get("/study-algorithm-engine/{algorithm_engine_id}", response_model=StudyAlgorithmEngineSearchResults, dependencies=[ Depends(auth.authenticate)])
+async def get_sae(
     algorithm_engine_id: int,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    where_list = [ f"{AlgorithmEngine.__tablename__}.id = {algorithm_engine_id}" ]
-    with_only_cols_list = ["id"]
-    ret_value = await algorithm_engine_crud.get(db=session, where=where_list, with_only_cols=with_only_cols_list)
-    return JSONResponse(jsonable_encoder(ret_value), status.HTTP_200_OK)
+    sae = await study_algorithm_engine.get_study_algorithm_engine(session=session, id=algorithm_engine_id)
+    return JSONResponse(jsonable_encoder(sae), status.HTTP_200_OK)
 
-@mod.post("/algorithm-engine", response_model=AlgorithmEngineSearchResults,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
-async def save_ae(
-    body: AlgorithmEngineCreate,
+@mod.post("/study-algorithm-engine", response_model=StudyAlgorithmEngineSearchResults,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+async def save_sae(
+    body: StudyAlgorithmEngineCreate,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
     """
     Comments:
     """
-    new_ae = await algorithm_engine_crud.create(db=session, obj_in=body)
+    new_ae = await study_algorithm_engine.create(session=session, study_algorithm_engine=body)
     return JSONResponse(jsonable_encoder(new_ae), status.HTTP_201_CREATED)
 
 def init_app(app):
-    app.include_router(mod, tags=["algorithm-engine","algorithm-engines"])
+    app.include_router(mod, tags=["study-algorithm-engine","study-algorithm-engines"])

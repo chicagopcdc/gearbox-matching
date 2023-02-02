@@ -1,26 +1,7 @@
 import json
 import re
 from collections import deque
-from gearbox.crud.match_conditions import get_algorithm_engines
 from gearbox.routers import logger
-
-async def get_match_conditions(session):
-    all_algo_engs = await get_algorithm_engines(session)
-    match_conditions = []
-    ae_dict = {}
-
-    for ae in all_algo_engs:
-        if ae.study_algo_engine.study_version.study_id in ae_dict:
-                ae_dict[ae.study_algo_engine.study_version.study_id].append((ae.path,ae.sequence))
-        else:
-            ae_dict[ae.study_algo_engine.study_version.study_id] = [(ae.path,ae.sequence)]
-
-    for i in sorted(ae_dict):
-        study_id = i
-        paths = [ x[0] for x in sorted(ae_dict[i], key = lambda x: x[1])]
-        match_conditions.append(get_tree(paths, study_id=study_id))
-
-    return match_conditions
 
 def expand_paths(paths):
     """

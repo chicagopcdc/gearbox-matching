@@ -25,6 +25,16 @@ from starlette.status import (
 from gearbox import config
 
 @pytest.mark.asyncio
+def test_get_criterion(setup_database, client, valid_upload_file_patcher, connection):
+
+    fake_jwt = "1.2.3"
+    criterion_id = 1
+
+    resp = client.get(f"/criterion/{criterion_id}", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp.raise_for_status()
+    assert str(resp.status_code).startswith("20")
+
+@pytest.mark.asyncio
 def test_create_criterion(setup_database, client, valid_upload_file_patcher, mock_new_criterion, connection):
     """
     Test create /user-input response for a valid user with authorization and

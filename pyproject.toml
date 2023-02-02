@@ -57,7 +57,7 @@ nest-asyncio = "^1.5.1"
 "match_form" = "gearbox.routers.match_form"
 "value" = "gearbox.routers.value"
 "criterion"="gearbox.routers.criterion"
-"algorithm_engine" = "gearbox.routers.algorithm_engine"
+"study_algorithm_engine" = "gearbox.routers.study_algorithm_engine"
 
 [build-system]
 requires = ["poetry>=0.12"]

@@ -25,8 +25,7 @@ from starlette.responses import JSONResponse
 from gearbox.admin_login import admin_required
 
 from gearbox import config
-from gearbox.models import Value
-from gearbox.schemas import ValueCreate, ValueSearchResults
+from gearbox.schemas import ValueCreate, ValueSearchResults, Value
 from gearbox.crud import value_crud
 from gearbox import deps
 from gearbox import auth 
@@ -41,17 +40,16 @@ async def get_values(
     values = await value_crud.get(session)
     return JSONResponse(jsonable_encoder(values), status.HTTP_200_OK)
 
-@mod.get("/value/{value_id}", response_model=ValueSearchResults, dependencies=[ Depends(auth.authenticate)])
+@mod.get("/value/{value_id}", response_model=Value, dependencies=[ Depends(auth.authenticate)])
 async def get_value(
     value_id: int,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    where_list = [f"{Value.__tablename__}.id = {value_id}"]
-    ret_value = await value_crud.get(db=session, where=where_list)
+    ret_value = await value_crud.get(db=session, id=value_id)
     return JSONResponse(jsonable_encoder(ret_value), status.HTTP_200_OK)
 
-@mod.post("/value", response_model=ValueSearchResults,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.post("/value", response_model=Value,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
     body: ValueCreate,
     request: Request,
@@ -63,7 +61,7 @@ async def save_object(
     new_value = await value_crud.create(db=session, obj_in=body)
     return JSONResponse(jsonable_encoder(new_value), status.HTTP_201_CREATED)
 
-@mod.post("/update-value/{value_id}", response_model=ValueSearchResults,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.post("/update-value/{value_id}", response_model=Value, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def update_object(
     value_id: int,
     body: dict,

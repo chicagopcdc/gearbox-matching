@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from fastapi import Request, Depends, HTTPException
 from fastapi.security import HTTPBearer
 
-from gearbox.services import match_conditions as mc, match_form as mf
+from gearbox.services import match_form as mf
 from . import logger
 from starlette.responses import JSONResponse 
 from typing import List

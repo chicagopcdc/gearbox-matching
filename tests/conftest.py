@@ -90,8 +90,7 @@ def setup_database(connection) -> Engine:
     file_to_table(conn, cursor,'triggered_by', './postgres-data/td_triggered_by.tsv')
     file_to_table(conn, cursor,'criterion_has_tag', './postgres-data/td_criterion_has_tag.tsv')
     file_to_table(conn, cursor,'el_criteria_has_criterion', './postgres-data/td_el_criteria_has_criterion.tsv')
-    file_to_table(conn, cursor,'study_algorithm_engine', './postgres-data/td_study_algorithm_engine.tsv')
-    # file_to_table(conn, cursor,'algorithm_engine', './postgres-data/td_algorithm_engine.tsv')
+    # file_to_table(conn, cursor,'study_algorithm_engine', './postgres-data/td_study_algorithm_engine.tsv')
     conn.commit()
 
     # cursor.execute("SELECT setval('algorithm_engine_id_seq', (SELECT MAX(id) FROM algorithm_engine));")

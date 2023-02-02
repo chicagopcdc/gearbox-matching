@@ -18,7 +18,7 @@ from starlette.responses import JSONResponse
 from gearbox.admin_login import admin_required
 
 # from gearbox import config
-from gearbox.schemas import CriterionSearchResults, CriterionCreateIn, CriterionCreate, CriterionHasValueCreate, CriterionHasTagCreate, DisplayRulesCreate, TriggeredByCreate
+from gearbox.schemas import CriterionSearchResults, CriterionCreateIn, CriterionCreate, CriterionHasValueCreate, CriterionHasTagCreate, DisplayRulesCreate, TriggeredByCreate, Criterion
 from gearbox.crud import criterion_crud, criterion_has_value_crud, criterion_has_tag_crud, display_rules_crud, triggered_by_crud, value_crud, tag_crud
 from gearbox import deps
 from gearbox import auth 
@@ -39,7 +39,16 @@ async def get_criteria(
     criteria = await criterion_crud.get(session)
     return JSONResponse(jsonable_encoder(criteria), status.HTTP_200_OK)    
 
-# to do: modify response_model - should return 1 object
+@mod.get("/criterion/{id}", response_model=Criterion, dependencies=[ Depends(auth.authenticate)])
+async def get_criteria(
+    request: Request,
+    id: int,
+    session: AsyncSession = Depends(deps.get_session),
+):
+
+    criterion = await criterion_crud.get(session, id=id)
+    return JSONResponse(jsonable_encoder(criterion), status.HTTP_200_OK)    
+
 @mod.post("/criterion", response_model=CriterionSearchResults,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
     body: CriterionCreateIn,
