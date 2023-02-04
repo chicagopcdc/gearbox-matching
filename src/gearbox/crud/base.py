@@ -44,62 +44,55 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             error_msg = f"ids: {errors} do not exist in {self.model}."
         return error_msg
 
-    async def get( self, db: Session, id: int ) -> ModelType:
+    async def get( self, db: Session, id: int, active: bool = None ) -> ModelType:
+
         stmt = select(self.model).where(self.model.id == id)
-        try:
-            print(f"THIS IS THE ID: {id}")
-            print(stmt)
-            result_db = await db.execute(stmt)
-            # result = result_db.unique().scalar_one()
-            result = result_db.unique().scalars().first()
-            return result
-        except exc.SQLAlchemyError as e:
-            print(f"----------------> ERROR: {e}")
-            logger.error(f"SQL ERROR IN base.get method: {e}")
-            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
 
-    async def get_active( self, db: Session, id: int ) -> ModelType:
+        if active != None: 
+            if 'active' not in self.model.__fields__.keys():
+                raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{self.model.__tablename__} does not inlude 'active' attribute")        
+            stmt = stmt.where(self.model.active == active)
 
-        if not 'active' in self.model.__fields__.keys():
-            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{self.model.__tablename__} does not inlude 'active' attribute")        
-
-        stmt = select(self.model).where(self.model.id == id).where(self.model.active == True)
+        # add where if active
         try:
             result_db = await db.execute(stmt)
             # not using scalar_one here because we don't necessarily
             # want to throw an error if we get more than one row here
             result = result_db.unique().scalars().first()
-            if not result:
-                raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"No 'active' rows in {self.model.__tablename__} ")        
+            #if not result:
+            #    raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"No 'active' rows in {self.model.__tablename__} ")        
             return result
         except exc.SQLAlchemyError as e:
             logger.error(f"SQL ERROR IN base.get method: {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
 
-    async def get_multi( self, db: Session, *, skip: int = 0, limit: int = 5000) -> List[ModelType]:
+    async def get_multi( self, db: Session, active: bool = None, where: List[str] = None ) -> List[ModelType]:
+
         stmt = select(self.model)
+        if active != None:
+            print(f"SELF MODEL: {self.model}")
+            print(f"SELF MODEL TYPE: {type(self.model)}")
+            print(f"MODEL COLUMNS: {self.model.__table__.columns}")
+            cols = [str(c).split('.')[1] for c in self.model.__table__.columns]
+            if 'active' in cols:
+                stmt = stmt.where(self.model.active == active)
+            else:
+                raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{self.model.__tablename__} does not inlude 'active' attribute")        
+        
+        if where:
+            for w in where:
+                stmt = stmt.where(text(w))
+
         try:
+            print(f"STATEMENT: {stmt}")
             result_db = await db.execute(stmt)
             result = result_db.unique().scalars().all()
-            return result
-        except exc.SQLAlchemyError as e:
-            logger.error(f"SQL ERROR IN base.get method: {e}")
-            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
-
-    async def get_active_multi( self, db: Session, id: int ) -> List[ModelType]:
-
-        if not 'active' in self.model.__fields__.keys():
-            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{self.model.__tablename__} does not inlude 'active' attribute")        
-
-        stmt = select(self.model).where(self.model.active == True)
-        try:
-            result_db = await db.execute(stmt)
-            result = result_db.unique().scalars().all()
-            if not result:
-                raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"No 'active' rows in {self.model.__tablename__} ")        
+            #if not result:
+            #    raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"No 'active' rows in {self.model.__tablename__} ")        
             return result
 
         except exc.SQLAlchemyError as e:
+            print(f"SQL ERROR IN base.get method: {e}")
             logger.error(f"SQL ERROR IN base.get method: {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
 

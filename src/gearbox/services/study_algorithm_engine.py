@@ -1,5 +1,5 @@
 import json
-import datetime
+from datetime import datetime
 
 from gearbox.models.study_algorithm_engine import StudyAlgorithmEngine
 from . import logger
@@ -18,7 +18,7 @@ async def get_study_algorithm_engine(session: Session, id: int) -> StudyAlgorith
     return aes
 
 async def get_study_algorithm_engines(session: Session) -> StudyAlgorithmEngineSearchResults:
-    aes = await study_algorithm_engine_crud.get_active_multi(session)
+    aes = await study_algorithm_engine_crud.get_multi(session)
     return aes
     pass
 
@@ -79,7 +79,7 @@ async def get_latest_algorithm_version(session: Session, study_version_id: int) 
     else:
         return 0
 
-async def check_existing_algorithm_logic_duplicate(session: Session, algorithm_logic: str, study_version_id: int) -> int:
+async def check_existing_algorithm_logic_duplicate(session: Session, algorithm_logic: str, study_version_id: int) -> StudyAlgorithmEngine:
     """
     description:
         The purpose of this function is to ensure that there are 
@@ -93,6 +93,7 @@ async def check_existing_algorithm_logic_duplicate(session: Session, algorithm_l
             .where(StudyAlgorithmEngine.study_version_id == study_version_id)
         )
         existing_algorithms = result.unique().scalars().all()
+
     except exc.SQLAlchemyError as e:
         logger.error(f"SQL ERROR IN check_existing_algorithm_logic_duplicate: {e}")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
@@ -103,7 +104,7 @@ async def check_existing_algorithm_logic_duplicate(session: Session, algorithm_l
         for ex in existing_algorithms:
             a, b = json.dumps(ex.algorithm_logic), json.dumps(algorithm_logic)
             if a == b:
-                return ex.id
+                return ex
 
     return None
 
@@ -112,38 +113,41 @@ async def check_existing_algorithm_logic_duplicate(session: Session, algorithm_l
 
 async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineCreate) -> StudyAlgorithmEngine:
 
-    # Check study_version fk in study_algorithm_engine row exists
+    # Validate study version
     if not check_study_version_id_exists(session, study_algorithm_engine.study_version_id):
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study_version {study_algorithm_engine.study_version_id} does not exist.")
 
-    # check ids exist, if not then throw exception (validate_algorithm_logic_ids)
+    # Validate criterion ids in the algorithm logic
     invalid_ids = await get_invalid_logic_ids(session, study_algorithm_engine.algorithm_logic, study_algorithm_engine.study_version_id) 
     if invalid_ids:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study algorithm logic contains the following invalid ids: {invalid_ids}.")
 
-    # fetch duplicate algorithm logic if exists
+    # Find existing exact duplicate algorithm logic for the study version
     dup_study_algorithm_engine = await check_existing_algorithm_logic_duplicate(session, study_algorithm_engine.algorithm_logic, study_algorithm_engine.study_version_id)
     
-    # if no duplicate is found, determine version and insert new
+    # if no duplicate is found, determine version and insert new study algorithm engine
     if not dup_study_algorithm_engine:
         study_algorithm_engine.algorithm_version = await get_latest_algorithm_version(session, study_algorithm_engine.study_version_id) + 1
         new_study_algorithm_engine = await create_study_algorithm_engine(session, study_algorithm_engine)
-        # session.add(study_algorithm_engine)
-        # session.flush()
         return new_study_algorithm_engine
     else: 
         # if incoming is 'active', but we find a duplicate, set existing duplicate record to 'active', set start_date to current
         if study_algorithm_engine.active == True:
-            stmt = (
-                update(StudyAlgorithmEngine).
-                where(StudyAlgorithmEngine.study_version_id == study_algorithm_engine.study_version_id).
-                values(active = False)
-            )
-            # try / catch?
-            stmt.execute()
-            dup_study_algorithm_engine.active = True
-            dup_study_algorithm_engine.start_date = datetime.datetime.utcnow(),
-            session.flush()
+            # first set all other rows related to the study_version to false
+            sae_to_update = await study_algorithm_engine_crud.get_multi(
+                    db=session, 
+                    active=False, 
+                    where=[f"study_algorithm_engine.study_version_id = {study_algorithm_engine.study_version_id}"]
+                )
+            upd_false = { "active":False }
+            for sae in sae_to_update:
+                # set all to false
+                await study_algorithm_engine_crud.update(db=session, db_obj=sae, obj_in=upd_false)
+            dt = datetime.now()
+            dup_row = await study_algorithm_engine_crud.get(db=session, id=dup_study_algorithm_engine.id)
+            upd_true = { "active":True }
+            await study_algorithm_engine_crud.update(db=session, db_obj=dup_row, obj_in=upd_true)
+
             return dup_study_algorithm_engine
         
 

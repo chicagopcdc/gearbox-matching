@@ -1,5 +1,5 @@
 from sqlalchemy import ForeignKey, Column, Integer, DateTime, Boolean
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import relationship
 
 from .base_class import Base
@@ -10,7 +10,7 @@ class StudyAlgorithmEngine(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     study_version_id = Column(Integer, ForeignKey('study_version.id'))
     start_date = Column(DateTime, nullable=True)
-    algorithm_logic = Column(JSONB)
+    algorithm_logic = Column(JSON)
     algorithm_version = Column(Integer)
     active = Column(Boolean, nullable=True)
 

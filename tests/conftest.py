@@ -1,5 +1,10 @@
 import importlib
+from collections import OrderedDict
 import json
+import os
+import glob
+from datetime import datetime
+import re
 from json import JSONEncoder
 from collections import defaultdict
 import tempfile
@@ -107,11 +112,33 @@ def setup_database(connection) -> Engine:
     cursor.execute("SELECT setval('tag_id_seq', (SELECT MAX(id) FROM tag));")
     cursor.execute("SELECT setval('triggered_by_id_seq', (SELECT MAX(id) FROM triggered_by));")
     cursor.execute("SELECT setval('value_id_seq', (SELECT MAX(id) FROM value));")
+    print("######################### ABOUT TO CALL LOAD STUDY ALGRITHM ENGINE --------------------------------------->")
+    load_study_algorithm_engine(conn, cursor)
     conn.commit()
 
     yield session
     session.close()
 
+def load_study_algorithm_engine(conn, cursor):
+    for filename in glob.glob("./tests/data/sae*.json"):
+        with open(filename) as jfile:
+            # study_logic = json.loads(jfile.read(), object_pairs_hook=OrderedDict)
+            study_logic = json.loads(jfile.read())
+            study_logic = json.dumps(study_logic)
+            study_version_id = re.search(r'\d', filename).group()
+            print(f"STUDY VERSION ID TYPE: {type(study_version_id)}")
+            dt = datetime.now()
+            active = False if int(study_version_id) == 1 else True
+            insert_query = f'''
+                INSERT INTO study_algorithm_engine 
+                    (study_version_id, start_date, algorithm_logic, algorithm_version, active) 
+                    VALUES (%s, %s, %s, %s, %s)
+            '''
+            try:
+                cursor.execute(insert_query, (study_version_id, dt, study_logic, 1, active))
+            except Exception as e:
+                print(f"ERROR: {e}")
+    conn.commit()
 
 @pytest.fixture(scope="session")
 def client(event_loop):

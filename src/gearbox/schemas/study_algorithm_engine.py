@@ -1,10 +1,38 @@
 from __future__ import annotations
 import json
+from jsonschema import validate
 from pydantic import BaseModel, ValidationError, validator, Json
 from datetime import datetime
 from typing import Optional, List, Sequence, Any
 
 from gearbox.models import study_algorithm_engine
+
+
+algorithm_logic_schema = {
+    "type":"object",
+    "properties": {
+        "studyId": {"type":"number"},
+        "algorithm": {"$ref":"#/definitions/crit"},
+    },  
+
+    "definitions": {
+        "crit": {
+            "type":"object",
+            "properties": {
+                "operator": {"type":"string", "enum":["AND","OR"] },
+                "criteria": {"type":"array",
+                    "items": {          
+                        "anyOf": [              
+                            {"type":"number"},          
+                            {"$ref":"#/definitions/crit"} 
+                        ]                       
+                    }                   
+                }               
+            }           
+        }       
+    }   
+}
+
 
 class StudyAlgorithmEngineBase(BaseModel):
     study_version_id: int
@@ -13,16 +41,23 @@ class StudyAlgorithmEngineBase(BaseModel):
     algorithm_version: Optional[int]
     active: bool
 
-    # @validator('algorithm_logic')
+    @validator('algorithm_logic')
     # note - first arg here is the class, the second is the field we are validating
     # pydantic validators return either an error or the validated field 
-    #def check_valid_json(cls, v):
-    #    try:
-    #        json.loads(v)
-    #    except ValueError: 
-    #        raise ValidationError
-    #    return v
+    def check_valid_json(cls, v):
+        try:
+            json.dumps(v)
+        except ValueError as e: 
+            raise ValidationError
+        except Exception as e: 
+            raise ValidationError
+        return v
 
+    @validator('algorithm_logic')
+    def check_valid_vs_schema(cls, v):
+        validation_errors =  validate(v, algorithm_logic_schema)
+        if validation_errors:
+            raise ValidationError(f"algorithm logic schema errors: {validation_errors}")
 
     class Config:
         orm_mode = True    

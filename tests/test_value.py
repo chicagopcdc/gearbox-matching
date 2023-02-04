@@ -38,8 +38,7 @@ from gearbox import config
 @pytest.mark.asyncio
 def test_create_value(setup_database, client, valid_upload_file_patcher, data):
     """
-    Test create /user-input response for a valid user with authorization and
-    valid input, ensure correct response.
+    Test create value
     """
     fake_jwt = "1.2.3"
     data['code'] = 'PYTEST TESTCODE' + str(random.randint(0,9999))
@@ -52,7 +51,7 @@ def test_create_value(setup_database, client, valid_upload_file_patcher, data):
 @respx.mock
 def test_get_values(setup_database, client):
     """
-    Test that the /user-input endpoint returns a 200 and the id of the latest saved obj
+    Test that the /values endpoint returns a 200 and the id of the latest saved obj
     """
     fake_jwt = "1.2.3"
     resp = client.get("/values", headers={"Authorization": f"bearer {fake_jwt}"})
