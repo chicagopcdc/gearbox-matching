@@ -17,19 +17,30 @@ from gearbox.models import StudyAlgorithmEngine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy import select
 
-@respx.mock
-@pytest.mark.parametrize(
-    "data", [ 
+TEST_CREATE_LIST = [
         {
             "study_version_id": 1,
             "algorithm_logic": None,
             "algorithm_version": 1,
-            "active": True
+            "active": True,
+            "logic_file": "./tests/data/algorithm_logic.json",
+            "success": True
+        },
+        {
+            "study_version_id": 1,
+            "algorithm_logic": None,
+            "algorithm_version": 1,
+            "active": True,
+            "logic_file": "./tests/data/algorithm_logic_invalid_schema.json",
+            "success":False
         }
-    ]
-)
+
+]
+
+@respx.mock
 @pytest.mark.asyncio
-def test_create_study_algorithm_engine(setup_database, client, data, connection):
+@pytest.mark.parametrize('test_create_data',TEST_CREATE_LIST)
+def test_create_study_algorithm_engine(setup_database, client, test_create_data, connection):
     """
     Comments:
     This test performs the following:
@@ -38,36 +49,50 @@ def test_create_study_algorithm_engine(setup_database, client, data, connection)
     3.) Validates that the json stored in the algorithm_logic column matches the input data
     4.) Deletes the test row from the study_algorithm_engine table
     """
+    data = {
+        "study_version_id": test_create_data['study_version_id'],
+        "algorithm_version": test_create_data['algorithm_version'],
+        "active": test_create_data['active'],
+    }
 
-    ae_file = './tests/data/algorithm_logic.json'
-    with open(ae_file, 'r') as comp_file:
+    logic_file = test_create_data['logic_file']
+    with open(logic_file, 'r') as comp_file:
         ae_json = comp_file.read().replace('\n','').replace('\t',' ')
     data['algorithm_logic'] = ae_json
+
+    print(f"TEST ALGORITHM LOGIC: {json.dumps(data['algorithm_logic'])}")
     fake_jwt = "1.2.3"
     resp = client.post("/study-algorithm-engine", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
-    resp.raise_for_status()
-    full_res = resp.json()
-    new_ae_id = full_res['id']
+    print(f"----------------------------> RESPONSE CODE: {resp}")
+    print(f"----------------------------> RESPONSE CODE: {resp.status_code}")
+
+    # resp.raise_for_status()
+
+    # if success we need to see if new_ae_id is created 
 
     errors = []
-    if not (str(resp.status_code).startswith("20")):
-        errors.append(f"ERROR bad http status in response: {str(resp.status_code)}")
+    if test_create_data["success"]:
+        if not (str(resp.status_code).startswith("20")):
+            errors.append(f"ERROR bad http status in response: {str(resp.status_code)}")
+        full_res = resp.json()
+        new_ae_id = full_res['id']
+        # verify row created 
+        try:
+            Session = sessionmaker(bind=connection)
+            db_session = Session()
 
-    try:
-        Session = sessionmaker(bind=connection)
-        db_session = Session()
+            stmt = select(StudyAlgorithmEngine.algorithm_logic, StudyAlgorithmEngine.active, StudyAlgorithmEngine.id, StudyAlgorithmEngine.study_version_id).where(StudyAlgorithmEngine.id == new_ae_id)
+            result = db_session.execute(stmt)
+            ael = result.all()
+            if not ael:
+                errors.append(f"ERROR failed to confirm new study_algorithm_engine row created.")
+            db_session.close()
+        except Exception as e:
+            print(f"SQL EXCEPTION DURING DB QUERY CONFIRM NEW study_algorithm_engine: {e}")
+    else:
+        if not (str(resp.status_code).startswith("4")):
+            errors.append(f"ERROR bad http status in response: {str(resp.status_code)}")
 
-        stmt = select(StudyAlgorithmEngine.algorithm_logic, StudyAlgorithmEngine.active, StudyAlgorithmEngine.id, StudyAlgorithmEngine.study_version_id).where(StudyAlgorithmEngine.id == new_ae_id)
-        result = db_session.execute(stmt)
-        ael = result = result.all()
-        ael_active = db_session.query(StudyAlgorithmEngine.active).filter(StudyAlgorithmEngine.id==new_ae_id).all()
-
-        # cleanup
-        # db_session.query(StudyAlgorithmEngine).filter(StudyAlgorithmEngine.id==new_ae_id).delete()
-        db_session.commit()
-        db_session.close()
-    except Exception as e:
-        print(f"SQL EXCEPTION DURING CLEANUP: {e}")
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))  
 

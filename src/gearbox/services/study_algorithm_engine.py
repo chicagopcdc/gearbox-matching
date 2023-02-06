@@ -49,7 +49,6 @@ async def get_invalid_logic_ids(session: Session, algorithm_logic: str, study_ve
     returns: list of el_criteria_has_criterion_id from the algorithm_logic input, 
         that are not present in the el_criteria_has_criterion table for the study
     """
-    logger.info(f"------------------------------> HERE IN INVALID CHECK IDS")
     try:
         result = await session.execute(select(ElCriteriaHasCriterion.id)
             .join(ElCriteriaHasCriterion.eligibility_criteria)
@@ -112,12 +111,11 @@ async def check_existing_algorithm_logic_duplicate(session: Session, algorithm_l
     # the algorithm_engine table
 
 async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineCreate) -> StudyAlgorithmEngine:
-
-    # Validate study version
+    # Check if study version on incoming algorithm engine exists in the db
     if not check_study_version_id_exists(session, study_algorithm_engine.study_version_id):
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study_version {study_algorithm_engine.study_version_id} does not exist.")
 
-    # Validate criterion ids in the algorithm logic
+    # Check el_criteria_has_criterion ids in incoming algoritm engine exist in the db
     invalid_ids = await get_invalid_logic_ids(session, study_algorithm_engine.algorithm_logic, study_algorithm_engine.study_version_id) 
     if invalid_ids:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study algorithm logic contains the following invalid ids: {invalid_ids}.")
@@ -132,6 +130,7 @@ async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineC
         return new_study_algorithm_engine
     else: 
         # if incoming is 'active', but we find a duplicate, set existing duplicate record to 'active', set start_date to current
+        # if incoming is not active and there is an exact duplicate then do nothing
         if study_algorithm_engine.active == True:
             # first set all other rows related to the study_version to false
             sae_to_update = await study_algorithm_engine_crud.get_multi(
@@ -139,14 +138,12 @@ async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineC
                     active=False, 
                     where=[f"study_algorithm_engine.study_version_id = {study_algorithm_engine.study_version_id}"]
                 )
-            upd_false = { "active":False }
             for sae in sae_to_update:
                 # set all to false
-                await study_algorithm_engine_crud.update(db=session, db_obj=sae, obj_in=upd_false)
+                await study_algorithm_engine_crud.update(db=session, db_obj=sae, obj_in={"active":False})
             dt = datetime.now()
             dup_row = await study_algorithm_engine_crud.get(db=session, id=dup_study_algorithm_engine.id)
-            upd_true = { "active":True }
-            await study_algorithm_engine_crud.update(db=session, db_obj=dup_row, obj_in=upd_true)
+            await study_algorithm_engine_crud.update(db=session, db_obj=dup_row, obj_in={"active":True})
 
             return dup_study_algorithm_engine
         

@@ -1,10 +1,17 @@
 import asyncio
+import json
+from fastapi.responses import PlainTextResponse
+from starlette.responses import JSONResponse
+# from pydantic import ValidationError
+# from jsonschema import ValidationError
 import click
 import pkg_resources
-from fastapi import FastAPI, APIRouter, HTTPException, Depends
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request
+from fastapi.exceptions import RequestValidationError
 import httpx
 from sqlalchemy.orm import Session
 from gearbox import deps, config
+from gearbox.util import status
 import cdislogging
 from pcdc_aws_client.boto import BotoManager
 
@@ -13,14 +20,13 @@ logger = cdislogging.get_logger(logger_name, log_level="debug" if config.DEBUG e
 
 
 
-try:
+#try:
     # importlib.metadata works locally but not in Docker
     # trying importlib_metadata
     # from importlib.metadata import entry_points
-    from importlib_metadata import entry_points
-except ImportError:
-    from importlib_metadata import entry_points
-
+from importlib_metadata import entry_points
+#except ImportError:
+#    from importlib_metadata import entry_points
 
 def get_app():
     app = FastAPI(
@@ -42,6 +48,9 @@ def get_app():
         }, 
         logger)
 
+    @app.exception_handler(RequestValidationError)
+    async def value_error_exception_handler(request:Request, exc:ValueError):
+        return PlainTextResponse(str(exc), status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     @app.on_event("shutdown")
     async def shutdown_event():

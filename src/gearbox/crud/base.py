@@ -70,9 +70,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
         stmt = select(self.model)
         if active != None:
-            print(f"SELF MODEL: {self.model}")
-            print(f"SELF MODEL TYPE: {type(self.model)}")
-            print(f"MODEL COLUMNS: {self.model.__table__.columns}")
             cols = [str(c).split('.')[1] for c in self.model.__table__.columns]
             if 'active' in cols:
                 stmt = stmt.where(self.model.active == active)
@@ -84,7 +81,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
                 stmt = stmt.where(text(w))
 
         try:
-            print(f"STATEMENT: {stmt}")
             result_db = await db.execute(stmt)
             result = result_db.unique().scalars().all()
             #if not result:
@@ -92,7 +88,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             return result
 
         except exc.SQLAlchemyError as e:
-            print(f"SQL ERROR IN base.get method: {e}")
             logger.error(f"SQL ERROR IN base.get method: {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
 
