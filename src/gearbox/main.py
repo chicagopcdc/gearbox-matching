@@ -1,12 +1,9 @@
 import asyncio
 import json
 from fastapi.responses import PlainTextResponse
-from starlette.responses import JSONResponse
-# from pydantic import ValidationError
-# from jsonschema import ValidationError
 import click
 import pkg_resources
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request
+from fastapi import FastAPI, APIRouter, Depends, Request
 from fastapi.exceptions import RequestValidationError
 import httpx
 from sqlalchemy.orm import Session

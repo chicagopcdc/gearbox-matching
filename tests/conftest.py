@@ -120,7 +120,7 @@ def setup_database(connection) -> Engine:
     session.close()
 
 def load_study_algorithm_engine(conn, cursor):
-    for filename in glob.glob("./tests/data/sae*.json"):
+    for filename in glob.glob("./tests/data/algorithm_logic_load*.json"):
         with open(filename) as jfile:
             # study_logic = json.loads(jfile.read(), object_pairs_hook=OrderedDict)
             study_logic = json.loads(jfile.read())

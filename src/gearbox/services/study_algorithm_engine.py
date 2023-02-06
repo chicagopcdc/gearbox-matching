@@ -1,3 +1,4 @@
+from cgitb import reset
 import json
 from datetime import datetime
 
@@ -29,7 +30,14 @@ async def create_study_algorithm_engine(session: Session, study_algorithm_engine
     return new_ae
 
 async def check_study_version_id_exists(session: Session, study_version_id_in: int):
-    study_version_id = select(StudyVersion.id).where(StudyVersion.id == study_version_id_in)
+    try:
+        result = await session.execute(select(StudyVersion.id).
+            where(StudyVersion.id == study_version_id_in))
+        study_version_id = result.scalar_one()
+    except exc.SQLAlchemyError as e:
+        logger.error(f"SQL ERROR IN check_study_version_id method: {e}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
+
     return True if study_version_id else False
 
 async def get_invalid_logic_ids(session: Session, algorithm_logic: str, study_version_id: int) -> list:
@@ -59,9 +67,10 @@ async def get_invalid_logic_ids(session: Session, algorithm_logic: str, study_ve
 
     # items that exist in input_el_criteria_has_criterion_ids but not in db_el_criteria_has_criterion_ids
         return list(set(input_el_criteria_has_criterion_ids).difference(db_el_criteria_has_criterion_ids))
+
     except exc.SQLAlchemyError as e:
-            logger.error(f"SQL ERROR IN get_invalid_logic_ids method: {e}")
-            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
+        logger.error(f"SQL ERROR IN get_invalid_logic_ids method: {e}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
 
 
 async def get_latest_algorithm_version(session: Session, study_version_id: int) -> int:
@@ -71,30 +80,34 @@ async def get_latest_algorithm_version(session: Session, study_version_id: int) 
         )
         latest_algorithm_version = result.scalar_one()
     except exc.SQLAlchemyError as e:
-            logger.error(f"SQL ERROR IN get_latest_algorithm_version method: {e}")
-            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
+        logger.error(f"SQL ERROR IN get_latest_algorithm_version method: {e}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
+
     if latest_algorithm_version:
         return latest_algorithm_version
     else:
         return 0
 
-async def check_existing_algorithm_logic_duplicate(session: Session, algorithm_logic: str, study_version_id: int) -> StudyAlgorithmEngine:
+async def get_existing_algorithm_logic_duplicate(session: Session, algorithm_logic: str, study_version_id: int) -> StudyAlgorithmEngine:
     """
     description:
-        The purpose of this function is to ensure that there are 
-        no exactly duplicate algorithm_logic json for a particular study version
+        The purpose of this function is to find any existing
+        exact duplicate algorithm_logic json for a particular study version
         in the algorithm_engine table. If a duplicate is found, the id
         of the duplicate row is returned which can then be used to assign
         to the appropriate study_version.
     """
     try:
+
         result = await session.execute(select(StudyAlgorithmEngine)
             .where(StudyAlgorithmEngine.study_version_id == study_version_id)
         )
-        existing_algorithms = result.unique().scalars().all()
+        # * SQLAlchemy note * scalars().all() returns a list of db model types 
+        # just .all() returns a list of SQLAlchemy row type 
+        existing_algorithms = result.scalars().all()
 
     except exc.SQLAlchemyError as e:
-        logger.error(f"SQL ERROR IN check_existing_algorithm_logic_duplicate: {e}")
+        logger.error(f"SQL ERROR IN get_existing_algorithm_logic_duplicate: {e}")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
     except Exception as e:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: {type(e)}: {e}")        
@@ -107,12 +120,21 @@ async def check_existing_algorithm_logic_duplicate(session: Session, algorithm_l
 
     return None
 
-    # ensure that there is only 1 active algorithm_logic for a study_id in 
-    # the algorithm_engine table
-
+async def reset_active_status(session: Session, study_version_id: int) -> bool:
+    # set all rows related to the study_version to false
+    sae_to_update = await study_algorithm_engine_crud.get_multi(
+        db=session, 
+        active=False, 
+        where=[f"study_algorithm_engine.study_version_id = {study_version_id}"]
+    )
+    for sae in sae_to_update:
+        # set all to false
+        await study_algorithm_engine_crud.update(db=session, db_obj=sae, obj_in={"active":False})
+    return True
+    
 async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineCreate) -> StudyAlgorithmEngine:
     # Check if study version on incoming algorithm engine exists in the db
-    if not check_study_version_id_exists(session, study_algorithm_engine.study_version_id):
+    if not await check_study_version_id_exists(session, study_algorithm_engine.study_version_id):
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study_version {study_algorithm_engine.study_version_id} does not exist.")
 
     # Check el_criteria_has_criterion ids in incoming algoritm engine exist in the db
@@ -121,30 +143,28 @@ async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineC
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study algorithm logic contains the following invalid ids: {invalid_ids}.")
 
     # Find existing exact duplicate algorithm logic for the study version
-    dup_study_algorithm_engine = await check_existing_algorithm_logic_duplicate(session, study_algorithm_engine.algorithm_logic, study_algorithm_engine.study_version_id)
-    
+    dup_study_algorithm_engine = await get_existing_algorithm_logic_duplicate(session, study_algorithm_engine.algorithm_logic, study_algorithm_engine.study_version_id)
+
     # if no duplicate is found, determine version and insert new study algorithm engine
     if not dup_study_algorithm_engine:
         study_algorithm_engine.algorithm_version = await get_latest_algorithm_version(session, study_algorithm_engine.study_version_id) + 1
-        new_study_algorithm_engine = await create_study_algorithm_engine(session, study_algorithm_engine)
-        return new_study_algorithm_engine
+
+        # set current active to false before creating 
+        reset_active = await reset_active_status(session, study_algorithm_engine.study_version_id)
+        if reset_active:
+            new_study_algorithm_engine = await create_study_algorithm_engine(session, study_algorithm_engine)
+            return new_study_algorithm_engine
+        else:
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Issue encountered updating status of study_algorithm_engine rows.")
     else: 
         # if incoming is 'active', but we find a duplicate, set existing duplicate record to 'active', set start_date to current
         # if incoming is not active and there is an exact duplicate then do nothing
-        if study_algorithm_engine.active == True:
-            # first set all other rows related to the study_version to false
-            sae_to_update = await study_algorithm_engine_crud.get_multi(
-                    db=session, 
-                    active=False, 
-                    where=[f"study_algorithm_engine.study_version_id = {study_algorithm_engine.study_version_id}"]
-                )
-            for sae in sae_to_update:
-                # set all to false
-                await study_algorithm_engine_crud.update(db=session, db_obj=sae, obj_in={"active":False})
-            dt = datetime.now()
-            dup_row = await study_algorithm_engine_crud.get(db=session, id=dup_study_algorithm_engine.id)
-            await study_algorithm_engine_crud.update(db=session, db_obj=dup_row, obj_in={"active":True})
 
-            return dup_study_algorithm_engine
-        
+        # set set all current active to false 
+        reset_active = await reset_active_status(session, study_algorithm_engine.study_version_id)
+        dt = datetime.now()
+        # set existing to active 
+        dup_row = await study_algorithm_engine_crud.get(db=session, id=dup_study_algorithm_engine.id)
+        await study_algorithm_engine_crud.update(db=session, db_obj=dup_row, obj_in={"active":True})
 
+        return dup_study_algorithm_engine

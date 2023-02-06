@@ -1,20 +1,14 @@
 from __future__ import annotations
-import json
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 from jsonschema.exceptions import SchemaError 
 from pydantic import BaseModel, validator, Json
 from datetime import datetime
 from typing import Optional, List, Sequence, Any
-from gearbox.util import status
-from fastapi import HTTPException
-# from fastapi.exceptions import RequestValidationError, ValidationError
-from fastapi.exceptions import RequestValidationError
-from starlette.responses import JSONResponse
 
 from gearbox.models import study_algorithm_engine
 
-# define the expected schema for the algorithm logic
+# define the expected jsonschema schema for the algorithm logic
 algorithm_logic_schema = {
     "type":"object",
     "properties": {
@@ -78,15 +72,3 @@ class StudyAlgorithmEngineUpdate(BaseModel):
 
 class StudyAlgorithmEngineSearchResults(BaseModel):
     results: Sequence[StudyAlgorithmEngine]    
-
-"""
-class StudyAlgorithmResponse(BaseModel):
-    operator: str
-    criteria: int
-    algorithm: List[StudyAlgorithmResponse]
-
-class StudyAlgorithmEngine(BaseModel):
-    pass
-
-StudyAlgorithmResponse.update_forward_refs()
-"""
