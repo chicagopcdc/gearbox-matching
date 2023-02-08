@@ -21,7 +21,6 @@ async def get_study_algorithm_engine(session: Session, id: int) -> StudyAlgorith
 async def get_study_algorithm_engines(session: Session) -> StudyAlgorithmEngineSearchResults:
     aes = await study_algorithm_engine_crud.get_multi(session)
     return aes
-    pass
 
 async def create_study_algorithm_engine(session: Session, study_algorithm_engine: StudyAlgorithmEngineCreate) -> StudyAlgorithmEngineSchema:
 

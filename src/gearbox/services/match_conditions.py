@@ -1,7 +1,13 @@
 import json
+from typing import List
+from fastapi.encoders import jsonable_encoder
 import re
 from collections import deque
 from gearbox.routers import logger
+from gearbox.crud import study_algorithm_engine_crud, match_conditions
+from gearbox.schemas import AlgorithmResponse
+from sqlalchemy.orm import Session
+from . import study_algorithm_engine
 
 def expand_paths(paths):
     """
@@ -224,7 +230,6 @@ def build_tree(nodelist):
             ####################################################
             working_node = crit_que.pop()
             working_group_id = ''
-            # print(f"WORKING NODE: {working_node['criteria']} {working_node['operator']}")
 
             #######################################################
             #  GET GROUP ID IF WORKING NODE IS PART OF A GROUP
@@ -523,3 +528,16 @@ def get_tree(full_paths, study_id=None, suppress_header=False):
 
 
     return return_criteria
+
+async def get_match_conditions(session: Session) -> List[AlgorithmResponse]:
+
+    active_match_conds = await match_conditions.get_study_algorithm_engines(session=session)
+    match_conds = []
+
+    for a in active_match_conds:
+        study_logic = {}
+        study_logic['studyId'] = a.study_version.study_id
+        study_logic['algorithm'] = a.algorithm_logic
+        match_conds = sorted(match_conds, key=lambda k: k['studyId'])
+        match_conds.append(study_logic)
+    return match_conds

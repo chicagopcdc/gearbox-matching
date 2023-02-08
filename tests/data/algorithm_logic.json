@@ -1,6 +1,4 @@
     {
-        "studyId": 1,
-        "algorithm": {
             "operator": "AND",
             "criteria": [
                 1,
@@ -96,4 +94,3 @@
                 }
             ]
         }
-    }

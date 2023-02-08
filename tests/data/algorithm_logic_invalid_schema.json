@@ -1,7 +1,5 @@
     {
-        "studyId": 1,
-        "algorithm": {
-            "operator": "AND",
+            "THISERRORoperator": "AND",
             "criteria": [
                 1,
                 {
@@ -96,4 +94,3 @@
                 }
             ]
         }
-    }

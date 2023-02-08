@@ -88,7 +88,6 @@ def test_create_study_algorithm_engine(setup_database, client, test_create_data,
 
     fake_jwt = "1.2.3"
     resp = client.post("/study-algorithm-engine", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
-    print(f"----------------------------> RESPONSE STATUS: {resp.status_code}")
 
     errors = []
     # TEST NEW STUDY ALGORITHM ENGINE SUCCESS
@@ -96,7 +95,6 @@ def test_create_study_algorithm_engine(setup_database, client, test_create_data,
         if not (str(resp.status_code).startswith("20")):
             errors.append(f"ERROR: create_new_study_algorithm_engine test: unexpected http status in response: {str(resp.status_code)}")
         full_res = resp.json()
-        print(f"FULL RESPONSE: {full_res}")
         # returns duplicate (existing) row with updated status
         new_ae_id = full_res['id']
         # verify row created 

@@ -112,7 +112,6 @@ def setup_database(connection) -> Engine:
     cursor.execute("SELECT setval('tag_id_seq', (SELECT MAX(id) FROM tag));")
     cursor.execute("SELECT setval('triggered_by_id_seq', (SELECT MAX(id) FROM triggered_by));")
     cursor.execute("SELECT setval('value_id_seq', (SELECT MAX(id) FROM value));")
-    print("######################### ABOUT TO CALL LOAD STUDY ALGRITHM ENGINE --------------------------------------->")
     load_study_algorithm_engine(conn, cursor)
     conn.commit()
 
@@ -126,7 +125,6 @@ def load_study_algorithm_engine(conn, cursor):
             study_logic = json.loads(jfile.read())
             study_logic = json.dumps(study_logic)
             study_version_id = re.search(r'\d', filename).group()
-            print(f"STUDY VERSION ID TYPE: {type(study_version_id)}")
             dt = datetime.now()
             active = False if int(study_version_id) == 1 else True
             insert_query = f'''

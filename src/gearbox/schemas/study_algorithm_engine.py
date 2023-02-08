@@ -12,28 +12,18 @@ from gearbox.models import study_algorithm_engine
 algorithm_logic_schema = {
     "type":"object",
     "properties": {
-        "studyId": {"type":"number"},
-        "algorithm": {"$ref":"#/definitions/crit"},
-    },  
-
-    "definitions": {
-        "crit": {
-            "type":"object",
-            "properties": {
-                "operator": {"type":"string", "enum":["AND","OR"] },
-                "criteria": {"type":"array",
-                    "items": {          
-                        "anyOf": [              
-                            {"type":"number"},          
-                            {"$ref":"#/definitions/crit"} 
-                        ]                       
-                    }                   
-                }               
-            }           
+        "operator": {"type":"string", "enum":["AND","OR"] },
+        "criteria": {"type":"array",
+            "items": {
+                "anyOf": [
+                    {"type":"number"},
+                    {"$ref":"#"}
+                ]       
+            }       
         }       
-    }   
-}
-
+    },       
+    "required": ["criteria"]
+}       
 
 class StudyAlgorithmEngineBase(BaseModel):
     study_version_id: int
@@ -53,6 +43,7 @@ class StudyAlgorithmEngineBase(BaseModel):
             # ValueError will be caught and handled by the app (in main.py)
             raise ValueError(f"ERROR VALIDATING algorithm_logic: {e}")
         except Exception as e:
+            # ValueError will be caught and handled by the app (in main.py)
             raise ValueError(f"ERROR VALIDATING algorithm_logic: {e}")
 
         return v

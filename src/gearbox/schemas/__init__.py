@@ -14,3 +14,4 @@ from .criterion import CriterionCreate, CriterionSearchResults, CriterionCreateI
 from .input_type import InputTypeCreate, InputTypeSearchResults, InputType
 from .ontology_code import OntologyCodeCreate, OntologyCodeSearchResults, OntologyCode
 from .el_criteria_has_criterion import ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterionCreate
+from .algorithm_engine import AlgorithmResponse

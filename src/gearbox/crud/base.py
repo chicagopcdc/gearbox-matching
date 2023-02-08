@@ -81,7 +81,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
                 stmt = stmt.where(text(w))
 
         try:
-            result_db = await db.execute(stmt)
+            result_db = await db.execute(statement=stmt)
             result = result_db.unique().scalars().all()
             #if not result:
             #    raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"No 'active' rows in {self.model.__tablename__} ")        
@@ -99,7 +99,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db_obj = self.model(**obj_in_data)
         try:
             db.add(db_obj)
-            # await db.commit()
             await db.flush()
             return db_obj
         except IntegrityError as e:
@@ -110,10 +109,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
 
     async def set_active(self, db: Session, id: int, active: bool) -> ModelType: 
-        # update object to set status 'active'
-        # raise error if 'active' not an attribute
-        # raise error if object with id does not exist
-        # update 'active' T if F, F if T
         if not 'active' in self.model.__fields__.keys():
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{self.model.__tablename__} does not inlude 'active' attribute")        
 
@@ -124,12 +119,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         upd_obj.active = active
         db.flush()
 
-    async def update(
-        self,
-        db: Session,
-        *,
-        db_obj: ModelType,
-        obj_in: Union[UpdateSchemaType, Dict[str, Any]]
+    async def update( self, db: Session, *, db_obj: ModelType, obj_in: Union[UpdateSchemaType, Dict[str, Any]]
     ) -> ModelType:
         obj_data = jsonable_encoder(db_obj)
         if isinstance(obj_in, dict):
