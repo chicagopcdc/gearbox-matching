@@ -8,3 +8,6 @@ from .triggered_by import triggered_by_crud
 from .tag import tag_crud
 from .eligibility_criteria import eligibility_criteria_crud
 from .study_algorithm_engine import study_algorithm_engine_crud
+from .study import study_crud
+from .site import site_crud
+from .study_version import study_version_crud

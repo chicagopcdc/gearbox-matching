@@ -10,17 +10,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from gearbox.models import Criterion, CriterionHasTag, CriterionHasValue, DisplayRules, TriggeredBy
 
 import respx
-
-from fastapi import HTTPException
 from starlette.config import environ
-from starlette.status import (
-    HTTP_201_CREATED,
-    HTTP_409_CONFLICT,
-    HTTP_400_BAD_REQUEST,
-    HTTP_401_UNAUTHORIZED,
-    HTTP_403_FORBIDDEN,
-    HTTP_500_INTERNAL_SERVER_ERROR,
-)
 
 from gearbox import config
 

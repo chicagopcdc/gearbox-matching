@@ -3,21 +3,20 @@ from pydantic import BaseModel, HttpUrl
 from datetime import datetime
 from typing import Sequence, List, Optional
 
-class StudyBase(BaseModel):
-    name: Optional[str]
-    code: Optional[str]
-    description: Optional[str]
+class StudyVersionBase(BaseModel):
+    study_id: int
     create_date: Optional[datetime]
+    study_version: int
     active: Optional[bool]
 
     class Config:
         orm_mode = True    
 
-class Study(StudyBase):
+class StudyVersion(StudyVersionBase):
     id: int
 
-class StudyCreate(StudyBase):
+class StudyVersionCreate(StudyVersionBase):
     pass
 
-class StudySearchResults(BaseModel):
-    results: Sequence[Study]
+class StudyVersionSearchResults(BaseModel):
+    results: Sequence[StudyVersion]

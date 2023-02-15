@@ -9,7 +9,6 @@ from collections.abc import Iterable
 from enum import Enum
 from typing import List
 from asyncpg import UniqueViolationError
-from sqlalchemy.ext.asyncio.session import async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from authutils.token.fastapi import access_token
 from fastapi import HTTPException, APIRouter, Security
@@ -18,7 +17,6 @@ from urllib.parse import urljoin
 from pydantic import BaseModel
 from fastapi import Request, Depends
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy.orm import Session
 from . import logger
 from gearbox.util import status
 from starlette.responses import JSONResponse
@@ -26,7 +24,7 @@ from gearbox.admin_login import admin_required
 
 from gearbox import config
 from gearbox.schemas import ValueCreate, ValueSearchResults, Value
-from gearbox.crud import value_crud
+from gearbox.services import value as value_service
 from gearbox import deps
 from gearbox import auth 
 
@@ -37,7 +35,7 @@ async def get_values(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    values = await value_crud.get_multi(session)
+    values = await value_service.get_values(session)
     return JSONResponse(jsonable_encoder(values), status.HTTP_200_OK)
 
 @mod.get("/value/{value_id}", response_model=Value, dependencies=[ Depends(auth.authenticate)])
@@ -46,7 +44,7 @@ async def get_value(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    ret_value = await value_crud.get(db=session, id=value_id)
+    ret_value = await value_service.get_value(db=session, id=value_id)
     return JSONResponse(jsonable_encoder(ret_value), status.HTTP_200_OK)
 
 @mod.post("/value", response_model=Value,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
@@ -58,7 +56,7 @@ async def save_object(
     """
     Comments:
     """
-    new_value = await value_crud.create(db=session, obj_in=body)
+    new_value = await value_service.create_value(session=session, value=body)
     return JSONResponse(jsonable_encoder(new_value), status.HTTP_201_CREATED)
 
 @mod.post("/update-value/{value_id}", response_model=Value, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
@@ -71,9 +69,7 @@ async def update_object(
     """
     Comments:
     """
-    # TO DO: try / exception value_in not found & db exceptions
-    value_in = await value_crud.get(db=session, id=value_id)
-    upd_value = await value_crud.update(db=session, db_obj=value_in, obj_in=body)
+    upd_value = await value_service.update_value(session=session, value=body, value_id=value_id)
     return JSONResponse(jsonable_encoder(upd_value), status.HTTP_201_CREATED)
 
 def init_app(app):

@@ -9,6 +9,7 @@ class StudyVersion(Base):
 
     id = Column(Integer, primary_key=True)
     study_id = Column(Integer, ForeignKey('study.id'))
+    study_version = Column(Integer, nullable=False)
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
   

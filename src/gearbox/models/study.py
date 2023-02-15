@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from .base_class import Base
@@ -13,6 +13,8 @@ class Study(Base):
     description = Column(String, nullable=True)
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
+
+    UniqueConstraint(code, name='study_code_uix')
 
     sites = relationship("SiteHasStudy", back_populates="study")
     # explicitly setting lazy='joined' here solved the problem of

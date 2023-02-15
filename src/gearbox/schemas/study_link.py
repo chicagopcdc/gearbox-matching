@@ -6,6 +6,7 @@ from typing import Sequence, List, Optional
 class StudyLinkBase(BaseModel):
     name: Optional[str]
     href: Optional[HttpUrl]
+    study_id: int
     active: Optional[bool]
 
     class Config:
@@ -13,11 +14,9 @@ class StudyLinkBase(BaseModel):
 
 class StudyLink(StudyLinkBase):
     id: int
-    study_id: int
 
 
 class StudyLinkCreate(StudyLinkBase):
-    study_id: int
     pass
 
 class StudyLinkSearchResults(BaseModel):

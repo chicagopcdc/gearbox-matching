@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from . import logger
 from gearbox.util import status
-from gearbox.services import criterion
+from gearbox.services import criterion as criterion_service
 from starlette.responses import JSONResponse
 from gearbox.admin_login import admin_required
 
@@ -56,7 +56,7 @@ async def save_object(
     session: AsyncSession = Depends(deps.get_session),
 ):
 
-    new_criterion = await criterion.create_new_criterion(session, body)
+    new_criterion = await criterion_service.create_new_criterion(session, body)
     await session.commit()
     return JSONResponse(new_criterion, status.HTTP_201_CREATED)
 

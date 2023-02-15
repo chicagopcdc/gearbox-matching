@@ -32,7 +32,6 @@ class SiteBase(BaseModel):
     code: Optional[str]
     create_date: Optional[datetime]
     active: Optional[bool]
-    studies: Optional[List[SiteStudy]]
 
     class Config:
         orm_mode = True
