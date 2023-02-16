@@ -4,4 +4,4 @@ from gearbox.schemas import StudyLinkSearchResults, StudyLinkCreate
 
 class CRUDStudyLink(CRUDBase [StudyLink, StudyLinkCreate, StudyLinkSearchResults]):
     ...
-value_crud = CRUDStudyLink(StudyLink)
+study_link_crud = CRUDStudyLink(StudyLink)

@@ -15,8 +15,10 @@ class StudyVersionBase(BaseModel):
 class StudyVersion(StudyVersionBase):
     id: int
 
-class StudyVersionCreate(StudyVersionBase):
-    pass
+class StudyVersionCreate(BaseModel):
+    study_id: int
+    active: Optional[bool]
+    study_version: Optional[int]
 
 class StudyVersionSearchResults(BaseModel):
     results: Sequence[StudyVersion]

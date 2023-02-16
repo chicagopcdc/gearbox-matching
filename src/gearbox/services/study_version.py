@@ -30,7 +30,7 @@ async def reset_active_status(session: Session, study_id: int) -> bool:
     # set all rows related to the study_version to false
     sae_to_update = await study_version_crud.get_multi(
         db=session, 
-        active=False, 
+        active=True, 
         where=[f"study_version.study_id = {study_id}"]
     )
     for sae in sae_to_update:
@@ -57,10 +57,10 @@ async def create_study_version(session: Session, study_version: StudyVersionCrea
     aes = await study_version_crud.create(db=session, obj_in=study_version)
     return aes
 
-async def update_study_version(session: Session, study: StudyVersionCreate, study_version_id: int) -> StudyVersionSchema:
+async def update_study_version(session: Session, study_version: StudyVersionCreate, study_version_id: int) -> StudyVersionSchema:
     study_version_in = await study_version_crud.get(db=session, id=study_version_id)
     if study_version_in:
-        upd_study_version = await study_version_crud.update(db=session, db_obj=study_version_in, obj_in=study)
+        upd_study_version = await study_version_crud.update(db=session, db_obj=study_version_in, obj_in=study_version)
     else:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study version for id: {study_version_id} not found for update.") 
     await session.commit() 

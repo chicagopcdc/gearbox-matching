@@ -92,16 +92,11 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
 
     async def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
-        print("SITE CRUD 1")
         obj_in_data = jsonable_encoder(obj_in)
-        print(f"SITE CRUD OBJ IN DATA: {obj_in_data}")
         # set create_date here if not already set and it is in the schema
-        print("SITE CRUD 2")
         if "create_date" in obj_in_data.keys():
             obj_in_data["create_date"] = datetime.now() if not obj_in_data["create_date"] else obj_in_data["create_date"]
-        print("SITE CRUD 3")
         db_obj = self.model(**obj_in_data)
-        print("SITE CRUD 4")
         try:
             db.add(db_obj)
             await db.flush()
@@ -133,8 +128,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             update_data = obj_in.dict(exclude_unset=True)
         for field in obj_data:
             if field in update_data:
-                print(f"CRUD FIELD: {field}")
-                print(f"CRUD UPDATE DATA: {update_data[field]}")
                 setattr(db_obj, field, update_data[field])
         try:
             db.add(db_obj)

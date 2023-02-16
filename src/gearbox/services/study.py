@@ -33,14 +33,11 @@ async def create_study(session: Session, study: StudyCreate) -> StudySchema:
     return aes
 
 async def update_study(session: Session, study: StudyCreate, study_id: int) -> StudySchema:
-    print("HERE IN UPDATE STUDY SERVICE 1")
-    print(f"UPDATE OBJECT ACTIVE: {study['active']}")
     study_in = await study_crud.get(db=session, id=study_id)
     if study_in:
         upd_study = await study_crud.update(db=session, db_obj=study_in, obj_in=study)
     else:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study for id: {study_id} not found for update.") 
-    print(f"HERE IN UPDATE STUDY SERVICE 2 UPDATED: {upd_study.active}")
     await session.commit() 
     return upd_study
 

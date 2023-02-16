@@ -46,7 +46,7 @@ async def save_object(
 ):
     new_study_version = await study_version_service.create_study_version(session, body)
     await session.commit()
-    return JSONResponse(new_study_version, status.HTTP_201_CREATED)
+    return JSONResponse(jsonable_encoder(new_study_version), status.HTTP_201_CREATED)
 
 @mod.post("/update-study-version/{study_version_id}", response_model=StudyVersionSchema, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def update_object(

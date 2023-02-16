@@ -1,6 +1,6 @@
 import asyncio
 import json
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, JSONResponse
 import click
 import pkg_resources
 from fastapi import FastAPI, APIRouter, Depends, Request
@@ -48,6 +48,16 @@ def get_app():
     @app.exception_handler(RequestValidationError)
     async def value_error_exception_handler(request:Request, exc:ValueError):
         return PlainTextResponse(str(exc), status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(request:Request, exc:ValueError):
+        print("HERE IN EXCEPTION HANDLER...")
+        exc_str = f'{exc}.'.replace('\n', '').replace(' ',' ')
+        logger.error(f"{request}: {exc_str}")
+        content = {'status_code': 10422,'message': exc_str, 'data':None}
+        print(f"EXC STR: {exc_str}")
+        return JSONResponse(content=content, status_code = status.HTTP_422_UNPROCESSABLE_ENTITY)
+
 
     @app.on_event("shutdown")
     async def shutdown_event():
