@@ -1,4 +1,3 @@
-# from tkinter.tix import DisplayStyle
 from pydantic import BaseModel, ValidationError, validator
 from datetime import datetime
 from typing import Sequence, List, Any, Optional
@@ -24,16 +23,13 @@ class Criterion(CriterionBase):
     id: int
     tags: Optional[List[CriterionTag]]
     values: Optional[List[CriterionValue]]
-    el_criteria_has_criterions: List[ElCriteriaHasCriterionBase]
+#    el_criteria_has_criterions: List[ElCriteriaHasCriterionBase]
 
 class CriterionCreate(CriterionBase):
     code: str
     display_name: str
-    # input_type_id: int ???
-    pass
 
 class CriterionCreateIn(CriterionBase):
-    # tags: Optional[List[int]]
     code: str
     tags: List[int]
     values: Optional[List[int]]

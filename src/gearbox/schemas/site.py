@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Sequence, List, Any, Optional
 from pydantic.utils import GetterDict
-from .study_link import StudyLink
+#from gearbox.schemas import StudyLink
 
 class SiteStudyGetter(GetterDict):
     # map and reformat study fields
@@ -19,7 +19,7 @@ class SiteStudy(BaseModel):
     description: Optional[str]
     create_date: Optional[datetime]
     active: Optional[bool]
-    links: Optional[List[StudyLink]]
+#    links: Optional[List[StudyLink]]
     assoc_create_date: Optional[datetime]
     assoc_active: Optional[bool]
 

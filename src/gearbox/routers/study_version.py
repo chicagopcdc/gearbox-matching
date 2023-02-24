@@ -38,6 +38,20 @@ async def get_all_study_versions(
     study_versions = await study_version_service.get_study_versions(session)
     return JSONResponse(jsonable_encoder(study_versions), status.HTTP_200_OK)
 
+@mod.post("/study-version", response_model=StudyVersionSchema, status_code=200, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+async def save_object(
+    body: StudyVersionCreate,
+    request: Request,
+    session: AsyncSession = Depends(deps.get_session),
+):
+    print(f"IN STUDY VERSION ROUTER 1")
+    new_study_version = await study_version_service.create_study_version(session, body)
+    print(f"IN STUDY VERSION ROUTER 2")
+    return new_study_version
+#    await session.commit()
+#    return JSONResponse(jsonable_encoder(new_study_version), status.HTTP_201_CREATED)
+
+"""
 @mod.post("/study-version", response_model=StudyVersionSchema,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
     body: StudyVersionCreate,
@@ -47,6 +61,7 @@ async def save_object(
     new_study_version = await study_version_service.create_study_version(session, body)
     await session.commit()
     return JSONResponse(jsonable_encoder(new_study_version), status.HTTP_201_CREATED)
+"""
 
 @mod.post("/update-study-version/{study_version_id}", response_model=StudyVersionSchema, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def update_object(

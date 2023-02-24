@@ -30,26 +30,30 @@ mod = APIRouter()
 # not recieve valid credentials
 # bearer = HTTPBearer(auto_error=False)
 
-@mod.get("/criteria", response_model=CriterionSearchResults, dependencies=[ Depends(auth.authenticate)])
+@mod.get("/criteria", response_model=CriterionSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
 async def get_criteria(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
 
     criteria = await criterion_crud.get(session)
-    return JSONResponse(jsonable_encoder(criteria), status.HTTP_200_OK)    
+    return { "results" :list(criteria) }
+    # return JSONResponse(jsonable_encoder(criteria), status.HTTP_200_OK)    
 
-@mod.get("/criterion/{id}", response_model=Criterion, dependencies=[ Depends(auth.authenticate)])
-async def get_criteria(
+@mod.get("/criterion/{criterion_id}", response_model=Criterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
+async def get_criterion(
+    criterion_id: int,
     request: Request,
-    id: int,
     session: AsyncSession = Depends(deps.get_session),
 ):
 
-    criterion = await criterion_crud.get(session, id=id)
-    return JSONResponse(jsonable_encoder(criterion), status.HTTP_200_OK)    
+    criterion = await criterion_service.get_criterion(session=session, id=criterion_id)
+    print(f"CRITERION TYPE: {type(criterion)}")
+    print(f"CRITERION ID: {criterion.id}")
+    # return JSONResponse(jsonable_encoder(criterion), status.HTTP_200_OK)    
+    return criterion
 
-@mod.post("/criterion", response_model=CriterionSearchResults,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.post("/criterion", response_model=Criterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
     body: CriterionCreateIn,
     request: Request,
@@ -58,7 +62,8 @@ async def save_object(
 
     new_criterion = await criterion_service.create_new_criterion(session, body)
     await session.commit()
-    return JSONResponse(new_criterion, status.HTTP_201_CREATED)
+    return new_criterion
+    # return JSONResponse(new_criterion, status.HTTP_201_CREATED)
 
 def init_app(app):
     app.include_router(mod, tags=["criteria","criterion"])

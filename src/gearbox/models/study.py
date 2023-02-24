@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
 
-from .base_class import Base
+from .base_class import Base 
 
 
 class Study(Base):
@@ -24,3 +24,12 @@ class Study(Base):
     # this only happens when trying to access via sites join to study
     # and not the other way around
     links = relationship("StudyLink", back_populates="study", lazy='joined')
+
+    def __init__(self, name=None, code=None, description=None, active=None, create_date=None, sites=None, links=None):
+        self.name = name
+        self.code = code
+        self.description = description
+        self.active = active
+        self.create_date = create_date
+        self.sites = []
+        self.links = []

@@ -13,6 +13,10 @@ class TriggeredBy(Base):
     path = Column(String, nullable=True)
     active = Column(Boolean, nullable=True)
 
+#    display_rules = relationship("DisplayRules", back_populates="triggered_bys",lazy="joined")
+#    criterion = relationship("Criterion", back_populates="triggered_bys",lazy="joined")
+#    value = relationship("Value", back_populates="triggered_bys",lazy="joined")
+
     display_rules = relationship("DisplayRules", back_populates="triggered_bys")
     criterion = relationship("Criterion", back_populates="triggered_bys")
     value = relationship("Value", back_populates="triggered_bys")

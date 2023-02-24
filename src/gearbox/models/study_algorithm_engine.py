@@ -14,4 +14,4 @@ class StudyAlgorithmEngine(Base):
     algorithm_version = Column(Integer)
     active = Column(Boolean, nullable=True)
 
-    study_version = relationship("StudyVersion", back_populates="algorithm_engines")
+    study_version = relationship("StudyVersion", back_populates="study_algorithm_engine")

@@ -1,15 +1,17 @@
 import json
 from datetime import datetime
 
+from gearbox.schemas.study_link import StudyLinkCreate
+
 from . import logger
 from sqlalchemy.orm import Session
 from sqlalchemy import select, exc, update
 from fastapi import HTTPException
 from gearbox.models import Study
-from gearbox.schemas import StudyCreate, StudySearchResults, Study as StudySchema
+from gearbox.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate
 from sqlalchemy.sql.functions import func
 from gearbox.util import status, json_utils
-from gearbox.crud import study_crud
+from gearbox.crud import study_crud, site_crud, site_has_study_crud, study_link_crud
 
 async def get_study_info(session: Session, id: int) -> StudySchema:
     aes = await study_crud.get_study_info(session, id)
@@ -29,8 +31,28 @@ async def get_studies(session: Session) -> StudySearchResults:
     return aes
 
 async def create_study(session: Session, study: StudyCreate) -> StudySchema:
-    aes = await study_crud.create(db=session, obj_in=study)
-    return aes
+
+    sites = study.sites
+    links = study.links
+    new_study = await study_crud.create(db=session, obj_in=study)
+
+    if sites:
+        new_site_ids = []
+        for site in sites:
+            new_site = await site_crud.create(db=session, obj_in=site)
+            new_site_ids.append(new_site.id)
+
+        for site_id in new_site_ids:
+            shs = SiteHasStudyCreate(study_id=new_study.id, site_id=site_id, active=True)
+            new_shs = await site_has_study_crud.create(db=session, obj_in=shs)
+    
+    if links:
+        for link in links:
+            link.study_id = new_study.id
+            new_link = await study_link_crud.create(db=session, obj_in=link)
+    
+    session.commit()
+    return new_study
 
 async def update_study(session: Session, study: StudyCreate, study_id: int) -> StudySchema:
     study_in = await study_crud.get(db=session, id=study_id)
@@ -40,4 +62,3 @@ async def update_study(session: Session, study: StudyCreate, study_id: int) -> S
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study for id: {study_id} not found for update.") 
     await session.commit() 
     return upd_study
-

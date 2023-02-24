@@ -19,6 +19,10 @@ class Value(Base):
     UniqueConstraint(code, name='value_code_uix')
     UniqueConstraint(type, unit, value_string, operator, name='value_code_unit_uix')
 
+    # el_criteria_has_criterions = relationship("ElCriteriaHasCriterion", back_populates="value", lazy="joined")
+    # criteria = relationship("CriterionHasValue", back_populates="value", lazy="joined")
+    # triggered_bys = relationship("TriggeredBy", back_populates="value", lazy="joined")
+
     el_criteria_has_criterions = relationship("ElCriteriaHasCriterion", back_populates="value")
     criteria = relationship("CriterionHasValue", back_populates="value")
     triggered_bys = relationship("TriggeredBy", back_populates="value")

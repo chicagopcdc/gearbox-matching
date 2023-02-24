@@ -1,12 +1,10 @@
-from urllib.request import HTTPDefaultErrorHandler
 from pydantic import BaseModel, HttpUrl
-from datetime import datetime
-from typing import Sequence, List, Optional
+from typing import Sequence, Optional
 
 class StudyLinkBase(BaseModel):
     name: Optional[str]
     href: Optional[HttpUrl]
-    study_id: int
+    study_id: Optional[int]
     active: Optional[bool]
 
     class Config:
@@ -14,7 +12,6 @@ class StudyLinkBase(BaseModel):
 
 class StudyLink(StudyLinkBase):
     id: int
-
 
 class StudyLinkCreate(StudyLinkBase):
     pass

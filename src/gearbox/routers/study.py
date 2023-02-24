@@ -63,7 +63,7 @@ async def save_object(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-
+    print(f"STUDY CREATE IN ROUTER: {body}")
     new_study = await study_service.create_study(session, body)
     await session.commit()
     return JSONResponse(jsonable_encoder(new_study), status.HTTP_201_CREATED)

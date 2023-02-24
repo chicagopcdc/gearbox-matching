@@ -17,6 +17,10 @@ async def get_value(session: Session, id: int) -> ValueSchema:
 
 async def get_values(session: Session) -> ValueSearchResults:
     aes = await value_crud.get_multi(session)
+    print(f"IN GET VALUES: {type(aes)}")
+    print(f"IN GET VALUES: {type(aes[0])}")
+    for a in aes:
+        print(f"ID: {a.id}")
     return aes
     pass
 

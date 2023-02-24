@@ -53,7 +53,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
                 raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{self.model.__tablename__} does not inlude 'active' attribute")        
             stmt = stmt.where(self.model.active == active)
 
-        # add where if active
         try:
             result_db = await db.execute(stmt)
             # not using scalar_one here because we don't necessarily
@@ -96,8 +95,10 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         # set create_date here if not already set and it is in the schema
         if "create_date" in obj_in_data.keys():
             obj_in_data["create_date"] = datetime.now() if not obj_in_data["create_date"] else obj_in_data["create_date"]
-        db_obj = self.model(**obj_in_data)
+        # fix to sqlalchemy model base_class fixed issue with nested pydantic schemas here
+        # where we are creating the db model object using the pydantic schema object
         try:
+            db_obj = self.model(**obj_in_data)
             db.add(db_obj)
             await db.flush()
             return db_obj
@@ -107,6 +108,10 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         except exc.SQLAlchemyError as e:
             logger.error(f"CREATE CRUD SQLAlchemyError ERROR {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
+        except Exception as e:
+            logger.error(f"CREATE CRUD OTHER ERROR {e}")
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"OTHER ERROR: {type(e)}: {e}")        
+
 
     async def set_active(self, db: Session, id: int, active: bool) -> ModelType: 
         if not 'active' in self.model.__fields__.keys():
@@ -121,15 +126,17 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
     async def update( self, db: Session, *, db_obj: ModelType, obj_in: Union[UpdateSchemaType, Dict[str, Any]]
     ) -> ModelType:
-        obj_data = jsonable_encoder(db_obj)
-        if isinstance(obj_in, dict):
-            update_data = obj_in
-        else:
-            update_data = obj_in.dict(exclude_unset=True)
-        for field in obj_data:
-            if field in update_data:
-                setattr(db_obj, field, update_data[field])
         try:
+            obj_data = jsonable_encoder(db_obj)
+
+            if isinstance(obj_in, dict):
+                update_data = obj_in
+            else:
+                update_data = obj_in.dict(exclude_unset=True)
+            for field in obj_data:
+                if field in update_data:
+                    setattr(db_obj, field, update_data[field])
+
             db.add(db_obj)
             await db.commit()
             return db_obj
@@ -137,6 +144,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             raise HTTPException(status.HTTP_409_CONFLICT, f"INTEGRITY SQL ERROR: {type(e)}: {e}")
         except exc.SQLAlchemyError as e:
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
+        except Exception as e:
+            print(f"BASE UPDATE EX: {e}")
 
     """
     def remove(self, db: Session, *, id: int) -> ModelType:

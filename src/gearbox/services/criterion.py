@@ -11,13 +11,18 @@ from starlette.responses import JSONResponse
 from gearbox.admin_login import admin_required
 
 # from gearbox import config
-from gearbox.schemas import CriterionSearchResults, CriterionCreateIn, CriterionCreate, CriterionHasValueCreate, CriterionHasTagCreate, DisplayRulesCreate, TriggeredByCreate
+from gearbox.schemas import CriterionSearchResults, CriterionCreateIn, CriterionCreate, CriterionHasValueCreate, CriterionHasTagCreate, DisplayRulesCreate, TriggeredByCreate, Criterion as CriterionSchema
 from gearbox.crud import criterion_crud, criterion_has_value_crud, criterion_has_tag_crud, display_rules_crud, triggered_by_crud, value_crud, tag_crud
 
+async def get_criterion(session: Session, id: int) -> CriterionSchema:
+    crit = await criterion_crud.get(session, id)
+    return crit
 
 async def create_new_criterion(session: Session, criterion_info: CriterionCreateIn):
 
+    print("IN CRITERION SERVICE 1")
     criterion_info_conv = jsonable_encoder(criterion_info)
+    print("IN CRITERION SERVICE 2")
 
     # check input fks exist
     check_id_errors = []

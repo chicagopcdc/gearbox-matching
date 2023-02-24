@@ -48,7 +48,7 @@ def test_create_value(setup_database, client, valid_upload_file_patcher, data):
     resp.raise_for_status()
     assert str(resp.status_code).startswith("20")
 
-@respx.mock
+@pytest.mark.asyncio
 def test_get_values(setup_database, client):
     """
     Test that the /values endpoint returns a 200 and the id of the latest saved obj
@@ -56,5 +56,17 @@ def test_get_values(setup_database, client):
     fake_jwt = "1.2.3"
     resp = client.get("/values", headers={"Authorization": f"bearer {fake_jwt}"})
     assert resp.status_code == 200
+
+@pytest.mark.asyncio
+def test_get_value(setup_database, client):
+    """
+    Test that the /values endpoint returns a 200 and the id of the latest saved obj
+    """
+    fake_jwt = "1.2.3"
+    resp = client.get("/value/1", headers={"Authorization": f"bearer {fake_jwt}"})
+    print(f"RESPONSE BODY TYPE: {type(resp.content)}")
+    print(f"RESPONSE BODY: {resp.content}")
+    assert resp.status_code == 200
+
 
 # TO DO: create test for violating unique constraint

@@ -14,3 +14,5 @@ class DisplayRules(Base):
 
     triggered_bys = relationship("TriggeredBy", back_populates="display_rules")
     criterion = relationship("Criterion", back_populates="display_rules")
+    #triggered_bys = relationship("TriggeredBy", back_populates="display_rules", lazy="joined")
+    #criterion = relationship("Criterion", back_populates="display_rules", lazy="joined")

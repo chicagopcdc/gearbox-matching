@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Extra
 from datetime import datetime
-from typing import Optional, Sequence
+from typing import Optional, Sequence, List
 
 class ValueBase(BaseModel):
     code: Optional[str]

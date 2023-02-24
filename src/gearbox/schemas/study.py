@@ -1,7 +1,9 @@
-from urllib.request import HTTPDefaultErrorHandler
-from pydantic import BaseModel, HttpUrl
+#from urllib.request import HTTPDefaultErrorHandler
+from pydantic import BaseModel #, HttpUrl
 from datetime import datetime
 from typing import Sequence, List, Optional
+from gearbox.schemas import SiteCreate #, StudyLinkCreate
+from .study_link import StudyLinkCreate
 
 class StudyBase(BaseModel):
     name: Optional[str]
@@ -17,7 +19,16 @@ class Study(StudyBase):
     id: int
 
 class StudyCreate(StudyBase):
-    pass
+    sites: Optional[List[SiteCreate]]
+    links: Optional[List[StudyLinkCreate]]
 
 class StudySearchResults(BaseModel):
     results: Sequence[Study]
+
+"""
+class StudyCreateFull(StudyBase):
+    sites: Optional [Sequence[SiteCreate]]
+    study_links: Optional [Sequence[StudyLinkCreate]]
+    study_version: Optional[StudyVersionCreate]
+    study_algorithm_engine: Optional[StudyAlgorithmEngineCreate]
+"""
