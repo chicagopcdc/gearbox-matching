@@ -1,3 +1,4 @@
+from re import A
 import pytest
 import json
 from .test_utils import is_aws_url
@@ -24,12 +25,7 @@ from starlette.status import (
 
 from gearbox import config
 
-# auto_error=False prevents FastAPI from raises a 403 when the request is missing
-# an Authorization header. Instead, we want to return a 401 to signify that we did
-# not recieve valid credentials
-bearer = HTTPBearer(auto_error=False)
-
-# @pytest.mark.asyncio
+@pytest.mark.asyncio
 def test_build_ec(setup_database, client):
     """
     Test create /eligibility_criteria endpoint
@@ -51,12 +47,15 @@ def test_build_ec(setup_database, client):
     with open(ecdata_file, 'r') as comp_file:
         ec_compare = json.load(comp_file)
 
+    ec = full_res['results']
+    ec_compare = ec_compare['results']
+
     diff = []
     for i in range (len(ec_compare)):
-        ec_diff = DeepDiff(full_res[i], ec_compare[i], ignore_order=True)
+        ec_diff = DeepDiff(ec[i], ec_compare[i], ignore_order=True)
         if ec_diff:
             diff.append(ec_diff)
-    
+
     assert not diff, "differences occurred: \n{}".format("\n".join(diff))            
 
 def test_get_ec(setup_database, client):
