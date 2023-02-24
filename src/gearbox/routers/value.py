@@ -1,27 +1,13 @@
-import os
-import datetime
-import httpx
-import fastapi
 from fastapi import Depends
-import jwt
 
 from collections.abc import Iterable
-from enum import Enum
-from typing import List
-from asyncpg import UniqueViolationError
 from sqlalchemy.ext.asyncio import AsyncSession
-from authutils.token.fastapi import access_token
-from fastapi import HTTPException, APIRouter, Security
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from urllib.parse import urljoin
+from fastapi import APIRouter
 from fastapi import Request, Depends
-from fastapi.encoders import jsonable_encoder
 from . import logger
 from gearbox.util import status
-from starlette.responses import JSONResponse
 from gearbox.admin_login import admin_required
 
-from gearbox import config
 from gearbox.schemas import ValueCreate, ValueSearchResults, Value
 from gearbox.services import value as value_service
 from gearbox import deps

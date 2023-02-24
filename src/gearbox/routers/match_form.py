@@ -8,13 +8,14 @@ from fastapi import APIRouter, Security
 from sqlalchemy.orm import Session
 from fastapi import Request, Depends, HTTPException
 from fastapi.security import HTTPBearer
+from gearbox.schemas.display_rules import DisplayRulesSearchResults
 
-from gearbox.services import match_form as mf
+from gearbox.services import match_form as match_form_service
 from . import logger
 from starlette.responses import JSONResponse 
 from typing import List
 from gearbox import auth
-from gearbox.schemas import DisplayRules 
+from gearbox.schemas import DisplayRulesSearchResults, DisplayRules
 from gearbox.crud.match_form import get_form_info
 from gearbox import deps
 from gearbox.util.bounds import bounds
@@ -24,16 +25,17 @@ from gearbox.admin_login import admin_required
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
 
-@mod.post("/build-match-form", response_model=List[DisplayRules], dependencies=[ Depends(auth.authenticate), Depends(admin_required)], status_code=status.HTTP_200_OK)
+@mod.post("/build-match-form", dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
 async def build_match_info(
     request: Request,
     session: Session = Depends(deps.get_session),
 ):
-    match_form = await mf.get_match_form(session)
-
+    match_form = await match_form_service.get_match_form(session)
     if not config.BYPASS_S3:
         params = [{'Content-Type':'application/json'}]
         bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_MATCH_FORM_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, match_form)
+
+    # TO DO: write jsonschema validator for match_form
     return JSONResponse(match_form, status.HTTP_200_OK)
 
 @mod.get("/match-form", dependencies=[ Depends(auth.authenticate)], status_code=status.HTTP_200_OK)

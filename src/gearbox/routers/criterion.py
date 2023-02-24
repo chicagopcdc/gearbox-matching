@@ -25,11 +25,6 @@ from gearbox import auth
 
 mod = APIRouter()
 
-# auto_error=False prevents FastAPI from raises a 403 when the request is missing
-# an Authorization header. Instead, we want to return a 401 to signify that we did
-# not recieve valid credentials
-# bearer = HTTPBearer(auto_error=False)
-
 @mod.get("/criteria", response_model=CriterionSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
 async def get_criteria(
     request: Request,
@@ -38,7 +33,6 @@ async def get_criteria(
 
     criteria = await criterion_crud.get(session)
     return { "results" :list(criteria) }
-    # return JSONResponse(jsonable_encoder(criteria), status.HTTP_200_OK)    
 
 @mod.get("/criterion/{criterion_id}", response_model=Criterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
 async def get_criterion(
@@ -48,9 +42,6 @@ async def get_criterion(
 ):
 
     criterion = await criterion_service.get_criterion(session=session, id=criterion_id)
-    print(f"CRITERION TYPE: {type(criterion)}")
-    print(f"CRITERION ID: {criterion.id}")
-    # return JSONResponse(jsonable_encoder(criterion), status.HTTP_200_OK)    
     return criterion
 
 @mod.post("/criterion", response_model=Criterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
@@ -63,7 +54,6 @@ async def save_object(
     new_criterion = await criterion_service.create_new_criterion(session, body)
     await session.commit()
     return new_criterion
-    # return JSONResponse(new_criterion, status.HTTP_201_CREATED)
 
 def init_app(app):
     app.include_router(mod, tags=["criteria","criterion"])

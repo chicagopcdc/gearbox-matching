@@ -8,7 +8,7 @@ from .triggered_by import TriggeredBy, TriggeredByCreate, TriggeredBySearchResul
 from .tag import Tag, TagCreate, TagSearchResults
 from .criterion_has_tag import CriterionHasTag, CriterionHasTagCreate, CriterionHasTagSearchResults
 from .criterion_has_value import CriterionHasValue, CriterionHasValueCreate, CriterionHasValueSearchResults
-from .study_response import StudyResponse
+from .study_response import StudyResponseSearchResults, StudyResponse
 from .eligibility_criteria_response import EligibilityCriteriaResponse
 from .eligibility_criteria import EligibilityCriteriaCreate, EligibilityCriteriaSearchResults
 from .criterion import CriterionCreate, CriterionSearchResults, CriterionCreateIn, Criterion
@@ -19,3 +19,4 @@ from .algorithm_engine import AlgorithmResponse
 from .study import StudySearchResults, StudyCreate, Study
 from .study_link import StudyLinkSearchResults, StudyLinkCreate, StudyLink
 from .study_version import StudyVersionSearchResults, StudyVersionCreate, StudyVersion
+from .eligibility_criteria_response import EligibilityCriteriaResponseResults

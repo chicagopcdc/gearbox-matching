@@ -21,6 +21,7 @@ async def get_study_links(session: Session) -> StudyLinkSearchResults:
     pass
 
 async def create_study_link(session: Session, study_link: StudyLinkCreate) -> StudyLinkSchema:
+
     new_study_link = await study_link_crud.create(db=session, obj_in=study_link)
     return new_study_link
 

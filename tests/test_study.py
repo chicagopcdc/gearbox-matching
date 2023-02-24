@@ -29,7 +29,6 @@ def test_studies_compare(setup_database, client):
     fake_jwt = "1.2.3"
     resp = client.post("/build-studies", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
-    full_res_str = '\n'.join([str(item) for item in full_res])
 
     resp.raise_for_status()
     studydata_file = './tests/data/studies.json'
@@ -42,10 +41,13 @@ def test_studies_compare(setup_database, client):
     with open(studydata_file, 'r') as comp_file:
         study_compare = json.load(comp_file)
 
+    studies = full_res["results"]
+    study_compare = study_compare["results"]
+
     diff = []
     # Diff all studies in the reponse that exist in the mock file
     for i in range (len(study_compare)):
-        study_diff = DeepDiff(full_res[i], study_compare[i], ignore_order=True)
+        study_diff = DeepDiff(studies[i], study_compare[i], ignore_order=True)
         if (study_diff):
             diff.append(study_diff)
     
