@@ -22,6 +22,16 @@ def test_get_sites(setup_database, client):
     resp = client.get("/sites", headers={"Authorization": f"bearer {fake_jwt}"})
     assert str(resp.status_code).startswith("20")
 
+@pytest.mark.asyncio
+def test_get_site(setup_database, client):
+    """
+    Comments: Test to validate aws url is returned from get endpoint
+    """
+    errors = []
+    fake_jwt = "1.2.3"
+    resp = client.get("/site/1", headers={"Authorization": f"bearer {fake_jwt}"})
+    assert str(resp.status_code).startswith("20")
+
 @respx.mock
 @pytest.mark.parametrize(
     "data", [ 

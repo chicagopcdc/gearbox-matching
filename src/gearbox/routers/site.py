@@ -18,7 +18,7 @@ async def get_site(
     site_id: int,
     session: AsyncSession = Depends(deps.get_session)
 ):
-    ret_site = await site_service.get_single_site(session, site_id)
+    ret_site = await site_service.get_site(session, site_id)
     return ret_site
 
 @mod.get("/sites", response_model=SiteSearchResults, status_code = status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])

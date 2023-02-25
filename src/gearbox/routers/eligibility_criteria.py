@@ -1,4 +1,3 @@
-from re import I
 from gearbox import config
 from fastapi import APIRouter
 from fastapi.security import HTTPBearer
