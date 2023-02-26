@@ -3,11 +3,10 @@ from datetime import datetime
 
 from . import logger
 from sqlalchemy.orm import Session
-from sqlalchemy import select, exc, update
+from sqlalchemy import exc
 from fastapi import HTTPException
 from gearbox.models import StudyLink
 from gearbox.schemas import StudyLinkCreate, StudyLinkSearchResults, StudyLink as StudyLinkSchema
-from sqlalchemy.sql.functions import func
 from gearbox.util import status, json_utils
 from gearbox.crud import study_link_crud
 

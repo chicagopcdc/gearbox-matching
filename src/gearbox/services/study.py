@@ -1,16 +1,9 @@
-import json
-from datetime import datetime
-
-from gearbox.schemas.study_link import StudyLinkCreate
-
 from . import logger
 from sqlalchemy.orm import Session
-from sqlalchemy import select, exc, update
+from sqlalchemy import exc 
 from fastapi import HTTPException
-from gearbox.models import Study
 from gearbox.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate
-from sqlalchemy.sql.functions import func
-from gearbox.util import status, json_utils
+from gearbox.util import status
 from gearbox.crud import study_crud, site_crud, site_has_study_crud, study_link_crud
 
 async def get_study_info(session: Session, id: int) -> StudySchema:

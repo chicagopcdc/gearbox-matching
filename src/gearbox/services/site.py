@@ -3,12 +3,10 @@ from datetime import datetime
 
 from . import logger
 from sqlalchemy.orm import Session
-from sqlalchemy import select, exc, update
+from sqlalchemy import exc 
 from fastapi import HTTPException
-from gearbox.models import Site
 from gearbox.schemas import SiteCreate, SiteSearchResults, Site as SiteSchema
-from sqlalchemy.sql.functions import func
-from gearbox.util import status, json_utils
+from gearbox.util import status
 from gearbox.crud import site_crud
 
 async def get_site_info(session: Session, id: int) -> SiteSchema:

@@ -1,11 +1,10 @@
-from cgitb import reset
 import json
 from datetime import datetime
 
 from gearbox.models.study_algorithm_engine import StudyAlgorithmEngine
 from . import logger
 from sqlalchemy.orm import Session
-from sqlalchemy import select, exc, update
+from sqlalchemy import select, exc
 from fastapi import HTTPException
 from gearbox.models import ElCriteriaHasCriterion, EligibilityCriteria, StudyVersion
 from gearbox.schemas import StudyAlgorithmEngine as StudyAlgorithmEngineSchema

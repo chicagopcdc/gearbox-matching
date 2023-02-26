@@ -1,16 +1,12 @@
-import json
-from datetime import datetime
-
 from . import logger
 from sqlalchemy.orm import Session
-from sqlalchemy import select, exc, update
+from sqlalchemy import exc, select
 from fastapi import HTTPException
 from gearbox.models import StudyVersion
 from gearbox.schemas import StudyVersionCreate, StudyVersionSearchResults, StudyVersion as StudyVersionSchema
 from sqlalchemy.sql.functions import func
-from gearbox.util import status, json_utils
+from gearbox.util import status
 from gearbox.crud import study_version_crud
-from . import study_algorithm_engine as study_algorithm_engine_service
 
 async def get_latest_study_version(session: Session, study_id: int) -> int:
     try:

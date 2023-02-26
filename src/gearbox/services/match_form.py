@@ -133,9 +133,7 @@ async def get_match_form(session):
                     }
                     # if len(pathlist) == 1: # this shouldn't happen, but if it did...
                 elif (pathlist):
-                    logger.info(f"------------------------> PATHLIST: {pathlist}")
                     path_tree = get_tree(pathlist, suppress_header=True)
-                    logger.info(f"------------------------> PATH TREE: {path_tree}")
                     path_tree = update_dict(path_tree, critlookup)
 
                 if path_tree:

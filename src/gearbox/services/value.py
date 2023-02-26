@@ -1,14 +1,9 @@
-import json
-from datetime import datetime
-
 from . import logger
 from sqlalchemy.orm import Session
-from sqlalchemy import select, exc, update
+from sqlalchemy import exc 
 from fastapi import HTTPException
-from gearbox.models import Value
 from gearbox.schemas import ValueCreate, ValueSearchResults, Value as ValueSchema
-from sqlalchemy.sql.functions import func
-from gearbox.util import status, json_utils
+from gearbox.util import status
 from gearbox.crud import value_crud
 
 async def get_value(session: Session, id: int) -> ValueSchema:
@@ -17,10 +12,6 @@ async def get_value(session: Session, id: int) -> ValueSchema:
 
 async def get_values(session: Session) -> ValueSearchResults:
     aes = await value_crud.get_multi(session)
-    print(f"IN GET VALUES: {type(aes)}")
-    print(f"IN GET VALUES: {type(aes[0])}")
-    for a in aes:
-        print(f"ID: {a.id}")
     return aes
     pass
 
