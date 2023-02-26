@@ -1,25 +1,15 @@
 from fastapi import Depends
-
-from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
-from authutils.token.fastapi import access_token
-from fastapi import HTTPException, APIRouter, Security
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from urllib.parse import urljoin
-from pydantic import BaseModel
+from fastapi import APIRouter
 from fastapi import Request, Depends
-from fastapi.encoders import jsonable_encoder
-from sqlalchemy.orm import Session
 
 from . import logger
 from gearbox.util import status
 from gearbox.services import criterion as criterion_service
-from starlette.responses import JSONResponse
 from gearbox.admin_login import admin_required
 
-# from gearbox import config
-from gearbox.schemas import CriterionSearchResults, CriterionCreateIn, CriterionCreate, CriterionHasValueCreate, CriterionHasTagCreate, DisplayRulesCreate, TriggeredByCreate, Criterion
-from gearbox.crud import criterion_crud, criterion_has_value_crud, criterion_has_tag_crud, display_rules_crud, triggered_by_crud, value_crud, tag_crud
+from gearbox.schemas import CriterionSearchResults, CriterionCreateIn, Criterion
+from gearbox.crud import criterion_crud
 from gearbox import deps
 from gearbox import auth 
 

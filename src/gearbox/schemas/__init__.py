@@ -20,3 +20,4 @@ from .study import StudySearchResults, StudyCreate, Study
 from .study_link import StudyLinkSearchResults, StudyLinkCreate, StudyLink
 from .study_version import StudyVersionSearchResults, StudyVersionCreate, StudyVersion
 from .eligibility_criteria_response import EligibilityCriteriaResponseResults
+from .match_form import MatchForm

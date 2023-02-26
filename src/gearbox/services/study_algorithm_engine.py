@@ -56,16 +56,13 @@ async def get_invalid_logic_ids(session: Session, algorithm_logic: str, study_ve
     returns: list of el_criteria_has_criterion_id from the algorithm_logic input, 
         that are not present in the el_criteria_has_criterion table for the study
     """
-    print(f"IN STUDY_ALGORITHM_ENGINE SERVICE STUDY VERSION ID: {study_version_id}")
     try:
         result = await session.execute(select(ElCriteriaHasCriterion.id)
             .join(ElCriteriaHasCriterion.eligibility_criteria)
             .where(EligibilityCriteria.study_version_id == study_version_id)
         )
         db_el_criteria_has_criterion_ids = result.unique().scalars().all()
-        print(f"DB IDS: {db_el_criteria_has_criterion_ids}")
         input_el_criteria_has_criterion_ids = json_utils.json_extract_ints(algorithm_logic, 'criteria')
-        print(f"INPUT IDS: {input_el_criteria_has_criterion_ids}")
 
     # items that exist in input_el_criteria_has_criterion_ids but not in db_el_criteria_has_criterion_ids
         return list(set(input_el_criteria_has_criterion_ids).difference(db_el_criteria_has_criterion_ids))
@@ -136,10 +133,8 @@ async def reset_active_status(session: Session, study_version_id: int) -> bool:
     
 async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineCreate) -> StudyAlgorithmEngine:
     # Check if study version on incoming algorithm engine exists in the db
-    print("SAE SERVICE 1")
     if not await check_study_version_id_exists(session, study_algorithm_engine.study_version_id):
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study_version {study_algorithm_engine.study_version_id} does not exist.")
-    print("SAE SERVICE 2")
 
     # Check el_criteria_has_criterion ids in incoming algoritm engine exist in the db
     invalid_ids = await get_invalid_logic_ids(session, study_algorithm_engine.algorithm_logic, study_algorithm_engine.study_version_id) 
@@ -147,13 +142,10 @@ async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineC
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study algorithm logic contains the following invalid ids: {invalid_ids}.")
 
     # Find existing exact duplicate algorithm logic for the study version
-    print("SAE SERVICE 3")
     dup_study_algorithm_engine = await get_existing_algorithm_logic_duplicate(session, study_algorithm_engine.algorithm_logic, study_algorithm_engine.study_version_id)
-    print("SAE SERVICE 4")
 
     # if no duplicate is found, determine version and insert new study algorithm engine
     if not dup_study_algorithm_engine:
-        print("SAE SERVICE 5")
         study_algorithm_engine.algorithm_version = await get_latest_algorithm_version(session, study_algorithm_engine.study_version_id) + 1
 
         # set current active to false before creating 
@@ -164,19 +156,14 @@ async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineC
         else:
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Issue encountered updating status of study_algorithm_engine rows.")
     else: 
-        print("SAE SERVICE 6")
         # if incoming is 'active', but we find a duplicate, set existing duplicate record to 'active', set start_date to current
         # if incoming is not active and there is an exact duplicate then do nothing
 
         # set set all current active to false 
         reset_active = await reset_active_status(session, study_algorithm_engine.study_version_id)
-        print("SAE SERVICE 7")
         dt = datetime.now()
-        print("SAE SERVICE 8")
         # set existing to active 
         dup_row = await study_algorithm_engine_crud.get(db=session, id=dup_study_algorithm_engine.id)
-        print("SAE SERVICE 9")
         await study_algorithm_engine_crud.update(db=session, db_obj=dup_row, obj_in={"active":True})
-        print("SAE SERVICE 10")
 
         return dup_study_algorithm_engine

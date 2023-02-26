@@ -1,17 +1,9 @@
-from typing import List
-from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
-
 from . import logger
 from gearbox.util import status
-from starlette.responses import JSONResponse
-from gearbox.admin_login import admin_required
-
-# from gearbox import config
-from gearbox.schemas import CriterionSearchResults, CriterionCreateIn, CriterionCreate, CriterionHasValueCreate, CriterionHasTagCreate, DisplayRulesCreate, TriggeredByCreate, Criterion as CriterionSchema
+from gearbox.schemas import CriterionCreateIn, CriterionCreate, CriterionHasValueCreate, CriterionHasTagCreate, DisplayRulesCreate, TriggeredByCreate, Criterion as CriterionSchema
 from gearbox.crud import criterion_crud, criterion_has_value_crud, criterion_has_tag_crud, display_rules_crud, triggered_by_crud, value_crud, tag_crud
 
 async def get_criterion(session: Session, id: int) -> CriterionSchema:
@@ -19,10 +11,7 @@ async def get_criterion(session: Session, id: int) -> CriterionSchema:
     return crit
 
 async def create_new_criterion(session: Session, criterion_info: CriterionCreateIn):
-
-    print("IN CRITERION SERVICE 1")
     criterion_info_conv = jsonable_encoder(criterion_info)
-    print("IN CRITERION SERVICE 2")
 
     # check input fks exist
     check_id_errors = []
@@ -72,6 +61,6 @@ async def create_new_criterion(session: Session, criterion_info: CriterionCreate
         )
         new_triggered_by = await triggered_by_crud.create(db=session, obj_in=tb)
 
-    # commit only executes if no exceptions encountered 
+    # commit if no exceptions encountered 
     await session.commit()
     return jsonable_encoder(new_criterion)

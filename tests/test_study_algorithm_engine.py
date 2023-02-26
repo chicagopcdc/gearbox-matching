@@ -190,7 +190,7 @@ def test_get_algorithm_engines(setup_database, client):
     resp = client.get("/study-algorithm-engines", headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
     full_res = resp.json()
-    al = full_res[0]['algorithm_logic']
+    al = full_res['results'][0]['algorithm_logic']
 
     # check algorithm_logic not empty
     assert al != ''

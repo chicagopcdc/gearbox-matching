@@ -4,7 +4,7 @@ from jsonschema.exceptions import ValidationError
 from jsonschema.exceptions import SchemaError 
 from pydantic import BaseModel, validator, Json
 from datetime import datetime
-from typing import Optional, List, Sequence, Any
+from typing import Optional, List, Sequence, Any, Dict, Union
 
 from gearbox.models import study_algorithm_engine
 
@@ -28,7 +28,7 @@ algorithm_logic_schema = {
 class StudyAlgorithmEngineBase(BaseModel):
     study_version_id: int
     start_date: Optional[datetime]
-    algorithm_logic: Json[Any]
+    algorithm_logic: Union[Json[Any],Dict]
     algorithm_version: Optional[int]
     active: bool
 
