@@ -3,12 +3,8 @@ import random
 
 from sqlalchemy.orm import sessionmaker
 from gearbox.models import Study, StudyLink, Site
-import respx
-
-from gearbox import config
 from .test_utils import is_aws_url
 
-@respx.mock
 @pytest.mark.parametrize(
     "data", [ 
         {
@@ -57,7 +53,6 @@ def test_create_study_with_sites(setup_database, client, data, connection):
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))
 
-@respx.mock
 @pytest.mark.parametrize(
     "data", [ 
         {

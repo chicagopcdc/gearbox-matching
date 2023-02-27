@@ -1,7 +1,7 @@
 import pytest
 
 from gearbox import config
-from gearbox.models import Base, Study
+from gearbox.models import Study
 
 def test_database(setup_database):
 

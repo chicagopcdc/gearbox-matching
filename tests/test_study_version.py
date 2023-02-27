@@ -1,14 +1,6 @@
 import pytest
-import random
-import json
-
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker 
 from gearbox.models import StudyVersion
-from deepdiff import DeepDiff
-
-import respx
-
-from gearbox import config
 from .test_utils import is_aws_url
 
 
@@ -22,7 +14,6 @@ def test_get_study_versions(setup_database, client):
     resp = client.get("/study-versions", headers={"Authorization": f"bearer {fake_jwt}"})
     assert str(resp.status_code).startswith("20")
 
-@respx.mock
 @pytest.mark.parametrize(
     "data", [ 
         {
@@ -31,7 +22,6 @@ def test_get_study_versions(setup_database, client):
     }
     ]
 )
-@pytest.mark.asyncio
 def test_create_study_version(setup_database, client, data, connection):
     """
     Comments: test create a new study_version and validates row created in db

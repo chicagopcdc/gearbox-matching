@@ -1,18 +1,8 @@
 import pytest
-import random
-import json
 
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker 
 from gearbox.models import StudyLink
-from deepdiff import DeepDiff
 
-import respx
-
-from gearbox import config
-from .test_utils import is_aws_url
-
-
-@pytest.mark.asyncio
 def test_get_study_links(setup_database, client):
     """
     Comments: Test to validate aws url is returned from get endpoint
@@ -22,7 +12,6 @@ def test_get_study_links(setup_database, client):
     resp = client.get("/study-links", headers={"Authorization": f"bearer {fake_jwt}"})
     assert str(resp.status_code).startswith("20")
 
-@respx.mock
 @pytest.mark.parametrize(
     "data", [ 
         {

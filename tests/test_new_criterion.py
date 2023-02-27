@@ -1,32 +1,21 @@
 import pytest
-import json
-import jwt
 import random
 
-from httpx import AsyncClient
-from fastapi import FastAPI
 from sqlalchemy.orm import sessionmaker
 
 from gearbox.models import Criterion, CriterionHasTag, CriterionHasValue, DisplayRules, TriggeredBy
 
-import respx
 from starlette.config import environ
 
 from gearbox import config
 
-@pytest.mark.asyncio
-# def test_get_criterion(setup_database, client, valid_upload_file_patcher, connection):
 def test_get_criterion(setup_database, client):
 
     fake_jwt = "1.2.3"
-    print("IN GET TEST 1")
     resp = client.get(f"/criterion/1", headers={"Authorization": f"bearer {fake_jwt}"})
-    print("IN GET TEST 2")
     resp.raise_for_status()
     assert str(resp.status_code).startswith("20")
 
-@pytest.mark.asyncio
-# def test_create_criterion(setup_database, client, valid_upload_file_patcher, mock_new_criterion, connection):
 def test_create_criterion(setup_database, client, mock_new_criterion, connection):
     """
     Test create /user-input response for a valid user with authorization and
@@ -38,10 +27,7 @@ def test_create_criterion(setup_database, client, mock_new_criterion, connection
     mock_new_criterion.code = test_criterion_code
     # adding code to ensure unique display name
     mock_new_criterion.display_name += test_criterion_code
-    print("IN TEST CREATE CRITERION 1")
     resp = client.post("/criterion", json=mock_new_criterion.to_json(), headers={"Authorization": f"bearer {fake_jwt}"})
-    print("IN TEST CREATE CRITERION 2")
-    print(f"RESPONSE: {resp.status_code}")
     resp.raise_for_status()
 
     try: 

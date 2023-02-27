@@ -1,14 +1,6 @@
 import pytest
-import json
-import jwt
-
-from httpx import AsyncClient
-from fastapi import FastAPI
-from sqlalchemy.orm import sessionmaker
-
 import respx
 
-from fastapi import HTTPException
 from starlette.config import environ
 from starlette.status import (
     HTTP_201_CREATED,
@@ -19,8 +11,6 @@ from starlette.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 
-from gearbox import config
-from gearbox.models import SavedInput
 
 @respx.mock
 @pytest.mark.parametrize(
@@ -28,7 +18,7 @@ from gearbox.models import SavedInput
         { 'data': [ {'id': 4, 'value': 'steve'} ] }
     ]
 )
-@pytest.mark.asyncio
+
 def test_create(setup_database, client, valid_upload_file_patcher, data):
     """
     Test create /user-input response for a valid user with authorization and

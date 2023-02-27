@@ -1,20 +1,11 @@
 import pytest
 import json
-import jwt
-import random
-
-from httpx import AsyncClient
-from fastapi import FastAPI
-
-import respx
 
 from fastapi import HTTPException
 from starlette.config import environ
-from gearbox import config
-from gearbox.util import status
 from gearbox.models import StudyAlgorithmEngine
 
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select
 
 TEST_CREATE_LIST = [
@@ -61,8 +52,6 @@ TEST_CREATE_LIST = [
 
 ]
 
-@respx.mock
-@pytest.mark.asyncio
 @pytest.mark.parametrize('test_create_data',TEST_CREATE_LIST)
 def test_create_study_algorithm_engine(setup_database, client, test_create_data, connection):
     """
@@ -167,7 +156,6 @@ def test_create_study_algorithm_engine(setup_database, client, test_create_data,
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))  
 
-@respx.mock
 def test_get_algorithm_engine(setup_database, client):
     """
     Test that the algorithm-engine endpoint returns a 200 and valid json
@@ -181,7 +169,6 @@ def test_get_algorithm_engine(setup_database, client):
     # check algorithm_logic not empty
     assert al != ''
 
-@respx.mock
 def test_get_algorithm_engines(setup_database, client):
     """
     Test that the algorithm-engine endpoint returns a 200 and valid json

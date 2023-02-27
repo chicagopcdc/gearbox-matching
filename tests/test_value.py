@@ -1,14 +1,5 @@
 import pytest
-import json
-import jwt
 import random
-
-from httpx import AsyncClient
-from fastapi import FastAPI
-
-import respx
-
-from fastapi import HTTPException
 from starlette.config import environ
 from starlette.status import (
     HTTP_201_CREATED,
@@ -19,9 +10,6 @@ from starlette.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 
-from gearbox import config
-
-@respx.mock
 @pytest.mark.parametrize(
     "data", [ 
         {
@@ -64,8 +52,6 @@ def test_get_value(setup_database, client):
     """
     fake_jwt = "1.2.3"
     resp = client.get("/value/1", headers={"Authorization": f"bearer {fake_jwt}"})
-    print(f"RESPONSE BODY TYPE: {type(resp.content)}")
-    print(f"RESPONSE BODY: {resp.content}")
     assert resp.status_code == 200
 
 

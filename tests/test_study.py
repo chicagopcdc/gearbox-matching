@@ -2,13 +2,10 @@ import pytest
 import random
 import json
 
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker
 from gearbox.models import Study
 from deepdiff import DeepDiff
 
-import respx
-
-from gearbox import config
 from .test_utils import is_aws_url
 
 @pytest.mark.asyncio
@@ -65,7 +62,6 @@ def test_get_studies(setup_database, client):
 
     assert is_aws_url(url_str)
 
-@respx.mock
 @pytest.mark.parametrize(
     "data", [ 
         {

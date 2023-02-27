@@ -2,18 +2,8 @@ from re import A
 import pytest
 import json
 from .test_utils import is_aws_url
-
 from deepdiff import DeepDiff
 
-from httpx import AsyncClient
-from fastapi import FastAPI
-
-import tempfile
-import respx
-
-from fastapi import HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from starlette.config import environ
 from starlette.status import (
     HTTP_201_CREATED,
     HTTP_409_CONFLICT,

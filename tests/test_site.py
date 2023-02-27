@@ -1,18 +1,9 @@
 import pytest
 import random
-import json
 
 from sqlalchemy.orm import sessionmaker, Session
 from gearbox.models import Site
-from deepdiff import DeepDiff
 
-import respx
-
-from gearbox import config
-from .test_utils import is_aws_url
-
-
-@pytest.mark.asyncio
 def test_get_sites(setup_database, client):
     """
     Comments: Test to validate aws url is returned from get endpoint
@@ -22,7 +13,6 @@ def test_get_sites(setup_database, client):
     resp = client.get("/sites", headers={"Authorization": f"bearer {fake_jwt}"})
     assert str(resp.status_code).startswith("20")
 
-@pytest.mark.asyncio
 def test_get_site(setup_database, client):
     """
     Comments: Test to validate aws url is returned from get endpoint
@@ -32,7 +22,6 @@ def test_get_site(setup_database, client):
     resp = client.get("/site/1", headers={"Authorization": f"bearer {fake_jwt}"})
     assert str(resp.status_code).startswith("20")
 
-@respx.mock
 @pytest.mark.parametrize(
     "data", [ 
         {
@@ -42,7 +31,6 @@ def test_get_site(setup_database, client):
     }
     ]
 )
-@pytest.mark.asyncio
 def test_create_site(setup_database, client, data, connection):
     """
     Comments: test create a new site and validates row created in db
@@ -68,7 +56,6 @@ def test_create_site(setup_database, client, data, connection):
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))
 
-@pytest.mark.asyncio
 def test_update_site(setup_database, client, connection):
     """
     Comments: test to validate update site active to false
