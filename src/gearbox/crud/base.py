@@ -58,8 +58,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             # not using scalar_one here because we don't necessarily
             # want to throw an error if we get more than one row here
             result = result_db.unique().scalars().first()
-            #if not result:
-            #    raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"No 'active' rows in {self.model.__tablename__} ")        
             return result
         except exc.SQLAlchemyError as e:
             logger.error(f"SQL ERROR IN base.get method: {e}")
@@ -74,7 +72,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
                 stmt = stmt.where(self.model.active == active)
             else:
                 raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{self.model.__tablename__} does not inlude 'active' attribute")        
-        
+
+        # enables querying on cols 
         if where:
             for w in where:
                 stmt = stmt.where(text(w))
@@ -82,8 +81,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         try:
             result_db = await db.execute(statement=stmt)
             result = result_db.unique().scalars().all()
-            #if not result:
-            #    raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"No 'active' rows in {self.model.__tablename__} ")        
             return result
 
         except exc.SQLAlchemyError as e:
@@ -95,8 +92,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         # set create_date here if not already set and it is in the schema
         if "create_date" in obj_in_data.keys():
             obj_in_data["create_date"] = datetime.now() if not obj_in_data["create_date"] else obj_in_data["create_date"]
-        # fix to sqlalchemy model base_class fixed issue with nested pydantic schemas here
-        # where we are creating the db model object using the pydantic schema object
+        
         try:
             db_obj = self.model(**obj_in_data)
             db.add(db_obj)
