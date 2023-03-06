@@ -1,8 +1,11 @@
 from pydantic import BaseModel
-from datetime import datetime
+from typing import Sequence
 
 class EligibilityCriteriaResponse(BaseModel):
     id: int
     fieldId: int
-    fieldValue: int
+    fieldValue: float
     operator: str
+
+class EligibilityCriteriaResponseResults(BaseModel):
+    results: Sequence[EligibilityCriteriaResponse]    

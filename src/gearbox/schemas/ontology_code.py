@@ -1,12 +1,26 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 from datetime import datetime
-from typing import Sequence, List
+from typing import Optional, Sequence
 
-class OntologyCode(BaseModel):
+class OntologyCodeBase(BaseModel):
+    ontology_url: Optional[str]
+    name: Optional[str]
+    code: Optional[str]
+    value: Optional[str]
+    version: Optional[bool]
+
+    class Config:
+        orm_mode = True    
+
+
+class OntologyCode(OntologyCodeBase):
+    id: int
+
+class OntologyCodeCreate(OntologyCodeBase):
     pass
 
-class OntologyCodeCreate(BaseModel):
+class OntologyCodeUpdate(BaseModel):
     pass
 
 class OntologyCodeSearchResults(BaseModel):
-    pass
+    results: Sequence[OntologyCode]    

@@ -1,4 +1,4 @@
-from gearbox.models.models import Study, StudyLink
+from gearbox.models import Study, StudyLink
 
 def format_study_response(study_list):
     ret_val = []

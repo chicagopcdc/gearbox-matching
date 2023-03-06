@@ -1,11 +1,2 @@
-id	study_version_id	start_date	active
-1	1		1
-2	2		1
-3	3		1
-4	4		1
-5	5		1
-6	6		1
-7	7		1
-8	8		1
-9	9		1
-10	10		1
+id	study_version_id	start_date	algorithm_logic	algorithm_version	active
+1	1		{ "studyId": 1, "algorithm": { "operator": "AND", "criteria": [ 1, { "operator": "OR", "criteria": [ { "operator": "AND", "criteria": [ 2, { "operator": "OR", "criteria": [ { "operator": "AND", "criteria": [ 12, 7 ] }, { "operator": "AND", "criteria": [ 13, 8 ] } ] } ] }, 3, { "operator": "AND", "criteria": [ 4, { "operator": "OR", "criteria": [ { "operator": "AND", "criteria": [ 12, 7 ] }, { "operator": "AND", "criteria": [ 13, 8 ] } ] } ] }, { "operator": "AND", "criteria": [ 5, 13, 8 ] }, { "operator": "AND", "criteria": [ 6, 13, 8, { "operator": "OR", "criteria": [ { "operator": "AND", "criteria": [ 9 ] }, { "operator": "AND", "criteria": [ 10, 11 ] } ] } ] } ] } ] } } 	1	true

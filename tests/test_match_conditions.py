@@ -1,19 +1,9 @@
 import pytest
-import re
 import json
 from .test_utils import is_aws_url
-
 from deepdiff import DeepDiff
-
-from httpx import AsyncClient
-from fastapi import FastAPI
-
-import tempfile
 import respx
 
-from fastapi import HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from starlette.config import environ
 from starlette.status import (
     HTTP_201_CREATED,
     HTTP_409_CONFLICT,
@@ -25,17 +15,24 @@ from starlette.status import (
 
 from gearbox import config
 
-# auto_error=False prevents FastAPI from raises a 403 when the request is missing
-# an Authorization header. Instead, we want to return a 401 to signify that we did
-# not recieve valid credentials
-bearer = HTTPBearer(auto_error=False)
-
+@respx.mock
+@pytest.mark.asyncio
+def test_build_mc(setup_database, client, valid_upload_file_patcher):
+    """
+    Test create value
+    """
+    fake_jwt = "1.2.3"
+    # add random value string to satisfy unique constraint for test
+    resp = client.post("/build-match-conditions", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp.raise_for_status()
+    full_res = resp.json()
+    assert str(resp.status_code).startswith("20")
 
 # @pytest.mark.asyncio
 def test_build_match_conditions(setup_database, client):
     """
-    This test creates match conditions from the backend database and uploads
-    to an S3 bucket. It also compares the match conditions to a saved, verified 
+    This test creates match conditions from the backend database.
+    It also compares the match conditions to a saved, verified 
     version in a local directory. 
     """
     errors = []
@@ -46,11 +43,10 @@ def test_build_match_conditions(setup_database, client):
     resp.raise_for_status()
     matchdata_file = './tests/data/match_conditions_compare_dat.json'
 
-    """ SERIALIZE STUDIES TO CREATE COMPARE DATA - UNCOMMENT TO WRITE NEW COMPARE DATA
-        COMPARE DATA SHOULD BE MANUALLY VERIFIED BEFORE UNCOMMENTING THIS
-    with open(matchdata_file,'w') as comp_file:
-        json.dump(full_res, comp_file)
-    """
+    #SERIALIZE STUDIES TO CREATE COMPARE DATA - UNCOMMENT TO WRITE NEW COMPARE DATA
+    #    COMPARE DATA SHOULD BE MANUALLY VERIFIED BEFORE UNCOMMENTING THIS
+    #with open(matchdata_file,'w') as comp_file:
+    #    json.dump(full_res, comp_file)
 
     with open(matchdata_file, 'r') as comp_file:
         match_conditions_compare = json.load(comp_file)

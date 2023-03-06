@@ -14,3 +14,6 @@ class StudyResponse(BaseModel):
     description: Optional[str]
     links: Optional[List[Link]]
     locations: Optional[List[str]]
+
+class StudyResponseSearchResults(BaseModel):
+    results: Sequence[StudyResponse]   

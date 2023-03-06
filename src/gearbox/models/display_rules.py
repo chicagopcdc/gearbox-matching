@@ -8,9 +8,11 @@ class DisplayRules(Base):
     __tablename__ = 'display_rules'
     id = Column(Integer, primary_key=True, autoincrement=True)
     criterion_id = Column(Integer, ForeignKey('criterion.id'))
-    priority = Column(String, nullable=True)
+    priority = Column(Integer)
     active = Column(Boolean, nullable=True)
     version = Column(Integer, nullable=True)
 
     triggered_bys = relationship("TriggeredBy", back_populates="display_rules")
     criterion = relationship("Criterion", back_populates="display_rules")
+    #triggered_bys = relationship("TriggeredBy", back_populates="display_rules", lazy="joined")
+    #criterion = relationship("Criterion", back_populates="display_rules", lazy="joined")

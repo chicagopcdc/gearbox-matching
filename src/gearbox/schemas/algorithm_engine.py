@@ -1,7 +1,10 @@
 from __future__ import annotations
-from pydantic import BaseModel
+import json
+from jsonschema import validate
+from pydantic import BaseModel, ValidationError, validator, Json
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Sequence, Any
+import jsonschema
 
 class AlgorithmResponse(BaseModel):
     operator: str

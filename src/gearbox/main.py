@@ -1,26 +1,31 @@
 import asyncio
+import json
+from fastapi.responses import PlainTextResponse, JSONResponse
 import click
 import pkg_resources
-from fastapi import FastAPI, APIRouter, HTTPException, Depends
+from fastapi import FastAPI, APIRouter, Depends, Request
+from fastapi.exceptions import RequestValidationError
+from pydantic import ValidationError
 import httpx
 from sqlalchemy.orm import Session
 from gearbox import deps, config
+from gearbox.util import status
 import cdislogging
 from pcdc_aws_client.boto import BotoManager
+import uvicorn
 
 logger_name = 'gb-logger'
 logger = cdislogging.get_logger(logger_name, log_level="debug" if config.DEBUG else "info")
 
 
 
-try:
+#try:
     # importlib.metadata works locally but not in Docker
     # trying importlib_metadata
     # from importlib.metadata import entry_points
-    from importlib_metadata import entry_points
-except ImportError:
-    from importlib_metadata import entry_points
-
+from importlib_metadata import entry_points
+#except ImportError:
+#    from importlib_metadata import entry_points
 
 def get_app():
     app = FastAPI(
@@ -42,6 +47,23 @@ def get_app():
         }, 
         logger)
 
+    @app.exception_handler(RequestValidationError)
+    async def value_error_exception_handler(request:Request, exc:ValueError):
+        return PlainTextResponse(str(exc), status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(request:Request, exc:ValueError):
+        exc_str = f'{exc}.'.replace('\n', '').replace(' ',' ')
+        logger.error(f"{request}: {exc_str}")
+        content = {'status_code': 10422,'message': exc_str, 'data':None}
+        return JSONResponse(content=content, status_code = status.HTTP_422_UNPROCESSABLE_ENTITY)
+
+    @app.exception_handler(ValidationError)
+    async def validation_exception_handler(request:Request, exc:ValueError):
+        exc_str = f'{exc}.'.replace('\n', '').replace(' ',' ')
+        logger.error(f"PYDANTIC ValidationError: {request}: {exc_str}")
+        content = {'status_code': 10422,'message': 'PYDANTIC ValidationError' + exc_str , 'data':None}
+        return JSONResponse(content=content, status_code = status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     @app.on_event("shutdown")
     async def shutdown_event():

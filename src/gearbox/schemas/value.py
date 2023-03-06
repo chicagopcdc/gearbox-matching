@@ -1,9 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Extra
 from datetime import datetime
-from typing import Sequence, List, Optional
+from typing import Optional, Sequence, List
 
-class Value(BaseModel):
-    id: int
+class ValueBase(BaseModel):
     code: Optional[str]
     description: Optional[str]
     type: Optional[str]
@@ -12,12 +11,19 @@ class Value(BaseModel):
     operator: Optional[str]
     create_date: Optional[datetime]
     active: Optional[bool]
-    
-    class Config:
-        orm_mode = True
 
-class ValueCreate(BaseModel):
+    class Config:
+        orm_mode = True    
+
+
+class Value(ValueBase):
+    id: int
+
+class ValueCreate(ValueBase):
+    pass
+
+class ValueUpdate(BaseModel):
     pass
 
 class ValueSearchResults(BaseModel):
-    pass
+    results: Sequence[Value]    
