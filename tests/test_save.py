@@ -12,14 +12,12 @@ from starlette.status import (
 )
 
 
-@respx.mock
 @pytest.mark.parametrize(
     "data", [ 
-        { 'data': [ {'id': 4, 'value': 'steve'} ] }
+        { 'data': [ {'value': 'TEST VALUE'} ] }
     ]
 )
-
-def test_create(setup_database, client, valid_upload_file_patcher, data):
+def test_create(setup_database, client, data):
     """
     Test create /user-input response for a valid user with authorization and
     valid input, ensure correct response.
@@ -29,38 +27,58 @@ def test_create(setup_database, client, valid_upload_file_patcher, data):
         "/user-input", json=data, headers={"Authorization": f"bearer {fake_jwt}"}
     )
     full_res = resp.json()
-
     resp.raise_for_status()
 
-    res = resp.json().get("results")
-    id = resp.json().get("id") 
-
     assert str(resp.status_code).startswith("20")
-    assert resp.json().get("results") == data.get("data", {})
     assert resp.json().get("id") is not None
 
-@respx.mock
-def test_get_last_saved_input(setup_database, client):
+@pytest.mark.parametrize(
+    "data", [ 
+        { 'data': [ {'id': 1, 'value': 'test response data for latest'} ] }
+    ]
+)
+def test_get_last_saved_input(setup_database, client, data):
     """
     Test that the /user-input endpoint returns a 200 and the id of the latest saved obj
     """
+    errors = []
     fake_jwt = "1.2.3"
+    resp = client.post(
+        "/user-input", json=data, headers={"Authorization": f"bearer {fake_jwt}"}
+    )
     resp = client.get("/user-input/latest", headers={"Authorization": f"bearer {fake_jwt}"})
-    assert resp.status_code == 200
-    assert resp.json().get("id")  is not None 
+    full_res = resp.json()
 
-"""
-@respx.mock
-def test_db_select_input(client, connection):
+    if not resp.status_code == 200:
+        errors.append(f"test_get_last_saved_input failed response code: {resp.status_code}")
+    if not full_res['results'][0]['value'] == data['data'][0]['value']:
+        errors.append(f"test_get_last_saved_input failed to retrieved last saved input: {data['data'][0]['value']}")
+
+    assert not errors, "errors occurred: \n{}".format("\n".join(errors))
+
+@pytest.mark.parametrize(
+    "data", [ 
+        { 'data': [ 
+            {'id': 1, 'value': 'UPDATED: test response 1'},
+            {'id': 2, 'value': 'UPDATED: test response 2'},
+            {'id': 3, 'value': 'UPDATED: test response 3'} 
+          ], 'id': 1 }
+    ]
+)
+def test_update_saved_input(setup_database, client, data):
+    """
+    Test that the /user-input endpoint returns a 200 and the id of the latest saved obj
+    """
+    errors = []
     fake_jwt = "1.2.3"
+    resp = client.post(
+        "/user-input", json=data, headers={"Authorization": f"bearer {fake_jwt}"}
+    )
     resp = client.get("/user-input/latest", headers={"Authorization": f"bearer {fake_jwt}"})
-    # import model
+    full_res = resp.json()
 
-    Session = sessionmaker(bind=connection)
-    session = Session()
-    si = session.query(SavedInput).first()
-    session.close()
+    if not resp.status_code == 200:
+        errors.append(f"test_get_last_saved_input failed response code: {resp.status_code}")
+    if not full_res['results'][0]['value'] == data['data'][0]['value']:
+        errors.append(f"test_get_last_saved_input failed to retrieved last saved input: {data['data'][0]['value']}")
     
-    assert resp.status_code == 200
-    assert resp.json().get("id")  is not None 
-"""

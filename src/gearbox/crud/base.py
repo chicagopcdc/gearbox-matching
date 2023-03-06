@@ -3,7 +3,7 @@ from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from fastapi.encoders import jsonable_encoder
 from fastapi import HTTPException
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy.sql import text
 from sqlalchemy import func, update, select, exc
 from sqlalchemy.exc import IntegrityError
@@ -92,6 +92,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         # set create_date here if not already set and it is in the schema
         if "create_date" in obj_in_data.keys():
             obj_in_data["create_date"] = datetime.now() if not obj_in_data["create_date"] else obj_in_data["create_date"]
+        if "update_date" in obj_in_data.keys():
+            obj_in_data["update_date"] = datetime.now() if not obj_in_data["update_date"] else obj_in_data["update_date"]
         
         try:
             db_obj = self.model(**obj_in_data)
@@ -133,6 +135,9 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
                 if field in update_data:
                     setattr(db_obj, field, update_data[field])
 
+            if "update_date" in obj_data.keys():
+                obj_data["update_date"] = datetime.now()
+
             db.add(db_obj)
             await db.commit()
             return db_obj
@@ -141,7 +146,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         except exc.SQLAlchemyError as e:
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
         except Exception as e:
-            print(f"BASE UPDATE EX: {e}")
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: {type(e)}: {e}")        
 
     """
     def remove(self, db: Session, *, id: int) -> ModelType:
