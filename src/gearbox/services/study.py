@@ -1,5 +1,5 @@
 from . import logger
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy import exc 
 from fastapi import HTTPException
 from gearbox.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate

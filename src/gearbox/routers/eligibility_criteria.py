@@ -1,7 +1,6 @@
 from gearbox import config
 from fastapi import APIRouter
-from fastapi.security import HTTPBearer
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import Request, Depends
 
 from gearbox.services import eligibility_criteria as ec

@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 
 from . import logger
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy import exc 
 from fastapi import HTTPException
 from gearbox.schemas import SiteCreate, SiteSearchResults, Site as SiteSchema

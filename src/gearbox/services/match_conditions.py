@@ -6,7 +6,7 @@ from collections import deque
 from gearbox.routers import logger
 from gearbox.crud import study_algorithm_engine_crud, match_conditions
 from gearbox.schemas import AlgorithmResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession as Session
 from . import study_algorithm_engine
 
 def expand_paths(paths):
