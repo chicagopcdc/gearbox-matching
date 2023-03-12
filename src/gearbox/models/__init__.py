@@ -9,6 +9,7 @@ from .display_rules import DisplayRules
 from .el_criteria_has_criterion import ElCriteriaHasCriterion
 from .eligibility_criteria_has_note import EligibilityCriteriaHasNote
 from .eligibility_criteria import EligibilityCriteria
+from .eligibility_criteria_info import EligibilityCriteriaInfo
 from .input_type import InputType
 from .note import Note
 from .ontology_code import OntologyCode

@@ -13,11 +13,10 @@ class ElCriteriaHasCriterion(Base):
     active = Column(Boolean, nullable=True)
     value_id = Column(Integer, ForeignKey('value.id'))
 
-    # eligibility_criteria = relationship("EligibilityCriteria", back_populates="el_criteria_has_criterions")
-    # criterion = relationship("Criterion", back_populates="el_criteria_has_criterions")
-    # value = relationship("Value", back_populates="el_criteria_has_criterions")
-
     eligibility_criteria = relationship("EligibilityCriteria", back_populates="el_criteria_has_criterions", lazy="joined")
     criterion = relationship("Criterion", back_populates="el_criteria_has_criterions", lazy="joined")
     value = relationship("Value", back_populates="el_criteria_has_criterions", lazy="joined")
+    #eligibility_criteria = relationship("EligibilityCriteria", back_populates="el_criteria_has_criterion", lazy="joined")
+    #criterion = relationship("Criterion", back_populates="el_criteria_has_criterion", lazy="joined")
+    #value = relationship("Value", back_populates="el_criteria_has_criterion", lazy="joined")
 
