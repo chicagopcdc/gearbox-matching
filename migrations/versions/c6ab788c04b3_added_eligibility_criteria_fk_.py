@@ -1,8 +1,8 @@
-"""Added eligibility_criteria_info table fix.
+"""Added eligibility_criteria fk constraint and fk constraint names to eligibility_criteria_info table.
 
-Revision ID: 6ace87aa7e5d
+Revision ID: c6ab788c04b3
 Revises: 5f38941a18aa
-Create Date: 2023-03-11 22:43:58.295218
+Create Date: 2023-03-14 19:34:36.154198
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '6ace87aa7e5d'
+revision = 'c6ab788c04b3'
 down_revision = '5f38941a18aa'
 branch_labels = None
 depends_on = None
@@ -24,8 +24,10 @@ def upgrade():
     sa.Column('active', sa.Boolean(), nullable=True),
     sa.Column('study_version_id', sa.Integer(), nullable=True),
     sa.Column('study_algorithm_engine_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['study_algorithm_engine_id'], ['study_algorithm_engine.id'], ),
-    sa.ForeignKeyConstraint(['study_version_id'], ['study_version.id'], ),
+    sa.Column('eligibility_criteria_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['eligibility_criteria_id'], ['eligibility_criteria.id'], name='fk_eligibility_criteria_id'),
+    sa.ForeignKeyConstraint(['study_algorithm_engine_id'], ['study_algorithm_engine.id'], name='fk_study_algorithm_engine_id'),
+    sa.ForeignKeyConstraint(['study_version_id'], ['study_version.id'], name='fk_study_version_id'),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###

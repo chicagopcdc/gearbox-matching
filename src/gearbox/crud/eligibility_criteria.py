@@ -15,7 +15,7 @@ from gearbox.schemas import EligibilityCriteriaSearchResults, EligibilityCriteri
 class CRUDEligibilityCriteria(CRUDBase [EligibilityCriteria, EligibilityCriteriaCreate, EligibilityCriteriaSearchResults]):
 
 
-    async def get_eligibility_criteria_info(self, current_session: Session):
+    async def get_eligibility_criteria_set(self, current_session: Session):
 
         stmt = select(ElCriteriaHasCriterion).options(
             joinedload(ElCriteriaHasCriterion.criterion).options(

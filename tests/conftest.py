@@ -28,7 +28,8 @@ import asyncio
 
 from gearbox import config
 # from gearbox.models import base_class, study
-from gearbox.models import Base, Study
+# from gearbox.models import Base, Study
+# from gearbox.models import Base
 
 class AsyncMock(MagicMock):
     async def __call__(self, *args, **kwargs):
@@ -79,6 +80,7 @@ def setup_database(connection) -> Engine:
     conn = session.connection().connection
 
 
+
     # COPY DATA INTO TABLES
     file_to_table(conn, cursor,'study', './postgres-data/td_study.tsv')
     file_to_table(conn, cursor,'study_links', './postgres-data/td_study_links.tsv')
@@ -112,7 +114,9 @@ def setup_database(connection) -> Engine:
     cursor.execute("SELECT setval('tag_id_seq', (SELECT MAX(id) FROM tag));")
     cursor.execute("SELECT setval('triggered_by_id_seq', (SELECT MAX(id) FROM triggered_by));")
     cursor.execute("SELECT setval('value_id_seq', (SELECT MAX(id) FROM value));")
+    # FIX THIS FUNCTION TO LOAD
     load_study_algorithm_engine(conn, cursor)
+    file_to_table(conn, cursor,'eligibility_criteria_info', './postgres-data/td_eligibility_criteria_info.tsv')
     conn.commit()
 
     yield session
@@ -124,18 +128,18 @@ def load_study_algorithm_engine(conn, cursor):
             # study_logic = json.loads(jfile.read(), object_pairs_hook=OrderedDict)
             study_logic = json.loads(jfile.read())
             study_logic = json.dumps(study_logic)
-            study_version_id = re.search(r'\d', filename).group()
+            # study_version_id = re.search(r'\d', filename).group()
             dt = datetime.now()
-            active = False if int(study_version_id) == 1 else True
+            # active = True
             insert_query = f'''
                 INSERT INTO study_algorithm_engine 
-                    (study_version_id, start_date, algorithm_logic, algorithm_version, active) 
-                    VALUES (%s, %s, %s, %s, %s)
+                    (start_date, algorithm_logic, algorithm_version) 
+                    VALUES (%s, %s, %s)
             '''
             try:
-                cursor.execute(insert_query, (study_version_id, dt, study_logic, 1, active))
+                cursor.execute(insert_query, (dt, study_logic, 1))
             except Exception as e:
-                print(f"ERROR: {e}")
+                print(f"ERROR IN load_study_algorithm_engine: {e}")
     conn.commit()
 
 @pytest.fixture(scope="session")

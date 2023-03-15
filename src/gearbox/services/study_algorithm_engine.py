@@ -6,7 +6,7 @@ from . import logger
 from sqlalchemy.orm import Session
 from sqlalchemy import select, exc
 from fastapi import HTTPException
-from gearbox.models import ElCriteriaHasCriterion, EligibilityCriteria, StudyVersion
+from gearbox.models import ElCriteriaHasCriterion, EligibilityCriteria, StudyVersion, EligibilityCriteriaInfo
 from gearbox.schemas import StudyAlgorithmEngine as StudyAlgorithmEngineSchema
 from gearbox.schemas import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSearchResults
 from sqlalchemy.sql.functions import func
@@ -97,9 +97,19 @@ async def get_existing_algorithm_logic_duplicate(session: Session, algorithm_log
     """
     try:
 
-        result = await session.execute(select(StudyAlgorithmEngine)
-            .where(StudyAlgorithmEngine.study_version_id == study_version_id)
+        result = await session.execute(
+#        (select(StudyAlgorithmEngine)
+#            .where(StudyAlgorithmEngine.study_version_id == study_version_id)
+#        )
+            select(StudyAlgorithmEngine)
+                .where(StudyAlgorithmEngine.id.in_(
+                        select(EligibilityCriteriaInfo.study_algorithm_engine_id)
+                                .where(EligibilityCriteriaInfo.study_version_id == study_version_id)
+                        )
+                )
         )
+        
+
         # * SQLAlchemy note * scalars().all() returns a list of db model types 
         # just .all() returns a list of SQLAlchemy row type 
         existing_algorithms = result.scalars().all()
@@ -132,15 +142,18 @@ async def reset_active_status(session: Session, study_version_id: int) -> bool:
     
 async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineCreate) -> StudyAlgorithmEngine:
     # Check if study version on incoming algorithm engine exists in the db
-    if not await check_study_version_id_exists(session, study_algorithm_engine.study_version_id):
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study_version {study_algorithm_engine.study_version_id} does not exist.")
+    # MOVE THIS LOGIC - STUDY_VERSION_ID NO LONGER EXISTS IN STUDY_ALGORITHM_ENGINE table
+    #if not await check_study_version_id_exists(session, study_algorithm_engine.study_version_id):
+    #    raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study_version {study_algorithm_engine.study_version_id} does not exist.")
 
     # Check el_criteria_has_criterion ids in incoming algoritm engine exist in the db
-    invalid_ids = await get_invalid_logic_ids(session, study_algorithm_engine.algorithm_logic, study_algorithm_engine.study_version_id) 
-    if invalid_ids:
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study algorithm logic contains the following invalid ids: {invalid_ids}.")
+    # MOVE THIS LOGIC - STUDY_VERSION_ID NO LONGER EXISTS IN STUDY_ALGORITHM_ENGINE table
+    #invalid_ids = await get_invalid_logic_ids(session, study_algorithm_engine.algorithm_logic, study_algorithm_engine.study_version_id) 
+    #if invalid_ids:
+    #    raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study algorithm logic contains the following invalid ids: {invalid_ids}.")
 
     # Find existing exact duplicate algorithm logic for the study version
+    # MOVE THIS LOGIC - STUDY_VERSION_ID NO LONGER EXISTS IN STUDY_ALGORITHM_ENGINE table
     dup_study_algorithm_engine = await get_existing_algorithm_logic_duplicate(session, study_algorithm_engine.algorithm_logic, study_algorithm_engine.study_version_id)
 
     # if no duplicate is found, determine version and insert new study algorithm engine

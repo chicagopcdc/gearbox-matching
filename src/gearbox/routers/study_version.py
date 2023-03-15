@@ -20,7 +20,7 @@ async def get_study_version(
     study_version_id: int,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    ret_study_version = await study_version_service.get_single_study_version(session, study_version_id)
+    ret_study_version = await study_version_service.get_study_version(session, study_version_id)
     return ret_study_version
 
 @mod.get("/study-versions", response_model=StudyVersionSearchResults, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])

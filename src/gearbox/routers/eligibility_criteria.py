@@ -16,7 +16,7 @@ from gearbox.admin_login import admin_required
 
 mod = APIRouter()
 
-@mod.get("/eligibility-criteria-info", dependencies=[Depends(auth.authenticate)] )
+@mod.get("/eligibility-criteria-set", dependencies=[Depends(auth.authenticate)] )
 async def get_ec(
     request: Request,
     session: Session = Depends(deps.get_session),
@@ -25,12 +25,12 @@ async def get_ec(
     presigned_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, params, "get_object")
     return JSONResponse(presigned_url, status.HTTP_200_OK) 
 
-@mod.post("/build-eligibility-criteria-info", status_code=status.HTTP_200_OK, response_model=EligibilityCriteriaResponseResults, dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
+@mod.post("/build-eligibility-criteria-set", status_code=status.HTTP_200_OK, response_model=EligibilityCriteriaResponseResults, dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
 async def build_eligibility_criteria(
     request: Request,
     session: Session = Depends(deps.get_session),
 ):
-    eligibility_criteria = await ec.get_eligibility_criteria_info(session)
+    eligibility_criteria = await ec.get_eligibility_criteria_set(session)
 
     if not config.BYPASS_S3:
         params = [{'Content-Type':'application/json'}]
@@ -40,5 +40,5 @@ async def build_eligibility_criteria(
 
 
 def init_app(app):
-    app.include_router(mod, tags=["build_eligibility_criteria_info"])
-    app.include_router(mod, tags=["eligibility_criteria_info"])
+    app.include_router(mod, tags=["build_eligibility_criteria_set"])
+    app.include_router(mod, tags=["eligibility_criteria_set"])
