@@ -8,10 +8,7 @@ class EligibilityCriteria(Base):
     __tablename__ = 'eligibility_criteria'
     id = Column(Integer, primary_key=True, autoincrement=True)
     create_date = Column(DateTime, nullable=True)
-    # active = Column(Boolean, nullable=True)
-    # study_version_id = Column(Integer, ForeignKey('study_version.id'))
 
     notes = relationship("EligibilityCriteriaHasNote", back_populates="eligibility_criteria")
     el_criteria_has_criterions = relationship("ElCriteriaHasCriterion", back_populates="eligibility_criteria")
     eligibility_criteria_info = relationship("EligibilityCriteriaInfo", back_populates="eligibility_criteria")
-    #infos = relationship("EligibilityCriteriaInfo", back_populates="eligibility_criteria")

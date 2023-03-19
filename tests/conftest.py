@@ -117,6 +117,7 @@ def setup_database(connection) -> Engine:
     # FIX THIS FUNCTION TO LOAD
     load_study_algorithm_engine(conn, cursor)
     file_to_table(conn, cursor,'eligibility_criteria_info', './postgres-data/td_eligibility_criteria_info.tsv')
+    cursor.execute("SELECT setval('eligibility_criteria_info_id_seq', (SELECT MAX(id) FROM eligibility_criteria_info));")
     conn.commit()
 
     yield session

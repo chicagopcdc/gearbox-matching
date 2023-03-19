@@ -1,7 +1,7 @@
 from gearbox import config
 from fastapi import APIRouter
 from fastapi.security import HTTPBearer
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import Request, Depends
 
 from gearbox.services import eligibility_criteria as ec
@@ -9,13 +9,14 @@ from . import logger
 from starlette.responses import JSONResponse 
 from typing import List
 from gearbox import auth
-from gearbox.schemas import EligibilityCriteriaResponseResults
+from gearbox.schemas import EligibilityCriteriaResponseResults, EligibilityCriteriaSearchResults, EligibilityCriteria, EligibilityCriteriaCreate
 from gearbox import deps
 from gearbox.util import bucket_utils, status
 from gearbox.admin_login import admin_required
 
 mod = APIRouter()
 
+# get eligibility-criteria set for the front end
 @mod.get("/eligibility-criteria-set", dependencies=[Depends(auth.authenticate)] )
 async def get_ec(
     request: Request,
@@ -25,6 +26,7 @@ async def get_ec(
     presigned_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, params, "get_object")
     return JSONResponse(presigned_url, status.HTTP_200_OK) 
 
+# build and return eligibility-criteria set for the front end
 @mod.post("/build-eligibility-criteria-set", status_code=status.HTTP_200_OK, response_model=EligibilityCriteriaResponseResults, dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
 async def build_eligibility_criteria(
     request: Request,
@@ -38,7 +40,27 @@ async def build_eligibility_criteria(
 
     return { "results" :list(eligibility_criteria) }
 
+@mod.get("/eligibility-criteria", response_model=EligibilityCriteriaSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
+async def get_eligibility_criteria(
+    request: Request,
+    session: Session = Depends(deps.get_session),
+):
+    eligibility_criteria = await ec.get_values(session=session)
+    return { "results" :list(eligibility_criteria) }
+
+@mod.post("/eligibility-criteria", response_model=EligibilityCriteria, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+async def save_object(
+    body: EligibilityCriteriaCreate,
+    request: Request,
+    session: Session = Depends(deps.get_session),
+):
+    """
+    Comments:
+    """
+    new_eligibility_criteria = await ec.create_eligibility_criteria(session=session, eligibility_criteria=body)
+    return new_eligibility_criteria
 
 def init_app(app):
     app.include_router(mod, tags=["build_eligibility_criteria_set"])
     app.include_router(mod, tags=["eligibility_criteria_set"])
+    app.include_router(mod, tags=["eligibility_criteria"])

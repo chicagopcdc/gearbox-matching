@@ -14,7 +14,7 @@ async def get_el_criteria_has_criterions(session: Session) -> ElCriteriaHasCrite
     pass
 
 async def create_el_criteria_has_criterion(session: Session, el_criteria_has_criterion: ElCriteriaHasCriterionCreate) -> ElCriteriaHasCriterionSchema:
-    new_el_criteria_has_criterion = await el_criteria_has_criterion.create(db=session, obj_in=el_criteria_has_criterion)
+    new_el_criteria_has_criterion = await el_criteria_has_criterion_crud.create(db=session, obj_in=el_criteria_has_criterion)
     await session.commit() 
     return new_el_criteria_has_criterion
 

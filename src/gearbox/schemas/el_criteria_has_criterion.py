@@ -6,13 +6,13 @@ from .input_type import InputType
 # from .criterion import CriterionBase
 
 class ElCriteriaHasCriterionBase(BaseModel):
-    id: int
+    # id: int
     criterion_id: int
     eligibility_criteria_id: int
     create_date: Optional[datetime]
     active: Optional[bool]
     value_id: int
-    value: Value
+    # value: Value
     class Config:
         orm_mode = True
 

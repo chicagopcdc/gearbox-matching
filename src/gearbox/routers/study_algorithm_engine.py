@@ -7,7 +7,7 @@ from gearbox.util import status
 from gearbox.admin_login import admin_required
 from gearbox.services import study_algorithm_engine
 
-from gearbox.schemas import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSearchResults , StudyAlgorithmEngine
+from gearbox.schemas import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSearchResults , StudyAlgorithmEngine, StudyAlgorithmEngineCreateInput
 from gearbox import deps
 from gearbox import auth 
 
@@ -32,14 +32,16 @@ async def get_sae(
 
 @mod.post("/study-algorithm-engine", response_model=StudyAlgorithmEngine,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_sae(
-    body: StudyAlgorithmEngineCreate,
+    body: StudyAlgorithmEngineCreateInput,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
     """
     Comments:
     """
+    print(f"ROUTER 1")
     new_ae = await study_algorithm_engine.create(session=session, study_algorithm_engine=body)
+    print(f"ROUTER 2")
     return new_ae
 
 def init_app(app):
