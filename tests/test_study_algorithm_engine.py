@@ -11,14 +11,47 @@ from sqlalchemy import select
 TEST_CREATE_LIST = [
         {
             "study_version_id": 7,
+            "eligibility_criteria_id": 7,
+            "algorithm_logic": None,
+            "algorithm_version": 1,
+            "logic_file": "./tests/data/new_algorithm_logic.json",
+            # "logic_file": "./tests/data/algorithm_logic.json",
+            "test": "create_new_study_algorithm_engine"
+        },
+        {
+            "study_version_id": 9999,
             "eligibility_criteria_id": 1,
             "algorithm_logic": None,
             "algorithm_version": 1,
-            # "active": True,
-            # "logic_file": "./tests/data/new_algorithm_logic.json",
-            "logic_file": "./tests/data/algorithm_logic.json",
-            "test": "create_new_study_algorithm_engine"
+            "logic_file": "./tests/data/new_algorithm_logic.json",
+            "test": "invalid_study_version"
         },
+        {
+            "study_version_id": 1,
+            "eligibility_criteria_id": 1,
+            "algorithm_logic": None,
+            "algorithm_version": 2,
+            "logic_file": "./tests/data/algorithm_logic.json",
+            "test": "duplicate_logic"
+        },
+        {
+            "study_version_id": 1,
+            "eligibility_criteria_id": 1,
+            "algorithm_logic": None,
+            "algorithm_version": 1,
+            "active": True,
+            "logic_file": "./tests/data/algorithm_logic_invalid_el_criteria_has_criterion_ids.json",
+            "test":"invalid_criteria_ids"
+        },
+        {
+            "study_version_id": 1,
+            "eligibility_criteria_id": 1,
+            "algorithm_logic": None,
+            "algorithm_version": 1,
+            "active": True,
+            "logic_file": "./tests/data/algorithm_logic_invalid_schema.json",
+            "test":"invalid_logic"
+        }
 ]
 
 @pytest.mark.parametrize('test_create_data',TEST_CREATE_LIST)

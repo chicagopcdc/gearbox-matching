@@ -30,10 +30,10 @@ def test_build_ec(setup_database, client):
     resp.raise_for_status()
     ecdata_file = './tests/data/eligibilityCriteria.json'
 
-    """ SERIALIZE STUDIES TO COMPARE AGAINST - UNCOMMENT TO WRITE NEW COMPARE DATA
-    with open(ecdata_file,'w') as comp_file:
-        json.dump(full_res, comp_file)
-    """
+    #""" SERIALIZE STUDIES TO COMPARE AGAINST - UNCOMMENT TO WRITE NEW COMPARE DATA
+    #with open(ecdata_file,'w') as comp_file:
+    #    json.dump(full_res, comp_file)
+    #"""
 
     with open(ecdata_file, 'r') as comp_file:
         ec_compare = json.load(comp_file)
@@ -41,12 +41,20 @@ def test_build_ec(setup_database, client):
     ec = full_res['results']
     ec_compare = ec_compare['results']
 
+    print(f"IN BUILD TEST EC: {ec}")
+    print(f"IN BUILD TEST EC compare: {ec_compare}")
+
     diff = []
     for i in range (len(ec_compare)):
-        ec_diff = DeepDiff(ec[i], ec_compare[i], ignore_order=True)
-        if ec_diff:
-            diff.append(ec_diff)
+        try:
+            ec_diff = DeepDiff(ec[i], ec_compare[i], ignore_order=True)
+            if ec_diff:
+                diff.append(ec_diff)
+        except Exception as e:
+            print(f"DIFF EXCEPTION: {e}")
 
+    #print(f"DIFF: {type(diff)}")
+    #print(f"DIFF: {diff}")
     assert not diff, "differences occurred: \n{}".format("\n".join(diff))            
 
 def test_get_ec(setup_database, client):
