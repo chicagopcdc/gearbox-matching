@@ -12,24 +12,82 @@ from starlette.status import (
 
 @pytest.mark.parametrize(
     "data", [ 
-        {
-            "criterion_id": 1,
-            "eligibility_criteria_id": 1,
+        { "echcs":
+            [
+                {
+            "criterion_id": 10,
+            "eligibility_criteria_id": 10,
             "active": True,
-            "value_id": 1
-    }
+            "value_id": 91
+                },
+                {
+            "criterion_id": 10,
+            "eligibility_criteria_id": 10,
+            "active": True,
+            "value_id": 92
+                },
+                {
+            "criterion_id": 10,
+            "eligibility_criteria_id": 10,
+            "active": True,
+            "value_id": 93 
+                },
+                {
+            "criterion_id": 10,
+            "eligibility_criteria_id": 10,
+            "active": True,
+            "value_id": 95 
+                },
+                {
+            "criterion_id": 1,
+            "eligibility_criteria_id": 10,
+            "active": True,
+            "value_id": 96 
+                },
+            ]
+        }
     ]
 )
 @pytest.mark.asyncio
-# def test_create_el_criteria_has_criterion(setup_database, client, valid_upload_file_patcher, data):
 def test_create_el_criteria_has_criterion(setup_database, client, data):
+    """
+    Test create el_criteria_has_criterion
+    """
+    print(f"IN TEST DATA TYPE: {type(data)}")
+    print(f"IN TEST DATA TYPE: {data}")
+    fake_jwt = "1.2.3"
+    resp = client.post("/el-criteria-has-criterion", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    resp.raise_for_status()
+    assert str(resp.status_code).startswith("20")
+
+@pytest.mark.parametrize(
+    "data", [ 
+        { "echcs":
+            [
+                {
+            "criterion_id": 1,
+            "eligibility_criteria_id": 1,
+            "active": True,
+            "value_id": 22 
+                },
+                {
+            "criterion_id": 8,
+            "eligibility_criteria_id": 2,
+            "active": True,
+            "value_id": 59 
+                },
+            ]
+        }
+    ]
+)
+@pytest.mark.asyncio
+def test_create_duplicate_el_criteria_has_criterion(setup_database, client, data):
     """
     Test create el_criteria_has_criterion
     """
     fake_jwt = "1.2.3"
     resp = client.post("/el-criteria-has-criterion", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
-    resp.raise_for_status()
-    assert str(resp.status_code).startswith("20")
+    assert str(resp.status_code).startswith("409")
 
 @pytest.mark.asyncio
 def test_get_el_criteria_has_criterions(setup_database, client):

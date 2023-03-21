@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, Column, Integer, DateTime, Boolean
+from sqlalchemy import ForeignKey, Column, Integer, DateTime, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from .base_class import Base
@@ -12,6 +12,8 @@ class ElCriteriaHasCriterion(Base):
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
     value_id = Column(Integer, ForeignKey('value.id'))
+
+    UniqueConstraint(criterion_id, eligibility_criteria_id, value_id, name='el_criteria_has_criterion_uix')
 
     eligibility_criteria = relationship("EligibilityCriteria", back_populates="el_criteria_has_criterions", lazy="joined")
     criterion = relationship("Criterion", back_populates="el_criteria_has_criterions", lazy="joined")

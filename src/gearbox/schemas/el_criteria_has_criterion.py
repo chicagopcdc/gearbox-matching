@@ -3,7 +3,6 @@ from datetime import datetime
 from typing import Sequence, List, Optional
 from .value import Value
 from .input_type import InputType
-# from .criterion import CriterionBase
 
 class ElCriteriaHasCriterionBase(BaseModel):
     # id: int
@@ -12,16 +11,14 @@ class ElCriteriaHasCriterionBase(BaseModel):
     create_date: Optional[datetime]
     active: Optional[bool]
     value_id: int
-    # value: Value
     class Config:
         orm_mode = True
 
 class ElCriteriaHasCriterion(ElCriteriaHasCriterionBase):
     id: int
-#    criterion: CriterionBase
 
-class ElCriteriaHasCriterionCreate(ElCriteriaHasCriterionBase):
-    pass
+class ElCriteriaHasCriterionCreate(BaseModel):
+    echcs: Sequence[ElCriteriaHasCriterionBase]
 
 class ElCriteriaHasCriterionSearchResults(BaseModel):
     results: Sequence[ElCriteriaHasCriterion]

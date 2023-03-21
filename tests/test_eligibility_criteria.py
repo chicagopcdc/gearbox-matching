@@ -41,20 +41,12 @@ def test_build_ec(setup_database, client):
     ec = full_res['results']
     ec_compare = ec_compare['results']
 
-    print(f"IN BUILD TEST EC: {ec}")
-    print(f"IN BUILD TEST EC compare: {ec_compare}")
-
     diff = []
     for i in range (len(ec_compare)):
-        try:
-            ec_diff = DeepDiff(ec[i], ec_compare[i], ignore_order=True)
-            if ec_diff:
-                diff.append(ec_diff)
-        except Exception as e:
-            print(f"DIFF EXCEPTION: {e}")
+        ec_diff = DeepDiff(ec[i], ec_compare[i], ignore_order=True)
+        if ec_diff:
+            diff.append(ec_diff)
 
-    #print(f"DIFF: {type(diff)}")
-    #print(f"DIFF: {diff}")
     assert not diff, "differences occurred: \n{}".format("\n".join(diff))            
 
 def test_get_ec(setup_database, client):
