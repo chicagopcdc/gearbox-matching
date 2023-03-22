@@ -39,9 +39,7 @@ async def save_sae(
     """
     Comments:
     """
-    print(f"ROUTER 1")
     new_ae = await study_algorithm_engine.create(session=session, study_algorithm_engine=body)
-    print(f"ROUTER 2")
     return new_ae
 
 def init_app(app):

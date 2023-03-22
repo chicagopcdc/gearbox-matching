@@ -41,7 +41,6 @@ async def save_object(
     """
     Comments:
     """
-    print(f"HERE IN ROUTER... {type(body)}")
     new_el_criteria_has_criterion = await el_criteria_has_criterion_service.create_el_criteria_has_criterion(session=session, el_criteria_has_criterion=body)
     return new_el_criteria_has_criterion
 

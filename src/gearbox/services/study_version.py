@@ -45,28 +45,12 @@ async def get_study_versions(session: Session) -> StudyVersionSearchResults:
 
 async def create_study_version(session: Session, study_version: StudyVersionCreate) -> StudyVersionSchema:
 
-    print("HERE IN CREATE STUDY VERSION 1")
     # find
     study_version.study_version = await get_latest_study_version(session, study_version.study_id) + 1
     # set others to inactive if incoming is active
     if study_version.active:
         reset_active = await reset_active_status(session, study_version.study_id)
-
-    print(f"HERE IN CREATE STUDY VERSION 2 TYPE study_version: {type(study_version)}")
     new_study_version = await study_version_crud.create(db=session, obj_in=study_version)
-    print("HERE IN CREATE STUDY VERSION 3")
-
-    # create study_agorithm_engine for study version
-
-    # get id from aes
-    # create...
-    # study_version_id = new_study_version.id
-    # print(f"STUDY VERSION ID: {study_version_id}")
-    # study_version.study_algorithm_engine.study_version_id = study_version_id
-    # sae = await study_algorithm_engine_service.create(session, study_version.study_algorithm_engine)
-    # add study_algorithm_engine to StudyVersionSchema (schemas/StudyVersion) 
-    # new_study_version.study_algorithm_engine = sae
-    # print("STUDY VERSION SERVICE JUST BEFORE COMMIT")
 
     await session.commit() 
     return new_study_version

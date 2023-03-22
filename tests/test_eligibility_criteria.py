@@ -76,6 +76,4 @@ def test_create_el_criteria_has_criterion(setup_database, client, data):
     full_res = resp.json()
     new_ec_id = full_res['id']
 
-    print(f"NEW ID: {new_ec_id}")
-
     assert str(resp.status_code).startswith("20")

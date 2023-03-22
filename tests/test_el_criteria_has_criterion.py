@@ -53,8 +53,6 @@ def test_create_el_criteria_has_criterion(setup_database, client, data):
     """
     Test create el_criteria_has_criterion
     """
-    print(f"IN TEST DATA TYPE: {type(data)}")
-    print(f"IN TEST DATA TYPE: {data}")
     fake_jwt = "1.2.3"
     resp = client.post("/el-criteria-has-criterion", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
@@ -135,6 +133,3 @@ def test_get_el_criteria_has_criterion(setup_database, client):
     fake_jwt = "1.2.3"
     resp = client.get("/el-criteria-has-criterion/1", headers={"Authorization": f"bearer {fake_jwt}"})
     assert resp.status_code == 200
-
-
-# TO DO: create test for violating unique constraint
