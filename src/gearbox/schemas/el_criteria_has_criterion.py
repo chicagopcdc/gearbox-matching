@@ -5,7 +5,6 @@ from .value import Value
 from .input_type import InputType
 
 class ElCriteriaHasCriterionBase(BaseModel):
-    # id: int
     criterion_id: int
     eligibility_criteria_id: int
     create_date: Optional[datetime]
