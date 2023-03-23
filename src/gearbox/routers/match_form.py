@@ -1,7 +1,7 @@
 from gearbox import config
 from fastapi import APIRouter
 from fastapi import APIRouter 
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import Request, Depends 
 from fastapi.security import HTTPBearer
 from gearbox.services import match_form as match_form_service

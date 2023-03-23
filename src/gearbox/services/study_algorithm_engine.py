@@ -4,7 +4,7 @@ from fastapi.encoders import jsonable_encoder
 
 from gearbox.models.study_algorithm_engine import StudyAlgorithmEngine
 from . import logger
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy import select, exc
 from fastapi import HTTPException
 from gearbox.models import ElCriteriaHasCriterion, EligibilityCriteria, StudyVersion, EligibilityCriteriaInfo
