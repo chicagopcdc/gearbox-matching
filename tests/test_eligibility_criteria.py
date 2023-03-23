@@ -31,7 +31,7 @@ def test_build_ec(setup_database, client):
     ecdata_file = './tests/data/eligibilityCriteria.json'
 
     #""" SERIALIZE STUDIES TO COMPARE AGAINST - UNCOMMENT TO WRITE NEW COMPARE DATA
-    #with open(ecdata_file,'w') as comp_file:
+    # with open(ecdata_file,'w') as comp_file:
     #    json.dump(full_res, comp_file)
     #"""
 
@@ -40,6 +40,10 @@ def test_build_ec(setup_database, client):
 
     ec = full_res['results']
     ec_compare = ec_compare['results']
+
+    print(f"EC: {ec}")
+    print("-=================================================")
+    print(f"EC_COMPARE: {ec_compare}")
 
     diff = []
     for i in range (len(ec_compare)):

@@ -36,13 +36,13 @@ from starlette.status import (
             "criterion_id": 10,
             "eligibility_criteria_id": 10,
             "active": True,
-            "value_id": 95 
+            "value_id": 34 
                 },
                 {
             "criterion_id": 1,
             "eligibility_criteria_id": 10,
             "active": True,
-            "value_id": 96 
+            "value_id": 89 
                 },
             ]
         }
