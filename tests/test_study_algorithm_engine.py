@@ -15,7 +15,6 @@ TEST_CREATE_LIST = [
             "algorithm_logic": None,
             "algorithm_version": 1,
             "logic_file": "./tests/data/new_algorithm_logic.json",
-            # "logic_file": "./tests/data/algorithm_logic.json",
             "test": "create_new_study_algorithm_engine"
         },
         {
@@ -97,8 +96,6 @@ def test_create_study_algorithm_engine(setup_database, client, test_create_data,
             ael = db_session.execute(stmt).first()
             if not ael:
                 errors.append(f"ERROR: create_new_study_algorithm_engine test failed to confirm new study_algorithm_engine row created.")
-            #if not ael.active:
-            #    errors.append(f"ERROR: create_new_study_algorithm_engine test failed to set active flag on insert.")
 
             # compare db json against input file
             with open(logic_file, 'r') as comp_file:

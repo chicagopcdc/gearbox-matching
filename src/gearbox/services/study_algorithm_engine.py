@@ -141,7 +141,6 @@ async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineC
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study algorithm logic contains the following invalid ids: {invalid_ids}.")
 
     # Find existing exact duplicate algorithm logic for the study version
-    # MOVE THIS LOGIC - STUDY_VERSION_ID NO LONGER EXISTS IN STUDY_ALGORITHM_ENGINE table
     dup_study_algorithm_engine = await get_existing_algorithm_logic_duplicate(session, study_algorithm_engine.algorithm_logic, study_algorithm_engine.study_version_id)
 
     # if no duplicate is found, determine version and insert new study algorithm engine

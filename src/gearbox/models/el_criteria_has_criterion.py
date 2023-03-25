@@ -18,7 +18,3 @@ class ElCriteriaHasCriterion(Base):
     eligibility_criteria = relationship("EligibilityCriteria", back_populates="el_criteria_has_criterions", lazy="joined")
     criterion = relationship("Criterion", back_populates="el_criteria_has_criterions", lazy="joined")
     value = relationship("Value", back_populates="el_criteria_has_criterions", lazy="joined")
-    #eligibility_criteria = relationship("EligibilityCriteria", back_populates="el_criteria_has_criterion", lazy="joined")
-    #criterion = relationship("Criterion", back_populates="el_criteria_has_criterion", lazy="joined")
-    #value = relationship("Value", back_populates="el_criteria_has_criterion", lazy="joined")
-

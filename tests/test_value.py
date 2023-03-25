@@ -24,7 +24,6 @@ from starlette.status import (
     ]
 )
 @pytest.mark.asyncio
-# def test_create_value(setup_database, client, valid_upload_file_patcher, data):
 def test_create_value(setup_database, client, data):
     """
     Test create value
@@ -55,5 +54,3 @@ def test_get_value(setup_database, client):
     resp = client.get("/value/1", headers={"Authorization": f"bearer {fake_jwt}"})
     assert resp.status_code == 200
 
-
-# TO DO: create test for violating unique constraint

@@ -41,10 +41,6 @@ def test_build_ec(setup_database, client):
     ec = full_res['results']
     ec_compare = ec_compare['results']
 
-    print(f"EC: {ec}")
-    print("-=================================================")
-    print(f"EC_COMPARE: {ec_compare}")
-
     diff = []
     for i in range (len(ec_compare)):
         ec_diff = DeepDiff(ec[i], ec_compare[i], ignore_order=True)
