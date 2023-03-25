@@ -101,15 +101,12 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             return db_obj
         except IntegrityError as e:
             logger.error(f"CREATE CRUD IntegrityError ERROR {e}")
-            print(f"CREATE CRUD IntegrityError ERROR {e}")
             raise HTTPException(status.HTTP_409_CONFLICT, f"INTEGRITY SQL ERROR: {type(e)}: {e}")
         except exc.SQLAlchemyError as e:
             logger.error(f"CREATE CRUD SQLAlchemyError ERROR {e}")
-            print(f"CREATE CRUD SQLAlchemyError ERROR {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
         except Exception as e:
             logger.error(f"CREATE CRUD OTHER ERROR {e}")
-            print(f"CREATE CRUD OTHER ERROR {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"OTHER ERROR: {type(e)}: {e}")        
 
 
