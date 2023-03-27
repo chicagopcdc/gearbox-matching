@@ -47,7 +47,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     async def get( self, db: Session, id: int, active: bool = None ) -> ModelType:
 
         stmt = select(self.model).where(self.model.id == id)
-
         if active != None: 
             if 'active' not in self.model.__fields__.keys():
                 raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{self.model.__tablename__} does not inlude 'active' attribute")        
@@ -112,6 +111,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
 
     async def set_active(self, db: Session, id: int, active: bool) -> ModelType: 
+        # add method to find current active and set to opposite of 'active' parameter
         if not 'active' in self.model.__fields__.keys():
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{self.model.__tablename__} does not inlude 'active' attribute")        
 

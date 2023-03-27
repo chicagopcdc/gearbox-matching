@@ -11,30 +11,31 @@ from sqlalchemy import select
 TEST_CREATE_LIST = [
         {
             "study_version_id": 7,
+            "eligibility_criteria_id": 7,
             "algorithm_logic": None,
             "algorithm_version": 1,
-            "active": True,
             "logic_file": "./tests/data/new_algorithm_logic.json",
             "test": "create_new_study_algorithm_engine"
         },
         {
             "study_version_id": 9999,
+            "eligibility_criteria_id": 1,
             "algorithm_logic": None,
             "algorithm_version": 1,
-            "active": True,
             "logic_file": "./tests/data/new_algorithm_logic.json",
             "test": "invalid_study_version"
         },
         {
             "study_version_id": 1,
+            "eligibility_criteria_id": 1,
             "algorithm_logic": None,
             "algorithm_version": 2,
-            "active": True,
             "logic_file": "./tests/data/algorithm_logic.json",
             "test": "duplicate_logic"
         },
         {
             "study_version_id": 1,
+            "eligibility_criteria_id": 1,
             "algorithm_logic": None,
             "algorithm_version": 1,
             "active": True,
@@ -43,13 +44,13 @@ TEST_CREATE_LIST = [
         },
         {
             "study_version_id": 1,
+            "eligibility_criteria_id": 1,
             "algorithm_logic": None,
             "algorithm_version": 1,
             "active": True,
             "logic_file": "./tests/data/algorithm_logic_invalid_schema.json",
             "test":"invalid_logic"
         }
-
 ]
 
 @pytest.mark.parametrize('test_create_data',TEST_CREATE_LIST)
@@ -65,8 +66,8 @@ def test_create_study_algorithm_engine(setup_database, client, test_create_data,
     """
     data = {
         "study_version_id": test_create_data['study_version_id'],
+        "eligibility_criteria_id": test_create_data['eligibility_criteria_id'],
         "algorithm_version": test_create_data['algorithm_version'],
-        "active": test_create_data['active'],
     }
 
     logic_file = test_create_data['logic_file']
@@ -91,12 +92,10 @@ def test_create_study_algorithm_engine(setup_database, client, test_create_data,
             Session = sessionmaker(bind=connection)
             db_session = Session()
 
-            stmt = select(StudyAlgorithmEngine.algorithm_logic, StudyAlgorithmEngine.active, StudyAlgorithmEngine.id, StudyAlgorithmEngine.study_version_id).where(StudyAlgorithmEngine.id == new_ae_id)
+            stmt = select(StudyAlgorithmEngine.algorithm_logic, StudyAlgorithmEngine.id).where(StudyAlgorithmEngine.id == new_ae_id)
             ael = db_session.execute(stmt).first()
             if not ael:
                 errors.append(f"ERROR: create_new_study_algorithm_engine test failed to confirm new study_algorithm_engine row created.")
-            if not ael.active:
-                errors.append(f"ERROR: create_new_study_algorithm_engine test failed to set active flag on insert.")
 
             # compare db json against input file
             with open(logic_file, 'r') as comp_file:
@@ -104,7 +103,6 @@ def test_create_study_algorithm_engine(setup_database, client, test_create_data,
             if not ae_logic_json == ael.algorithm_logic:
                 errors.append(f"ERROR: create_new_study_algorithm_engine test db algorithm_logic does not match input data.")
             db_session.close()
-
         except Exception as e:
             errors.append(f"SQL ERROR: create_new_study_algorithm_engine: {e}")
 
@@ -131,12 +129,10 @@ def test_create_study_algorithm_engine(setup_database, client, test_create_data,
             Session = sessionmaker(bind=connection)
             db_session = Session()
 
-            stmt = select(StudyAlgorithmEngine.algorithm_logic, StudyAlgorithmEngine.active, StudyAlgorithmEngine.id, StudyAlgorithmEngine.study_version_id).where(StudyAlgorithmEngine.id == new_ae_id)
+            stmt = select(StudyAlgorithmEngine.algorithm_logic, StudyAlgorithmEngine.id).where(StudyAlgorithmEngine.id == new_ae_id)
             ael = db_session.execute(stmt).first()
             if not ael:
                 errors.append(f"ERROR: duplicate_logic test failed to confirm new study_algorithm_engine row created.")
-            if not ael.active:
-                errors.append(f"ERROR: duplicate_logic test failed to set active flag on duplicate insert.")
 
             # compare db json against input file
             with open(logic_file, 'r') as comp_file:

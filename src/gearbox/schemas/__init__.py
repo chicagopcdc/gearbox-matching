@@ -1,7 +1,7 @@
 from .saved_input import SavedInputSearchResults, SavedInput, SavedInputCreate, SavedInputPost
 from .site import SiteSearchResults, SiteCreate, Site
 from .site_has_study import SiteHasStudySearchResults, SiteHasStudyCreate, SiteHasStudy
-from .study_algorithm_engine import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSearchResults, StudyAlgorithmEngineUpdate, StudyAlgorithmEngine
+from .study_algorithm_engine import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSearchResults, StudyAlgorithmEngineUpdate, StudyAlgorithmEngine, StudyAlgorithmEngineCreateInput
 from .value import Value, ValueSearchResults, ValueCreate
 from .display_rules import DisplayRules, DisplayRulesSearchResults, DisplayRulesCreate
 from .triggered_by import TriggeredBy, TriggeredByCreate, TriggeredBySearchResults
@@ -10,11 +10,12 @@ from .criterion_has_tag import CriterionHasTag, CriterionHasTagCreate, Criterion
 from .criterion_has_value import CriterionHasValue, CriterionHasValueCreate, CriterionHasValueSearchResults
 from .study_response import StudyResponseSearchResults, StudyResponse
 from .eligibility_criteria_response import EligibilityCriteriaResponse
-from .eligibility_criteria import EligibilityCriteriaCreate, EligibilityCriteriaSearchResults
+from .eligibility_criteria import EligibilityCriteriaCreate, EligibilityCriteriaSearchResults, EligibilityCriteria
+from .eligibility_criteria_info import EligibilityCriteriaInfoCreate, EligibilityCriteriaInfoSearchResults, EligibilityCriteriaInfo
 from .criterion import CriterionCreate, CriterionSearchResults, CriterionCreateIn, Criterion
 from .input_type import InputTypeCreate, InputTypeSearchResults, InputType
 from .ontology_code import OntologyCodeCreate, OntologyCodeSearchResults, OntologyCode
-from .el_criteria_has_criterion import ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterionCreate
+from .el_criteria_has_criterion import ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterionCreate, ElCriteriaHasCriterion
 from .algorithm_engine import AlgorithmResponse
 from .study import StudySearchResults, StudyCreate, Study
 from .study_link import StudyLinkSearchResults, StudyLinkCreate, StudyLink

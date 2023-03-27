@@ -26,11 +26,9 @@ algorithm_logic_schema = {
 }       
 
 class StudyAlgorithmEngineBase(BaseModel):
-    study_version_id: int
     start_date: Optional[datetime]
     algorithm_logic: Union[Json[Any],Dict]
     algorithm_version: Optional[int]
-    active: bool
 
     @validator('algorithm_logic')
     def check_valid_vs_schema(cls, v):
@@ -55,7 +53,16 @@ class StudyAlgorithmEngineBase(BaseModel):
 class StudyAlgorithmEngine(StudyAlgorithmEngineBase):
     id: int
 
+class StudyAlgorithmEngineCreateInput(StudyAlgorithmEngineBase):
+    # used to validate the logic ids against the set of eligibility-criteria ids
+    # in the el_criteria_has_criterion table
+    eligibility_criteria_id: int
+    study_version_id: int
+    pass
+
 class StudyAlgorithmEngineCreate(StudyAlgorithmEngineBase):
+    # used to validate the logic ids against the set of eligibility-criteria ids
+    # in the el_criteria_has_criterion table
     pass
 
 class StudyAlgorithmEngineUpdate(BaseModel):

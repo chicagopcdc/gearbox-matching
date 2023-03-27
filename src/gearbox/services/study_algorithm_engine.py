@@ -1,17 +1,18 @@
 import json
 from datetime import datetime
+from fastapi.encoders import jsonable_encoder
 
 from gearbox.models.study_algorithm_engine import StudyAlgorithmEngine
 from . import logger
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy import select, exc
 from fastapi import HTTPException
-from gearbox.models import ElCriteriaHasCriterion, EligibilityCriteria, StudyVersion
+from gearbox.models import ElCriteriaHasCriterion, EligibilityCriteria, StudyVersion, EligibilityCriteriaInfo
 from gearbox.schemas import StudyAlgorithmEngine as StudyAlgorithmEngineSchema
-from gearbox.schemas import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSearchResults
+from gearbox.schemas import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSearchResults, StudyAlgorithmEngineCreateInput
 from sqlalchemy.sql.functions import func
 from gearbox.util import status, json_utils
-from gearbox.crud import study_algorithm_engine_crud
+from gearbox.crud import study_algorithm_engine_crud, eligibility_criteria_info_crud
 
 async def get_study_algorithm_engine(session: Session, id: int) -> StudyAlgorithmEngineSchema:
     aes = await study_algorithm_engine_crud.get(session, id)
@@ -21,24 +22,16 @@ async def get_study_algorithm_engines(session: Session) -> StudyAlgorithmEngineS
     aes = await study_algorithm_engine_crud.get_multi(session)
     return aes
 
-async def create_study_algorithm_engine(session: Session, study_algorithm_engine: StudyAlgorithmEngineCreate) -> StudyAlgorithmEngineSchema:
+async def create_study_algorithm_engine(session: Session, study_algorithm_engine: StudyAlgorithmEngineCreateInput) -> StudyAlgorithmEngineSchema:
 
-    new_ae = await study_algorithm_engine_crud.create(db=session, obj_in=study_algorithm_engine)
+    sae_input_conv = jsonable_encoder(study_algorithm_engine)
+    sae_create = {key:value for key,value in sae_input_conv.items() if key in StudyAlgorithmEngineCreate.__fields__.keys() }
+
+    new_ae = await study_algorithm_engine_crud.create(db=session, obj_in=sae_create)
     await session.commit()    
     return new_ae
 
-async def check_study_version_id_exists(session: Session, study_version_id_in: int):
-    try:
-        result = await session.execute(select(StudyVersion.id).
-            where(StudyVersion.id == study_version_id_in))
-        study_version_id = result.scalar_one()
-    except exc.SQLAlchemyError as e:
-        logger.error(f"SQL ERROR IN check_study_version_id method: {e}")
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
-
-    return True if study_version_id else False
-
-async def get_invalid_logic_ids(session: Session, algorithm_logic: str, study_version_id: int) -> list:
+async def get_invalid_logic_ids(session: Session, algorithm_logic: str, eligibility_criteria_id: int) -> list:
     """
     description:
         The purpose of this function is to QC the el_criteria_has_criterion ids
@@ -58,12 +51,13 @@ async def get_invalid_logic_ids(session: Session, algorithm_logic: str, study_ve
     try:
         result = await session.execute(select(ElCriteriaHasCriterion.id)
             .join(ElCriteriaHasCriterion.eligibility_criteria)
-            .where(EligibilityCriteria.study_version_id == study_version_id)
+            .where(EligibilityCriteria.id == eligibility_criteria_id)
+            .where(ElCriteriaHasCriterion.active == True)
         )
         db_el_criteria_has_criterion_ids = result.unique().scalars().all()
         input_el_criteria_has_criterion_ids = json_utils.json_extract_ints(algorithm_logic, 'criteria')
 
-    # items that exist in input_el_criteria_has_criterion_ids but not in db_el_criteria_has_criterion_ids
+        # items that exist in input_el_criteria_has_criterion_ids but not in db_el_criteria_has_criterion_ids
         return list(set(input_el_criteria_has_criterion_ids).difference(db_el_criteria_has_criterion_ids))
 
     except exc.SQLAlchemyError as e:
@@ -74,8 +68,10 @@ async def get_invalid_logic_ids(session: Session, algorithm_logic: str, study_ve
 async def get_latest_algorithm_version(session: Session, study_version_id: int) -> int:
     try:
         result = await session.execute(select(func.max(StudyAlgorithmEngine.algorithm_version))
-            .where(StudyAlgorithmEngine.study_version_id == study_version_id)
+            .join(StudyAlgorithmEngine.eligibility_criteria_info)
+            .where(EligibilityCriteriaInfo.study_version_id == study_version_id)
         )
+
         latest_algorithm_version = result.scalar_one()
     except exc.SQLAlchemyError as e:
         logger.error(f"SQL ERROR IN get_latest_algorithm_version method: {e}")
@@ -97,9 +93,16 @@ async def get_existing_algorithm_logic_duplicate(session: Session, algorithm_log
     """
     try:
 
-        result = await session.execute(select(StudyAlgorithmEngine)
-            .where(StudyAlgorithmEngine.study_version_id == study_version_id)
+        result = await session.execute(
+            select(StudyAlgorithmEngine)
+                .where(StudyAlgorithmEngine.id.in_(
+                        select(EligibilityCriteriaInfo.study_algorithm_engine_id)
+                                .where(EligibilityCriteriaInfo.study_version_id == study_version_id)
+                        )
+                )
         )
+        
+
         # * SQLAlchemy note * scalars().all() returns a list of db model types 
         # just .all() returns a list of SQLAlchemy row type 
         existing_algorithms = result.scalars().all()
@@ -120,23 +123,20 @@ async def get_existing_algorithm_logic_duplicate(session: Session, algorithm_log
 
 async def reset_active_status(session: Session, study_version_id: int) -> bool:
     # set all rows related to the study_version to false
-    sae_to_update = await study_algorithm_engine_crud.get_multi(
+    eci_to_update = await eligibility_criteria_info_crud.get_multi(
         db=session, 
         active=False, 
-        where=[f"study_algorithm_engine.study_version_id = {study_version_id}"]
+        where=[f"eligibility_criteria_info.study_version_id = {study_version_id}"]
     )
-    for sae in sae_to_update:
+    for sae in eci_to_update:
         # set all to false
-        await study_algorithm_engine_crud.update(db=session, db_obj=sae, obj_in={"active":False})
+        await eligibility_criteria_info_crud.update(db=session, db_obj=sae, obj_in={"active":False})
     return True
     
 async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineCreate) -> StudyAlgorithmEngine:
-    # Check if study version on incoming algorithm engine exists in the db
-    if not await check_study_version_id_exists(session, study_algorithm_engine.study_version_id):
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study_version {study_algorithm_engine.study_version_id} does not exist.")
 
     # Check el_criteria_has_criterion ids in incoming algoritm engine exist in the db
-    invalid_ids = await get_invalid_logic_ids(session, study_algorithm_engine.algorithm_logic, study_algorithm_engine.study_version_id) 
+    invalid_ids = await get_invalid_logic_ids(session, study_algorithm_engine.algorithm_logic, study_algorithm_engine.eligibility_criteria_id) 
     if invalid_ids:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study algorithm logic contains the following invalid ids: {invalid_ids}.")
 

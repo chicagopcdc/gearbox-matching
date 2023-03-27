@@ -1,4 +1,3 @@
-from .study import Study
 from .base_class import Base
 
 from .saved_input import SavedInput
@@ -21,6 +20,7 @@ from .study import Study
 from .tag import Tag
 from .triggered_by import TriggeredBy
 from .value import Value
+from .eligibility_criteria_info import EligibilityCriteriaInfo
 
 # from sqlalchemy.ext.declarative import declarative_base
 # from app.main import DbSession
