@@ -17,6 +17,7 @@ class EligibilityCriteriaInfo(EligibilityCriteriaInfoBase):
     id: int
 
 class EligibilityCriteriaInfoCreate(EligibilityCriteriaInfoBase):
+    study_version_id: Optional[int]
     pass
 
 class EligibilityCriteriaInfoSearchResults(BaseModel):

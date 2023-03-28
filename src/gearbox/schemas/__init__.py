@@ -15,10 +15,11 @@ from .eligibility_criteria_info import EligibilityCriteriaInfoCreate, Eligibilit
 from .criterion import CriterionCreate, CriterionSearchResults, CriterionCreateIn, Criterion
 from .input_type import InputTypeCreate, InputTypeSearchResults, InputType
 from .ontology_code import OntologyCodeCreate, OntologyCodeSearchResults, OntologyCode
-from .el_criteria_has_criterion import ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterionCreate, ElCriteriaHasCriterion
+from .el_criteria_has_criterion import ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterionCreate, ElCriteriaHasCriterion, ElCriteriaHasCriterions
 from .algorithm_engine import AlgorithmResponse
 from .study import StudySearchResults, StudyCreate, Study
 from .study_link import StudyLinkSearchResults, StudyLinkCreate, StudyLink
 from .study_version import StudyVersionSearchResults, StudyVersionCreate, StudyVersion
 from .eligibility_criteria_response import EligibilityCriteriaResponseResults
 from .match_form import MatchForm
+from .study_version_eligibility_criteria import StudyVersionEligibilityCriteriaCreate, StudyVersionEligibilityCriteria

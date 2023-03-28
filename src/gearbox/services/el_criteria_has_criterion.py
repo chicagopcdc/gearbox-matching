@@ -1,6 +1,6 @@
 from . import logger
 from gearbox.crud import el_criteria_has_criterion_crud
-from gearbox.schemas import ElCriteriaHasCriterionCreate, ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterion as ElCriteriaHasCriterionSchema
+from gearbox.schemas import ElCriteriaHasCriterionCreate, ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterion as ElCriteriaHasCriterionSchema, ElCriteriaHasCriterions
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy import select
 from fastapi import HTTPException
@@ -54,12 +54,15 @@ async def find_duplicates_exist_in_db(session: Session, el_criteria_has_criterio
         logger.error(f"Following duplicate key values violate unique constraint on table EL_CRITERIA_HAS_CRITERION: {duplicates}")
         raise HTTPException(status.HTTP_409_CONFLICT, f"Following duplicate key values violate unique constraint on table EL_CRITERIA_HAS_CRITERION: {duplicates}")
 
-async def create_el_criteria_has_criterion(session: Session, el_criteria_has_criterion: ElCriteriaHasCriterionCreate) -> ElCriteriaHasCriterionSchema:
+# async def create_el_criteria_has_criterion(session: Session, el_criteria_has_criterion: ElCriteriaHasCriterionCreate) -> ElCriteriaHasCriterionSearchResults:
+async def create_el_criteria_has_criterion(session: Session, el_criteria_has_criterion: ElCriteriaHasCriterionCreate) -> ElCriteriaHasCriterions:
     dupes = await find_duplicates_exist_in_db(session, el_criteria_has_criterion)
+    echc_returned = []
     for echc in el_criteria_has_criterion.echcs:
         new_el_criteria_has_criterion = await el_criteria_has_criterion_crud.create(db=session, obj_in=echc)
+        echc_returned.append(new_el_criteria_has_criterion)
     await session.commit() 
-    return new_el_criteria_has_criterion
+    return echc_returned
 
 async def update_el_criteria_has_criterion(session: Session, el_criteria_has_criterion: ElCriteriaHasCriterionCreate, el_criteria_has_criterion_id: int) -> ElCriteriaHasCriterionSchema:
     el_criteria_has_criterion_in = await el_criteria_has_criterion_crud.get(db=session, id=el_criteria_has_criterion_id)

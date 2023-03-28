@@ -65,9 +65,9 @@ def test_get_ec(setup_database, client):
 )
 @pytest.mark.asyncio
 # def test_create_el_criteria_has_criterion(setup_database, client, valid_upload_file_patcher, data):
-def test_create_el_criteria_has_criterion(setup_database, client, data):
+def test_eligibility_criteria(setup_database, client, data):
     """
-    Test create el_criteria_has_criterion
+    Test create eligibility_criteria
     """
     fake_jwt = "1.2.3"
     resp = client.post("/eligibility-criteria", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
