@@ -23,3 +23,4 @@ from .study_version import StudyVersionSearchResults, StudyVersionCreate, StudyV
 from .eligibility_criteria_response import EligibilityCriteriaResponseResults
 from .match_form import MatchForm
 from .study_version_eligibility_criteria import StudyVersionEligibilityCriteriaCreate, StudyVersionEligibilityCriteria
+from .study_version_study_algorithm import StudyVersionStudyAlgorithm, StudyVersionStudyAlgorithmCreate

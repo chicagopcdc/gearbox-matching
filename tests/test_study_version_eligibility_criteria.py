@@ -9,7 +9,7 @@ from .test_utils import is_aws_url
             "study_version": 
             {
                 "study_id": 1,
-                "active": True
+                "active": False
             },
             "eligibility_criteria": 
             {
@@ -53,8 +53,8 @@ from .test_utils import is_aws_url
             },
             "eligibility_criteria_info":
             {
-                "active": True,
-                "study_version_id": 1,
+                "active": False,
+                #"study_version_id": 1,
                 "study_algorithm_engine_id": 1,
                 "eligibility_criteria_id": 1
             }

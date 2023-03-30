@@ -20,7 +20,7 @@ def test_get_eligibility_criteria_infos(setup_database, client):
             "active": True,
             "study_version_id": 1,
             "study_algorithm_engine_id": 1,
-            "eligibility_criteria_id": 1
+            "eligibility_criteria_id": 7
         }
     ]
 )
