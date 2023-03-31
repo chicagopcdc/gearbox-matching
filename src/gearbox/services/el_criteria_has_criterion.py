@@ -16,6 +16,9 @@ async def get_el_criteria_has_criterions(session: Session) -> ElCriteriaHasCrite
     return ecs
     pass
 
+# TO DO: add endpoint to fetch all el_criteria_has_criterions for a particular eligibility_criteria_id
+# get_multi with the where parameter
+
 async def find_duplicates_exist_in_db(session: Session, el_criteria_has_criterion: ElCriteriaHasCriterionCreate):
 
     echcs_in = el_criteria_has_criterion.echcs

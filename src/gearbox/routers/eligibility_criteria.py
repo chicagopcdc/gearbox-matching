@@ -17,7 +17,7 @@ from gearbox.admin_login import admin_required
 mod = APIRouter()
 
 # get eligibility-criteria set for the front end
-@mod.get("/eligibility-criteria-set", dependencies=[Depends(auth.authenticate)] )
+@mod.get("/eligibility-criteria", dependencies=[Depends(auth.authenticate)] )
 async def get_ec(
     request: Request,
     session: Session = Depends(deps.get_session),
@@ -27,7 +27,7 @@ async def get_ec(
     return JSONResponse(presigned_url, status.HTTP_200_OK) 
 
 # build and return eligibility-criteria set for the front end
-@mod.post("/build-eligibility-criteria-set", status_code=status.HTTP_200_OK, response_model=EligibilityCriteriaResponseResults, dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
+@mod.post("/build-eligibility-criteria", status_code=status.HTTP_200_OK, response_model=EligibilityCriteriaResponseResults, dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
 async def build_eligibility_criteria(
     request: Request,
     session: Session = Depends(deps.get_session),
@@ -40,13 +40,15 @@ async def build_eligibility_criteria(
 
     return { "results" :list(eligibility_criteria) }
 
+"""
 @mod.get("/eligibility-criteria", response_model=EligibilityCriteriaSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
 async def get_eligibility_criteria(
     request: Request,
     session: Session = Depends(deps.get_session),
 ):
-    eligibility_criteria = await ec.get_values(session=session)
+    eligibility_criteria = await ec.get_eligibility_criteria(session=session)
     return { "results" :list(eligibility_criteria) }
+"""
 
 @mod.post("/eligibility-criteria", response_model=EligibilityCriteria, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
@@ -61,6 +63,5 @@ async def save_object(
     return new_eligibility_criteria
 
 def init_app(app):
-    app.include_router(mod, tags=["build_eligibility_criteria_set"])
-    app.include_router(mod, tags=["eligibility_criteria_set"])
+    app.include_router(mod, tags=["build_eligibility_criteria"])
     app.include_router(mod, tags=["eligibility_criteria"])

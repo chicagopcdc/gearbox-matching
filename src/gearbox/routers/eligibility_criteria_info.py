@@ -15,6 +15,12 @@ from gearbox.admin_login import admin_required
 
 mod = APIRouter()
 
+# ADD ROUTER TO FETCH ALL eligibility_criteria_info FOR A GIVEN STUDY
+# THIS IS FOR THE FE TO MATCH study_algorithm_engines TO study_versions
+# AND eligibility_criteria - ENDPOINT SHOULD RETURN:
+# study, study_version, eligibility_criteria, all el_criteria_has_criterion ROWS
+# (and study_algorithm_engine data if exists)
+
 @mod.get("/eligibility-criteria-info/{eligibility_criteria_info_id}", response_model=EligibilityCriteriaInfoSchema, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)] )
 async def get_eligibility_criteria_info(
     request: Request,

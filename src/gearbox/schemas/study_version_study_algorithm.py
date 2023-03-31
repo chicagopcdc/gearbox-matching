@@ -1,15 +1,15 @@
-from gearbox.schemas import StudyVersionCreate, StudyAlgorithmEngineCreateInput
+from gearbox.schemas import StudyAlgorithmEngineCreateInput, StudyAlgorithmEngineCreate, StudyAlgorithmEngine
 from pydantic import BaseModel
 
 class StudyVersionStudyAlgorithmBase(BaseModel):
-    eligibility_criteria_info_id: int
     study_algorithm_engine: StudyAlgorithmEngineCreateInput
 
 class StudyVersionStudyAlgorithmCreate(StudyVersionStudyAlgorithmBase):
-    pass
+    eligibility_criteria_info_id: int
 
 class StudyVersionStudyAlgorithm(StudyVersionStudyAlgorithmBase):
-    pass
-
+    # study_algorithm_engine: StudyAlgorithmEngineCreate
+    eligibility_criteria_info_id: int
+    study_algorithm_engine: StudyAlgorithmEngine
 
 StudyVersionStudyAlgorithm, StudyVersionStudyAlgorithmCreate

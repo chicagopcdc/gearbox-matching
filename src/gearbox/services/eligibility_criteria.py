@@ -76,6 +76,5 @@ async def get_eligibility_criteria_set(session):
                 eligibility_criteria.append(f)
     else:
         eligibility_criteria = []
-    
 
     return eligibility_criteria
