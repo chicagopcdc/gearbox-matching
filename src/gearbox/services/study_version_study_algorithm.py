@@ -26,10 +26,9 @@ async def create_study_version_study_algorithm(session: Session, study_version_s
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")
 
     # add eligibility_criteria_id to study_version_study_algorithm
+
     study_version_study_algorithm.study_algorithm_engine.eligibility_criteria_id = eligibility_criteria_id
     new_study_algorithm_engine = await study_algorithm_engine_service.create(session=session, study_algorithm_engine=study_version_study_algorithm.study_algorithm_engine)
-
-    print(f"IN SERVICE NEW STUDY ALGO ENG TYPE: {type(new_study_algorithm_engine)}")
 
     # update eligibility_criteria_info with study_algorithm_engine.id and set to active
     ecii_upd = {

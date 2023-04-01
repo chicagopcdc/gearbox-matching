@@ -2,6 +2,8 @@ import pytest
 from sqlalchemy.orm import sessionmaker 
 from gearbox.models import StudyVersion
 from .test_utils import is_aws_url
+from sqlalchemy import select, exc
+from gearbox.models import StudyAlgorithmEngine, EligibilityCriteriaInfo
 
 @pytest.mark.parametrize(
     "data", [ 
@@ -19,7 +21,7 @@ from .test_utils import is_aws_url
         }
     ]
 )
-def test_create_study_version_eligibility_criteria(setup_database, client, data, connection):
+def test_create_study_version_study_algorithm(setup_database, client, data, connection):
     fake_jwt = "1.2.3"
 
     logic_file = "./tests/data/new_algorithm_logic.json"
@@ -30,3 +32,30 @@ def test_create_study_version_eligibility_criteria(setup_database, client, data,
 
     resp = client.post("/study-version-study-algorithm", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
+    full_res = resp.json()
+
+    new_study_algorithm_engine_id = full_res['study_algorithm_engine']['id']
+    new_eligibility_criteria_info_id = full_res['eligibility_criteria_info_id']
+
+    errors = []
+
+    # verify db changes
+    try:
+        Session = sessionmaker(bind=connection)
+        db_session = Session()
+
+        # verify study_algorithm_engine row created
+        stmt = select(StudyAlgorithmEngine).where(StudyAlgorithmEngine.id == new_study_algorithm_engine_id)
+        nsae = db_session.execute(stmt).first()
+        if not nsae:
+            errors.append(f"ERROR: create_new_study_version_study_algorithm test failed to confirm new study_algorithm_engine row created.")
+
+        # verify eligibility_criteria_info row created
+        stmt = select(EligibilityCriteriaInfo).where(EligibilityCriteriaInfo.study_algorithm_engine_id == new_study_algorithm_engine_id)
+        updated_eci = db_session.execute(stmt).first()
+        if not updated_eci:
+            errors.append(f"ERROR: create_new_study_version_study_algorithm test failed to confirm updated eligibility_criteria_info row.")
+
+        db_session.close()
+    except Exception as e:
+        errors.append(f"SQL ERROR: create_new_study_version_study_algorithm: {e}")

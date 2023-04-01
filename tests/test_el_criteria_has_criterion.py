@@ -18,31 +18,31 @@ from starlette.status import (
             "criterion_id": 10,
             "eligibility_criteria_id": 10,
             "active": True,
-            "value_id": 91
+            "value_id": 40
                 },
                 {
             "criterion_id": 10,
             "eligibility_criteria_id": 10,
             "active": True,
-            "value_id": 92
+            "value_id": 41 
                 },
                 {
             "criterion_id": 10,
             "eligibility_criteria_id": 10,
             "active": True,
-            "value_id": 93 
+            "value_id": 42 
                 },
                 {
             "criterion_id": 10,
             "eligibility_criteria_id": 10,
             "active": True,
-            "value_id": 34 
+            "value_id": 43 
                 },
                 {
             "criterion_id": 1,
             "eligibility_criteria_id": 10,
             "active": True,
-            "value_id": 89 
+            "value_id": 44 
                 },
             ]
         }

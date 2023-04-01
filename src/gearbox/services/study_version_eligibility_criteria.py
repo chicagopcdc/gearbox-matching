@@ -4,7 +4,6 @@ from gearbox.schemas import StudyVersionEligibilityCriteriaCreate, StudyVersionE
 from gearbox.services import study_version as study_version_service, eligibility_criteria as eligibility_criteria_service, el_criteria_has_criterion as el_criteria_has_criterion_service, eligibility_criteria_info as eligibility_criteria_info_service
 
 async def create_study_version_eligibility_criteria(session: Session, study_version_eligibility_criteria: StudyVersionEligibilityCriteriaCreate) -> StudyVersionEligibilityCriteriaSchema:
-
     new_study_version = await study_version_service.create_study_version(session, study_version_eligibility_criteria.study_version) 
     new_eligibility_criteria = await eligibility_criteria_service.create_eligibility_criteria(session, study_version_eligibility_criteria.eligibility_criteria) 
     new_el_criteria_has_criterion = await el_criteria_has_criterion_service.create_el_criteria_has_criterion(session, study_version_eligibility_criteria.el_criteria_has_criterion) 
