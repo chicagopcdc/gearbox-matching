@@ -93,6 +93,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             obj_in_data["create_date"] = datetime.now() if not obj_in_data["create_date"] else obj_in_data["create_date"]
         if "update_date" in obj_in_data.keys():
             obj_in_data["update_date"] = datetime.now() if not obj_in_data["update_date"] else obj_in_data["update_date"]
+        if "start_date" in obj_in_data.keys():
+            obj_in_data["start_date"] = datetime.now() if not obj_in_data["start_date"] else obj_in_data["start_date"]
         
         try:
             db_obj = self.model(**obj_in_data)
@@ -111,11 +113,12 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
 
     async def set_active(self, db: Session, id: int, active: bool) -> ModelType: 
-        # add method to find current active and set to opposite of 'active' parameter
-        if not 'active' in self.model.__fields__.keys():
+        
+        if not 'active' in self.model.__table__.columns.keys():
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{self.model.__tablename__} does not inlude 'active' attribute")        
 
-        upd_obj = db.execute(select (self.model)).where(self.model.id == id)
+        upd_obj = await db.execute(select(self.model).where(self.model.id == id))
+
         if not upd_obj:
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"id: {id} does not exist in {self.model.__tablename__}")        
 
@@ -142,6 +145,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             await db.commit()
             return db_obj
         except IntegrityError as e:
+            logger.error(f"INTEGREITY ERROR IN BASE UPDATE: {e}")
             raise HTTPException(status.HTTP_409_CONFLICT, f"INTEGRITY SQL ERROR: {type(e)}: {e}")
         except exc.SQLAlchemyError as e:
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        

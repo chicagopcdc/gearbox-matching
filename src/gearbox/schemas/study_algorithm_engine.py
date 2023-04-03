@@ -56,13 +56,11 @@ class StudyAlgorithmEngine(StudyAlgorithmEngineBase):
 class StudyAlgorithmEngineCreateInput(StudyAlgorithmEngineBase):
     # used to validate the logic ids against the set of eligibility-criteria ids
     # in the el_criteria_has_criterion table
-    eligibility_criteria_id: int
-    study_version_id: int
+    eligibility_criteria_id: Optional[int]
+    study_version_id: Optional[int]
     pass
 
 class StudyAlgorithmEngineCreate(StudyAlgorithmEngineBase):
-    # used to validate the logic ids against the set of eligibility-criteria ids
-    # in the el_criteria_has_criterion table
     pass
 
 class StudyAlgorithmEngineUpdate(BaseModel):

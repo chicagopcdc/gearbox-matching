@@ -8,7 +8,7 @@ from . import logger
 from gearbox.util import status
 from gearbox.admin_login import admin_required
 
-from gearbox.schemas import ElCriteriaHasCriterionCreate, ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterion
+from gearbox.schemas import ElCriteriaHasCriterionCreate, ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterion, ElCriteriaHasCriterions
 from gearbox.services import el_criteria_has_criterion as el_criteria_has_criterion_service
 from gearbox import deps
 from gearbox import auth 
@@ -32,7 +32,7 @@ async def get_el_criteria_has_criterion(
     ret_el_criteria_has_criterion = await el_criteria_has_criterion_service.get_el_criteria_has_criterion(session=session, id=el_criteria_has_criterion_id)
     return ret_el_criteria_has_criterion
 
-@mod.post("/el-criteria-has-criterion", response_model=ElCriteriaHasCriterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.post("/el-criteria-has-criterion", response_model=ElCriteriaHasCriterions, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
     body: ElCriteriaHasCriterionCreate,
     request: Request,
@@ -42,7 +42,7 @@ async def save_object(
     Comments:
     """
     new_el_criteria_has_criterion = await el_criteria_has_criterion_service.create_el_criteria_has_criterion(session=session, el_criteria_has_criterion=body)
-    return new_el_criteria_has_criterion
+    return { "echcs" :list(new_el_criteria_has_criterion) }
 
 @mod.post("/update-el-criteria-has-criterion/{el_criteria_has_criterion_id}", response_model=ElCriteriaHasCriterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def update_object(

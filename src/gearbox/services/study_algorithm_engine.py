@@ -133,7 +133,7 @@ async def reset_active_status(session: Session, study_version_id: int) -> bool:
         await eligibility_criteria_info_crud.update(db=session, db_obj=sae, obj_in={"active":False})
     return True
     
-async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineCreate) -> StudyAlgorithmEngine:
+async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineCreateInput) -> StudyAlgorithmEngine:
 
     # Check el_criteria_has_criterion ids in incoming algoritm engine exist in the db
     invalid_ids = await get_invalid_logic_ids(session, study_algorithm_engine.algorithm_logic, study_algorithm_engine.eligibility_criteria_id) 

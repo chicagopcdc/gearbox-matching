@@ -19,5 +19,12 @@ class ElCriteriaHasCriterion(ElCriteriaHasCriterionBase):
 class ElCriteriaHasCriterionCreate(BaseModel):
     echcs: Sequence[ElCriteriaHasCriterionBase]
 
+class ElCriteriaHasCriterions(BaseModel):
+    #echcs: Optional[Sequence[ElCriteriaHasCriterion]]
+    echcs: Sequence[ElCriteriaHasCriterion]
+#    def __init__(self, *a, **kw):
+#        super().__init__(*a, **kw)
+#        echcs = []
+
 class ElCriteriaHasCriterionSearchResults(BaseModel):
     results: Sequence[ElCriteriaHasCriterion]
