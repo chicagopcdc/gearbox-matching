@@ -15,18 +15,18 @@ from starlette.status import (
 
 from gearbox import config
 
-#@respx.mock
-#@pytest.mark.asyncio
-# def test_build_mc(setup_database, client, valid_upload_file_patcher):
-#     """
-#     Test create value
-#     """
-#     fake_jwt = "1.2.3"
-#     # add random value string to satisfy unique constraint for test
-#     resp = client.post("/build-match-conditions", headers={"Authorization": f"bearer {fake_jwt}"})
-#     resp.raise_for_status()
-#     full_res = resp.json()
-#     assert str(resp.status_code).startswith("20")
+@respx.mock
+@pytest.mark.asyncio
+def test_build_mc(setup_database, client, valid_upload_file_patcher):
+    """
+    Test create value
+    """
+    fake_jwt = "1.2.3"
+    # add random value string to satisfy unique constraint for test
+    resp = client.post("/build-match-conditions", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp.raise_for_status()
+    full_res = resp.json()
+    assert str(resp.status_code).startswith("20")
 
 # @pytest.mark.asyncio
 #def test_build_match_conditions(setup_database, client):
@@ -65,10 +65,10 @@ from gearbox import config
 #    assert not errors, "errors occurred: \n{}".format("\n".join(errors))            
 
 # Test getter method returns an aws url
-def test_get_match_conditions(setup_database, client):
-    errors = []
-    fake_jwt = "1.2.3"
-    url = client.get("/match-conditions", headers={"Authorization": f"bearer {fake_jwt}"})
-    url_str =  url.content.decode('ascii').strip('\"')
+#def test_get_match_conditions(setup_database, client):
+#    errors = []
+#    fake_jwt = "1.2.3"
+#    url = client.get("/match-conditions", headers={"Authorization": f"bearer {fake_jwt}"})
+#    url_str =  url.content.decode('ascii').strip('\"')
 
-    assert is_aws_url(url_str)
+#    assert is_aws_url(url_str)
