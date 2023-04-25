@@ -536,10 +536,8 @@ async def get_match_conditions(session: Session) -> List[AlgorithmResponse]:
 
     for a in active_match_conds:
         study_logic = {}
-        # temporary fix
-        if a.eligibility_criteria_info:
-            study_logic['studyId'] = a.eligibility_criteria_info[0].study_version.study_id
-            study_logic['algorithm'] = a.algorithm_logic
-            match_conds = sorted(match_conds, key=lambda k: k['studyId'])
-            match_conds.append(study_logic)
+        study_logic['studyId'] = a.study_version.study_id
+        study_logic['algorithm'] = a.study_algorithm_engine.algorithm_logic
+        match_conds = sorted(match_conds, key=lambda k: k['studyId'])
+        match_conds.append(study_logic)
     return match_conds

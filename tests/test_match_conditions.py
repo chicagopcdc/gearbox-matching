@@ -17,7 +17,8 @@ from gearbox import config
 
 @respx.mock
 @pytest.mark.asyncio
-def test_build_mc(setup_database, client, valid_upload_file_patcher):
+# def test_build_mc(setup_database, client, valid_upload_file_patcher):
+def test_build_mc(setup_database, client):
     """
     Test create value
     """
