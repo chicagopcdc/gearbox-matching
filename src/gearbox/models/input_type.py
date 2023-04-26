@@ -7,8 +7,8 @@ from .base_class import Base
 class InputType(Base):
     __tablename__ = 'input_type'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    data_type = Column(String, nullable=True)
-    render_type = Column(String, nullable=True)
+    data_type = Column(String)
+    render_type = Column(String)
     create_date = Column(DateTime, nullable=True)
 
     criterions = relationship("Criterion", back_populates="input_type", lazy='joined')

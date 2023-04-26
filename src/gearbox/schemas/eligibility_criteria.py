@@ -1,17 +1,19 @@
-from pydantic import BaseModel
+from re import I
+from pydantic import BaseModel, Extra
 from datetime import datetime
-from typing import Sequence, List
-from .el_criterion_has_criterion_schema import ElCriterionHasCriterionSchema
+from typing import Optional, Sequence
 
-class EligibilityCriteria(BaseModel):
+class EligibilityCriteriaBase(BaseModel):
+    create_date: Optional[datetime]
+
+    class Config:
+        orm_mode = True   
+
+class EligibilityCriteria(EligibilityCriteriaBase):
     id: int
-    create_date: datetime
-    active: bool
-    study_version_id: int
-    el_criteria_has_criterions: List[ElCriterionHasCriterionSchema]
 
-class EligibilityCriteriaCreate(BaseModel):
+class EligibilityCriteriaCreate(EligibilityCriteriaBase):
     pass
 
 class EligibilityCriteriaSearchResults(BaseModel):
-    pass
+    results: Sequence[EligibilityCriteria]    

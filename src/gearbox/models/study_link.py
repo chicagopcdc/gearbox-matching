@@ -11,7 +11,7 @@ class StudyLink(Base):
     id = Column(Integer, primary_key=True)
     study_id = Column(Integer, ForeignKey('study.id'))
     name = Column(String, nullable=True)
-    href = Column(String, nullable=True)
+    href = Column(String)
     active = Column(Boolean, nullable=True)
 
     study = relationship("Study", back_populates="links")

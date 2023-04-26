@@ -1,34 +1,34 @@
-from pydantic import BaseModel
+#from urllib.request import HTTPDefaultErrorHandler
+from pydantic import BaseModel #, HttpUrl
 from datetime import datetime
 from typing import Sequence, List, Optional
-from .site_has_study import StudySite
-from .study_link import StudyLink
+from gearbox.schemas import SiteCreate #, StudyLinkCreate
+from .study_link import StudyLinkCreate
 
-class Study(BaseModel):
-    id: int
+class StudyBase(BaseModel):
     name: Optional[str]
     code: Optional[str]
     description: Optional[str]
     create_date: Optional[datetime]
     active: Optional[bool]
-    sites: Optional[List[StudySite]]
-    links: Optional[List[StudyLink]]
-    fake: int
 
     class Config:
-        orm_mode = True
+        orm_mode = True    
 
-class StudyCreate(BaseModel):
-    name: str
-    code: str
-    description: str
-    active: bool
+class Study(StudyBase):
+    id: int
+
+class StudyCreate(StudyBase):
+    sites: Optional[List[SiteCreate]]
+    links: Optional[List[StudyLinkCreate]]
 
 class StudySearchResults(BaseModel):
     results: Sequence[Study]
 
-class StudyResponse(BaseModel):
-    current_date: str
-    current_time: str
-    status: str
-    body: List[Study]
+"""
+class StudyCreateFull(StudyBase):
+    sites: Optional [Sequence[SiteCreate]]
+    study_links: Optional [Sequence[StudyLinkCreate]]
+    study_version: Optional[StudyVersionCreate]
+    study_algorithm_engine: Optional[StudyAlgorithmEngineCreate]
+"""

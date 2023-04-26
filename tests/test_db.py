@@ -1,7 +1,7 @@
 import pytest
 
 from gearbox import config
-from gearbox.models import Base, Study
+from gearbox.models import Study
 
 def test_database(setup_database):
 
@@ -12,7 +12,7 @@ def test_database(setup_database):
 
 def test_insert_study(setup_database):
 
-    new_study = Study(id=9999, name='test from pytest', code='1111', active=True)
+    new_study = Study(name='test from pytest', code='1111', active=True)
     session = setup_database
     session.add(new_study)
     assert len(session.query(Study).all()) == 11

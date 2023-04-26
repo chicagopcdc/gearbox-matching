@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Sequence, List, Optional
 
-class InputType(BaseModel):
+class InputTypeBase(BaseModel):
     id: int
     data_type: Optional[str]
     render_type: Optional[str]
@@ -12,8 +12,11 @@ class InputType(BaseModel):
     class Config:
         orm_mode = True
 
-class InputTypeCreate(BaseModel):
+class InputType(InputTypeBase):
+    id: int
+
+class InputTypeCreate(InputTypeBase):
     pass
 
 class InputTypeSearchResults(BaseModel):
-    pass
+    results: Sequence[InputType]

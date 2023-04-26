@@ -1,5 +1,11 @@
 import importlib
+from collections import OrderedDict
 import json
+import os
+import glob
+from datetime import datetime
+import re
+from json import JSONEncoder
 from collections import defaultdict
 import tempfile
 
@@ -7,7 +13,7 @@ import pytest
 # from pytest_postgresql import factories
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.engine.url import URL
 from sqlalchemy.engine import Engine
 
@@ -22,7 +28,8 @@ import asyncio
 
 from gearbox import config
 # from gearbox.models import base_class, study
-from gearbox.models import Base, Study
+# from gearbox.models import Base, Study
+# from gearbox.models import Base
 
 class AsyncMock(MagicMock):
     async def __call__(self, *args, **kwargs):
@@ -73,6 +80,7 @@ def setup_database(connection) -> Engine:
     conn = session.connection().connection
 
 
+
     # COPY DATA INTO TABLES
     file_to_table(conn, cursor,'study', './postgres-data/td_study.tsv')
     file_to_table(conn, cursor,'study_links', './postgres-data/td_study_links.tsv')
@@ -89,13 +97,51 @@ def setup_database(connection) -> Engine:
     file_to_table(conn, cursor,'triggered_by', './postgres-data/td_triggered_by.tsv')
     file_to_table(conn, cursor,'criterion_has_tag', './postgres-data/td_criterion_has_tag.tsv')
     file_to_table(conn, cursor,'el_criteria_has_criterion', './postgres-data/td_el_criteria_has_criterion.tsv')
-    file_to_table(conn, cursor,'study_algorithm_engine', './postgres-data/td_study_algorithm_engine.tsv')
-    file_to_table(conn, cursor,'algorithm_engine', './postgres-data/td_algorithm_engine.tsv')
+    # file_to_table(conn, cursor,'study_algorithm_engine', './postgres-data/td_study_algorithm_engine.tsv')
+    conn.commit()
+
+    # cursor.execute("SELECT setval('algorithm_engine_id_seq', (SELECT MAX(id) FROM algorithm_engine));")
+    cursor.execute("SELECT setval('criterion_id_seq', (SELECT MAX(id) FROM criterion));")
+    cursor.execute("SELECT setval('display_rules_id_seq', (SELECT MAX(id) FROM display_rules));")
+    cursor.execute("SELECT setval('el_criteria_has_criterion_id_seq', (SELECT MAX(id) FROM el_criteria_has_criterion));")
+    cursor.execute("SELECT setval('eligibility_criteria_id_seq', (SELECT MAX(id) FROM eligibility_criteria));")
+    cursor.execute("SELECT setval('input_type_id_seq', (SELECT MAX(id) FROM input_type));")
+    cursor.execute("SELECT setval('site_id_seq', (SELECT MAX(id) FROM site));")
+    cursor.execute("SELECT setval('study_id_seq', (SELECT MAX(id) FROM study));")
+    cursor.execute("SELECT setval('study_algorithm_engine_id_seq', (SELECT MAX(id) FROM study_algorithm_engine));")
+    cursor.execute("SELECT setval('study_links_id_seq', (SELECT MAX(id) FROM study_links));")
+    cursor.execute("SELECT setval('study_version_id_seq', (SELECT MAX(id) FROM study_version));")
+    cursor.execute("SELECT setval('tag_id_seq', (SELECT MAX(id) FROM tag));")
+    cursor.execute("SELECT setval('triggered_by_id_seq', (SELECT MAX(id) FROM triggered_by));")
+    cursor.execute("SELECT setval('value_id_seq', (SELECT MAX(id) FROM value));")
+    # FIX THIS FUNCTION TO LOAD
+    load_study_algorithm_engine(conn, cursor)
+    file_to_table(conn, cursor,'eligibility_criteria_info', './postgres-data/td_eligibility_criteria_info.tsv')
+    cursor.execute("SELECT setval('eligibility_criteria_info_id_seq', (SELECT MAX(id) FROM eligibility_criteria_info));")
     conn.commit()
 
     yield session
     session.close()
 
+def load_study_algorithm_engine(conn, cursor):
+    for filename in glob.glob("./tests/data/algorithm_logic_load*.json"):
+        with open(filename) as jfile:
+            # study_logic = json.loads(jfile.read(), object_pairs_hook=OrderedDict)
+            study_logic = json.loads(jfile.read())
+            study_logic = json.dumps(study_logic)
+            # study_version_id = re.search(r'\d', filename).group()
+            dt = datetime.now()
+            # active = True
+            insert_query = f'''
+                INSERT INTO study_algorithm_engine 
+                    (start_date, algorithm_logic, algorithm_version) 
+                    VALUES (%s, %s, %s)
+            '''
+            try:
+                cursor.execute(insert_query, (dt, study_logic, 1))
+            except Exception as e:
+                print(f"ERROR IN load_study_algorithm_engine: {e}")
+    conn.commit()
 
 @pytest.fixture(scope="session")
 def client(event_loop):
@@ -106,7 +152,6 @@ def client(event_loop):
 
     with TestClient(get_app()) as client:
         yield client
-
 
 @pytest.fixture(
     params=[
@@ -159,3 +204,36 @@ def event_loop(request):
     yield loop
     loop.close()
 
+@pytest.fixture
+def mock_new_criterion():
+
+    class MockNewCriterion(object):
+        code = "test_criteria"
+        display_name = "this is a test criterion"
+        description = "test is a test criterion"
+        active = False
+        input_type_id = 1
+        tags = [1]
+        values = [3]
+        display_rules_priority = 1001
+        display_rules_version = 5
+        triggered_by_criterion_id = 1
+        triggered_by_value_id = 1
+        triggered_by_path = "2.3.4"
+
+        def to_json(self):
+            return {
+                "code": self.code,
+                "display_name": self.display_name,
+                "description": self.description,
+                "active": self.active,
+                "input_type_id": self.input_type_id,
+                "tags": self.tags,
+                "values": self.values,
+                "display_rules_priority": self.display_rules_priority,
+                "display_rules_version": self.display_rules_version,
+                "triggered_by_criterion_id": self.triggered_by_criterion_id,
+                "triggered_by_value_id": self.triggered_by_value_id,
+                "triggered_by_path": self.triggered_by_path
+            }
+    return MockNewCriterion()

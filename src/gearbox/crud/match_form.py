@@ -5,7 +5,7 @@ from sqlalchemy import func, update, select, exc
 from gearbox.models.criterion_has_tag import CriterionHasTag
 from sqlalchemy.orm import Session, joinedload, join, noload
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
-from gearbox.models.models import DisplayRules, TriggeredBy, Criterion, CriterionHasTag, Value
+from gearbox.models import DisplayRules, TriggeredBy, Criterion, CriterionHasTag, Value
 
 from cdislogging import get_logger
 logger = get_logger(__name__)

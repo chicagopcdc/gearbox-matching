@@ -1,0 +1,96 @@
+    {
+            "operator": "AND",
+            "criteria": [
+                -1,
+                {
+                    "operator": "OR",
+                    "criteria": [
+                        {
+                            "operator": "AND",
+                            "criteria": [
+                                2,
+                                {
+                                    "operator": "OR",
+                                    "criteria": [
+                                        {
+                                            "operator": "AND",
+                                            "criteria": [
+                                                12,
+                                                7
+                                            ]
+                                        },
+                                        {
+                                            "operator": "AND",
+                                            "criteria": [
+                                                13,
+                                                8
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        3,
+                        {
+                            "operator": "AND",
+                            "criteria": [
+                                4,
+                                {
+                                    "operator": "OR",
+                                    "criteria": [
+                                        {
+                                            "operator": "AND",
+                                            "criteria": [
+                                                12,
+                                                7
+                                            ]
+                                        },
+                                        {
+                                            "operator": "AND",
+                                            "criteria": [
+                                                13,
+                                                8
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "operator": "AND",
+                            "criteria": [
+                                5,
+                                13,
+                                8
+                            ]
+                        },
+                        {
+                            "operator": "AND",
+                            "criteria": [
+                                6,
+                                13,
+                                8,
+                                {
+                                    "operator": "OR",
+                                    "criteria": [
+                                        {
+                                            "operator": "AND",
+                                            "criteria": [
+                                                9
+                                            ]
+                                        },
+                                        {
+                                            "operator": "AND",
+                                            "criteria": [
+                                                10,
+                                                11
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }

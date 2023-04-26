@@ -1,17 +1,8 @@
-import pytest
 import json
 from .test_utils import is_aws_url
+import pytest
 
 from deepdiff import DeepDiff
-
-from httpx import AsyncClient
-from fastapi import FastAPI
-
-import tempfile
-import respx
-
-from fastapi import HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from starlette.config import environ
 from starlette.status import (
     HTTP_201_CREATED,
@@ -24,12 +15,6 @@ from starlette.status import (
 
 from gearbox import config
 
-# auto_error=False prevents FastAPI from raises a 403 when the request is missing
-# an Authorization header. Instead, we want to return a 401 to signify that we did
-# not recieve valid credentials
-bearer = HTTPBearer(auto_error=False)
-
-# @pytest.mark.asyncio
 def test_build_match_form(setup_database, client):
     """
     Test create /match_form endpoint
