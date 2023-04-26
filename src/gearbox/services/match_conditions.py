@@ -1,6 +1,8 @@
 import json
 from typing import List
 from fastapi.encoders import jsonable_encoder
+from fastapi import HTTPException
+from gearbox.util import status
 import re
 from collections import deque
 from gearbox.routers import logger
@@ -538,6 +540,18 @@ async def get_match_conditions(session: Session) -> List[AlgorithmResponse]:
         study_logic = {}
         study_logic['studyId'] = a.study_version.study_id
         study_logic['algorithm'] = a.study_algorithm_engine.algorithm_logic
-        match_conds = sorted(match_conds, key=lambda k: k['studyId'])
         match_conds.append(study_logic)
+
+    # check for duplicate study ids in match conditions list, this can happen if
+    # there are more than 1 active entry for a study in the eligibility_criteria_info table
+    studyIds = [ x['studyId'] for x in match_conds ]
+    dupes = [ x for n, x in enumerate(studyIds) if x in studyIds[:n]]
+    if dupes:
+        logger.error(f"Duplicte active studies found in eligibility_criteria_info table for the following study ids: {dupes}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            f"Duplicte active studies found in eligibility_criteria_info table for the following study ids: {dupes}") 
+
+    # sort by studyId before returning
+    match_conds = sorted(match_conds, key=lambda k: k['studyId'])
+
     return match_conds
