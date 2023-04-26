@@ -9,7 +9,7 @@ from . import logger
 from starlette.responses import JSONResponse 
 from typing import List
 from gearbox import auth
-from gearbox.schemas import EligibilityCriteriaResponseResults, EligibilityCriteriaSearchResults, EligibilityCriteria, EligibilityCriteriaCreate
+from gearbox.schemas import EligibilityCriteriaResponseResults, EligibilityCriteriaSearchResults, EligibilityCriteria, EligibilityCriteriaCreate, EligibilityCriteriaResponse
 from gearbox import deps
 from gearbox.util import bucket_utils, status
 from gearbox.admin_login import admin_required
@@ -27,7 +27,7 @@ async def get_ec(
     return JSONResponse(presigned_url, status.HTTP_200_OK) 
 
 # build and return eligibility-criteria set for the front end
-@mod.post("/build-eligibility-criteria", status_code=status.HTTP_200_OK, response_model=EligibilityCriteriaResponseResults, dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
+@mod.post("/build-eligibility-criteria", status_code=status.HTTP_200_OK, response_model=List[EligibilityCriteriaResponse], dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
 async def build_eligibility_criteria(
     request: Request,
     session: Session = Depends(deps.get_session),
@@ -38,7 +38,7 @@ async def build_eligibility_criteria(
         params = [{'Content-Type':'application/json'}]
         bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, eligibility_criteria)
 
-    return { "results" :list(eligibility_criteria) }
+    return eligibility_criteria
 
 """
 @mod.get("/eligibility-criteria", response_model=EligibilityCriteriaSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
