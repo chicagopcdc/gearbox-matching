@@ -16,7 +16,7 @@ from gearbox.admin_login import admin_required
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
 
-@mod.post("/build-match-form", response_model=MatchForm, dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
+@mod.post("/build-match-form", response_model=MatchForm, response_model_exclude_none=True, dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
 async def build_match_info(
     request: Request,
     session: Session = Depends(deps.get_session),

@@ -8,6 +8,7 @@ from fastapi import Request, Depends
 from fastapi import APIRouter 
 from . import logger
 from starlette.responses import JSONResponse 
+from typing import List
 
 from gearbox import auth
 from gearbox.admin_login import admin_required
@@ -30,7 +31,7 @@ async def get_study(
 
     return study_response
 
-@mod.post("/build-studies", response_model=StudyResponseSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
+@mod.post("/build-studies", response_model=List[StudyResponse], status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
 async def build_all_studies(
     request: Request,
     session: AsyncSession = Depends(deps.get_session)
@@ -42,7 +43,7 @@ async def build_all_studies(
         params = [{'Content-Type':'application/json'}]
         bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_STUDIES_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, study_response)
 
-    return { "results": list(study_response) }
+    return study_response
 
 @mod.get("/studies", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)] )
 async def get_all_studies(
