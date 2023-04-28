@@ -38,8 +38,8 @@ def test_studies_compare(setup_database, client):
     with open(studydata_file, 'r') as comp_file:
         study_compare = json.load(comp_file)
 
-    studies = full_res["results"]
-    study_compare = study_compare["results"]
+    studies = full_res
+    study_compare = study_compare
 
     diff = []
     # Diff all studies in the reponse that exist in the mock file
