@@ -31,15 +31,15 @@ def test_build_ec(setup_database, client):
     ecdata_file = './tests/data/eligibilityCriteria.json'
 
     #""" SERIALIZE STUDIES TO COMPARE AGAINST - UNCOMMENT TO WRITE NEW COMPARE DATA
-    # with open(ecdata_file,'w') as comp_file:
+    #with open(ecdata_file,'w') as comp_file:
     #    json.dump(full_res, comp_file)
     #"""
 
     with open(ecdata_file, 'r') as comp_file:
         ec_compare = json.load(comp_file)
 
-    ec = full_res['results']
-    ec_compare = ec_compare['results']
+    ec = full_res
+    ec_compare = ec_compare
 
     diff = []
     for i in range (len(ec_compare)):
