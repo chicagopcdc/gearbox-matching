@@ -1,12 +1,11 @@
 import datetime
 from re import I
-from sqlalchemy import func, update, select, exc
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
+from sqlalchemy import select, exc
+from typing import Generic, List, Optional, Type, TypeVar, Union
 
-from gearbox.schemas.algorithm_engine import AlgorithmResponse
-from sqlalchemy.orm import Session, selectinload, joinedload
+from sqlalchemy.orm import Session 
 
-from gearbox.models import StudyAlgorithmEngine, StudyVersion, EligibilityCriteriaInfo
+from gearbox.models import EligibilityCriteriaInfo
 
 from cdislogging import get_logger
 logger = get_logger(__name__)
