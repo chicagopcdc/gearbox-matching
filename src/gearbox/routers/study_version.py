@@ -24,13 +24,13 @@ async def get_study_version(
     ret_study_version = await study_version_service.get_study_version(session, study_version_id)
     return ret_study_version
 
-@mod.get("/study-versions", response_model=StudyVersionSearchResults, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])
+@mod.get("/study-versions", response_model=List[StudyVersionInfo], status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])
 async def get_all_study_versions(
     request: Request,
     session: AsyncSession = Depends(deps.get_session)
 ):
     study_versions = await study_version_service.get_study_versions(session)
-    return {"results": list(study_versions)}
+    return study_versions
 
 @mod.get("/study-versions-in-process", response_model=List[StudyVersionInfo], status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])
 async def get_all_study_versions(
