@@ -6,8 +6,9 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from datetime import date
 from . import logger
 from ..util import status
+from typing import List
 from gearbox import auth
-from gearbox.schemas import StudyVersionSearchResults, StudyVersion as StudyVersionSchema, StudyVersionCreate
+from gearbox.schemas import StudyVersionSearchResults, StudyVersion as StudyVersionSchema, StudyVersionCreate, StudyVersionInfo
 from gearbox import deps
 from gearbox.services import study_version  as study_version_service
 from gearbox.admin_login import admin_required
@@ -30,6 +31,15 @@ async def get_all_study_versions(
 ):
     study_versions = await study_version_service.get_study_versions(session)
     return {"results": list(study_versions)}
+
+@mod.get("/study-versions-in-process", response_model=List[StudyVersionInfo], status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])
+async def get_all_study_versions(
+    request: Request,
+    session: AsyncSession = Depends(deps.get_session)
+):
+    study_versions = await study_version_service.get_in_process_study_versions(session)
+    # return {list(study_versions)}
+    return study_versions
 
 @mod.post("/study-version", response_model=StudyVersionSchema, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
@@ -67,4 +77,4 @@ async def update_object(
     return upd_study_version
 
 def init_app(app):
-    app.include_router(mod, tags=["study_version","update_study_version","study_versions"])
+    app.include_router(mod, tags=["study_version","update_study_version","study_versions", "study_versions_in_process"])
