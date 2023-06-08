@@ -8,6 +8,7 @@ from sqlalchemy.sql.functions import func
 from gearbox.util import status
 from gearbox.crud import study_version_crud
 from typing import List
+from gearbox.util.types import EligibilityCriteriaInfoStatus
 
 async def get_latest_study_version(session: Session, study_id: int) -> int:
     try:
@@ -44,8 +45,13 @@ async def get_study_versions(session: Session) -> StudyVersionSearchResults:
     sv = await study_version_crud.get_multi(session)
     return sv
 
-async def get_in_process_study_versions(session: Session) -> List[StudyVersionInfo]:
-    sv = await study_version_crud.get_in_process_study_versions(session)
+async def get_study_versions_by_status(session: Session, study_version_status:str ) -> List[StudyVersionInfo]:
+
+    # check for valid status value 
+    if study_version_status not in [item.value for item in EligibilityCriteriaInfoStatus]:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"INVALID STUDY VERSION STATUS: {study_version_status}") 
+
+    sv = await study_version_crud.get_study_versions_by_status(session, study_version_status)
 
     return sv
 
