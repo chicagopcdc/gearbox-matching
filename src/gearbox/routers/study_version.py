@@ -38,6 +38,9 @@ async def get_study_versions(
     request: Request,
     session: AsyncSession = Depends(deps.get_session)
 ):
+    """
+    Comments: Get all study versions with a given status
+    """
     study_versions = await study_version_service.get_study_versions_by_status(session, study_version_status)
     return study_versions
 
@@ -70,9 +73,6 @@ async def update_object(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    """
-    Comments:
-    """
     upd_study_version = await study_version_service.update_study_version(session=session, study_version=body, study_version_id=study_version_id)
     return upd_study_version
 

@@ -6,7 +6,7 @@ from gearbox.util import status
 from gearbox.util.types import EligibilityCriteriaInfoStatus
 
 async def reset_active_status(session: Session, study_version_id: int) -> bool:
-    # set all rows related to the study_version to false
+    # set all rows related to the study_version to inactive
     sae_to_update = await eligibility_criteria_info_crud.get_multi(
         db=session,
         where=[f"eligibility_criteria_info.study_version_id = {study_version_id} and eligibility_criteria_info.status = '{EligibilityCriteriaInfoStatus.ACTIVE.value}'"]
