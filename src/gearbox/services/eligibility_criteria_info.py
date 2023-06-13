@@ -3,17 +3,17 @@ from gearbox.schemas import EligibilityCriteriaInfoCreate, EligibilityCriteriaIn
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import HTTPException
 from gearbox.util import status
+from gearbox.util.types import EligibilityCriteriaInfoStatus
 
 async def reset_active_status(session: Session, study_version_id: int) -> bool:
-    # set all rows related to the study_version to false
+    # set all rows related to the study_version to inactive
     sae_to_update = await eligibility_criteria_info_crud.get_multi(
         db=session,
-        active=True, 
-        where=[f"eligibility_criteria_info.study_version_id = {study_version_id}"]
+        where=[f"eligibility_criteria_info.study_version_id = {study_version_id} and eligibility_criteria_info.status = '{EligibilityCriteriaInfoStatus.ACTIVE.value}'"]
     )
     for sae in sae_to_update:
         # set all to false
-        await eligibility_criteria_info_crud.update(db=session, db_obj=sae, obj_in={"active":False})
+        await eligibility_criteria_info_crud.update(db=session, db_obj=sae, obj_in={"status":EligibilityCriteriaInfoStatus.INACTIVE.value})
     return True
 
 async def get_eligibility_criteria_info(session: Session, id: int) -> EligibilityCriteriaInfoSchema:
@@ -37,7 +37,7 @@ async def create_eligibility_criteria_info(session: Session, eligibility_criteri
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: missing FKs for eligibility_criteria_info creation: {[error for error in check_id_errors if error]}")        
 
     # if incoming info is active, then reset any currently active infos for the study_version 
-    if eligibility_criteria_info.active:
+    if eligibility_criteria_info.status.value == EligibilityCriteriaInfoStatus.ACTIVE.value:
         retval = await reset_active_status(session=session, study_version_id=eligibility_criteria_info.study_version_id)
 
     new_eligibility_criteria_info = await eligibility_criteria_info_crud.create(db=session, obj_in=eligibility_criteria_info)

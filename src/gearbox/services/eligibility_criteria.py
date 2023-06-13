@@ -39,9 +39,9 @@ async def update_eligibility_criteria(session: Session, eligibility_criteria: El
     await session.commit() 
     return upd_eligibility_criteria
 
-async def get_eligibility_criteria_set(session):
+async def get_eligibility_criteria_set(session, id: int=None):
 
-    results = await eligibility_criteria_crud.get_eligibility_criteria_set(session)
+    results = await eligibility_criteria_crud.get_eligibility_criteria_set(session, ec_id=id)
     eligibility_criteria = []
 
     if results:

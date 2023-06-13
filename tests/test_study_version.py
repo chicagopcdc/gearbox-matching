@@ -14,6 +14,17 @@ def test_get_study_versions(setup_database, client):
     resp = client.get("/study-versions", headers={"Authorization": f"bearer {fake_jwt}"})
     assert str(resp.status_code).startswith("20")
 
+@pytest.mark.asyncio
+#def test_get_study_versions_in_process(setup_database, client):
+def test_get_study_versions_by_status(setup_database, client):
+    """
+    Comments: Test to validate aws url is returned from get endpoint
+    """
+    errors = []
+    fake_jwt = "1.2.3"
+    resp = client.get("/study-versions/IN_PROCESS", headers={"Authorization": f"bearer {fake_jwt}"})
+    assert str(resp.status_code).startswith("20")
+
 @pytest.mark.parametrize(
     "data", [ 
         {

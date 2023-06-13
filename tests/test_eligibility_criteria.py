@@ -17,6 +17,18 @@ from starlette.status import (
 from gearbox import config
 
 @pytest.mark.asyncio
+def test_get_single_ec(setup_database, client):
+    """
+    Test create /eligibility_criteria endpoint
+    valid input, ensure correct response.
+    """
+    
+    fake_jwt = "1.2.3"
+    resp = client.get("/eligibility-criteria/1", headers={"Authorization": f"bearer {fake_jwt}"})
+    full_res = resp.json()
+    resp.raise_for_status()
+
+@pytest.mark.asyncio
 def test_build_ec(setup_database, client):
     """
     Test create /eligibility_criteria endpoint
