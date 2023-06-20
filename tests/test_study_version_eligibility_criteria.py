@@ -11,53 +11,37 @@ from .test_utils import is_aws_url
                 "study_id": 1,
                 "active": False
             },
-            "eligibility_criteria": 
-            {
-
-            },
             "el_criteria_has_criterion": 
             {
                 "echcs":
                     [
                         {
                             "criterion_id": 10,
-                            "eligibility_criteria_id": 10,
                             "active": True,
                             "value_id": 91
                         },
                         {
                             "criterion_id": 10,
-                            "eligibility_criteria_id": 10,
                             "active": True,
                             "value_id": 92
                         },
                         {
                             "criterion_id": 10,
-                            "eligibility_criteria_id": 10,
                             "active": True,
                             "value_id": 93 
                         },
                         {
                             "criterion_id": 10,
-                            "eligibility_criteria_id": 10,
                             "active": True,
                             "value_id": 34 
                         },
                         {
                             "criterion_id": 1,
-                            "eligibility_criteria_id": 10,
                             "active": True,
                             "value_id": 89 
                         },
                     ]
             },
-            "eligibility_criteria_info":
-            {
-                "active": False,
-                #"study_version_id": 1,
-                "study_algorithm_engine_id": 1,
-                "eligibility_criteria_id": 1
-            }
         }
     ]
 )

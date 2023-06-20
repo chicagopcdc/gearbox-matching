@@ -30,6 +30,12 @@ async def create_eligibility_criteria(session: Session, eligibility_criteria: El
     await session.commit() 
     return new_eligibility_criteria
 
+async def create_eligibility_criteria(session: Session):
+    eligibility_criteria = EligibilityCriteriaCreate()
+    new_eligibility_criteria = await eligibility_criteria_crud.create(db=session, obj_in=eligibility_criteria)
+    await session.commit() 
+    return new_eligibility_criteria
+
 async def update_eligibility_criteria(session: Session, eligibility_criteria: EligibilityCriteriaCreate, eligibility_criteria_id: int) -> EligibilityCriteriaSchema:
     eligibility_criteria_in = await eligibility_criteria_crud.get(db=session, id=eligibility_criteria_id)
     if eligibility_criteria_in:

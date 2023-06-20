@@ -33,8 +33,10 @@ async def create_eligibility_criteria_info(session: Session, eligibility_criteri
     check_id_errors.append(await study_algorithm_engine_crud.check_key(db=session, ids_to_check=eligibility_criteria_info.study_algorithm_engine_id))
     check_id_errors.append(await eligibility_criteria_crud.check_key(db=session, ids_to_check=eligibility_criteria_info.eligibility_criteria_id))
 
+
     if not all(i is None for i in check_id_errors):
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: missing FKs for eligibility_criteria_info creation: {[error for error in check_id_errors if error]}")        
+
 
     # if incoming info is active, then reset any currently active infos for the study_version 
     if eligibility_criteria_info.status.value == EligibilityCriteriaInfoStatus.ACTIVE.value:
