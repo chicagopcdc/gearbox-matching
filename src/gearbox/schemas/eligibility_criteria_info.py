@@ -10,7 +10,7 @@ class EligibilityCriteriaInfoBase(BaseModel):
     create_date: Optional[datetime]
     status: Optional[EligibilityCriteriaInfoStatus]
     study_version_id: int
-    study_algorithm_engine_id: int
+    study_algorithm_engine_id: Optional[int]
     eligibility_criteria_id: int
 
     class Config:

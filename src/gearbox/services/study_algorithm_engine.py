@@ -13,6 +13,7 @@ from gearbox.schemas import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSear
 from sqlalchemy.sql.functions import func
 from gearbox.util import status, json_utils
 from gearbox.crud import study_algorithm_engine_crud, eligibility_criteria_info_crud
+from gearbox.util.types import EligibilityCriteriaInfoStatus
 
 async def get_study_algorithm_engine(session: Session, id: int) -> StudyAlgorithmEngineSchema:
     aes = await study_algorithm_engine_crud.get(session, id)
@@ -124,13 +125,13 @@ async def get_existing_algorithm_logic_duplicate(session: Session, algorithm_log
 async def reset_active_status(session: Session, study_version_id: int) -> bool:
     # set all rows related to the study_version to false
     eci_to_update = await eligibility_criteria_info_crud.get_multi(
-        db=session, 
-        active=False, 
+        db=session,
         where=[f"eligibility_criteria_info.study_version_id = {study_version_id}"]
     )
     for sae in eci_to_update:
-        # set all to false
-        await eligibility_criteria_info_crud.update(db=session, db_obj=sae, obj_in={"active":False})
+        # reset any currently 'ACTIVE' status to 'INACTIVE'
+        if sae.status == EligibilityCriteriaInfoStatus.ACTIVE.value:
+            await eligibility_criteria_info_crud.update(db=session, db_obj=sae, obj_in={"status":EligibilityCriteriaInfoStatus.INACTIVE.value})
     return True
     
 async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineCreateInput) -> StudyAlgorithmEngine:

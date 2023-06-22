@@ -17,7 +17,7 @@ from gearbox.models import StudyAlgorithmEngine, EligibilityCriteriaInfo
                 "algorithm_logic": None,
                 "test": "create_new_study_algorithm_engine"
             },
-            "eligibility_criteria_info_id": 1
+            "eligibility_criteria_info_id": 7
         }
     ]
 )
