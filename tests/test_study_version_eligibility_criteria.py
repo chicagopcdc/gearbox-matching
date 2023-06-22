@@ -49,6 +49,7 @@ def test_create_study_version_eligibility_criteria(setup_database, client, data,
     fake_jwt = "1.2.3"
     resp = client.post("/study-version-eligibility-criteria", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
+    full_res = resp.json()
 
     """
     errors = []

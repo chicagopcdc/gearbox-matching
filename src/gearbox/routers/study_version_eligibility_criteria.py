@@ -28,4 +28,4 @@ async def save_object(
     return new_svec
 
 def init_app(app):
-    app.include_router(mod, tags=["study-versino-eligibility-criteria"])
+    app.include_router(mod, tags=["study-version-eligibility-criteria"])

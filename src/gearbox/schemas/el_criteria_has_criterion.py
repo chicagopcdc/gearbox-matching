@@ -16,6 +16,9 @@ class ElCriteriaHasCriterionBase(BaseModel):
 class ElCriteriaHasCriterion(ElCriteriaHasCriterionBase):
     id: int
 
+class ElCriteriaHasCriterions(BaseModel):
+    echcs: Sequence[ElCriteriaHasCriterion]
+
 class ElCriteriaHasCriterionCreate(BaseModel):
     echcs: Sequence[ElCriteriaHasCriterionBase]
 
