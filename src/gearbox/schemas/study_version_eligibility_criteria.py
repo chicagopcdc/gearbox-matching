@@ -16,4 +16,3 @@ class StudyVersionEligibilityCriteria(StudyVersionEligibilityCriteriaBase):
     eligibility_criteria: Optional[EligibilityCriteria]
     el_criteria_has_criterion: ElCriteriaHasCriterions
     eligibility_criteria_info: Optional[EligibilityCriteriaInfo]
-    pass

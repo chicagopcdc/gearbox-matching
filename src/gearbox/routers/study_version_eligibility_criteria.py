@@ -22,7 +22,7 @@ async def save_object(
     session: AsyncSession = Depends(deps.get_session),
 ):
     """
-    Comments:
+    Comments: This endpoint installs all eligibility criteria for a particular study version. 
     """
     new_svec = await study_version_eligibility_criteria_service.create_study_version_eligibility_criteria(session=session, study_version_eligibility_criteria=body)
     return new_svec
