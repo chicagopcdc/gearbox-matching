@@ -68,9 +68,10 @@ async def save_object(
     session: Session = Depends(deps.get_session),
 ):
     """
-    Comments:
+    Comments: This endpoint creates a row in the eligibility_criteria table that represents
+    a set of el_criteria_has_criterions that are associated with a particular study version.
     """
-    new_eligibility_criteria = await ec.create_eligibility_criteria(session=session, eligibility_criteria=body)
+    new_eligibility_criteria = await ec.create_eligibility_criteria(session=session)
     return new_eligibility_criteria
 
 def init_app(app):
