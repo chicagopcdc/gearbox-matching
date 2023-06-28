@@ -26,6 +26,17 @@ async def get_ec(
     presigned_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, params, "get_object")
     return JSONResponse(presigned_url, status.HTTP_200_OK) 
 
+# get single eligibility-criteria set 
+@mod.get("/eligibility-criteria/{ec_id}", dependencies=[Depends(auth.authenticate)] )
+async def get_ec(
+    ec_id: int,
+    request: Request,
+    session: Session = Depends(deps.get_session),
+):
+    params = []
+    presigned_url = await ec.get_eligibility_criteria_set(session, id=ec_id)
+    return JSONResponse(presigned_url, status.HTTP_200_OK) 
+
 # build and return eligibility-criteria set for the front end
 @mod.post("/build-eligibility-criteria", status_code=status.HTTP_200_OK, response_model=List[EligibilityCriteriaResponse], dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
 async def build_eligibility_criteria(
@@ -57,9 +68,10 @@ async def save_object(
     session: Session = Depends(deps.get_session),
 ):
     """
-    Comments:
+    Comments: This endpoint creates a row in the eligibility_criteria table that represents
+    a set of el_criteria_has_criterions that are associated with a particular study version.
     """
-    new_eligibility_criteria = await ec.create_eligibility_criteria(session=session, eligibility_criteria=body)
+    new_eligibility_criteria = await ec.create_eligibility_criteria(session=session)
     return new_eligibility_criteria
 
 def init_app(app):

@@ -7,6 +7,7 @@ from gearbox.crud import eligibility_criteria_info_crud, study_version_crud
 from fastapi import HTTPException
 from gearbox.util import status
 from gearbox.models import EligibilityCriteriaInfo
+from gearbox.util.types import EligibilityCriteriaInfoStatus
 
 async def create_study_version_study_algorithm(session: Session, study_version_study_algorithm: StudyVersionStudyAlgorithmCreate) -> StudyVersionStudyAlgorithmSchema:
 
@@ -16,7 +17,7 @@ async def create_study_version_study_algorithm(session: Session, study_version_s
     try:
         result = await session.execute(select(EligibilityCriteriaInfo)
             .where(EligibilityCriteriaInfo.id == eligibility_criteria_info_id))
-        eligibility_criteria_info_db = result.scalar_one()
+        eligibility_criteria_info_db = result.unique().scalar_one()
 
         eligibility_criteria_id = eligibility_criteria_info_db.eligibility_criteria_id
         study_version_id = eligibility_criteria_info_db.study_version_id
@@ -28,22 +29,19 @@ async def create_study_version_study_algorithm(session: Session, study_version_s
     # add eligibility_criteria_id to study_version_study_algorithm
 
     study_version_study_algorithm.study_algorithm_engine.eligibility_criteria_id = eligibility_criteria_id
+    study_version_study_algorithm.study_algorithm_engine.study_version_id = study_version_id
     new_study_algorithm_engine = await study_algorithm_engine_service.create(session=session, study_algorithm_engine=study_version_study_algorithm.study_algorithm_engine)
 
     # update eligibility_criteria_info with study_algorithm_engine.id and set to active
     ecii_upd = {
         "study_algorithm_engine_id": new_study_algorithm_engine.id,
-        "active": True
+        "status": EligibilityCriteriaInfoStatus.ACTIVE.value
     }
     eciid_in = await eligibility_criteria_info_crud.get(db=session, id=eligibility_criteria_info_id)
     if eciid_in:
         upd_value = await eligibility_criteria_info_crud.update(db=session, db_obj=eciid_in, obj_in=ecii_upd)
     else:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Eligibility_criteria_info for id: {eligibility_criteria_info_id} not found for update.")
-
-    # set study_version active to true
-    sv_active = await eligibility_criteria_info_crud.set_active(db=session, id=study_version_id, active=True)
-    await session.commit()
 
     new_study_version_study_algorithm = {}
     new_study_version_study_algorithm["eligibility_criteria_info_id"] = eligibility_criteria_info_id

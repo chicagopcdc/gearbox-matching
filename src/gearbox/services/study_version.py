@@ -3,10 +3,12 @@ from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy import exc, select
 from fastapi import HTTPException
 from gearbox.models import StudyVersion
-from gearbox.schemas import StudyVersionCreate, StudyVersionSearchResults, StudyVersion as StudyVersionSchema
+from gearbox.schemas import StudyVersionCreate, StudyVersionSearchResults, StudyVersion as StudyVersionSchema, StudyVersionInfo
 from sqlalchemy.sql.functions import func
 from gearbox.util import status
 from gearbox.crud import study_version_crud
+from typing import List
+from gearbox.util.types import EligibilityCriteriaInfoStatus
 
 async def get_latest_study_version(session: Session, study_id: int) -> int:
     try:
@@ -36,12 +38,22 @@ async def reset_active_status(session: Session, study_id: int) -> bool:
     return True
 
 async def get_study_version(session: Session, id: int) -> StudyVersionSchema:
-    aes = await study_version_crud.get_study_version(session, id)
-    return aes
+    sv = await study_version_crud.get_study_version(session, id)
+    return sv
 
 async def get_study_versions(session: Session) -> StudyVersionSearchResults:
-    aes = await study_version_crud.get_multi(session)
-    return aes
+    sv = await study_version_crud.get_multi(session)
+    return sv
+
+async def get_study_versions_by_status(session: Session, study_version_status:str ) -> List[StudyVersionInfo]:
+
+    # check for valid status value 
+    if study_version_status not in [item.value for item in EligibilityCriteriaInfoStatus]:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"INVALID STUDY VERSION STATUS: {study_version_status}") 
+
+    sv = await study_version_crud.get_study_versions_by_status(session, study_version_status)
+
+    return sv
 
 async def create_study_version(session: Session, study_version: StudyVersionCreate) -> StudyVersionSchema:
 

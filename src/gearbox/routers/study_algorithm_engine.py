@@ -37,7 +37,7 @@ async def save_sae(
     session: AsyncSession = Depends(deps.get_session),
 ):
     """
-    Comments:
+    Comments: This endpoint installs the logic for a partiular study version into the db.
     """
     new_ae = await study_algorithm_engine.create(session=session, study_algorithm_engine=body)
     return new_ae
