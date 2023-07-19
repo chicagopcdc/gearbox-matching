@@ -15,6 +15,15 @@ async def get_latest_user_input(session: Session, user_id: int) -> SavedInputSea
     }
     return response
 
+async def get_all_user_input(session: Session, user_id: int) -> SavedInputSearchResults:
+    # this method returns an array of saved inputs
+    saved_input = await saved_input_crud.get_all_saved_input(session, user_id)
+    response = {
+        "user_id": user_id, # this is the user_id that was passed in
+        "results": saved_input
+    }
+    return response
+
 
 async def create_saved_input(session: Session, user_input: SavedInputCreate, user_id: int) -> SavedInputSearchResults:
     uid = dict(user_input)

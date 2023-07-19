@@ -72,7 +72,7 @@ async def get_object_all(
         token (HTTPAuthorizationCredentials, optional): bearer token
 
     Returns:
-        200: { "results": [{id: 1, "value": ""}...] }
+        200: { "user": user_id, "results": [{id: 1, "value": ""}...] }
         404: if the obj is not found
     """
     saved_user_input = await user_input_service.get_all_user_input(session=session, user_id=int(user_id))
