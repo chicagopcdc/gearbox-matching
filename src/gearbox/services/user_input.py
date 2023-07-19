@@ -19,7 +19,6 @@ async def get_all_user_input(session: Session, user_id: int) -> SavedInputSearch
     # this method returns an array of saved inputs
     saved_input = await saved_input_crud.get_all_saved_input(session, user_id)
     response = {
-        "user_id": user_id, # this is the user_id that was passed in
         "results": saved_input
     }
     return response
