@@ -16,7 +16,7 @@ class Study(Base):
 
     UniqueConstraint(code, name='study_code_uix')
 
-    sites = relationship("SiteHasStudy", back_populates="study")
+    sites = relationship("SiteHasStudy", back_populates="study", lazy='joined')
     # explicitly setting lazy='joined' here solved the problem of
     # pydantic trying to execute a join outside of the async 
     # program stream when lazy loading the study-links - this was happening even 

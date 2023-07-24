@@ -38,7 +38,7 @@ async def reset_active_status(session: Session, study_id: int) -> bool:
     return True
 
 async def get_study_version(session: Session, id: int) -> StudyVersionSchema:
-    sv = await study_version_crud.get_study_version(session, id)
+    sv = await study_version_crud.get(session, id)
     return sv
 
 async def get_study_versions(session: Session) -> StudyVersionSearchResults:

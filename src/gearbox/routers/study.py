@@ -29,7 +29,7 @@ async def get_study(
     results = await study_service.get_study_info(session, study_id)
     study_response = format_study_response(results)
 
-    return study_response
+    return study_response[0]
 
 @mod.post("/build-studies", response_model=List[StudyResponse], status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
 async def build_all_studies(

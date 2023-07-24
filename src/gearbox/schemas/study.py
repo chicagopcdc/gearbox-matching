@@ -3,7 +3,8 @@ from pydantic import BaseModel #, HttpUrl
 from datetime import datetime
 from typing import Sequence, List, Optional
 from gearbox.schemas import SiteCreate #, StudyLinkCreate
-from .study_link import StudyLinkCreate
+from .study_link import StudyLinkCreate, StudyLink
+from .site import Site, SiteStudy
 
 class StudyBase(BaseModel):
     name: Optional[str]
@@ -17,6 +18,8 @@ class StudyBase(BaseModel):
 
 class Study(StudyBase):
     id: int
+    sites: List[SiteStudy]
+    links: List[StudyLink]
 
 class StudyCreate(StudyBase):
     sites: Optional[List[SiteCreate]]

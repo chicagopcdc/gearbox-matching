@@ -15,7 +15,8 @@ from gearbox.admin_login import admin_required
 
 mod = APIRouter()
 
-@mod.get("/study-version/{study_version_id}", response_model=StudyVersionSchema, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)] )
+# @mod.get("/study-version/{study_version_id}", response_model=StudyVersionSchema, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)] )
+@mod.get("/study-version/{study_version_id}", response_model=StudyVersionInfo, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)] )
 async def get_study_version(
     request: Request,
     study_version_id: int,
