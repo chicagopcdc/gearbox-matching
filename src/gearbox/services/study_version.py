@@ -52,7 +52,6 @@ async def get_study_versions_by_status(session: Session, study_version_status:st
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"INVALID STUDY VERSION STATUS: {study_version_status}") 
 
     sv = await study_version_crud.get_study_versions_by_status(session, study_version_status)
-
     return sv
 
 async def create_study_version(session: Session, study_version: StudyVersionCreate) -> StudyVersionSchema:
@@ -75,4 +74,3 @@ async def update_study_version(session: Session, study_version: StudyVersionCrea
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study version for id: {study_version_id} not found for update.") 
     await session.commit() 
     return upd_study_version
-
