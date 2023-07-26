@@ -8,7 +8,6 @@ from gearbox.crud import study_crud, site_crud, site_has_study_crud, study_link_
 
 async def get_study_info(session: Session, id: int) -> StudySchema:
     aes = await study_crud.get_single_study_info(session, id)
-    print(f"AES TYPE---> {type(aes)}")
     return aes
 
 async def get_studies_info(session: Session) -> StudySearchResults:
