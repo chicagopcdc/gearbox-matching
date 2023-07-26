@@ -27,7 +27,7 @@ class CRUDStudy(CRUDBase [Study, StudyCreate, StudySearchResults]):
             ), joinedload(Study.links)
         ).where(Study.id == study_id)
         result = await current_session.execute(stmt)
-        sites = result.unique().scalars().all()
-        return sites
+        study = result.unique().scalars().all()
+        return study
 
 study_crud = CRUDStudy(Study)

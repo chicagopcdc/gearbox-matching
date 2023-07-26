@@ -13,37 +13,33 @@ from typing import List
 from gearbox import auth
 from gearbox.admin_login import admin_required
 
-from gearbox.schemas import StudyResponse, Study, StudyCreate, StudyResponseSearchResults
+from gearbox.schemas import Study, StudyCreate
 from gearbox import deps
-from gearbox.util.study_response import format_study_response
 from gearbox.services import study as study_service
 
 mod = APIRouter()
 
-@mod.get("/study/{study_id}", response_model=StudyResponse, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)] )
+@mod.get("/study/{study_id}", response_model=Study, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)] )
 async def get_study(
     request: Request,
     study_id: int,
     session: AsyncSession = Depends(deps.get_session)
 ):
     results = await study_service.get_study_info(session, study_id)
-    study_response = format_study_response(results)
+    return results[0]
 
-    return study_response
-
-@mod.post("/build-studies", response_model=List[StudyResponse], status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
+@mod.post("/build-studies", response_model=List[Study], status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
 async def build_all_studies(
     request: Request,
     session: AsyncSession = Depends(deps.get_session)
 ):
     results = await study_service.get_studies_info(session)
-    study_response = format_study_response(results)
 
     if not config.BYPASS_S3:
         params = [{'Content-Type':'application/json'}]
-        bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_STUDIES_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, study_response)
+        bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_STUDIES_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, results)
 
-    return study_response
+    return results
 
 @mod.get("/studies", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)] )
 async def get_all_studies(
