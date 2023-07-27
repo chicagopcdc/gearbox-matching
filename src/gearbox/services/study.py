@@ -7,7 +7,7 @@ from gearbox.util import status
 from gearbox.crud import study_crud, site_crud, site_has_study_crud, study_link_crud
 
 async def get_study_info(session: Session, id: int) -> StudySchema:
-    aes = await study_crud.get_study_info(session, id)
+    aes = await study_crud.get_single_study_info(session, id)
     return aes
 
 async def get_studies_info(session: Session) -> StudySearchResults:
@@ -16,7 +16,7 @@ async def get_studies_info(session: Session) -> StudySearchResults:
     pass
 
 async def get_study(session: Session, id: int) -> StudySchema:
-    aes = await study_crud.get_study(session, id)
+    aes = await study_crud.get(session, id)
     return aes
 
 async def get_studies(session: Session) -> StudySearchResults:

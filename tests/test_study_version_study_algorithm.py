@@ -10,14 +10,12 @@ from gearbox.models import StudyAlgorithmEngine, EligibilityCriteriaInfo
         {
             "study_algorithm_engine": 
             {
-                "study_version_id": 7,
-                "eligibility_criteria_id": 7,
                 "algorithm_logic": None,
                 "algorithm_version": 1,
                 "algorithm_logic": None,
                 "test": "create_new_study_algorithm_engine"
             },
-            "eligibility_criteria_info_id": 1
+            "eligibility_criteria_info_id": 7
         }
     ]
 )

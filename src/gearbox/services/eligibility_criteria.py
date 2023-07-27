@@ -25,7 +25,8 @@ async def get_eligibility_criteria(session: Session) -> EligibilityCriteriaSearc
     return ecs
     pass
 
-async def create_eligibility_criteria(session: Session, eligibility_criteria: EligibilityCriteriaCreate) -> EligibilityCriteriaSchema:
+async def create_eligibility_criteria(session: Session):
+    eligibility_criteria = EligibilityCriteriaCreate()
     new_eligibility_criteria = await eligibility_criteria_crud.create(db=session, obj_in=eligibility_criteria)
     await session.commit() 
     return new_eligibility_criteria
@@ -39,9 +40,9 @@ async def update_eligibility_criteria(session: Session, eligibility_criteria: El
     await session.commit() 
     return upd_eligibility_criteria
 
-async def get_eligibility_criteria_set(session):
+async def get_eligibility_criteria_set(session, id: int=None):
 
-    results = await eligibility_criteria_crud.get_eligibility_criteria_set(session)
+    results = await eligibility_criteria_crud.get_eligibility_criteria_set(session, ec_id=id)
     eligibility_criteria = []
 
     if results:

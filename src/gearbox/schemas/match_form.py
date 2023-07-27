@@ -25,15 +25,14 @@ class MatchFormField(BaseModel):
     id: int
     groupId: int
     name: str
-    min: Optional[Union[float,int]]
-    max: Optional[Union[float,int]]
-    step: Optional[Union[float,int]]
-    placeholder: Optional[str]
+    min: Optional[Union[float,int]] = None
+    max: Optional[Union[float,int]] = None
+    step: Optional[Union[float,int]] = None
+    placeholder: Optional[str] = None
     label: str
     type: str
-    options: Optional[List[MatchFormOption]]
-    showIf: Optional[MatchFormShowIf]
-
+    options: Optional[List[MatchFormOption]] = None
+    showIf: Optional[MatchFormShowIf] = None
 
 class MatchFormBase(BaseModel):
     groups: List[MatchFormGroup]

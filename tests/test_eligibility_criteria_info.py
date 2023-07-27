@@ -2,6 +2,7 @@ import pytest
 from sqlalchemy.orm import sessionmaker 
 from gearbox.models import EligibilityCriteriaInfo
 from .test_utils import is_aws_url
+from gearbox.util.types import EligibilityCriteriaInfoStatus
 
 
 @pytest.mark.asyncio
@@ -17,7 +18,7 @@ def test_get_eligibility_criteria_infos(setup_database, client):
 @pytest.mark.parametrize(
     "data", [ 
         {
-            "active": True,
+            "status": EligibilityCriteriaInfoStatus.ACTIVE.value,
             "study_version_id": 1,
             "study_algorithm_engine_id": 1,
             "eligibility_criteria_id": 7
@@ -43,9 +44,9 @@ def test_create_eligibility_criteria_info(setup_database, client, data, connecti
         #
         # Test: confirm that there exists only one active study version for the study id.
         #
-        active_eligibility_criteria_infos = db_session.query(EligibilityCriteriaInfo).filter(EligibilityCriteriaInfo.study_version_id==data['study_version_id']).filter(EligibilityCriteriaInfo.active==True).all()
+        active_eligibility_criteria_infos = db_session.query(EligibilityCriteriaInfo).filter(EligibilityCriteriaInfo.study_version_id==data['study_version_id']).filter(EligibilityCriteriaInfo.study_version_id==data['study_version_id']).filter(EligibilityCriteriaInfo.status==EligibilityCriteriaInfoStatus.ACTIVE.value).all()
         if len(active_eligibility_criteria_infos) != 1:
-            errors.append(f"Study id: {data['study_id']} has {len(active_eligibility_criteria_infos)} active study versions, should have exactly 1.")
+            errors.append(f"Study id: {data['study_version_id']} has {len(active_eligibility_criteria_infos)} active study versions, should have exactly 1.")
 
     except Exception as e:
         errors.append(f"Test eligibility_criteria_info unexpected exception: {str(e)}")
@@ -61,7 +62,7 @@ def test_update_eligibility_criteria_info(setup_database, client, connection):
 #    """
     fake_jwt = "1.2.3"
     errors = []
-    data = {"active":False}
+    data = {"status":EligibilityCriteriaInfoStatus.INACTIVE.value}
     eligibility_criteria_info_id = 1
 
     resp = client.post(f"/update-eligibility-criteria-info/{eligibility_criteria_info_id}", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
@@ -70,7 +71,7 @@ def test_update_eligibility_criteria_info(setup_database, client, connection):
         Session = sessionmaker(bind=connection)
         db_session = Session()
         eligibility_criteria_info_updated = db_session.query(EligibilityCriteriaInfo).filter(EligibilityCriteriaInfo.id==eligibility_criteria_info_id).first()
-        if eligibility_criteria_info_updated.active != False:
+        if eligibility_criteria_info_updated.status.value != EligibilityCriteriaInfoStatus.INACTIVE.value:
             errors.append(f"Study version (id): {eligibility_criteria_info_id} update active to false failed")
 
     except Exception as e:
