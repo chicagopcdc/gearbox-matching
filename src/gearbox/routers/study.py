@@ -36,7 +36,7 @@ async def build_all_studies(
     session: AsyncSession = Depends(deps.get_session)
 ):
     results = await study_service.get_studies_info(session)
-    json_studies = [jsonable_encoder(study) for study in results]
+    json_studies = jsonable_encoder(results)
 
     if not config.BYPASS_S3:
         params = [{'Content-Type':'application/json'}]
