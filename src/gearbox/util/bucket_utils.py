@@ -27,13 +27,13 @@ def get_presigned_url(request, key_name, pu_config, method):
             end_idx = presigned_url.find("&", start_idx)
             presigned_url = presigned_url[:start_idx] + presigned_url[end_idx + 1:]
     except Exception as ex:
-        raise HTTPException(status.get_starlette_status(ex.code), 
-            detail="Error creating presigned_url for {} {}.".format(bucket_name, ex))
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            f"Error creating presigned_url for {bucket_name} {ex}.")
     return presigned_url
 
 def put_object(request, bucket_name, key_name, expires, config, contents):
     try:
         request.app.boto_manager.put_object(bucket_name, key_name, expires, config, contents) 
     except Exception as ex:
-        raise HTTPException(status.get_starlette_status(ex.code), 
-            detail="Error putting object {} {}.".format(bucket_name, ex))
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            f"Error putting object {bucket_name}: {ex}.")
