@@ -49,6 +49,8 @@ def get_app():
 
     @app.exception_handler(RequestValidationError)
     async def value_error_exception_handler(request:Request, exc:ValueError):
+        exc_str = f'{exc}.'.replace('\n', '').replace(' ',' ')
+        print(f"EXCEPTION HANDLER VALUE ERROR: {request}: {exc_str}")
         return PlainTextResponse(str(exc), status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     @app.exception_handler(RequestValidationError)

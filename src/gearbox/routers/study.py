@@ -16,6 +16,7 @@ from gearbox.admin_login import admin_required
 from gearbox.schemas import Study, StudyCreate
 from gearbox import deps
 from gearbox.services import study as study_service
+from fastapi.encoders import jsonable_encoder
 
 mod = APIRouter()
 
@@ -34,10 +35,11 @@ async def build_all_studies(
     session: AsyncSession = Depends(deps.get_session)
 ):
     results = await study_service.get_studies_info(session)
+    json_studies = jsonable_encoder(results)
 
     if not config.BYPASS_S3:
         params = [{'Content-Type':'application/json'}]
-        bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_STUDIES_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, results)
+        bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_STUDIES_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, json_studies)
 
     return results
 
