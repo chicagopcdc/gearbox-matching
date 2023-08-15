@@ -45,5 +45,4 @@ async def build_mc(
     return JSONResponse(jsonable_encoder(match_conditions), status.HTTP_200_OK)
 
 def init_app(app):
-    app.include_router(mod, tags=["build_match_conditions"])
-    app.include_router(mod, tags=["match_conditions"])
+    app.include_router(mod, tags=["match-conditions"])

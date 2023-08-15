@@ -75,5 +75,4 @@ async def save_object(
     return new_eligibility_criteria
 
 def init_app(app):
-    app.include_router(mod, tags=["build_eligibility_criteria"])
-    app.include_router(mod, tags=["eligibility_criteria"])
+    app.include_router(mod, tags=["eligibility-criteria"])

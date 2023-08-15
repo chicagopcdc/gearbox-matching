@@ -38,5 +38,4 @@ async def get_match_form(
     return JSONResponse(presigned_url, status.HTTP_200_OK) 
 
 def init_app(app):
-    app.include_router(mod, tags=["build_match_form"])
-    app.include_router(mod, tags=["match_form"])
+    app.include_router(mod, tags=["match-form"])

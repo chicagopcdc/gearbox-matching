@@ -55,4 +55,4 @@ async def update_sae(
     return updated_sae
 
 def init_app(app):
-    app.include_router(mod, tags=["study-algorithm-engine","study-algorithm-engines","update-study-algorithm-engine"])
+    app.include_router(mod, tags=["study-algorithm-engine"])

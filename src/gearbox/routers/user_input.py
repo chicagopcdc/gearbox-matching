@@ -57,4 +57,4 @@ async def get_object_latest(
     return saved_user_input
 
 def init_app(app):
-    app.include_router(mod, tags=["user_input"])
+    app.include_router(mod, tags=["user-input"])

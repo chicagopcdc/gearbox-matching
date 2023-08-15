@@ -77,4 +77,3 @@ async def update_object(
 
 def init_app(app):
     app.include_router(mod, tags=["study"])
-    app.include_router(mod, tags=["build_studies"])
