@@ -18,7 +18,6 @@ from gearbox import deps
 from gearbox.services import study as study_service
 from fastapi.encoders import jsonable_encoder
 
-
 mod = APIRouter()
 
 @mod.get("/study/{study_id}", response_model=Study, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)] )
@@ -78,4 +77,3 @@ async def update_object(
 
 def init_app(app):
     app.include_router(mod, tags=["study"])
-    app.include_router(mod, tags=["build_studies"])

@@ -63,4 +63,4 @@ async def update_object(
     return upd_eligibility_criteria_info
 
 def init_app(app):
-    app.include_router(mod, tags=["eligibility_criteria_info","update_eligibility_criteria_info","eligibility_criteria_infos"])
+    app.include_router(mod, tags=["eligibility-criteria-info"])

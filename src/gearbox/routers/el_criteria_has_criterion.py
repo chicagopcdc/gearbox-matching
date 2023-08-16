@@ -58,4 +58,4 @@ async def update_object(
     return upd_el_criteria_has_criterion
 
 def init_app(app):
-    app.include_router(mod, tags=["el_criteria_has_criterion","el_criteria_has_criterions","update-el_criteria_has_criterion"])
+    app.include_router(mod, tags=["el-criteria-has-criterion"])

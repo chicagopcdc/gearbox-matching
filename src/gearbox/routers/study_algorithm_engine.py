@@ -7,7 +7,7 @@ from gearbox.util import status
 from gearbox.admin_login import admin_required
 from gearbox.services import study_algorithm_engine
 
-from gearbox.schemas import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSearchResults , StudyAlgorithmEngine, StudyAlgorithmEngineCreateInput
+from gearbox.schemas import StudyAlgorithmEngineUpdate, StudyAlgorithmEngineSearchResults , StudyAlgorithmEngine, StudyAlgorithmEngineCreateInput
 from gearbox import deps
 from gearbox import auth 
 
@@ -42,5 +42,17 @@ async def save_sae(
     new_ae = await study_algorithm_engine.create(session=session, study_algorithm_engine=body)
     return new_ae
 
+@mod.post("/update-study-algorithm-engine", response_model=StudyAlgorithmEngine,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+async def update_sae(
+    body: StudyAlgorithmEngineUpdate,
+    request: Request,
+    session: AsyncSession = Depends(deps.get_session),
+):
+    """
+    Comments: This endpoint updates the logic for a partiular study version 
+    """
+    updated_sae = await study_algorithm_engine.update(session=session, study_algorithm_engine=body)
+    return updated_sae
+
 def init_app(app):
-    app.include_router(mod, tags=["study-algorithm-engine","study-algorithm-engines"])
+    app.include_router(mod, tags=["study-algorithm-engine"])

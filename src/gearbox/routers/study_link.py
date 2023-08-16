@@ -53,4 +53,4 @@ async def update_object(
     return upd_study_link
 
 def init_app(app):
-    app.include_router(mod, tags=["study_link","update_study_link","study_links"])
+    app.include_router(mod, tags=["study-link"])

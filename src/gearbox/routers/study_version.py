@@ -77,4 +77,4 @@ async def update_object(
     return upd_study_version
 
 def init_app(app):
-    app.include_router(mod, tags=["study_version","update_study_version","study_versions", "study_versions_in_process"])
+    app.include_router(mod, tags=["study-version"])
