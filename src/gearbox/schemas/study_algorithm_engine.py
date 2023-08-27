@@ -62,6 +62,7 @@ class StudyAlgorithmEngineCreateInput(StudyAlgorithmEngineBase):
     # in the el_criteria_has_criterion table
     eligibility_criteria_id: Optional[int]
     study_version_id: Optional[int]
+    eligibility_criteria_info_id: int
     pass
 
 class StudyAlgorithmEngineCreate(StudyAlgorithmEngineBase):

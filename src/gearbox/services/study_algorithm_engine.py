@@ -7,13 +7,14 @@ from . import logger
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy import select, exc
 from fastapi import HTTPException
-from gearbox.models import ElCriteriaHasCriterion, EligibilityCriteria, StudyVersion, EligibilityCriteriaInfo
+from gearbox.models import ElCriteriaHasCriterion, EligibilityCriteria, StudyVersion, EligibilityCriteriaInfo as EligibilityCriteriaInfoModel
 from gearbox.schemas import StudyAlgorithmEngine as StudyAlgorithmEngineSchema
 from gearbox.schemas import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSearchResults, StudyAlgorithmEngineCreateInput, StudyAlgorithmEngineUpdate
 from sqlalchemy.sql.functions import func
 from gearbox.util import status, json_utils
 from gearbox.crud import study_algorithm_engine_crud, eligibility_criteria_info_crud
 from gearbox.util.types import EligibilityCriteriaInfoStatus
+from gearbox.services import eligibility_criteria_info as eligibility_criteria_info_service
 
 async def get_study_algorithm_engine(session: Session, id: int) -> StudyAlgorithmEngineSchema:
     aes = await study_algorithm_engine_crud.get(session, id)
@@ -72,7 +73,7 @@ async def get_latest_algorithm_version(session: Session, study_version_id: int) 
     try:
         result = await session.execute(select(func.max(StudyAlgorithmEngine.algorithm_version))
             .join(StudyAlgorithmEngine.eligibility_criteria_info)
-            .where(EligibilityCriteriaInfo.study_version_id == study_version_id)
+            .where(EligibilityCriteriaInfoModel.study_version_id == study_version_id)
         )
 
         latest_algorithm_version = result.scalar_one()
@@ -99,8 +100,8 @@ async def get_existing_algorithm_logic_duplicate(session: Session, algorithm_log
         result = await session.execute(
             select(StudyAlgorithmEngine)
                 .where(StudyAlgorithmEngine.id.in_(
-                        select(EligibilityCriteriaInfo.study_algorithm_engine_id)
-                                .where(EligibilityCriteriaInfo.study_version_id == study_version_id)
+                        select(EligibilityCriteriaInfoModel.study_algorithm_engine_id)
+                                .where(EligibilityCriteriaInfoModel.study_version_id == study_version_id)
                         )
                 )
         )
@@ -135,11 +136,17 @@ async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineC
     # if no duplicate is found, determine version and insert new study algorithm engine
     if not dup_study_algorithm_engine:
         study_algorithm_engine.algorithm_version = await get_latest_algorithm_version(session, study_algorithm_engine.study_version_id) + 1
-
         new_study_algorithm_engine = await save_study_algorithm_engine(session, study_algorithm_engine)
-        return new_study_algorithm_engine
+        study_algorithm_engine_id = new_study_algorithm_engine.id
+        retval = new_study_algorithm_engine
     else: 
-        return dup_study_algorithm_engine
+        study_algorithm_engine_id = dup_study_algorithm_engine.id
+        retval = dup_study_algorithm_engine
+
+    # update eligibility_criteria_info with new study_algorithm_engine_id
+    eci_upd = {'study_algorithm_engine_id': study_algorithm_engine_id}
+    updated_eci = await eligibility_criteria_info_service.update_eligibility_criteria_info(session, eligibility_criteria_info=eci_upd, eligibility_criteria_info_id=study_algorithm_engine.eligibility_criteria_info_id)
+    return retval
 
 async def update(session: Session, study_algorithm_engine: StudyAlgorithmEngineUpdate) -> StudyAlgorithmEngine:
 
