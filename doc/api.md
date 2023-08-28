@@ -29,6 +29,8 @@ This is a summary of a discussion on GEARBOx API design on July 31, 2020.
 >   - updated Studies API based on feedback
 > - October 8, 2021:
 >   - added a new section for <s>Latest</s>Saved User Input
+> - October 19, 2021:
+>   - updated Saved User Input endpoints (from `/saved` to `/user-input`)
   
 </details>
 
@@ -225,7 +227,7 @@ This is a special input type with a dedicated input component consisting of year
 
 #### Creating and updating 
 
-- Endpoint: POST `/saved`
+- Endpoint: POST `/user-input`
 - API:
 
 ```jsonc
@@ -251,5 +253,5 @@ This is a special input type with a dedicated input component consisting of year
 
 #### Retrieving the latest
 
-- Endpoint: GET `/saved/latest`
+- Endpoint: GET `/user-input/latest`
 - API: same as the POST response data

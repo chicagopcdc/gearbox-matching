@@ -30,6 +30,11 @@ class SavedInputSearchResults(BaseModel):
     results: List[dict]
     id: int
 
+# this is the response for the /user-input/all endpoint
+# it returns a list of saved inputs
+class SavedInputAll(BaseModel):
+    results: List[dict]
+
 class SavedInputCreate(BaseModel):
     data: List[dict]
     id: Optional[int]
