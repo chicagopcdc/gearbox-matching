@@ -49,7 +49,6 @@ async def create_eligibility_criteria_info(session: Session, eligibility_criteri
 
 async def update_eligibility_criteria_info(session: Session, eligibility_criteria_info: EligibilityCriteriaInfoCreate, eligibility_criteria_info_id: int) -> EligibilityCriteriaInfoSchema:
     eligibility_criteria_info_to_upd = await eligibility_criteria_info_crud.get(db=session, id=eligibility_criteria_info_id)
-
     # if updating status to active, then set status to inactive for any 
     # currently active eligibility_criteria_info rows for the study version
     if 'status' in eligibility_criteria_info.keys() and eligibility_criteria_info['status'] == EligibilityCriteriaInfoStatus.ACTIVE.value:
