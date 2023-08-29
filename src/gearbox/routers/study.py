@@ -27,7 +27,10 @@ async def get_study(
     session: AsyncSession = Depends(deps.get_session)
 ):
     results = await study_service.get_study_info(session, study_id)
-    return results[0]
+    if results:
+        return results[0]
+    else:
+        return None
 
 @mod.post("/build-studies", response_model=List[Study], status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
 async def build_all_studies(
