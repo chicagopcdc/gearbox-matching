@@ -15,7 +15,6 @@ class CRUDSavedInput(CRUDBase [SavedInput, SavedInputCreate, SavedInputSearchRes
         stmt = select(SavedInput).where(SavedInput.user_id==logged_user_id)
         result = await current_session.execute(stmt)
         saved_inputs = result.scalars().all()
-        saved_inputs = [si.data for si in saved_inputs]
         return saved_inputs
 
 
