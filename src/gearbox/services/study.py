@@ -44,7 +44,7 @@ async def create_study(session: Session, study: StudyCreate) -> StudySchema:
             link.study_id = new_study.id
             new_link = await study_link_crud.create(db=session, obj_in=link)
     
-    session.commit()
+    await session.commit()
     return new_study
 
 async def update_study(session: Session, study: StudyCreate, study_id: int) -> StudySchema:
