@@ -27,7 +27,7 @@ async def get_study(
     session: AsyncSession = Depends(deps.get_session)
 ):
     results = await study_service.get_study_info(session, study_id)
-    if results:
+    if results and len(results) > 0:
         return results[0]
     else:
         return None
