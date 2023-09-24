@@ -7,10 +7,11 @@ from sqlalchemy.orm import Session
 from . import logger
 from gearbox.util import status
 
-from gearbox.schemas import SavedInputSearchResults, SavedInputCreate
+from gearbox.schemas import SavedInputSearchResults, SavedInputCreate, SavedInputAll
 from gearbox.services import user_input as user_input_service
 from gearbox import deps
 from gearbox import auth 
+from gearbox.config import config
 
 mod = APIRouter()
 
@@ -54,6 +55,37 @@ async def get_object_latest(
     if not saved_user_input:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Saved input not found for user '{user_id}'")
 
+    return saved_user_input
+
+# get all saved inputs for a user
+@mod.get("/user-input/all", response_model=SavedInputSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
+async def get_object_all(
+    request: Request,
+    session: Session = Depends(deps.get_session),
+    user_id: int = Depends(auth.authenticate_user)
+):
+    """
+    Attempt to fetch all saved inputs for the user, 
+    return the saved object.
+
+    Args:
+        request (Request): starlette request (which contains reference to FastAPI app)
+        token (HTTPAuthorizationCredentials, optional): bearer token
+
+    Returns:
+        200: { "user": user_id, "results": [{id: 1, "value": ""}...] }
+        404: if the obj is not found
+    """
+    # check that the environment variable ALL_INPUTS from the config.py is set to True
+
+    if not config.ALL_INPUTS:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, f"this endpoint is not active")
+
+    
+    saved_user_input = await user_input_service.get_all_user_input(session=session, user_id=int(user_id))
+    if not saved_user_input:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Saved input not found for user '{user_id}'")
+    
     return saved_user_input
 
 def init_app(app):
