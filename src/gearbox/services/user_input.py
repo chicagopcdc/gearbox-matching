@@ -1,4 +1,4 @@
-from gearbox.schemas import SavedInputCreate, SavedInputPost, SavedInputSearchResults
+from gearbox.schemas import SavedInputCreate, SavedInputPost, SavedInputSearchResults, SavedInputAll
 from gearbox.models import SavedInput
 from . import logger
 from sqlalchemy.ext.asyncio import AsyncSession as Session
@@ -12,6 +12,17 @@ async def get_latest_user_input(session: Session, user_id: int) -> SavedInputSea
     response = {
         "results": latest_saved_input.data,
         "id": latest_saved_input.id
+    }
+    return response
+
+async def get_all_user_input(session: Session, user_id: int) -> SavedInputAll:
+    # this method returns an array of saved inputs
+    saved_inputs = await saved_input_crud.get_all_saved_input(session, user_id)
+    saved_inputs = [{"filter": si.data, "id": si.id} for si in saved_inputs]
+
+    response = {
+        "results": saved_inputs,
+        "id": user_id
     }
     return response
 

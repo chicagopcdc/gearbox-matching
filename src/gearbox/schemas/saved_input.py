@@ -37,3 +37,8 @@ class SavedInputCreate(BaseModel):
 class SavedInputPost(SavedInputBase):
     id: Optional[int]
     pass
+
+# this is the response for the /user-input/all endpoint
+# it returns a list of saved inputs
+class SavedInputAll(BaseModel):
+    results: List[dict]

@@ -22,7 +22,10 @@ async def save_object(
     session: AsyncSession = Depends(deps.get_session),
 ):
     """
-    Comments:
+    Comments: This endpoint installs the logic for a study version in the study_algorithm_engine table.
+    Usage of this endpoint is dependent on the existence of the set of eligibility criteria
+    for the study which is created in a separate api call to the study_version_eligibility_criteria
+    endpoint. 
     """
     new_svsa = await study_version_study_algorithm_service.create_study_version_study_algorithm(session=session, study_version_study_algorithm=body)
     return new_svsa

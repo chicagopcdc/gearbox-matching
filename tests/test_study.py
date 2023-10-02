@@ -38,8 +38,8 @@ def test_studies_compare(setup_database, client):
     with open(studydata_file, 'r') as comp_file:
         study_compare = json.load(comp_file)
 
-    studies = full_res["results"]
-    study_compare = study_compare["results"]
+    studies = full_res
+    study_compare = study_compare
 
     diff = []
     # Diff all studies in the reponse that exist in the mock file
@@ -61,6 +61,26 @@ def test_get_studies(setup_database, client):
     url_str =  url.content.decode('ascii').strip('\"')
 
     assert is_aws_url(url_str)
+
+@pytest.mark.asyncio
+def test_get_study(setup_database, client):
+    """
+    Comments: Test to validate aws url is returned from get endpoint
+    """
+    errors = []
+    fake_jwt = "1.2.3"
+    resp = client.get("/study/1", headers={"Authorization": f"bearer {fake_jwt}"})
+    assert str(resp.status_code).startswith("20")
+
+@pytest.mark.asyncio
+def test_get_study_not_exist(setup_database, client):
+    """
+    Comments: Test to validate aws url is returned from get endpoint
+    """
+    errors = []
+    fake_jwt = "1.2.3"
+    resp = client.get("/study/9999991", headers={"Authorization": f"bearer {fake_jwt}"})
+    assert resp.json() == None
 
 @pytest.mark.parametrize(
     "data", [ 

@@ -11,7 +11,7 @@ class SiteHasStudy(Base):
     assoc_create_date = Column("create_date", DateTime, nullable=True)
     assoc_active = Column("active", Boolean, nullable=True)
 
-    study = relationship("Study", back_populates="sites")
-    site = relationship("Site", back_populates="studies")
+    study = relationship("Study", back_populates="sites", lazy='joined')
+    site = relationship("Site", back_populates="studies", lazy='joined')
 
 

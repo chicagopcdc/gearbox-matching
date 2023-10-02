@@ -1,7 +1,0 @@
-id	data_type	render_type	create_date
-1	Integer	number	
-2	list	radio	
-3	percentage	number	
-4	Float	number	
-5	list	select	
-6	integer	age	

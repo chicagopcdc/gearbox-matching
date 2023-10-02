@@ -3,7 +3,7 @@ import json
 
 from fastapi import HTTPException
 from starlette.config import environ
-from gearbox.models import StudyAlgorithmEngine
+from gearbox.models import StudyAlgorithmEngine, EligibilityCriteriaInfo
 
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select
@@ -12,16 +12,27 @@ TEST_CREATE_LIST = [
         {
             "study_version_id": 7,
             "eligibility_criteria_id": 7,
+            "eligibility_criteria_info_id": 7,
             "algorithm_logic": None,
             "algorithm_version": 1,
             "logic_file": "./tests/data/new_algorithm_logic.json",
             "test": "create_new_study_algorithm_engine"
         },
         {
+            "study_version_id": 7,
+            "eligibility_criteria_id": 7,
+            "algorithm_logic": None,
+            "algorithm_version": 1,
+            "logic_file": "./tests/data/update_algorithm_logic.json",
+            "test": "update_new_study_algorithm_engine",
+            "id": 7
+        },
+        {
             "study_version_id": 9999,
             "eligibility_criteria_id": 1,
             "algorithm_logic": None,
             "algorithm_version": 1,
+            "eligibility_criteria_info_id": 1,
             "logic_file": "./tests/data/new_algorithm_logic.json",
             "test": "invalid_study_version"
         },
@@ -30,6 +41,7 @@ TEST_CREATE_LIST = [
             "eligibility_criteria_id": 1,
             "algorithm_logic": None,
             "algorithm_version": 2,
+            "eligibility_criteria_info_id": 1,
             "logic_file": "./tests/data/algorithm_logic.json",
             "test": "duplicate_logic"
         },
@@ -38,6 +50,7 @@ TEST_CREATE_LIST = [
             "eligibility_criteria_id": 1,
             "algorithm_logic": None,
             "algorithm_version": 1,
+            "eligibility_criteria_info_id": 1,
             "active": True,
             "logic_file": "./tests/data/algorithm_logic_invalid_el_criteria_has_criterion_ids.json",
             "test":"invalid_criteria_ids"
@@ -48,6 +61,7 @@ TEST_CREATE_LIST = [
             "algorithm_logic": None,
             "algorithm_version": 1,
             "active": True,
+            "eligibility_criteria_info_id": 1,
             "logic_file": "./tests/data/algorithm_logic_invalid_schema.json",
             "test":"invalid_logic"
         }
@@ -75,9 +89,16 @@ def test_create_study_algorithm_engine(setup_database, client, test_create_data,
         ae_logic_json = comp_file.read().replace('\n','').replace('\t',' ')
 
     data['algorithm_logic'] = ae_logic_json
-
     fake_jwt = "1.2.3"
-    resp = client.post("/study-algorithm-engine", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+
+
+    if test_create_data["test"] == "update_new_study_algorithm_engine":
+        data['id'] = test_create_data['id']
+        data['eligibility_criteria_id'] = test_create_data['eligibility_criteria_id']
+        resp = client.post("/update-study-algorithm-engine", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    else:
+        data['eligibility_criteria_info_id'] = test_create_data['eligibility_criteria_info_id']
+        resp = client.post("/study-algorithm-engine", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
 
     errors = []
     # TEST NEW STUDY ALGORITHM ENGINE SUCCESS
@@ -85,6 +106,37 @@ def test_create_study_algorithm_engine(setup_database, client, test_create_data,
         if not (str(resp.status_code).startswith("20")):
             errors.append(f"ERROR: create_new_study_algorithm_engine test: unexpected http status in response: {str(resp.status_code)}")
         full_res = resp.json()
+        new_ae_id = full_res['id']
+        # verify row created 
+        try:
+            Session = sessionmaker(bind=connection)
+            db_session = Session()
+
+            stmt = select(StudyAlgorithmEngine.algorithm_logic, StudyAlgorithmEngine.id).where(StudyAlgorithmEngine.id == new_ae_id)
+            ael = db_session.execute(stmt).first()
+            if not ael:
+                errors.append(f"ERROR: create_new_study_algorithm_engine test failed to confirm new study_algorithm_engine row created.")
+
+            # compare db json against input file
+            with open(logic_file, 'r') as comp_file:
+                ae_logic_json = json.loads(comp_file.read())
+            if not ae_logic_json == ael.algorithm_logic:
+                errors.append(f"ERROR: create_new_study_algorithm_engine test db algorithm_logic does not match input data.")
+
+            stmt = select(EligibilityCriteriaInfo.study_algorithm_engine_id).where(EligibilityCriteriaInfo.study_algorithm_engine_id == new_ae_id)
+            eciid = db_session.execute(stmt).first()
+            if not eciid:
+                errors.append(f"ERROR: create_new_study_algorithm_engine test failed to confirm updated eligibility_criteria_info row for new study_algorithm_engine.")
+
+            db_session.close()
+        except Exception as e:
+            errors.append(f"SQL ERROR: create_new_study_algorithm_engine: {e}")
+
+    elif test_create_data["test"] == "update_new_study_algorithm_engine":
+        if not (str(resp.status_code).startswith("20")):
+            errors.append(f"ERROR: update_new_study_algorithm_engine test: unexpected http status in response: {str(resp.status_code)}")
+        full_res = resp.json()
+
         # returns duplicate (existing) row with updated status
         new_ae_id = full_res['id']
         # verify row created 
