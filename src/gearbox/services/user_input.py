@@ -18,6 +18,7 @@ async def get_latest_user_input(session: Session, user_id: int) -> SavedInputSea
 async def get_all_user_input(session: Session, user_id: int) -> SavedInputAll:
     # this method returns an array of saved inputs
     saved_inputs = await saved_input_crud.get_all_saved_input(session, user_id)
+    saved_inputs = [{"filter": si.data, "id": si.id} for si in saved_inputs]
 
     response = {
         "results": saved_inputs,
