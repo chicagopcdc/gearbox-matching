@@ -130,3 +130,5 @@ S3_BUCKET_STUDIES_KEY_NAME = config("S3_BUCKET_STUDIES_KEY_NAME", default='gearb
 S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME = config("S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME", default='eligibility_criteria.json')
 
 AWS_REGION = config("AWS_REGION", default='us-east-1')
+
+STUDY_HAS_PATIENT = config("STUDY_HAS_PATIENT", default='False')
