@@ -106,5 +106,5 @@ def test_get_all_saved_input(setup_database, client, data):
     
     # check that the response contains the expected data (all of the saved inputs for the user)
     for saved_input in full_res['results']:
-        if not saved_input in data['data']:
+        if not saved_input["filter"] in data['data']:
             errors.append(f"test_get_all_saved_input failed to retrieved all saved inputs for user: {data['data']}")
