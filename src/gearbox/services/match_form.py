@@ -69,7 +69,6 @@ async def get_match_form(session):
                         chvalues = [x for x in display_rules.criterion.values]
                         for chvalue in chvalues:
                             o = {'value': chvalue.value.id}
-                            # o.update({'label':chvalue.value.code})
                             o.update({'label':chvalue.value.description})
                             options.append(o)
                     if display_rules.criterion.input_type.render_type == 'radio':
@@ -116,6 +115,7 @@ async def get_match_form(session):
                         critdict = {
                             "id": tb.criterion.id,
                             "value": tb_value,
+                            "valueId": tb.value.id,
                             "operator": tb.value.operator
                         }
                         critlookup[tb.id] = critdict
@@ -131,7 +131,6 @@ async def get_match_form(session):
                         "operator": "AND",
                         "criteria": critlist 
                     }
-                    # if len(pathlist) == 1: # this shouldn't happen, but if it did...
                 elif (pathlist):
                     path_tree = get_tree(pathlist, suppress_header=True)
                     path_tree = update_dict(path_tree, critlookup)

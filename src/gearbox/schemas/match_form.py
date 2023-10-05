@@ -12,15 +12,6 @@ class MatchFormOption(BaseModel):
     label: str
     description: Optional[str]
 
-class MatchFormShowIfCriteria(BaseModel):
-    id: Optional[int]
-    value: Optional[Union[float,int]]
-    operator: str
-
-class MatchFormShowIf(BaseModel):
-    operator: str
-    criteria: List[MatchFormShowIfCriteria]
-
 class MatchFormField(BaseModel):
     id: int
     groupId: int
@@ -32,7 +23,7 @@ class MatchFormField(BaseModel):
     label: str
     type: str
     options: Optional[List[MatchFormOption]] = None
-    showIf: Optional[MatchFormShowIf] = None
+    showIf: Optional[dict]
 
 class MatchFormBase(BaseModel):
     groups: List[MatchFormGroup]
