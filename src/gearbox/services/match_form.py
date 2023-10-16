@@ -3,6 +3,7 @@ from ..util.bounds import bounds
 from . import logger
 from gearbox.crud.match_form import get_form_info
 from .match_conditions import get_tree
+import re
 
 def update_dict(d, critlookup):
     for key in d:
@@ -94,7 +95,8 @@ async def get_match_form(session):
                 pathlist = []
                 critlookup = {}
                 path_tree = None
-                for tb in display_rules.triggered_bys:
+                triggered_bys = [x for x in display_rules.triggered_bys]
+                for tb in triggered_bys:
                     if tb.active:
                         tb_value = ''
                         if (tb.path):
@@ -120,17 +122,25 @@ async def get_match_form(session):
                         }
                         critlookup[tb.id] = critdict
 
-                # build tree
-                if len(pathlist) == 2 or len(critlookup) == 1 or len(critlookup) == 2: 
+                if len(pathlist) == 2 or len(critlookup) == 1 or len(critlookup) == 2:
                     critlist = []
                     for crit_key in critlookup:
                         if critlookup[crit_key]:
                             critlist.append(critlookup[crit_key])
 
-                    path_tree = {
-                        "operator": "AND",
-                        "criteria": critlist 
-                    }
+
+                    m = re.search("OR", str(pathlist))
+                    if m and len(pathlist) == 1:
+                        path_tree = {
+                            "operator": "OR",
+                            "criteria": critlist 
+                        }
+                    else:
+                        path_tree = {
+                            "operator": "AND",
+                            "criteria": critlist 
+                        }
+
                 elif (pathlist):
                     path_tree = get_tree(pathlist, suppress_header=True)
                     path_tree = update_dict(path_tree, critlookup)
