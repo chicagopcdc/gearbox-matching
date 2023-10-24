@@ -37,5 +37,18 @@ async def get_match_form(
     presigned_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_MATCH_FORM_KEY_NAME, params, "get_object")
     return JSONResponse(presigned_url, status.HTTP_200_OK) 
 
+@mod.post("/update-match-form", response_model=MatchForm,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+async def update_sae(
+    body: MatchForm,
+    request: Request,
+    session: Session = Depends(deps.get_session),
+):
+    """
+    Comments: This endpoint is used to update the order of the criteria in the match_form.
+    It deletes and recreates the contents of the display_rules and triggered_by tables based
+    on the given match form json.
+    """
+    await match_form_service.update(match_form=body, session=session)
+
 def init_app(app):
     app.include_router(mod, tags=["match-form"])

@@ -67,3 +67,20 @@ def test_get_match_form(setup_database, client):
     url_str =  url.content.decode('ascii').strip('\"')
 
     assert is_aws_url(url_str)
+
+def test_update_match_form(setup_database, client):
+    errors = []
+    fake_jwt = "1.2.3"
+    print(f"IN UPDATE FUNC")
+    matchformdata_file = './tests/data/match_form_compare_dat.json'
+    with open(matchformdata_file, 'r') as comp_file:
+        match_form_for_update = json.load(comp_file)
+
+    resp = client.post("/update-match-form", json=match_form_for_update, headers={"Authorization": f"bearer {fake_jwt}"})
+    resp.raise_for_status()
+    print(f"RESPONSE CODE: {resp.status_code}")
+    assert str(resp.status_code).startswith("20")
+    # -- NEED TO SEND A MATCH-FORM WITH THE TEST! --
+    # -- USE THE ONE IN THE DATA DIR --
+    # url_str =  url.content.decode('ascii').strip('\"')
+

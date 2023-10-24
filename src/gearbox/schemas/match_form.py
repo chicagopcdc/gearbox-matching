@@ -1,7 +1,7 @@
 from xml.dom.minidom import Identified
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, Extra, Json
 from datetime import datetime
-from typing import Optional, Sequence, List, Union
+from typing import Optional, Sequence, List, Union, Dict, Any
 
 class MatchFormGroup(BaseModel):
     id: int
@@ -23,7 +23,7 @@ class MatchFormField(BaseModel):
     label: str
     type: str
     options: Optional[List[MatchFormOption]] = None
-    showIf: Optional[dict]
+    showIf: Optional[Union[Json[Any],Dict]]
 
 class MatchFormBase(BaseModel):
     groups: List[MatchFormGroup]
