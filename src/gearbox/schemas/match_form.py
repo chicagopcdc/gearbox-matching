@@ -7,41 +7,22 @@ from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 from jsonschema.exceptions import SchemaError 
 
-match_form_group_schema = {
-    "type":"array",
+# define the expected jsonschema schema for the showif logic
+showif_logic_schema = {
+    "type":"object",
     "properties": {
-            "id": {"type": "number"},
-            "name": {"type": "string"}
-        },
-    "required": ["id","name"]
-}
-
-#        "fields": {"type:":"array",
-#            "id": {"type": "number"},
-#            "groupId": {"type": "number"},
-#            "name": {"type": "string"},
-#            "label": {"type": "string"},
-#            "type": {"type": "string"},
-#            "options": {"type:":"array",
-#                "value": {"type": "number"},
-#                "label": {"type": "string"},
-#                "description": {"type": "string"}
-#            },
-#            "showIf": {"type:":"array",
-#                "operator": {"type":"string", "enum":["AND","OR"] },
-#                "criteria": {"type":"array",
-#                "items": {
-#                    "anyOf": [
-#                        {"type":"number"},
-#                        {"$ref":"#"}
-#                    ]       
-#                }          
-#                }       
-#            }
-#        }
-#    },       
-#    "required": ["groups","fields"]
-#}       
+        "operator": {"type":"string", "enum":["AND","OR","eq","gt","gte","eq","lte","lt"] },
+        "criteria": {"type":"array",
+            "items": {
+                "anyOf": [
+                    {"type":"number"},
+                    {"$ref":"#"}
+                ]       
+            }       
+        }       
+    },       
+    "required": ["operator"]
+}       
 
 class MatchFormGroup(BaseModel):
     id: int
@@ -65,25 +46,25 @@ class MatchFormField(BaseModel):
     options: Optional[List[MatchFormOption]] = None
     showIf: Optional[Union[Json[Any],Dict]]
 
-class MatchFormBase(BaseModel):
-    groups: List[MatchFormGroup]
-    fields: List[MatchFormField]
-
-    @validator('groups')
-    def check_valid_vs_groups_schema(cls, v):
+    @validator('showIf')
+    def check_valid_vs_logic_schema(cls, v):
         
         try:
             # The validate method will throw a jsonschema.exceptions.ValidationError
-            # if algorithm_logic field fails to validate against the algorithm_logic_schema
-            validate(v, match_form_group_schema)
+            # if showif_logic field fails to validate against the showif_logic_schema
+            validate(v, showif_logic_schema)
         except ValidationError as e:
             # ValueError will be caught and handled by the app (in main.py)
-            raise ValueError(f"ERROR VALIDATING match form groups: {e}")
+            raise ValueError(f"ERROR VALIDATING showIf logic: {e}")
         except Exception as e:
             # ValueError will be caught and handled by the app (in main.py)
-            raise ValueError(f"ERROR VALIDATING match form groups: {e}")
+            raise ValueError(f"ERROR VALIDATING showIf logic: {e}")
 
         return v    
+
+class MatchFormBase(BaseModel):
+    groups: List[MatchFormGroup]
+    fields: List[MatchFormField]
 
 class MatchForm(MatchFormBase):
     pass
