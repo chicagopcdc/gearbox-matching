@@ -11,7 +11,7 @@ from gearbox.schemas import SavedInputSearchResults, SavedInputCreate, SavedInpu
 from gearbox.services import user_input as user_input_service
 from gearbox import deps
 from gearbox import auth 
-from gearbox.config import config
+from gearbox import config
 
 mod = APIRouter()
 
@@ -78,7 +78,7 @@ async def get_object_all(
     """
     # check that the environment variable ALL_INPUTS from the config.py is set to True
 
-    if not config.ALL_INPUTS:
+    if config.ALL_INPUTS == None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"this endpoint is not active")
 
     
