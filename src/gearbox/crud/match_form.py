@@ -48,7 +48,7 @@ async def clear_display_rules_and_triggered_by(current_session: Session):
 
 
 async def insert_display_rules(current_session: Session, display_rules_rows: list):
-    mylist = [{
+    rows = [{
         "id": i.get('id'), 
         "criterion_id": i.get('criterion_id'),
         "priority": i.get('priority'),
@@ -58,7 +58,7 @@ async def insert_display_rules(current_session: Session, display_rules_rows: lis
     ]
     try:
         await current_session.execute(
-            DisplayRules.__table__.insert(), mylist
+            DisplayRules.__table__.insert(), rows
         )
     except exc.SQLAlchemyError as e:
         logger.error(f"Error inserting display_rules: {type(e)}")
@@ -67,7 +67,7 @@ async def insert_display_rules(current_session: Session, display_rules_rows: lis
     await current_session.commit()
 
 async def insert_triggered_by(current_session: Session, triggered_by_rows: list):
-    mylist = [{
+    rows = [{
         "id": i.get('id'), 
         "display_rules_id": i.get('display_rules_id'),
         "criterion_id": i.get('criterion_id'),
@@ -78,7 +78,7 @@ async def insert_triggered_by(current_session: Session, triggered_by_rows: list)
     ]
     try:
         await current_session.execute(
-            TriggeredBy.__table__.insert(), mylist
+            TriggeredBy.__table__.insert(), rows
         )
     except exc.SQLAlchemyError as e:
         logger.error(f"Error inserting triggered_by: {e}")
