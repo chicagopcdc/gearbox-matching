@@ -12,7 +12,5 @@ class DisplayRules(Base):
     active = Column(Boolean, nullable=True)
     version = Column(Integer, nullable=True)
 
-    triggered_bys = relationship("TriggeredBy", back_populates="display_rules")
-    criterion = relationship("Criterion", back_populates="display_rules")
-    #triggered_bys = relationship("TriggeredBy", back_populates="display_rules", lazy="joined")
-    #criterion = relationship("Criterion", back_populates="display_rules", lazy="joined")
+    triggered_bys = relationship("TriggeredBy", back_populates="display_rules", lazy="joined", order_by="TriggeredBy.id")
+    criterion = relationship("Criterion", back_populates="display_rules", lazy="joined")
