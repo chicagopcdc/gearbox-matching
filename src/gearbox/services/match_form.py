@@ -185,8 +185,9 @@ async def update(match_form, session):
                 tb_row['display_rules_id'] = display_rules_id   
                 tb_row['criterion_id'] = show_if_criterion.get('id')
                 tb_row['value_id'] = show_if_criterion.get('valueId')
+                tb_row['active'] = True
                 if show_if_path_count > 1:
-                    tb_row['path'] = '.'.join(map(str,path_ids))
+                    tb_row['path'] ='.'.join(map(str,path_ids))
                 tb_rows.append(tb_row)
                 tb_row = {}
 

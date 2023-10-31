@@ -4295,7 +4295,7 @@
             "id": 179,
             "groupId": 3,
             "name": "exp_cd47_sirpalpha_ever",
-            "label": "Does the patient have any prior exposure to: any CD47\u2013SIRP\u03b1-targeted therapeutics",
+            "label": "Does the patient have any prior exposure to: any CD47–SIRPα-targeted therapeutics",
             "type": "radio",
             "options": [
                 {
@@ -4393,7 +4393,7 @@
             "name": "meas_platelet_microl",
             "min": 0.0,
             "step": 0.1,
-            "label": "What is the patient's most recent measure of: Platelet count (in 10^3/\u00b5L)",
+            "label": "What is the patient's most recent measure of: Platelet count (in 10^3/µL)",
             "type": "number"
         },
         {
@@ -4402,7 +4402,7 @@
             "name": "meas_absolute_neutrophil",
             "min": 0.0,
             "step": 0.1,
-            "label": "What is the patient's most recent measure of: Absolute neutrophil count (ANC) (in 10^3/\u00b5L)",
+            "label": "What is the patient's most recent measure of: Absolute neutrophil count (ANC) (in 10^3/µL)",
             "type": "number"
         },
         {
@@ -4411,7 +4411,7 @@
             "name": "meas_absolute_phagocyte",
             "min": 0.0,
             "step": 0.1,
-            "label": "What is the patient's most recent measure of: Absolute phagocyte count (APC) (in 10^3/\u00b5L)",
+            "label": "What is the patient's most recent measure of: Absolute phagocyte count (APC) (in 10^3/µL)",
             "type": "number"
         },
         {
@@ -4420,7 +4420,7 @@
             "name": "meas_absolute_lymphocyte",
             "min": 0.0,
             "step": 0.1,
-            "label": "What is the patient's most recent measure of: Absolute lymphocyte count (in 10^3/\u00b5L)",
+            "label": "What is the patient's most recent measure of: Absolute lymphocyte count (in 10^3/µL)",
             "type": "number"
         },
         {
@@ -4429,7 +4429,7 @@
             "name": "meas_absolute_eosinophil",
             "min": 0.0,
             "step": 0.1,
-            "label": "What is the patient's most recent measure of: Absolute eosinophil count (in 10^3/\u00b5L)",
+            "label": "What is the patient's most recent measure of: Absolute eosinophil count (in 10^3/µL)",
             "type": "number"
         },
         {
@@ -4622,6 +4622,7 @@
             "groupId": 4,
             "name": "meas_inr",
             "min": 0.0,
+            "step": 0.1,
             "label": "What is the patient's most recent measure of: International Normalized Ratio (INR)",
             "type": "number"
         },
@@ -4654,6 +4655,7 @@
             "groupId": 4,
             "name": "meas_qtc",
             "min": 0.0,
+            "step": 0.1,
             "label": "What is the patient's most recent measure of: Corrected QT (QTc) interval (in msec)",
             "type": "number"
         }
