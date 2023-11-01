@@ -59,7 +59,6 @@ def test_build_ec(setup_database, client):
         if ec_diff:
             diff.append(ec_diff)
 
-    print(f"DIFF: {diff}")
     assert not diff, f"differences occurred: \n{diff}"
 
 def test_get_ec(setup_database, client):
