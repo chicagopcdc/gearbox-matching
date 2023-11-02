@@ -78,7 +78,7 @@ async def get_object_all(
     """
     # check that the environment variable ALL_INPUTS from the config.py is set to True
 
-    if config.ALL_INPUTS == None:
+    if not config.ENABLE_PHI:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"this endpoint is not active")
 
     
