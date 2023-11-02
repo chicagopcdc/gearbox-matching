@@ -42,10 +42,10 @@ def test_build_ec(setup_database, client):
     resp.raise_for_status()
     ecdata_file = './tests/data/eligibilityCriteria.json'
 
-    #""" SERIALIZE STUDIES TO COMPARE AGAINST - UNCOMMENT TO WRITE NEW COMPARE DATA
-    #with open(ecdata_file,'w') as comp_file:
-    #    json.dump(full_res, comp_file)
-    #"""
+    """ SERIALIZE STUDIES TO COMPARE AGAINST - UNCOMMENT TO WRITE NEW COMPARE DATA
+    with open(ecdata_file,'w') as comp_file:
+        json.dump(full_res, comp_file)
+    """
 
     with open(ecdata_file, 'r') as comp_file:
         ec_compare = json.load(comp_file)
@@ -59,7 +59,7 @@ def test_build_ec(setup_database, client):
         if ec_diff:
             diff.append(ec_diff)
 
-    assert not diff, "differences occurred: \n{}".format("\n".join(diff))            
+    assert not diff, f"differences occurred: \n{diff}"
 
 def test_get_ec(setup_database, client):
     errors = []

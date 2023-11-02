@@ -1,8 +1,10 @@
 
 from ..util.bounds import bounds
 from . import logger
-from gearbox.crud.match_form import get_form_info
+from gearbox.crud.match_form import get_form_info, clear_display_rules_and_triggered_by, insert_display_rules, insert_triggered_by
 from .match_conditions import get_tree
+from gearbox.schemas import MatchForm
+import re
 
 def update_dict(d, critlookup):
     for key in d:
@@ -69,7 +71,6 @@ async def get_match_form(session):
                         chvalues = [x for x in display_rules.criterion.values]
                         for chvalue in chvalues:
                             o = {'value': chvalue.value.id}
-                            # o.update({'label':chvalue.value.code})
                             o.update({'label':chvalue.value.description})
                             options.append(o)
                     if display_rules.criterion.input_type.render_type == 'radio':
@@ -95,7 +96,8 @@ async def get_match_form(session):
                 pathlist = []
                 critlookup = {}
                 path_tree = None
-                for tb in display_rules.triggered_bys:
+                triggered_bys = [x for x in display_rules.triggered_bys]
+                for tb in triggered_bys:
                     if tb.active:
                         tb_value = ''
                         if (tb.path):
@@ -116,22 +118,30 @@ async def get_match_form(session):
                         critdict = {
                             "id": tb.criterion.id,
                             "value": tb_value,
+                            "valueId": tb.value.id,
                             "operator": tb.value.operator
                         }
                         critlookup[tb.id] = critdict
 
-                # build tree
-                if len(pathlist) == 2 or len(critlookup) == 1 or len(critlookup) == 2: 
+                if len(pathlist) == 2 or len(critlookup) == 1 or len(critlookup) == 2:
                     critlist = []
                     for crit_key in critlookup:
                         if critlookup[crit_key]:
                             critlist.append(critlookup[crit_key])
 
-                    path_tree = {
-                        "operator": "AND",
-                        "criteria": critlist 
-                    }
-                    # if len(pathlist) == 1: # this shouldn't happen, but if it did...
+
+                    m = re.search("OR", str(pathlist))
+                    if m and len(pathlist) == 1:
+                        path_tree = {
+                            "operator": "OR",
+                            "criteria": critlist 
+                        }
+                    else:
+                        path_tree = {
+                            "operator": "AND",
+                            "criteria": critlist 
+                        }
+
                 elif (pathlist):
                     path_tree = get_tree(pathlist, suppress_header=True)
                     path_tree = update_dict(path_tree, critlookup)
@@ -144,3 +154,43 @@ async def get_match_form(session):
         match_form = {"groups": G, "fields": F}
 
     return match_form
+
+async def update(match_form, session):
+    priority = 0
+    display_rules_id = 0
+    triggered_by_id = 0
+    dr_rows = []
+    tb_rows = []
+    for field in match_form.fields:
+        dr_row = {}
+        tb_row = {}
+        priority += 1000
+        display_rules_id += 1
+        display_rules_criterion_id = field.id
+        dr_row['id'] = display_rules_id
+        dr_row['criterion_id'] = display_rules_criterion_id
+        dr_row['priority'] = priority
+        dr_row['active'] = 1
+        dr_row['version'] = 1
+        dr_rows.append(dr_row)
+        if field.showIf:
+            show_if_criteria = field.showIf.get('criteria')
+            path_ids = []
+            show_if_path_count = 0
+            for show_if_criterion in show_if_criteria:
+                show_if_path_count += 1
+                triggered_by_id += 1
+                path_ids.append(triggered_by_id)
+                tb_row['id'] = triggered_by_id
+                tb_row['display_rules_id'] = display_rules_id   
+                tb_row['criterion_id'] = show_if_criterion.get('id')
+                tb_row['value_id'] = show_if_criterion.get('valueId')
+                tb_row['active'] = True
+                if show_if_path_count > 1:
+                    tb_row['path'] ='.'.join(map(str,path_ids))
+                tb_rows.append(tb_row)
+                tb_row = {}
+
+    await clear_display_rules_and_triggered_by(current_session=session) 
+    await insert_display_rules(current_session=session, display_rules_rows=dr_rows)
+    await insert_triggered_by(current_session=session, triggered_by_rows=tb_rows)
