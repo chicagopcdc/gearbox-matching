@@ -1,7 +1,7 @@
 from .saved_input import SavedInputSearchResults, SavedInput, SavedInputCreate, SavedInputPost, SavedInputAll
 from .site import SiteSearchResults, SiteCreate, Site
 from .site_has_study import SiteHasStudySearchResults, SiteHasStudyCreate, SiteHasStudy
-from .study_algorithm_engine import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSearchResults, StudyAlgorithmEngineUpdate, StudyAlgorithmEngine, StudyAlgorithmEngineCreateInput
+from .study_algorithm_engine import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSearchResults, StudyAlgorithmEngineUpdate, StudyAlgorithmEngine, StudyAlgorithmEngineCreateInput, StudyAlgorithmEngineSave
 from .value import Value, ValueSearchResults, ValueCreate
 from .display_rules import DisplayRules, DisplayRulesSearchResults, DisplayRulesCreate
 from .triggered_by import TriggeredBy, TriggeredByCreate, TriggeredBySearchResults

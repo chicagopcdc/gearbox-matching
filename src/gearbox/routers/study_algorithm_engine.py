@@ -7,7 +7,7 @@ from gearbox.util import status
 from gearbox.admin_login import admin_required
 from gearbox.services import study_algorithm_engine
 
-from gearbox.schemas import StudyAlgorithmEngineUpdate, StudyAlgorithmEngineSearchResults , StudyAlgorithmEngine, StudyAlgorithmEngineCreateInput
+from gearbox.schemas import StudyAlgorithmEngineUpdate, StudyAlgorithmEngineSearchResults , StudyAlgorithmEngine, StudyAlgorithmEngineCreateInput, StudyAlgorithmEngineCreate
 from gearbox import deps
 from gearbox import auth 
 
@@ -32,14 +32,21 @@ async def get_sae(
 
 @mod.post("/study-algorithm-engine", response_model=StudyAlgorithmEngine,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_sae(
-    body: StudyAlgorithmEngineCreateInput,
+    body: StudyAlgorithmEngineCreate,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
     """
     Comments: This endpoint installs the logic for a partiular study version into the db.
     """
-    new_ae = await study_algorithm_engine.create(session=session, study_algorithm_engine=body)
+    print(f"IN POST----------------------")
+    print(f"HERE IN ROUTER BODY: {body}")
+    new_ae = await study_algorithm_engine.create(session=session, study_algorithm_engine=body.study_algorithm_engine, eligibility_criteria_info_id=body.eligibility_criteria_info_id)
+    print(f"TYPE NEW AE: --------- {type(new_ae)}")
+    print(f"NEW AE: {new_ae.id}")
+    print(f"NEW AE: {new_ae.start_date}")
+    print(f"NEW AE: {new_ae.algorithm_version}")
+    print(f"NEW AE: {new_ae.algorithm_logic}")
     return new_ae
 
 @mod.post("/update-study-algorithm-engine", response_model=StudyAlgorithmEngine,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
