@@ -1,90 +1,245 @@
 import pytest
-import random
 import json
-
-from sqlalchemy.orm import sessionmaker
-from gearbox.models import StudyHasPatient
 from deepdiff import DeepDiff
+from gearbox.deps import get_session
 
-from .test_utils import is_aws_url
+from fastapi.testclient import TestClient
+import importlib
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import sessionmaker, Session
+from gearbox.models import StudyHasPatient, Study
+
+@pytest.fixture(scope="session")
+def database(connection) -> Engine:
+
+    Session = sessionmaker(bind=connection)
+    session = Session()
+
+    yield session
+
+    session.query(StudyHasPatient).delete()
+    session.query(Study).delete()
+    session.commit()
+    session.close()
+
+@pytest.fixture(scope="session")
+def add_study_simple(database):
+
+    study_1 = Study(
+         name='study 1'
+     )
+
+    database.add(study_1)
+    database.commit()
+
+    study_id = database.query(Study.id).filter(Study.name == 'study 1').first()[0]
+
+    study_patient_1_1 = StudyHasPatient(
+        study_id=study_id,
+        patient_id="1",
+        data={
+            f"{study_id}": 1
+        },
+        source_id="test.com"
+     )
+    
+    database.add(study_patient_1_1)
+    database.commit()
+
+    yield study_id
+
+@pytest.fixture(scope="session")
+def add_study_complex(database):
+    study_2 = Study(
+         name='study 2'
+     )
+
+    study_3 = Study(
+         name='study 3'
+    )
+    
+    database.add_all([study_2, study_3])
+    database.commit()
+
+    study_id_2 = database.query(Study.id).filter(Study.name == 'study 2').first()[0]
+    study_id_3 = database.query(Study.id).filter(Study.name == 'study 3').first()[0]
+
+
+    study_patient_2_1 = StudyHasPatient(
+        study_id=study_id_2,
+        patient_id="1",
+        data={
+            f"{study_id_2}": 1
+        },
+        source_id="test.com"
+     )
+    
+    study_patient_2_2 = StudyHasPatient(
+        study_id=study_id_2,
+        patient_id="2",
+        data={
+            f"{study_id_2}": 2
+        },
+        source_id="test.com"
+     )
+    
+    study_patient_3_1 = StudyHasPatient(
+        study_id=study_id_3,
+        patient_id="1",
+        data={
+            f"{study_id_3}": 1
+        },
+        source_id="test.com"
+     )
+    
+    study_patient_3_2 = StudyHasPatient(
+        study_id=study_id_3,
+        patient_id="2",
+        data={
+            f"{study_id_3}": 2
+        },
+        source_id="test.com"
+     )
+    
+    study_patient_3_3 = StudyHasPatient(
+        study_id=study_id_3,
+        patient_id="3",
+        data={
+            f"{study_id_3}": 3
+        },
+        source_id="test.com"
+     )
+    
+    database.add_all([study_patient_2_1, study_patient_2_2, study_patient_3_1, study_patient_3_2, study_patient_3_3])
+    database.commit()
+
+    yield study_id_2, study_id_3
+
 
 # test to validate StudyHasPatient endpoints are enabled
 @pytest.mark.asyncio
-def test_get_study_has_patients(setup_database, client):
+def test_get_study_has_patients_simple(add_study_simple, client):
     """
-    Comments: Test to validate StudyHasPatient endpoints are enabled
+    Comments: Test one study and one patient
     """
     errors = []
     fake_jwt = "1.2.3"
-    resp = client.get("/study-has-patients", headers={"Authorization": f"bearer {fake_jwt}"})
-    resp.raise_for_status()
+    resp = client.get(f"/study-has-patients?study_id={add_study_simple}", headers={"Authorization": f"bearer {fake_jwt}"})
+    assert str(resp.status_code).startswith("20")
+    assert resp.json() == [{
+        "study_id": add_study_simple,
+        "patient_id": "1",
+        "data": {
+            f"{add_study_simple}": 1
+        },
+        "source_id": "test.com"
+    }]
+
+
+@pytest.mark.asyncio
+def test_get_study_has_patients_complex(add_study_complex, client):
+    """
+    Comments: Test multi study and multi patients
+    """
+    study_id_2, study_id_3 = add_study_complex
+    errors = []
+    fake_jwt = "1.2.3"
+    resp = client.get(f"/study-has-patients?study_id={study_id_2}", headers={"Authorization": f"bearer {fake_jwt}"})
+    assert str(resp.status_code).startswith("20")
+    assert resp.json() == [{
+                            "study_id": study_id_2,
+                            "patient_id": "1",
+                            "data": {
+                                f"{study_id_2}": 1
+                            },
+                            "source_id": "test.com"
+                        },
+                        {
+                            "study_id": study_id_2,
+                            "patient_id": "2",
+                            "data": {
+                                f"{study_id_2}": 2
+                            },
+                            "source_id": "test.com"
+                        }]
+    
+    resp = client.get(f"/study-has-patients?study_id={study_id_3}", headers={"Authorization": f"bearer {fake_jwt}"})
+    assert str(resp.status_code).startswith("20")
+    assert resp.json() == [{
+                            "study_id": study_id_3,
+                            "patient_id": "1",
+                            "data": {
+                                f"{study_id_3}": 1
+                            },
+                            "source_id": "test.com"
+                        },
+                        {
+                            "study_id": study_id_3,
+                            "patient_id": "2",
+                            "data": {
+                                f"{study_id_3}": 2
+                            },
+                            "source_id": "test.com"
+                        },
+                        {
+                            "study_id": study_id_3,
+                            "patient_id": "3",
+                            "data": {
+                                f"{study_id_3}": 3
+                            },
+                            "source_id": "test.com"
+                        }]
+
+
+@pytest.mark.asyncio
+def test_get_patients_has_studies_complex(add_study_simple, add_study_complex, client):
+    errors = []
+    fake_jwt = "1.2.3"
+    study_id_2, study_id_3 = add_study_complex
+    resp = client.get(f"/patient-has-studies?patient_id='1'", headers={"Authorization": f"bearer {fake_jwt}"})
+    assert str(resp.status_code).startswith("20")
+    assert resp.json() == [{
+                            "study_id": add_study_simple,
+                            "patient_id": "1",
+                            "data": {
+                                f"{add_study_simple}": 1
+                            },
+                            "source_id": "test.com"
+                        },
+                        {
+                            "study_id": study_id_2,
+                            "patient_id": "1",
+                            "data": {
+                                f"{study_id_2}": 1
+                            },
+                            "source_id": "test.com"
+                        },
+                        {
+                            "study_id": study_id_3,
+                            "patient_id": "1",
+                            "data": {
+                                f"{study_id_3}": 1
+                            },
+                            "source_id": "test.com"
+                        }]
+    
+@pytest.mark.asyncio
+def test_create_study_has_patients(add_study_simple, database, client):
+    json_data = [{
+                    "study_id": add_study_simple,
+                    "patient_id": "4",
+                    "data": {
+                        f"{add_study_simple}": 1
+                    },
+                    "source_id": "test.com"
+                }]
+    
+    fake_jwt = "1.2.3"
+    resp = client.post("/study-has-patient", json=json_data, headers={"Authorization": f"bearer {fake_jwt}"})
     assert str(resp.status_code).startswith("20")
 
-# test to validate StudyHasPatient endpoints transfer data accurately
-@pytest.mark.asyncio
-def test_study_has_patients_compare(setup_database, client):
-    """
-    Comments: This test builds the study_has_patient document and compares vs study_has_patients.json 
-    """
-    errors = []
-    fake_jwt = "1.2.3"
-    resp = client.get("/study-has-patients", headers={"Authorization": f"bearer {fake_jwt}"})
-    full_res = resp.json()
+    added_data = database.query(StudyHasPatient).filter(StudyHasPatient.patient_id == '4').first()
 
-    resp.raise_for_status()
-    study_has_patientdata_file = './tests/data/study_has_patients.json'
+    assert added_data.study_id == add_study_simple
+    assert added_data.patient_id == '4'
 
-    """ SERIALIZE STUDY_HAS_PATIENTS TO COMPARE AGAINST - UNCOMMENT TO WRITE NEW COMPARE DATA
-    with open(study_has_patientdata_file,'w') as comp_file:
-        json.dump(full_res, comp_file)
-    """
-
-    with open(study_has_patientdata_file, 'r') as comp_file:
-        study_has_patient_compare = json.load(comp_file)
-
-    study_has_patients = full_res["results"]
-    study_has_patient_compare = study_has_patient_compare["results"]
-
-    diff = []
-    # Diff all study_has_patients in the reponse that exist in the mock file
-    for i in range (len(study_has_patient_compare)):
-        study_has_patient_diff = DeepDiff(study_has_patients[i], study_has_patient_compare[i], ignore_order=True)
-        if (study_has_patient_diff):
-            diff.append(study_has_patient_diff)
-    
-    assert not diff, "differences occurred: \n{}".format("\n".join(diff))
-
-# test to validate StudyHasPatient endpoints create entries in the database
-# by creating a new study_has_patient entry in the database
-@pytest.mark.asyncio
-def test_study_has_patients_create(setup_database, client):
-    """
-    Comments: This test creates a new study_has_patient entry in the database
-    """
-    errors = []
-    fake_jwt = "1.2.3"
-    resp = client.get("/study-has-patients", headers={"Authorization": f"bearer {fake_jwt}"})
-    full_res = resp.json()
-
-    resp.raise_for_status()
-    study_has_patientdata_file = './tests/data/study_has_patients.json'
-
-    """ SERIALIZE STUDY_HAS_PATIENTS TO COMPARE AGAINST - UNCOMMENT TO WRITE NEW COMPARE DATA
-    with open(study_has_patientdata_file,'w') as comp_file:
-        json.dump(full_res, comp_file)
-    """
-
-    with open(study_has_patientdata_file, 'r') as comp_file:
-        study_has_patient_compare = json.load(comp_file)
-
-    study_has_patients = full_res["results"]
-    study_has_patient_compare = study_has_patient_compare["results"]
-
-    diff = []
-    # Diff all study_has_patients in the reponse that exist in the mock file
-    for i in range (len(study_has_patient_compare)):
-        study_has_patient_diff = DeepDiff(study_has_patients[i], study_has_patient_compare[i], ignore_order=True)
-        if (study_has_patient_diff):
-            diff.append(study_has_patient_diff)
-    
-    assert not diff, "differences occurred: \n{}".format("\n".join(diff))

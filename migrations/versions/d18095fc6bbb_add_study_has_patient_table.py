@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'd18095fc6bbb'
-down_revision = '33779211b25c'
+down_revision = 'f3c7a489a0c0'
 branch_labels = None
 depends_on = None
 
@@ -19,9 +19,12 @@ depends_on = None
 def upgrade():
     op.create_table(
         'study_has_patient',
-        sa.Column('study_id', sa.Integer, sa.ForeignKey('study.id'), primary_key=True),
-        sa.Column('patient_id', sa.Integer, primary_key=True),
+        sa.Column('study_id', sa.Integer, nullable=False),
+        sa.Column('patient_id', sa.String, nullable=False),
         sa.Column('data', sa.JSON, nullable=False),
+        sa.Column('source_id', sa.String, nullable=False),
+        sa.ForeignKeyConstraint(['study_id'], ['study.id'], ),
+        sa.PrimaryKeyConstraint('study_id', 'patient_id', 'source_id')
     )
 
 

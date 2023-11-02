@@ -1,7 +1,7 @@
 from .base import CRUDBase
-from gearbox.models import SiteHasStudy
-from gearbox.schemas import SiteHasStudyCreate, SiteHasStudySearchResults
+from gearbox.models import StudyHasPatient
+from gearbox.schemas import StudyHasPatientCreate, StudyHasPatientSearchResults
 
-class CRUDSiteHasStudy(CRUDBase [SiteHasStudy, SiteHasStudyCreate, SiteHasStudySearchResults]):
+class CRUDStudyHasPatient(CRUDBase [StudyHasPatient, StudyHasPatientCreate, StudyHasPatientSearchResults]):
     ...
-site_has_study_crud = CRUDSiteHasStudy(SiteHasStudy)
+study_has_patient_crud = CRUDStudyHasPatient(StudyHasPatient)

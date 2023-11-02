@@ -24,3 +24,4 @@ from .eligibility_criteria_response import EligibilityCriteriaResponseResults
 from .match_form import MatchForm
 from .study_version_eligibility_criteria import StudyVersionEligibilityCriteriaCreate, StudyVersionEligibilityCriteria
 from .study_version_study_algorithm import StudyVersionStudyAlgorithm, StudyVersionStudyAlgorithmCreate
+from .study_has_patient import StudyHasPatient, StudyHasPatientCreate, StudyHasPatientSearchResults

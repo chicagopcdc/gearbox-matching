@@ -3,12 +3,13 @@ from datetime import datetime
 from typing import Sequence, List, Any, Optional
 from pydantic.utils import GetterDict
 # import json
-from sqlalchemy import JSON, JSONB
+from sqlalchemy import JSON
 
 class StudyHasPatientBase(BaseModel):
     study_id: int
-    patient_id: int
-    data: JSON
+    patient_id: str
+    data: Any
+    source_id: str
 
     class Config:
         orm_mode = True
@@ -16,7 +17,7 @@ class StudyHasPatientBase(BaseModel):
 class StudyHasPatient(StudyHasPatientBase):
     pass
 
-class StudyHasPatientCreate(StudyHasPatientBase):
+class StudyHasPatientCreate(BaseModel):
     shps: Sequence[StudyHasPatientBase]
 
 class StudyHasPatientSearchResults(StudyHasPatientBase):
