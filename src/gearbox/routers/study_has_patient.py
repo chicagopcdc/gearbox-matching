@@ -24,7 +24,7 @@ async def get_study_has_patients(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    if not config.STUDY_HAS_PATIENT:
+    if not config.ENABLE_PHI:
         raise HTTPException(status_code=404, detail="Study Has Patient endpoints are not enabled")
     
     study_has_patients = await study_has_patient_service.get_study_has_patients(session=session, column='study_id', id=study_id)
@@ -36,7 +36,7 @@ async def get_patient_has_studies(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    if not config.STUDY_HAS_PATIENT:
+    if not config.ENABLE_PHI:
         raise HTTPException(status_code=404, detail="Study Has Patient endpoints are not enabled")
     
     patients_has_studies = await study_has_patient_service.get_study_has_patients(session=session, column='patient_id', id=patient_id)
@@ -48,7 +48,7 @@ async def save_object(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):  
-    if not config.STUDY_HAS_PATIENT:
+    if not config.ENABLE_PHI:
         raise HTTPException(status_code=404, detail="Study Has Patient endpoints are not enabled")
     
     body = await request.json()

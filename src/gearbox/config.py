@@ -128,6 +128,4 @@ DATA_ACCESS_SERVICE_ENDPOINT = config(
 AWS_REGION = config("AWS_REGION", default='us-east-1')
 
 # NEW FEATURES
-ALL_INPUTS = config("ALL_INPUTS", cast=bool, default=False)
-
-STUDY_HAS_PATIENT = config("STUDY_HAS_PATIENT", default=False)
+ENABLE_PHI = config("ENABLE_PHI", default=False)
