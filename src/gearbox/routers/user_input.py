@@ -52,9 +52,6 @@ async def get_object_latest(
         404: if the obj is not found
     """
     saved_user_input = await user_input_service.get_latest_user_input(session=session, user_id=int(user_id))
-    if not saved_user_input:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Saved input not found for user '{user_id}'")
-
     return saved_user_input
 
 # get all saved inputs for a user
