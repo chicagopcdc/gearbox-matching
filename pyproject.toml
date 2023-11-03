@@ -64,7 +64,6 @@ nest-asyncio = "^1.5.1"
 "study_algorithm_engine" = "gearbox.routers.study_algorithm_engine"
 "study_version" = "gearbox.routers.study_version"
 "study_version_eligibility_criteria" = "gearbox.routers.study_version_eligibility_criteria"
-"study_version_study_algorithm" = "gearbox.routers.study_version_study_algorithm"
 "study_link" = "gearbox.routers.study_link"
 
 [build-system]

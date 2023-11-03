@@ -17,8 +17,59 @@ TEST_CREATE_LIST = [
             "test": "create_new_study_algorithm_engine",
             "logic_file": "./tests/data/new_algorithm_logic.json",
             "eligibility_criteria_info_id": 7
+        },
+        {
+                "study_algorithm_engine": {
+            "algorithm_logic": None,
+            "algorithm_version": 1,
+            "eligibility_criteria_info_id": 7,
+            "id": 7
+                },
+            "logic_file": "./tests/data/update_algorithm_logic.json",
+            "test": "update_new_study_algorithm_engine"
+        }
+        ,
+        {
+                "study_algorithm_engine": {
+            "algorithm_logic": None,
+            "algorithm_version": 1
+                },
+            "eligibility_criteria_info_id": 1,
+            "logic_file": "./tests/data/new_algorithm_logic.json",
+            "test": "invalid_study_version"
+        },
+        {
+                "study_algorithm_engine": {
+            "algorithm_logic": None,
+            "algorithm_version": 2
+                },
+            "eligibility_criteria_info_id": 1,
+            "logic_file": "./tests/data/algorithm_logic.json",
+            "test": "duplicate_logic"
+        },
+        {
+                "study_algorithm_engine": {
+            "algorithm_logic": None,
+            "algorithm_version": 1
+                },
+            "eligibility_criteria_info_id": 1,
+            "active": True,
+            "logic_file": "./tests/data/algorithm_logic_invalid_el_criteria_has_criterion_ids.json",
+            "test":"invalid_criteria_ids"
+        }
+        ,
+        {
+                "study_algorithm_engine": {
+            "algorithm_logic": None,
+            "algorithm_version": 1
+                },
+            "active": True,
+            "eligibility_criteria_info_id": 1,
+            "logic_file": "./tests/data/algorithm_logic_invalid_schema.json",
+            "test":"invalid_logic"
         }
 ]
+
 
 @pytest.mark.parametrize('test_create_data',TEST_CREATE_LIST)
 def test_create_study_algorithm_engine(setup_database, client, test_create_data, connection):
@@ -39,18 +90,21 @@ def test_create_study_algorithm_engine(setup_database, client, test_create_data,
         ae_logic_json = comp_file.read().replace('\n','').replace('\t',' ')
 
     data = {}
-    data['study_algorithm_engine'] = {
+    data = {
         "algorithm_version": test_create_data['study_algorithm_engine']['algorithm_version'],
         "algorithm_logic" : ae_logic_json
     }
 
     if test_create_data["test"] == "update_new_study_algorithm_engine":
         # Set the id to update
-        data['study_algorithm_engine']['id'] = test_create_data['study_algorithm_engine']['id']
+        data['id'] = test_create_data['study_algorithm_engine']['id']
+        data['algorithm_logic'] = ae_logic_json
+        data['algorithm_version'] = test_create_data['study_algorithm_engine']['algorithm_version']
+        data['eligibility_criteria_info_id'] = test_create_data['study_algorithm_engine']['eligibility_criteria_info_id']
+
         resp = client.post("/update-study-algorithm-engine", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     else:
         data['eligibility_criteria_info_id'] = test_create_data['eligibility_criteria_info_id']
-        print(f"--------------> HERE DATA: {data}")
         resp = client.post("/study-algorithm-engine", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
 
     errors = []
@@ -59,7 +113,6 @@ def test_create_study_algorithm_engine(setup_database, client, test_create_data,
         if not (str(resp.status_code).startswith("20")):
             errors.append(f"ERROR: create_new_study_algorithm_engine test: unexpected http status in response: {str(resp.status_code)}")
         full_res = resp.json()
-        print(f"=====================> FULL RESPONSE: {full_res}")
         new_ae_id = full_res['id']
         # verify row created 
         try:

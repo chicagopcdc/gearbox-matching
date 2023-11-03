@@ -53,19 +53,15 @@ class StudyAlgorithmEngineBase(BaseModel):
 class StudyAlgorithmEngine(StudyAlgorithmEngineBase):
     id: int
 
-class StudyAlgorithmEngineUpdate(StudyAlgorithmEngineBase):
-    id: int
-    eligibility_criteria_id: int
-
-class StudyAlgorithmEngineCreateInput(StudyAlgorithmEngineBase):
-    pass
-
 class StudyAlgorithmEngineSave(StudyAlgorithmEngineBase):
     pass
 
-class StudyAlgorithmEngineCreate(BaseModel):
-    study_algorithm_engine: StudyAlgorithmEngineCreateInput
+class StudyAlgorithmEngineCreate(StudyAlgorithmEngineSave):
     eligibility_criteria_info_id: int
+
+class StudyAlgorithmEngineUpdate(StudyAlgorithmEngineSave):
+    eligibility_criteria_info_id: int
+    id: int
 
 class StudyAlgorithmEngineSearchResults(BaseModel):
     results: Sequence[StudyAlgorithmEngine]    

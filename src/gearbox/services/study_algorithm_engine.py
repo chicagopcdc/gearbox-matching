@@ -9,7 +9,7 @@ from sqlalchemy import select, exc
 from fastapi import HTTPException
 from gearbox.models import ElCriteriaHasCriterion, EligibilityCriteria, EligibilityCriteriaInfo 
 from gearbox.schemas import StudyAlgorithmEngine as StudyAlgorithmEngineSchema
-from gearbox.schemas import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSave, StudyAlgorithmEngineSearchResults, StudyAlgorithmEngineCreateInput, StudyAlgorithmEngineUpdate
+from gearbox.schemas import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSave, StudyAlgorithmEngineSearchResults, StudyAlgorithmEngineSave, StudyAlgorithmEngineUpdate
 from sqlalchemy.sql.functions import func
 from gearbox.util import status, json_utils
 from gearbox.crud import study_algorithm_engine_crud
@@ -34,15 +34,9 @@ async def get_study_algorithm_engines(session: Session) -> StudyAlgorithmEngineS
     aes = await study_algorithm_engine_crud.get_multi(session)
     return aes
 
-async def save_study_algorithm_engine(session: Session, study_algorithm_engine: StudyAlgorithmEngineCreateInput) -> StudyAlgorithmEngineSchema:
+async def save_study_algorithm_engine(session: Session, study_algorithm_engine: StudyAlgorithmEngineSave) -> StudyAlgorithmEngineSchema:
 
     sae_input_conv = jsonable_encoder(study_algorithm_engine)
-
-    print(f"HERE INPUT CONV: {sae_input_conv}")
-    # print(f"HERE KEYS: {StudyAlgorithmEngineCreate.__fields__.keys()}")
-    print(f"HERE KEYS: {StudyAlgorithmEngineSave.__fields__.keys()}")
-
-    #sae_create = {key:value for key,value in sae_input_conv.items() if key in StudyAlgorithmEngineCreate.__fields__.keys() }
     sae_create = {key:value for key,value in sae_input_conv.items() if key in StudyAlgorithmEngineSave.__fields__.keys() }
 
     new_ae = await study_algorithm_engine_crud.create(db=session, obj_in=sae_create)
@@ -74,10 +68,6 @@ async def validate_eligibility_criteria_ids(session: Session, algorithm_logic: s
         )
         db_el_criteria_has_criterion_ids = result.unique().scalars().all()
         input_el_criteria_has_criterion_ids = json_utils.json_extract_ints(algorithm_logic, 'criteria')
-
-        print(f"HERE ELIGIBILITY_CRIETERIA_ID FOR ID QUERY: {eligibility_criteria_id}")
-        print(f"HERE db_el_criteria_has_criterion_ids: {db_el_criteria_has_criterion_ids}")
-        print(f"HERE input_el_criteria_has_criterion_ids: {input_el_criteria_has_criterion_ids}")
 
         # items that exist in input_el_criteria_has_criterion_ids but not in db_el_criteria_has_criterion_ids
         invalid_ids = list(set(input_el_criteria_has_criterion_ids).difference(db_el_criteria_has_criterion_ids))
@@ -141,48 +131,38 @@ async def get_existing_algorithm_logic_duplicate(session: Session, algorithm_log
 
     return None
 
-async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineCreateInput, eligibility_criteria_info_id: int) -> StudyAlgorithmEngine:
+async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineCreate) -> StudyAlgorithmEngine:
 
-    print(f"IN CREATE eligibility_criteria_info_id: {eligibility_criteria_info_id}")
-    print(f"LOGIC!!!! IN CREATE eligibility_criteria_info_id: {study_algorithm_engine.algorithm_logic}")
-    print(f"HERE CHECK: {study_algorithm_engine}")
-
-    eligibility_criteria_id = await get_eligibility_criteria_id(session=session, eligibility_criteria_info_id_for_lookup=eligibility_criteria_info_id)
-    print(f"HERE FOUND eligibility_criteria_id {eligibility_criteria_id}")
+    # Get the eligibility_criteria_id
+    eligibility_criteria_id = await get_eligibility_criteria_id(session=session, eligibility_criteria_info_id_for_lookup=study_algorithm_engine.eligibility_criteria_info_id)
 
     # Check el_criteria_has_criterion ids in incoming algoritm engine exist in the db
     await validate_eligibility_criteria_ids(session, study_algorithm_engine.algorithm_logic, eligibility_criteria_id) 
 
-    print(f"IN CREATE 2")
-
     # Search for any existing exact duplicate algorithm logic for the study version
-    dup_study_algorithm_engine = await get_existing_algorithm_logic_duplicate(session, study_algorithm_engine.algorithm_logic, eligibility_criteria_info_id)
+    dup_study_algorithm_engine = await get_existing_algorithm_logic_duplicate(session, study_algorithm_engine.algorithm_logic, study_algorithm_engine.eligibility_criteria_info_id)
 
     # if no duplicate is found, determine version and insert new study algorithm engine
     if not dup_study_algorithm_engine:
-        study_algorithm_engine.algorithm_version = await get_latest_algorithm_version(session, eligibility_criteria_info_id) + 1
+        study_algorithm_engine.algorithm_version = await get_latest_algorithm_version(session, study_algorithm_engine.eligibility_criteria_info_id) + 1
         new_study_algorithm_engine = await save_study_algorithm_engine(session, study_algorithm_engine)
-        print(f"STUDY ALGORITHM ENGINE: {study_algorithm_engine}")
-        print(f"NEW STUDY ALGORITHM ENGINE: {new_study_algorithm_engine.algorithm_logic}")
         study_algorithm_engine_id = new_study_algorithm_engine.id
         retval = new_study_algorithm_engine
     else: 
         study_algorithm_engine_id = dup_study_algorithm_engine.id
         retval = dup_study_algorithm_engine
 
-    print(f"IN CREATE 3")
-
     # update eligibility_criteria_info with new study_algorithm_engine_id
     eci_upd = {'study_algorithm_engine_id': study_algorithm_engine_id}
-    print(f"IN CREATE 4")
-    updated_eci = await eligibility_criteria_info_service.update_eligibility_criteria_info(session, eligibility_criteria_info=eci_upd, eligibility_criteria_info_id=eligibility_criteria_info_id)
-    print(f"IN CREATE 5")
+    updated_eci = await eligibility_criteria_info_service.update_eligibility_criteria_info(session, eligibility_criteria_info=eci_upd, eligibility_criteria_info_id=study_algorithm_engine.eligibility_criteria_info_id)
     return retval
 
 async def update(session: Session, study_algorithm_engine: StudyAlgorithmEngineUpdate) -> StudyAlgorithmEngine:
 
+    eligibility_criteria_id = await get_eligibility_criteria_id(session=session, eligibility_criteria_info_id_for_lookup=study_algorithm_engine.eligibility_criteria_info_id)
+
     # Check el_criteria_has_criterion ids in incoming algoritm engine exist in the db
-    await validate_eligibility_criteria_ids(session, study_algorithm_engine.algorithm_logic, study_algorithm_engine.eligibility_criteria_id) 
+    await validate_eligibility_criteria_ids(session, study_algorithm_engine.algorithm_logic, eligibility_criteria_id) 
 
     # QUERY FOR db_obj
     sae_to_upd = await study_algorithm_engine_crud.get(session, study_algorithm_engine.id)
