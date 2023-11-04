@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, UniqueConstraint
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, UniqueConstraint, Text
 from sqlalchemy.orm import relationship
 
 from .base_class import Base 
@@ -13,6 +13,7 @@ class Study(Base):
     description = Column(String, nullable=True)
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
+    follow_up_info = Column(Text, nullable=True)
 
     UniqueConstraint(code, name='study_code_uix')
 
@@ -27,7 +28,7 @@ class Study(Base):
     links = relationship("StudyLink", back_populates="study", lazy='joined')
     study_versions = relationship("StudyVersion", back_populates="study", lazy='joined')
 
-    def __init__(self, name=None, code=None, description=None, active=None, create_date=None, sites=None, links=None):
+    def __init__(self, name=None, code=None, description=None, active=None, create_date=None, sites=None, links=None, follow_up_info=None):
         self.name = name
         self.code = code
         self.description = description
@@ -35,3 +36,4 @@ class Study(Base):
         self.create_date = create_date
         self.sites = []
         self.links = []
+        self.follow_up_info = follow_up_info
