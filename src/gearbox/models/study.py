@@ -25,6 +25,7 @@ class Study(Base):
     # this only happens when trying to access via sites join to study
     # and not the other way around
     links = relationship("StudyLink", back_populates="study", lazy='joined')
+    ext_ids = relationship("StudyExternalId", back_populates="study", lazy='joined')
     study_versions = relationship("StudyVersion", back_populates="study", lazy='joined')
 
     def __init__(self, name=None, code=None, description=None, active=None, create_date=None, sites=None, links=None):
@@ -35,3 +36,4 @@ class Study(Base):
         self.create_date = create_date
         self.sites = []
         self.links = []
+        self.ext_ids = []
