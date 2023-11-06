@@ -20,7 +20,7 @@ URL_PREFIX = config("URL_PREFIX", default="/" if DEBUG else "/gearbox")
 BYPASS_FENCE = config("BYPASS_FENCE", cast=bool, default=False)
 
 #S3
-BYPASS_S3 = config("BYPASS_S3",   cast=bool, default=False)
+BYPASS_S3 = config("BYPASS_S3", cast=bool, default=False)
 # DUMMY_S3 - use a public dummy S3 bucket for docker compose testing presigned urls
 DUMMY_S3 = config("DUMMY_S3", cast=bool, default=False)
 S3_BUCKET_NAME = config("S3_BUCKET_NAME", default='commons-gearbox-data-bucket-with-versioning')
@@ -127,5 +127,5 @@ DATA_ACCESS_SERVICE_ENDPOINT = config(
 
 AWS_REGION = config("AWS_REGION", default='us-east-1')
 
-# NEW FEATURE
-ALL_INPUTS = config("ALL_INPUTS", cast=bool, default=False)
+# NEW FEATURES
+ENABLE_PHI = config("ENABLE_PHI", default=False)

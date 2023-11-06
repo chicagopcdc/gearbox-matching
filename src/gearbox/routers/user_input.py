@@ -52,9 +52,6 @@ async def get_object_latest(
         404: if the obj is not found
     """
     saved_user_input = await user_input_service.get_latest_user_input(session=session, user_id=int(user_id))
-    if not saved_user_input:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Saved input not found for user '{user_id}'")
-
     return saved_user_input
 
 # get all saved inputs for a user
@@ -78,7 +75,7 @@ async def get_object_all(
     """
     # check that the environment variable ALL_INPUTS from the config.py is set to True
 
-    if config.ALL_INPUTS == None:
+    if not config.ENABLE_PHI:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"this endpoint is not active")
 
     
