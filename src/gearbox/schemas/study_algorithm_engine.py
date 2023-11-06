@@ -27,7 +27,7 @@ algorithm_logic_schema = {
 
 class StudyAlgorithmEngineBase(BaseModel):
     start_date: Optional[datetime]
-    algorithm_logic: Union[Json[Any],Dict]
+    algorithm_logic: Union[Json[Any],Dict] 
     algorithm_version: Optional[int]
 
     @validator('algorithm_logic')
@@ -53,20 +53,15 @@ class StudyAlgorithmEngineBase(BaseModel):
 class StudyAlgorithmEngine(StudyAlgorithmEngineBase):
     id: int
 
-class StudyAlgorithmEngineUpdate(StudyAlgorithmEngineBase):
-    id: int
-    eligibility_criteria_id: int
+class StudyAlgorithmEngineSave(StudyAlgorithmEngineBase):
+    pass
 
-class StudyAlgorithmEngineCreateInput(StudyAlgorithmEngineBase):
-    # used to validate the logic ids against the set of eligibility-criteria ids
-    # in the el_criteria_has_criterion table
-    eligibility_criteria_id: Optional[int]
-    study_version_id: Optional[int]
+class StudyAlgorithmEngineCreate(StudyAlgorithmEngineSave):
     eligibility_criteria_info_id: int
-    pass
 
-class StudyAlgorithmEngineCreate(StudyAlgorithmEngineBase):
-    pass
+class StudyAlgorithmEngineUpdate(StudyAlgorithmEngineSave):
+    eligibility_criteria_info_id: int
+    id: int
 
 class StudyAlgorithmEngineSearchResults(BaseModel):
     results: Sequence[StudyAlgorithmEngine]    
