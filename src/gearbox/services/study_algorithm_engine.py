@@ -21,7 +21,7 @@ async def get_eligibility_criteria_id(session: Session, eligibility_criteria_inf
             .where(EligibilityCriteriaInfo.id == eligibility_criteria_info_id_for_lookup))
         eligibility_criteria_id = result.scalar_one()
     except exc.SQLAlchemyError as e:
-        logger.error(f"SQL ERROR IN get_latest_algorithm_version method: {e}")
+        logger.error(f"SQL ERROR IN get_eligibility_criteria_id method: {e}")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
     
     return eligibility_criteria_id
