@@ -10,15 +10,15 @@ from sqlalchemy.orm import sessionmaker, Session
 from gearbox.models import StudyHasPatient, Study
 
 @pytest.fixture(scope="session")
-def database(connection) -> Engine:
-
-    Session = sessionmaker(bind=connection)
-    session = Session()
+def database(setup_database) -> Engine:
+    session = setup_database
 
     yield session
 
     session.query(StudyHasPatient).delete()
-    session.query(Study).delete()
+    study_1 = session.query(Study.id).filter(Study.name == 'study 1').delete()
+    study_2 = session.query(Study.id).filter(Study.name == 'study 2').delete()
+    study_3 = session.query(Study.id).filter(Study.name == 'study 3').delete()
     session.commit()
     session.close()
 
