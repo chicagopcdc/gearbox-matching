@@ -34,6 +34,7 @@ class StudyBase(BaseModel):
     description: Optional[str]
     create_date: Optional[datetime]
     active: Optional[bool]
+    follow_up_info: Optional[str]
 
     class Config:
         orm_mode = True    
