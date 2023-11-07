@@ -7,7 +7,7 @@ from gearbox.util import status
 from gearbox.admin_login import admin_required
 from gearbox.services import study_algorithm_engine
 
-from gearbox.schemas import StudyAlgorithmEngineUpdate, StudyAlgorithmEngineSearchResults , StudyAlgorithmEngine, StudyAlgorithmEngineCreateInput
+from gearbox.schemas import StudyAlgorithmEngineUpdate, StudyAlgorithmEngineSearchResults , StudyAlgorithmEngine, StudyAlgorithmEngineCreate
 from gearbox import deps
 from gearbox import auth 
 
@@ -32,12 +32,15 @@ async def get_sae(
 
 @mod.post("/study-algorithm-engine", response_model=StudyAlgorithmEngine,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_sae(
-    body: StudyAlgorithmEngineCreateInput,
+    body: StudyAlgorithmEngineCreate,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
     """
-    Comments: This endpoint installs the logic for a partiular study version into the db.
+    Comments: This endpoint installs the logic for a study version in the study_algorithm_engine table.
+    Usage of this endpoint is dependent on the existence of the set of eligibility criteria
+    for the study which is created in a separate api call to the study_version_eligibility_criteria
+    endpoint. 
     """
     new_ae = await study_algorithm_engine.create(session=session, study_algorithm_engine=body)
     return new_ae

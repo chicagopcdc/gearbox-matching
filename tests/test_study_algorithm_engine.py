@@ -10,62 +10,66 @@ from sqlalchemy import select
 
 TEST_CREATE_LIST = [
         {
-            "study_version_id": 7,
-            "eligibility_criteria_id": 7,
-            "eligibility_criteria_info_id": 7,
-            "algorithm_logic": None,
-            "algorithm_version": 1,
+            "study_algorithm_engine": {
+                "algorithm_logic": None,
+                "algorithm_version": 1
+            },
+            "test": "create_new_study_algorithm_engine",
             "logic_file": "./tests/data/new_algorithm_logic.json",
-            "test": "create_new_study_algorithm_engine"
+            "eligibility_criteria_info_id": 7
         },
         {
-            "study_version_id": 7,
-            "eligibility_criteria_id": 7,
+                "study_algorithm_engine": {
             "algorithm_logic": None,
             "algorithm_version": 1,
-            "logic_file": "./tests/data/update_algorithm_logic.json",
-            "test": "update_new_study_algorithm_engine",
+            "eligibility_criteria_info_id": 7,
             "id": 7
-        },
+                },
+            "logic_file": "./tests/data/update_algorithm_logic.json",
+            "test": "update_new_study_algorithm_engine"
+        }
+        ,
         {
-            "study_version_id": 9999,
-            "eligibility_criteria_id": 1,
+                "study_algorithm_engine": {
             "algorithm_logic": None,
-            "algorithm_version": 1,
+            "algorithm_version": 1
+                },
             "eligibility_criteria_info_id": 1,
             "logic_file": "./tests/data/new_algorithm_logic.json",
             "test": "invalid_study_version"
         },
         {
-            "study_version_id": 1,
-            "eligibility_criteria_id": 1,
+                "study_algorithm_engine": {
             "algorithm_logic": None,
-            "algorithm_version": 2,
+            "algorithm_version": 2
+                },
             "eligibility_criteria_info_id": 1,
             "logic_file": "./tests/data/algorithm_logic.json",
             "test": "duplicate_logic"
         },
         {
-            "study_version_id": 1,
-            "eligibility_criteria_id": 1,
+                "study_algorithm_engine": {
             "algorithm_logic": None,
-            "algorithm_version": 1,
+            "algorithm_version": 1
+                },
             "eligibility_criteria_info_id": 1,
             "active": True,
             "logic_file": "./tests/data/algorithm_logic_invalid_el_criteria_has_criterion_ids.json",
             "test":"invalid_criteria_ids"
-        },
+        }
+        ,
         {
-            "study_version_id": 1,
-            "eligibility_criteria_id": 1,
+                "study_algorithm_engine": {
             "algorithm_logic": None,
-            "algorithm_version": 1,
+            "algorithm_version": 1
+                },
             "active": True,
             "eligibility_criteria_info_id": 1,
             "logic_file": "./tests/data/algorithm_logic_invalid_schema.json",
             "test":"invalid_logic"
         }
 ]
+
 
 @pytest.mark.parametrize('test_create_data',TEST_CREATE_LIST)
 def test_create_study_algorithm_engine(setup_database, client, test_create_data, connection):
@@ -78,23 +82,26 @@ def test_create_study_algorithm_engine(setup_database, client, test_create_data,
     4.)  "invalid_criteria_ids" - 500 response code and produces a list of invalid criterion ids
     5.)  "invalid_logic" - fails json schema validation 
     """
-    data = {
-        "study_version_id": test_create_data['study_version_id'],
-        "eligibility_criteria_id": test_create_data['eligibility_criteria_id'],
-        "algorithm_version": test_create_data['algorithm_version'],
-    }
+
+    fake_jwt = "1.2.3"
 
     logic_file = test_create_data['logic_file']
     with open(logic_file, 'r') as comp_file:
         ae_logic_json = comp_file.read().replace('\n','').replace('\t',' ')
 
-    data['algorithm_logic'] = ae_logic_json
-    fake_jwt = "1.2.3"
-
+    data = {}
+    data = {
+        "algorithm_version": test_create_data['study_algorithm_engine']['algorithm_version'],
+        "algorithm_logic" : ae_logic_json
+    }
 
     if test_create_data["test"] == "update_new_study_algorithm_engine":
-        data['id'] = test_create_data['id']
-        data['eligibility_criteria_id'] = test_create_data['eligibility_criteria_id']
+        # Set the id to update
+        data['id'] = test_create_data['study_algorithm_engine']['id']
+        data['algorithm_logic'] = ae_logic_json
+        data['algorithm_version'] = test_create_data['study_algorithm_engine']['algorithm_version']
+        data['eligibility_criteria_info_id'] = test_create_data['study_algorithm_engine']['eligibility_criteria_info_id']
+
         resp = client.post("/update-study-algorithm-engine", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     else:
         data['eligibility_criteria_info_id'] = test_create_data['eligibility_criteria_info_id']
