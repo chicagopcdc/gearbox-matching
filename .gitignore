@@ -17,5 +17,3 @@ env
 
 .env
 .DS_Store
-
-tests/test_study_info_follow_up_column.py
