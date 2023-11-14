@@ -1,6 +1,7 @@
 from . import config
+import json
 from authutils.token.fastapi import access_token
-from fastapi import HTTPException, Security, Depends
+from fastapi import HTTPException, Security, Depends, Request
 from fastapi.security import (
     HTTPAuthorizationCredentials,
     HTTPBasic,
@@ -8,11 +9,13 @@ from fastapi.security import (
     HTTPBearer,
 )
 from . import config
+from pcdcutils.gen3 import Gen3RequestManager
+from pcdcutils.signature import SignatureManager
 from starlette.status import (
     HTTP_401_UNAUTHORIZED
 )
 from cdislogging import get_logger
-logger = get_logger('__name__')
+logger = get_logger('gb-auth', log_level='info')
 
 # auto_error=False prevents FastAPI from raises a 403 when the request is missing
 # an Authorization header. Instead, we want to return a 401 to signify that we did
@@ -21,10 +24,21 @@ security = HTTPBasic(auto_error=False)
 bearer = HTTPBearer(auto_error=False)
 
 async def authenticate(
+    request: Request,
     token: HTTPAuthorizationCredentials = Security(bearer)
 ):
     if not config.BYPASS_FENCE:
-        token_claims = await get_token_claims(token)
+        g3rm = Gen3RequestManager(headers=request.headers)
+        if g3rm.is_gen3_signed():
+            if request.headers['gen3-service'] == 'gearbox_middleware' and 'GEARBOX_MIDDLEWARE_PUBLIC_KEY' not in config.GEARBOX_KEY_CONFIG:
+                logger.error("no public key found")
+                raise HTTPException(HTTP_401_UNAUTHORIZED, "missing public key")
+            else:
+                data = await request.json()
+                if not g3rm.valid_gen3_signature(json.dumps(data), config=config.GEARBOX_KEY_CONFIG):
+                    raise HTTPException(HTTP_401_UNAUTHORIZED, "Gen3 signed request is invalid")
+        else:
+            token_claims = await get_token_claims(token)
 
 async def authenticate_user(
     token: HTTPAuthorizationCredentials = Security(bearer)

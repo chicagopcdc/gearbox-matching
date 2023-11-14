@@ -129,3 +129,7 @@ AWS_REGION = config("AWS_REGION", default='us-east-1')
 
 # NEW FEATURES
 ENABLE_PHI = config("ENABLE_PHI", default=False)
+
+GEARBOX_MIDDLEWARE_PUBLIC_KEY_Path = config("GEARBOX_MIDDLEWARE_PUBLIC_KEY_PATH", default='src/gearbox/keys/jwt_public_key.pem')
+
+GEARBOX_KEY_CONFIG = {}
