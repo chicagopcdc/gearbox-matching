@@ -52,10 +52,5 @@ class StudyCreate(StudyBase):
 class StudySearchResults(BaseModel):
     results: Sequence[Study]
 
-"""
-class StudyCreateFull(StudyBase):
-    sites: Optional [Sequence[SiteCreate]]
-    study_links: Optional [Sequence[StudyLinkCreate]]
-    study_version: Optional[StudyVersionCreate]
-    study_algorithm_engine: Optional[StudyAlgorithmEngineCreate]
-"""
+class StudyUpdates(BaseModel):
+    studies: Sequence[StudyCreate]

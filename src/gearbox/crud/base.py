@@ -7,6 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy.sql import text
 from sqlalchemy import func, update, select, exc
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.dialects import postgresql
 from gearbox.util import status
 
 from datetime import datetime
@@ -151,6 +153,25 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
         except Exception as e:
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: {type(e)}: {e}")        
+
+    async def upsert(self, db:Session, model: Type[ModelType], row, as_of_date_col='create_date', no_update_cols=[]) -> ModelType:
+        table = model.__table__
+
+        stmt = insert(table).values(row)
+        update_cols = [c.name for c in table.c
+                   if c not in list(table.primary_key.columns)
+                   and c.name not in no_update_cols]
+
+        on_conflict_stmt = stmt.on_conflict_do_update(
+            index_elements=table.primary_key.columns,
+            set_={k: getattr(stmt.excluded, k) for k in update_cols},
+            index_where=(getattr(model, as_of_date_col) < getattr(stmt.excluded, as_of_date_col))
+        ).returning(table.c['id'])
+
+        retval = await db.execute(on_conflict_stmt)
+        updated_ids = retval.all()
+        await db.commit()
+        return updated_ids
 
     """
     def remove(self, db: Session, *, id: int) -> ModelType:

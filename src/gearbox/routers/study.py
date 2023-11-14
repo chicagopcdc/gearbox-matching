@@ -13,7 +13,7 @@ from typing import List
 from gearbox import auth
 from gearbox.admin_login import admin_required
 
-from gearbox.schemas import Study, StudyCreate
+from gearbox.schemas import Study, StudyCreate, StudyUpdates
 from gearbox import deps
 from gearbox.services import study as study_service
 from fastapi.encoders import jsonable_encoder
@@ -77,6 +77,19 @@ async def update_object(
     """
     upd_study = await study_service.update_study(session=session, study=body, study_id=study_id)
     return upd_study
+
+@mod.post("/update-studies", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+async def update_studies(
+    body: StudyUpdates,
+    request: Request,
+    session: AsyncSession = Depends(deps.get_session),
+):
+    """
+    Comments:
+    """
+    print(f"IN ROUTER CALLING UPDATE_STUDIES SERVICE......")
+    upd_study = await study_service.update_studies(session=session, updates=body)
+    return JSONResponse(status.HTTP_200_OK)
 
 def init_app(app):
     app.include_router(mod, tags=["study"])

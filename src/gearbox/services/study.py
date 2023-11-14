@@ -2,9 +2,10 @@ from . import logger
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy import exc 
 from fastapi import HTTPException
-from gearbox.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate
+from gearbox.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate, StudyUpdates
 from gearbox.util import status
 from gearbox.crud import study_crud, site_crud, site_has_study_crud, study_link_crud
+from gearbox.models import Study
 
 async def get_study_info(session: Session, id: int) -> StudySchema:
     aes = await study_crud.get_single_study_info(session, id)
@@ -55,3 +56,19 @@ async def update_study(session: Session, study: StudyCreate, study_id: int) -> S
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study for id: {study_id} not found for update.") 
     await session.commit() 
     return upd_study
+
+async def update_studies(session: Session, updates: StudyUpdates):
+
+    row=[]
+    for study in updates.studies:
+
+        row = {
+            'name':study.name,
+            'code':study.code,
+            'description':study.description
+        }
+
+    no_update_cols = ['id']
+    retval = await study_crud.upsert(db=session, model=Study, row=row, as_of_date_col='create_date', no_update_cols=no_update_cols)
+
+    return True
