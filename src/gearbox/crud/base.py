@@ -10,6 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.dialects import postgresql
 from gearbox.util import status
+from sqlalchemy import inspect
 
 from datetime import datetime
 from ..models import *
@@ -113,6 +114,14 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             logger.error(f"CREATE CRUD OTHER ERROR {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"OTHER ERROR: {type(e)}: {e}")        
 
+    async def set_active_all_rows(self, db: Session, active_upd: bool) -> bool: 
+        if not 'active' in self.model.__table__.columns.keys():
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{self.model.__tablename__} does not inlude 'active' attribute")        
+        stmt = ( update(self.model)
+            .values(active=active_upd)
+        )
+        res = await db.execute(stmt)
+        return True
 
     async def set_active(self, db: Session, id: int, active: bool) -> ModelType: 
         
@@ -154,29 +163,47 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         except Exception as e:
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: {type(e)}: {e}")        
 
-    async def upsert(self, db:Session, model: Type[ModelType], row, as_of_date_col='create_date', no_update_cols=[]) -> ModelType:
+    def compile_query(self,query):
+        compiler = query.compile if not hasattr(query, 'statement') else query.statement.compile
+        return compiler(dialect=postgresql.dialect())
+
+
+    async def upsert(self, db:Session, model: Type[ModelType], row, as_of_date_col='create_date', no_update_cols=[], constraint_cols=[]) -> ModelType:
         table = model.__table__
 
         stmt = insert(table).values(row)
+
         update_cols = [c.name for c in table.c
                    if c not in list(table.primary_key.columns)
                    and c.name not in no_update_cols]
+        
+        try:
+            # Note - 'excluded' is a reference to the row that was not inserted due to conflict #
+            if len(constraint_cols) > 0:
+                on_conflict_stmt = stmt.on_conflict_do_update(
+                    index_elements=constraint_cols,
+                    set_={k: getattr(stmt.excluded, k) for k in update_cols},
+                    index_where=(getattr(model, as_of_date_col) < getattr(stmt.excluded, as_of_date_col))
+                ).returning(table.c['id'])
+                print(f"HERE IS THE QUERY: {self.compile_query(on_conflict_stmt)}")
+            else:
+                # if no constraint columns specified use primary key cols
+                on_conflict_stmt = stmt.on_conflict_do_update(
+                    index_elements=table.primary_key.columns,
+                    set_={k: getattr(stmt.excluded, k) for k in update_cols},
+                    index_where=(getattr(model, as_of_date_col) < getattr(stmt.excluded, as_of_date_col))
+                ).returning(None)
 
-        on_conflict_stmt = stmt.on_conflict_do_update(
-            index_elements=table.primary_key.columns,
-            set_={k: getattr(stmt.excluded, k) for k in update_cols},
-            index_where=(getattr(model, as_of_date_col) < getattr(stmt.excluded, as_of_date_col))
-        ).returning(table.c['id'])
-
-        retval = await db.execute(on_conflict_stmt)
-        updated_ids = retval.all()
-        await db.commit()
-        return updated_ids
-
-    """
-    def remove(self, db: Session, *, id: int) -> ModelType:
-        obj = db.query(self.model).get(id)
-        db.delete(obj)
-        db.commit()
-        return obj
-    """
+            print(f"HERE IS THE QUERY: {self.compile_query(on_conflict_stmt)}")
+            retval = await db.execute(on_conflict_stmt)
+            # convert id returned to an int
+            updated_id = retval.scalar()
+            await db.commit()
+            return updated_id
+        
+        except exc.SQLAlchemyError as e:
+            print(f"***************** SQLAlchemy  EXCEPTION: {e}")
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
+        except Exception as e:
+            print(f"***************** EXCEPTION: {e}")
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: {type(e)}: {e}")       

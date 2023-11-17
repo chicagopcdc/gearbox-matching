@@ -10,8 +10,8 @@ from .test_utils import is_aws_url
         {
             "studies": [
             {
-                "name": "TEST STUDY UPDATES - *TEST STUDY NAME*",
-                "code": "TEST STUDY CODE",
+                "name": "TEST STUDY UPDATES - *TEST STUDY NAME FIRST!!!*",
+                "code": "20-489",
                 "description": "test study description",
                 "active": True,
                 "sites": [ 
@@ -23,7 +23,27 @@ from .test_utils import is_aws_url
                 ],
                 "links": [ 
                     {
-                        "name": "TEST STUDY UPDATES LINK NAME",
+                        "name": "UPDATED-----TEST STUDY UPDATES LINK NAME",
+                        "href": "http://www.testlink.org",
+                        "active": True
+                    }
+                ]
+            },
+            {
+                "name": "TEST STUDY UPDATES - *TEST STUDY NAME SECOND*",
+                "code": "20-489",
+                "description": "test study description",
+                "active": True,
+                "sites": [ 
+                    {
+                        "name": "TEST STUDY UPDATES TEST SITE NAME",
+                        "code": "TEST SITE CODE",
+                        "active": True
+                    }
+                ],
+                "links": [ 
+                    {
+                        "name": "UPDATED THIS IS NEW OK? NEXT-----TEST STUDY UPDATES LINK NAME",
                         "href": "http://www.testlink.org",
                         "active": True
                     }
