@@ -12,7 +12,8 @@ from . import config
 from pcdcutils.gen3 import Gen3RequestManager
 from pcdcutils.signature import SignatureManager
 from starlette.status import (
-    HTTP_401_UNAUTHORIZED
+    HTTP_401_UNAUTHORIZED,
+    HTTP_500_INTERNAL_SERVER_ERROR
 )
 from cdislogging import get_logger
 logger = get_logger('gb-auth', log_level='info')
@@ -32,7 +33,7 @@ async def authenticate(
         if g3rm.is_gen3_signed():
             if request.headers['gen3-service'] == 'gearbox_middleware' and 'GEARBOX_MIDDLEWARE_PUBLIC_KEY' not in config.GEARBOX_KEY_CONFIG:
                 logger.error("no public key found")
-                raise HTTPException(HTTP_401_UNAUTHORIZED, "missing public key")
+                raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, "missing public key")
             else:
                 data = await request.json()
                 if not g3rm.valid_gen3_signature(json.dumps(data), config=config.GEARBOX_KEY_CONFIG):
