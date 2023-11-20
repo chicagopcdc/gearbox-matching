@@ -179,6 +179,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         
         try:
             # Note - 'excluded' is a reference to the row that was not inserted due to conflict #
+            print(f"-----> NO UPDATE COLS: {no_update_cols}")
+            print(f"----> UPDATE COLS: {update_cols}")
             if len(constraint_cols) > 0:
                 on_conflict_stmt = stmt.on_conflict_do_update(
                     index_elements=constraint_cols,
