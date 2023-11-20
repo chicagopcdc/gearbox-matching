@@ -2,7 +2,7 @@ import pytest
 import random
 
 from sqlalchemy.orm import sessionmaker
-from gearbox.models import Study, StudyLink, Site
+from gearbox.models import Study, StudyLink, Site, StudyExternalId
 from .test_utils import is_aws_url
 
 @pytest.mark.parametrize(
@@ -58,7 +58,15 @@ from .test_utils import is_aws_url
                         "active": True
                     }
                 ],
-                "ext_ids": [ ]
+            "ext_ids": [
+                    {
+                        "ext_id": "testexternalstudyid2",
+                        "source": "test ext id source",
+                        "source_url": "http://www.testsourceurl.gov",
+                        "active": True
+
+                    }
+            ]
             }
             ]
         }
@@ -73,17 +81,35 @@ def test_study_updates(setup_database, client, data, connection):
     resp = client.post("/update-studies", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
 
-    # errors = []
-    # try: 
-    #     Session = sessionmaker(bind=connection)
-    #    db_session = Session()
-    #    study = db_session.query(Study).filter(Study.code==test_study_code).first()
-    #    if not study: 
-    #        errors.append(f"Study (code): {test_study_code} not created")
+    test_study_code = data.get('studies')[1].get('code')
+    test_site_name = data.get('studies')[1].get('sites')[0].get('name')
+    test_link = data.get('studies')[1].get('links')[0].get('href')
+    test_ext_id = data.get('studies')[1].get('ext_ids')[0].get('ext_id')
 
-    #except Exception as e:
-    #    errors.append(f"Test study unexpected exception: {str(e)}")
-    #if not str(resp.status_code).startswith("20"):
-    #    errors.append(f"Invalid https status code returned from test_create_study (create): {resp.status_code} ")
+    errors = []
+    try: 
+        Session = sessionmaker(bind=connection)
+        db_session = Session()
+        study = db_session.query(Study).filter(Study.code==test_study_code).first()
+        if not study: 
+            errors.append(f"Study (code): {test_study_code} not created")
 
-    #assert not errors, "errors occurred: \n{}".format("\n".join(errors))
+        site = db_session.query(Site).filter(Site.name==test_site_name).first()
+        if not site: 
+            errors.append(f"Site (name): {test_site_name} not created")
+
+        link = db_session.query(StudyLink).filter(StudyLink.href==test_link).first()
+        if not link: 
+            errors.append(f"Link (href): {test_link} not created")
+
+        ext_id = db_session.query(StudyExternalId).filter(StudyExternalId.ext_id==test_ext_id).first()
+        if not ext_id: 
+            errors.append(f"Study external id (ext_id): {test_ext_id} not created")
+        
+
+    except Exception as e:
+        errors.append(f"Test study unexpected exception: {str(e)}")
+    if not str(resp.status_code).startswith("20"):
+        errors.append(f"Invalid https status code returned from test_create_study (create): {resp.status_code} ")
+
+    assert not errors, "errors occurred: \n{}".format("\n".join(errors))
