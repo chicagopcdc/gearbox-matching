@@ -2,7 +2,7 @@ import pytest
 import random
 
 from sqlalchemy.orm import sessionmaker
-from gearbox.models import Study, StudyLink, Site, StudyExternalId
+from gearbox.models import Study, StudyLink, Site, StudyExternalId, SiteHasStudy
 from .test_utils import is_aws_url
 
 @pytest.mark.parametrize(
@@ -11,7 +11,7 @@ from .test_utils import is_aws_url
             "studies": [
             {
                 "name": "TEST STUDY UPDATES - *TEST STUDY NAME FIRST!!!*",
-                "code": "20-489",
+                "code": "NEW_STUDY_CODE",
                 "description": "test study description",
                 "active": True,
                 "sites": [ 
@@ -41,7 +41,7 @@ from .test_utils import is_aws_url
             },
             {
                 "name": "TEST STUDY UPDATES - *TEST STUDY NAME FIRST!!!*",
-                "code": "20-489",
+                "code": "NEW_STUDY_CODE",
                 "description": "test study description",
                 "active": True,
                 "sites": [ 
@@ -105,8 +105,11 @@ def test_study_updates(setup_database, client, data, connection):
         ext_id = db_session.query(StudyExternalId).filter(StudyExternalId.ext_id==test_ext_id).first()
         if not ext_id: 
             errors.append(f"Study external id (ext_id): {test_ext_id} not created")
-        
 
+        site_has_study = db_session.query(SiteHasStudy).filter(SiteHasStudy.study_id==study.id).first()
+        if not site_has_study: 
+            errors.append(f"Site has study(study_id): {study.id} not created")
+        
     except Exception as e:
         errors.append(f"Test study unexpected exception: {str(e)}")
     if not str(resp.status_code).startswith("20"):

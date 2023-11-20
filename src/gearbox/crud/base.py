@@ -92,6 +92,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     async def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
         obj_in_data = jsonable_encoder(obj_in)
         # set create_date here if not already set and it is in the schema
+
         if "create_date" in obj_in_data.keys():
             obj_in_data["create_date"] = datetime.now() if not obj_in_data["create_date"] else obj_in_data["create_date"]
         if "update_date" in obj_in_data.keys():
@@ -179,15 +180,12 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         
         try:
             # Note - 'excluded' is a reference to the row that was not inserted due to conflict #
-            print(f"-----> NO UPDATE COLS: {no_update_cols}")
-            print(f"----> UPDATE COLS: {update_cols}")
             if len(constraint_cols) > 0:
                 on_conflict_stmt = stmt.on_conflict_do_update(
                     index_elements=constraint_cols,
                     set_={k: getattr(stmt.excluded, k) for k in update_cols},
                     index_where=(getattr(model, as_of_date_col) < getattr(stmt.excluded, as_of_date_col))
                 ).returning(table.c['id'])
-                print(f"HERE IS THE QUERY: {self.compile_query(on_conflict_stmt)}")
             else:
                 # if no constraint columns specified use primary key cols
                 on_conflict_stmt = stmt.on_conflict_do_update(
@@ -196,7 +194,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
                     index_where=(getattr(model, as_of_date_col) < getattr(stmt.excluded, as_of_date_col))
                 ).returning(None)
 
-            print(f"HERE IS THE QUERY: {self.compile_query(on_conflict_stmt)}")
+            # Print the query for debugging
+            # print(f"HERE IS THE QUERY: {self.compile_query(on_conflict_stmt)}")
             retval = await db.execute(on_conflict_stmt)
             # convert id returned to an int
             updated_id = retval.scalar()
@@ -204,8 +203,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             return updated_id
         
         except exc.SQLAlchemyError as e:
-            print(f"***************** SQLAlchemy  EXCEPTION: {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
         except Exception as e:
-            print(f"***************** EXCEPTION: {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: {type(e)}: {e}")       

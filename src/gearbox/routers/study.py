@@ -87,7 +87,6 @@ async def update_studies(
     """
     Comments:
     """
-    print(f"IN ROUTER CALLING UPDATE_STUDIES SERVICE......")
     upd_study = await study_service.update_studies(session=session, updates=body)
     return JSONResponse(status.HTTP_200_OK)
 

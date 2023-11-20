@@ -31,6 +31,7 @@ async def create_study(session: Session, study: StudyCreate) -> StudySchema:
     links = study.links
     new_study = await study_crud.create(db=session, obj_in=study)
 
+
     if sites:
         new_site_ids = []
         for site in sites:
