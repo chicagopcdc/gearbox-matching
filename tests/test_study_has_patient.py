@@ -16,9 +16,9 @@ def database(setup_database) -> Engine:
     yield session
 
     session.query(StudyHasPatient).delete()
-    study_1 = session.query(Study.id).filter(Study.name == 'study 1').delete()
-    study_2 = session.query(Study.id).filter(Study.name == 'study 2').delete()
-    study_3 = session.query(Study.id).filter(Study.name == 'study 3').delete()
+    study_1 = session.query(Study).filter(Study.name == 'study 1').delete()
+    study_2 = session.query(Study).filter(Study.name == 'study 2').delete()
+    study_3 = session.query(Study).filter(Study.name == 'study 3').delete()
     session.commit()
     session.close()
 
@@ -26,7 +26,8 @@ def database(setup_database) -> Engine:
 def add_study_simple(database):
 
     study_1 = Study(
-         name='study 1'
+         name='study 1',
+         code='ADDSTUDYSIMPLECODE 1'
      )
 
     database.add(study_1)
@@ -51,11 +52,13 @@ def add_study_simple(database):
 @pytest.fixture(scope="session")
 def add_study_complex(database):
     study_2 = Study(
-         name='study 2'
+         name='study 2',
+         code='ADDSTUDYSIMPLECODE 2'
      )
 
     study_3 = Study(
-         name='study 3'
+         name='study 3',
+         code='ADDSTUDYSIMPLECODE 3'
     )
     
     database.add_all([study_2, study_3])
