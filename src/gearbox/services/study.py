@@ -61,7 +61,7 @@ async def update_study(session: Session, study: StudyCreate, study_id: int) -> S
 
 async def update_studies(session: Session, updates: StudyUpdates):
 
-    # to do - create / update date
+    # Reset active to false for all rows in all study-related tables
     await study_crud.set_active_all_rows(db=session, active_upd=False)
     await site_crud.set_active_all_rows(db=session, active_upd=False)
     await site_has_study_crud.set_active_all_rows(db=session, active_upd=False)

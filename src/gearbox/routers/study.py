@@ -85,7 +85,10 @@ async def update_studies(
     session: AsyncSession = Depends(deps.get_session),
 ):
     """
-    Comments:
+    Comments: This endpoint does a refresh of the study, study_links, study_external_ids,
+        site_has_study, and site tables. Rather than delete the existing information,
+        the 'active' flag is set to false for all studies that do not exist in the
+        studyupdates json document.
     """
     upd_study = await study_service.update_studies(session=session, updates=body)
     return JSONResponse(status.HTTP_200_OK)
