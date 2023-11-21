@@ -73,7 +73,7 @@ async def update_studies(session: Session, updates: StudyUpdates):
             'name':study.name,
             'code':study.code,
             'description':study.description,
-            'active':True,
+            'active':study.active,
             'create_date': datetime.now()
         }
         no_update_cols = ['create_date']
@@ -91,7 +91,7 @@ async def update_studies(session: Session, updates: StudyUpdates):
             row = {
                 'name': site.name,
                 'code': site.code,
-                'active': site.active ,
+                'active': site.active,
                 'create_date': datetime.now()
             }
             constraint_cols = [Site.code, Site.name]
@@ -108,7 +108,7 @@ async def update_studies(session: Session, updates: StudyUpdates):
             row = {
                 'study_id': new_or_updated_study_id,
                 'site_id': new_or_updated_site_id,
-                'active': True,
+                'active': site.active,
                 'create_date': datetime.now()
             }
             no_update_cols = ['create_date']
