@@ -50,9 +50,6 @@ def get_app():
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request:Request, exc:ValueError):
         exc_str = f'{exc}.'.replace('\n', '').replace(' ',' ')
-        print("=================================================================")
-        print(f"PYDANTIC REQUEST VALIDATION ERROR: {request}: {exc_str}")
-        print("=================================================================")
         logger.error(f"PYDANTIC REQUEST VALIDATION ERROR: {request}: {exc_str}")
         content = {'status_code': 10422,'message': exc_str, 'data':None}
         return JSONResponse(content=content, status_code = status.HTTP_422_UNPROCESSABLE_ENTITY)
@@ -60,9 +57,6 @@ def get_app():
     @app.exception_handler(ValidationError)
     async def validation_exception_handler(request:Request, exc:ValueError):
         exc_str = f'{exc}.'.replace('\n', '').replace(' ',' ')
-        print("=================================================================")
-        print(f"PYDANTIC VALIDATION ERROR: {request}: {exc_str}")
-        print("=================================================================")
         logger.error(f"PYDANTIC VALIDATION ERROR: {request}: {exc_str}")
         content = {'status_code': 10422,'message': 'PYDANTIC ValidationError' + exc_str , 'data':None}
         return JSONResponse(content=content, status_code = status.HTTP_422_UNPROCESSABLE_ENTITY)
