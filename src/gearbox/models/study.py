@@ -8,8 +8,8 @@ class Study(Base):
     __tablename__ = "study"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String, nullable=True)
-    code = Column(String, nullable=True)
+    name = Column(String, nullable=False)
+    code = Column(String, nullable=False)
     description = Column(String, nullable=True)
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
@@ -29,7 +29,7 @@ class Study(Base):
     ext_ids = relationship("StudyExternalId", back_populates="study", lazy='joined')
     study_versions = relationship("StudyVersion", back_populates="study", lazy='joined')
 
-    def __init__(self, name=None, code=None, description=None, active=None, create_date=None, sites=None, links=None, follow_up_info=None):
+    def __init__(self, name=None, code=None, description=None, active=None, create_date=None, sites=None, links=None, follow_up_info=None, ext_ids=None):
         self.name = name
         self.code = code
         self.description = description

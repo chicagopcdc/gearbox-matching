@@ -1,10 +1,12 @@
 from . import logger
+from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy import exc 
 from fastapi import HTTPException
-from gearbox.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate
+from gearbox.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate, StudyUpdates
 from gearbox.util import status
-from gearbox.crud import study_crud, site_crud, site_has_study_crud, study_link_crud
+from gearbox.crud import study_crud, site_crud, site_has_study_crud, study_link_crud, site_has_study_crud, study_external_id_crud
+from gearbox.models import Study, Site, StudyLink, SiteHasStudy, StudyExternalId
 
 async def get_study_info(session: Session, id: int) -> StudySchema:
     aes = await study_crud.get_single_study_info(session, id)
@@ -28,6 +30,7 @@ async def create_study(session: Session, study: StudyCreate) -> StudySchema:
     sites = study.sites
     links = study.links
     new_study = await study_crud.create(db=session, obj_in=study)
+
 
     if sites:
         new_site_ids = []
@@ -55,3 +58,103 @@ async def update_study(session: Session, study: StudyCreate, study_id: int) -> S
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study for id: {study_id} not found for update.") 
     await session.commit() 
     return upd_study
+
+async def update_studies(session: Session, updates: StudyUpdates):
+
+    # Reset active to false for all rows in all study-related tables
+    await study_crud.set_active_all_rows(db=session, active_upd=False)
+    await site_crud.set_active_all_rows(db=session, active_upd=False)
+    await site_has_study_crud.set_active_all_rows(db=session, active_upd=False)
+    await study_link_crud.set_active_all_rows(db=session, active_upd=False)
+
+    for study in updates.studies:
+
+        row = {
+            'name':study.name,
+            'code':study.code,
+            'description':study.description,
+            'active':study.active,
+            'create_date': datetime.now()
+        }
+        no_update_cols = ['create_date']
+        constraint_cols = [Study.code]
+        new_or_updated_study_id = await study_crud.upsert(
+            db=session, 
+            model=Study, 
+            row=row, 
+            as_of_date_col='create_date', 
+            no_update_cols=no_update_cols, 
+            constraint_cols=constraint_cols
+        )
+
+        for site in study.sites:
+            row = {
+                'name': site.name,
+                'code': site.code,
+                'active': site.active,
+                'create_date': datetime.now()
+            }
+            constraint_cols = [Site.code, Site.name]
+            no_update_cols=['create_date']
+            new_or_updated_site_id = await site_crud.upsert(
+                db=session, 
+                model=Site, 
+                row=row, 
+                as_of_date_col='create_date', 
+                no_update_cols=no_update_cols, 
+                constraint_cols=constraint_cols
+            )
+
+            row = {
+                'study_id': new_or_updated_study_id,
+                'site_id': new_or_updated_site_id,
+                'active': site.active,
+                'create_date': datetime.now()
+            }
+            no_update_cols = ['create_date']
+            constraint_cols = [Site.id, Study.id]
+            new_or_updated_site_has_study_id = await site_has_study_crud.upsert(
+                db=session, 
+                model=SiteHasStudy, 
+                row=row, 
+                as_of_date_col='create_date', 
+                no_update_cols=no_update_cols
+            )
+
+        for link in study.links:
+            row = {
+                'name': link.name,
+                'href': link.href,
+                'study_id' : new_or_updated_study_id,
+                'active': link.active,
+                'create_date': datetime.now()
+            }
+            no_update_cols = ['create_date']
+            constraint_cols = [StudyLink.study_id, StudyLink.href]
+            new_or_updated_link_id = await study_link_crud.upsert(
+                db=session, 
+                model=StudyLink, 
+                row=row, 
+                no_update_cols=no_update_cols, 
+                constraint_cols=constraint_cols
+            )
+
+        for ext_id in study.ext_ids:
+            row = {
+                'study_id' : new_or_updated_study_id,
+                'ext_id': ext_id.ext_id,
+                'source': ext_id.source,
+                'source_url': ext_id.source_url,
+                'active': ext_id.active,
+                'create_date': datetime.now()
+            }
+            no_update_cols = ['create_date']
+            constraint_cols = [StudyExternalId.study_id, StudyExternalId.ext_id]
+            new_or_updated_ext_id = await study_external_id_crud.upsert(
+                db=session, 
+                model=StudyExternalId, 
+                row=row, 
+                no_update_cols=no_update_cols, 
+                constraint_cols=constraint_cols
+            )
+    return True

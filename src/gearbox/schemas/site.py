@@ -20,8 +20,8 @@ class SiteStudy(BaseModel):
     create_date: Optional[datetime]
     active: Optional[bool]
 #    links: Optional[List[StudyLink]]
-    assoc_create_date: Optional[datetime]
-    assoc_active: Optional[bool]
+    create_date: Optional[datetime]
+    active: Optional[bool]
 
     class Config:
         orm_mode = True

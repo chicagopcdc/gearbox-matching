@@ -13,6 +13,7 @@ class StudyExternalId(Base):
     source = Column(String, nullable=True)
     source_url = Column(String, nullable=True)
     active = Column(Boolean, nullable=True)
+    create_date = Column(DateTime, nullable=True)
 
     UniqueConstraint(study_id, ext_id, name='study_ext_id_uix')
 

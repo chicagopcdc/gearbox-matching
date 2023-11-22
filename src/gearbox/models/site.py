@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from .base_class import Base
@@ -11,6 +11,8 @@ class Site(Base):
     code = Column(String, nullable=True)
     create_date = Column(DateTime, nullable=True)
     active = Column(Boolean, nullable=True)
+
+    UniqueConstraint(name, code, name='site_uix')
 
     studies = relationship("SiteHasStudy", back_populates="site")
 

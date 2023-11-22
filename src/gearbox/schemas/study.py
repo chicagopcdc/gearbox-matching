@@ -6,6 +6,7 @@ from gearbox.schemas import SiteCreate #, StudyLinkCreate
 from .study_link import StudyLinkCreate, StudyLink
 from .site_has_study import SiteHasStudy
 from .site import Site
+from .study_external_id import StudyExternalIdCreate
 
 from pydantic.utils import GetterDict
 
@@ -48,14 +49,10 @@ class Study(StudyBase):
 class StudyCreate(StudyBase):
     sites: Optional[List[SiteCreate]]
     links: Optional[List[StudyLinkCreate]]
+    ext_ids: Optional[List[StudyExternalIdCreate]]
 
 class StudySearchResults(BaseModel):
     results: Sequence[Study]
 
-"""
-class StudyCreateFull(StudyBase):
-    sites: Optional [Sequence[SiteCreate]]
-    study_links: Optional [Sequence[StudyLinkCreate]]
-    study_version: Optional[StudyVersionCreate]
-    study_algorithm_engine: Optional[StudyAlgorithmEngineCreate]
-"""
+class StudyUpdates(BaseModel):
+    studies: Sequence[StudyCreate]
