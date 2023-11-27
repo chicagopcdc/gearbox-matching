@@ -35,7 +35,7 @@ async def authenticate(
                 raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, "missing public key")
             else:
                 data = await request.json()
-                if not g3rm.valid_gen3_signature(json.dumps(data), config=config.GEARBOX_KEY_CONFIG):
+                if not g3rm.valid_gen3_signature(json.dumps(data, separators=(',', ':')), config=config.GEARBOX_KEY_CONFIG):
                     raise HTTPException(HTTP_401_UNAUTHORIZED, "Gen3 signed request is invalid")
         else:
             token_claims = await get_token_claims(token)
