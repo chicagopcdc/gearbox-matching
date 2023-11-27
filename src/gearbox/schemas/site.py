@@ -30,6 +30,11 @@ class SiteStudy(BaseModel):
 class SiteBase(BaseModel):
     name: str
     code: Optional[str]
+    country: Optional[str]
+    status: Optional[str]
+    city: Optional[str]
+    state: Optional[str]
+    zip: Optional[str]
     create_date: Optional[datetime]
     active: Optional[bool]
 

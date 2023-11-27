@@ -48,7 +48,12 @@ from .test_utils import is_aws_url
                     {
                         "name": "TEST STUDY UPDATES TEST SITE NAME -> UPDATED",
                         "code": "TEST SITE CODE",
-                        "active": True
+                        "active": True,
+                        "country": "USA",
+                        "status":"recruiting",
+                        "city":"Chicago",
+                        "state":"IL",
+                        "zip":"60660"
                     }
                 ],
                 "links": [ 

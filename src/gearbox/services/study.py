@@ -91,6 +91,11 @@ async def update_studies(session: Session, updates: StudyUpdates):
             row = {
                 'name': site.name,
                 'code': site.code,
+                'country': site.country,
+                'status': site.status,
+                'city': site.city,
+                'state': site.state,
+                'zip': site.zip,
                 'active': site.active,
                 'create_date': datetime.now()
             }

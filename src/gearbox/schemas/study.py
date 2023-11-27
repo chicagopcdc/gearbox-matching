@@ -22,6 +22,11 @@ class StudySite(BaseModel):
     id: int
     name: Optional[str]
     code: Optional[str]
+    country: Optional[str]
+    status: Optional[str]
+    city: Optional[str]
+    state: Optional[str]
+    zip: Optional[str]
     create_date: Optional[datetime]
     active: Optional[bool]
 
