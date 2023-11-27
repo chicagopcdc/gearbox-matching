@@ -9,21 +9,21 @@ from .test_utils import is_aws_url
     "data", [ 
         {
             "name": "CREATE UPDATE TEST STUDY NAME",
-            "code": "TEST STUDY CODE",
+            "code": "TEST STUDY WITH SITE CODE",
             "description": "test study description",
             "active": True,
             "sites": [ 
                 {
                     "name": "CREATE UPDATE TEST SITE NAME",
-                    "code": "TEST SITE CODE",
+                    "code": "TEST STUDY WITH SITE CODE",
                     "active": True
                 },
                 {
                     "name": "CREATE UPDATE TEST SITE NAME 2",
-                    "code": "TEST SITE CODE 2",
+                    "code": "TEST STUDY WITH SITE CODE 2",
                     "active": True
                 }
-    ]
+            ]
     }
     ]
 )

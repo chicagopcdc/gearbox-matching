@@ -43,6 +43,7 @@ Create a file `.env` in the root directory of the checkout:
 # DEBUG                         # default: False
 # TESTING                       # default: False
 # BYPASS_FENCE_DUMMYER_USER_ID = ...  # default: 4
+# ENABLE_PHI =                  # default: False
 ```
 
 Run database schema migration:

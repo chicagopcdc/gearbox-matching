@@ -6,8 +6,8 @@ from pydantic.utils import GetterDict
 class SiteHasStudyBase(BaseModel):
     study_id: int
     site_id: int
-    assoc_active: Optional[bool]
-    assoc_create_date: Optional[datetime]
+    active: Optional[bool]
+    create_date: Optional[datetime]
 
     class Config:
         orm_mode = True

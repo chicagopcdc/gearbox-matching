@@ -87,6 +87,7 @@ def setup_database(connection) -> Engine:
     file_to_table(conn, cursor,'site', './postgres-data/td_site.tsv')
     file_to_table(conn, cursor,'site_has_study', './postgres-data/td_site_has_study.tsv')
     file_to_table(conn, cursor,'study_version', './postgres-data/td_study_version.tsv')
+    file_to_table(conn, cursor,'study_algorithm_engine', './postgres-data/td_study_algorithm_engine.tsv')
     file_to_table(conn, cursor,'value', './postgres-data/td_value.tsv')
     file_to_table(conn, cursor,'input_type', './postgres-data/td_input_type.tsv')
     file_to_table(conn, cursor,'tag', './postgres-data/td_tag.tsv')
@@ -114,34 +115,12 @@ def setup_database(connection) -> Engine:
     cursor.execute("SELECT setval('tag_id_seq', (SELECT MAX(id) FROM tag));")
     cursor.execute("SELECT setval('triggered_by_id_seq', (SELECT MAX(id) FROM triggered_by));")
     cursor.execute("SELECT setval('value_id_seq', (SELECT MAX(id) FROM value));")
-    # FIX THIS FUNCTION TO LOAD
-    load_study_algorithm_engine(conn, cursor)
     file_to_table(conn, cursor,'eligibility_criteria_info', './postgres-data/td_eligibility_criteria_info.tsv')
     cursor.execute("SELECT setval('eligibility_criteria_info_id_seq', (SELECT MAX(id) FROM eligibility_criteria_info));")
     conn.commit()
 
     yield session
     session.close()
-
-def load_study_algorithm_engine(conn, cursor):
-    for filename in glob.glob("./tests/data/algorithm_logic_load*.json"):
-        with open(filename) as jfile:
-            # study_logic = json.loads(jfile.read(), object_pairs_hook=OrderedDict)
-            study_logic = json.loads(jfile.read())
-            study_logic = json.dumps(study_logic)
-            # study_version_id = re.search(r'\d', filename).group()
-            dt = datetime.now()
-            # active = True
-            insert_query = f'''
-                INSERT INTO study_algorithm_engine 
-                    (start_date, algorithm_logic, algorithm_version) 
-                    VALUES (%s, %s, %s)
-            '''
-            try:
-                cursor.execute(insert_query, (dt, study_logic, 1))
-            except Exception as e:
-                print(f"ERROR IN load_study_algorithm_engine: {e}")
-    conn.commit()
 
 @pytest.fixture(scope="session")
 def client(event_loop):

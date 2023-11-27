@@ -46,4 +46,4 @@ async def save_object(
     return new_criterion
 
 def init_app(app):
-    app.include_router(mod, tags=["criteria","criterion"])
+    app.include_router(mod, tags=["criterion"])

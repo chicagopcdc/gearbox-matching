@@ -58,4 +58,4 @@ async def update_object(
     return upd_value
 
 def init_app(app):
-    app.include_router(mod, tags=["value","values","update-value"])
+    app.include_router(mod, tags=["value"])

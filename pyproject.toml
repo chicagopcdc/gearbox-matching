@@ -6,7 +6,7 @@ authors = ["CTDS UChicago <cdis@uchicago.edu>"]
 license = "Apache-2.0"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = ">=3.9,<4.0.0"
 fastapi = "^0.65.2"
 uvicorn = {extras = ["standard"], version="^0.11.2"}
 gunicorn = "^20.0.4"
@@ -19,7 +19,7 @@ cryptography = "3.4.8"
 authutils = "^5.0.4"
 cdislogging = "^1.0"
 click = "==7.1.*,>=7.1.2"
-pyyaml = "==5.4.*,>=5.4.1"
+pyyaml = "5.3.1"
 dataclasses-json = "==0.5.*,>=0.5.2"
 pytest-asyncio = "^0.15.1"
 jsonpath-ng = "^1.5.3"
@@ -37,8 +37,11 @@ certifi = "^2022.6.15"
 python-dateutil = "^2.8.2"
 six = "^1.16.0"
 urllib3 = "^1.26.9"
-pcdc-aws-client = {git = "https://github.com/chicagopcdc/pcdc-aws-client.git", rev = "0.3.2"}
+pcdc-aws-client = {git = "https://github.com/chicagopcdc/pcdc-aws-client.git", rev = "1.2.3"}
 jsonschema = "^4.17.3"
+werkzeug = "2.2.2"
+pcdcutils = {git = "https://github.com/chicagopcdc/pcdcutils.git", rev = "0.1.2"}
+
 
 
 [tool.poetry.dev-dependencies]
@@ -63,8 +66,9 @@ nest-asyncio = "^1.5.1"
 "study_algorithm_engine" = "gearbox.routers.study_algorithm_engine"
 "study_version" = "gearbox.routers.study_version"
 "study_version_eligibility_criteria" = "gearbox.routers.study_version_eligibility_criteria"
-"study_version_study_algorithm" = "gearbox.routers.study_version_study_algorithm"
 "study_link" = "gearbox.routers.study_link"
+"study_has_patient" = "gearbox.routers.study_has_patient"
+
 
 [build-system]
 requires = ["poetry>=0.12"]

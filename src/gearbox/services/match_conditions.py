@@ -1,6 +1,8 @@
 import json
 from typing import List
 from fastapi.encoders import jsonable_encoder
+from fastapi import HTTPException
+from gearbox.util import status
 import re
 from collections import deque
 from gearbox.routers import logger
@@ -201,7 +203,6 @@ def build_tree(nodelist):
 
         # start to build the tree
         if len(crit_que) == 0:
-
             root_node = get_new_node(node, 'AND')
             crit_que.append(root_node)
 
@@ -215,9 +216,16 @@ def build_tree(nodelist):
                     crit_que.append((root_node, neighbor_group_id))
                     crit_que.append((n_node, neighbor_group_id))
             elif check_ahead_node == neighbor:
-                n_node = get_new_node(neighbor, 'AND')
-                root_node['criteria'].append(n_node)
-                crit_que.append(n_node)
+
+                # If there is no operator in the neighbor and the 
+                # root is an 'AND', then just add neighbor to the root criteria list
+                if root_node['operator'] == 'AND':
+                    root_node['criteria'].append(neighbor)
+                else:
+                    n_node = get_new_node(neighbor, 'AND')
+                    root_node['criteria'].append(n_node)
+                    crit_que.append(n_node)
+
             else:
                 n_node = get_new_node(neighbor, 'OR')
                 root_node['criteria'].append(n_node)
@@ -248,7 +256,6 @@ def build_tree(nodelist):
                 # IF THERE IS NO EXPLICIT OPERATOR
                 ################################################################
                 if not neighbor_operator:
-
                     ################################################################
                     # IF THERE IS NOT ALREADY AN 'AND' ON THE NODE THEN ADD
                     # 'AND' AND NEIGHBOR CRITERIA
@@ -325,14 +332,12 @@ def build_tree(nodelist):
                                 working_group_id = working_node[1]
                                 working_node = working_node[0]
                         except:
-                            # print("no more nodes")
+                            # no more nodes
                             break
 
                     ########################################################
                     # IF NEIGHBOR HAS CHILDREN CREATE THE "AND" AND APPEND
                     ########################################################
-                    if neighbor == check_ahead_node:
-                        c_node = get_new_node(neighbor,'AND')
                         working_node['criteria'].append(c_node)
                         crit_que.append((working_node, neighbor_group_id))
                         crit_que.append((c_node, neighbor_group_id))
@@ -361,7 +366,7 @@ def build_tree(nodelist):
                                 working_group_id = working_node[1]
                                 working_node = working_node[0]
                         except:
-                            # print("no more nodes")
+                            # no more nodes
                             break
 
                 ######################################################################
@@ -375,7 +380,7 @@ def build_tree(nodelist):
                                 working_group_id = working_node[1]
                                 working_node = working_node[0]
                         except:
-                            # print("no more nodes")
+                            # no more nodes
                             break
 
                 #################################################################
@@ -513,8 +518,9 @@ def get_tree(full_paths, study_id=None, suppress_header=False):
     fpg = add_generation(fp)
     mgd = merged(fpg)
     dfd = get_nodes_and_children(set(), {}, mgd, fpg[0])
-
+        
     node_list = dfs(set(), [], dfd, fpg[0])
+
     criteria_tree = build_tree(node_list)
 
     if isinstance(criteria_tree, tuple):
@@ -537,7 +543,19 @@ async def get_match_conditions(session: Session) -> List[AlgorithmResponse]:
     for a in active_match_conds:
         study_logic = {}
         study_logic['studyId'] = a.study_version.study_id
-        study_logic['algorithm'] = a.algorithm_logic
-        match_conds = sorted(match_conds, key=lambda k: k['studyId'])
+        study_logic['algorithm'] = a.study_algorithm_engine.algorithm_logic
         match_conds.append(study_logic)
+
+    # check for duplicate study ids in match conditions list, this can happen if
+    # there are more than 1 active entry for a study in the eligibility_criteria_info table
+    studyIds = [ x['studyId'] for x in match_conds ]
+    dupes = [ x for n, x in enumerate(studyIds) if x in studyIds[:n]]
+    if dupes:
+        logger.error(f"Duplicte active studies found in eligibility_criteria_info table for the following study ids: {dupes}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            f"Duplicte active studies found in eligibility_criteria_info table for the following study ids: {dupes}") 
+
+    # sort by studyId before returning
+    match_conds = sorted(match_conds, key=lambda k: k['studyId'])
+
     return match_conds

@@ -7,6 +7,9 @@ RUN apt-get update \
     build-essential gcc make musl-dev libffi-dev libssl-dev git curl bash
 COPY . /src/
 WORKDIR /src
+
+RUN mkdir src/gearbox/keys/
+
 RUN python -m venv /env && . /env/bin/activate && poetry install --no-interaction --no-dev
 
 

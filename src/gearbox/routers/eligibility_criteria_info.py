@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from datetime import date
 from . import logger
+from typing import List
 from ..util import status
 from gearbox import auth
 from gearbox.schemas import EligibilityCriteriaInfoSearchResults, EligibilityCriteriaInfo as EligibilityCriteriaInfoSchema, EligibilityCriteriaInfoCreate
@@ -30,13 +31,13 @@ async def get_eligibility_criteria_info(
     ret_eligibility_criteria_info = await eligibility_criteria_info_service.get_eligibility_criteria_info(session, eligibility_criteria_info_id)
     return ret_eligibility_criteria_info
 
-@mod.get("/eligibility-criteria-infos", response_model=EligibilityCriteriaInfoSearchResults, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])
+@mod.get("/eligibility-criteria-infos", response_model=List[EligibilityCriteriaInfoSchema], status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])
 async def get_all_eligibility_criteria_infos(
     request: Request,
     session: AsyncSession = Depends(deps.get_session)
 ):
     eligibility_criteria_infos = await eligibility_criteria_info_service.get_eligibility_criteria_infos(session)
-    return {"results": list(eligibility_criteria_infos)}
+    return eligibility_criteria_infos
 
 @mod.post("/eligibility-criteria-info", response_model=EligibilityCriteriaInfoSchema, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
@@ -62,4 +63,4 @@ async def update_object(
     return upd_eligibility_criteria_info
 
 def init_app(app):
-    app.include_router(mod, tags=["eligibility_criteria_info","update_eligibility_criteria_info","eligibility_criteria_infos"])
+    app.include_router(mod, tags=["eligibility-criteria-info"])

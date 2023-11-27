@@ -13,6 +13,8 @@ from gearbox.util import status
 import cdislogging
 from pcdc_aws_client.boto import BotoManager
 import uvicorn
+from pcdcutils.signature import SignatureManager
+from pcdcutils.errors import KeyPathInvalidError, NoKeyError
 
 logger_name = 'gb-logger'
 logger = cdislogging.get_logger(logger_name, log_level="debug" if config.DEBUG else "info")
@@ -46,24 +48,19 @@ def get_app():
             'aws_secret_access_key': config.S3_AWS_SECRET_ACCESS_KEY
         }, 
         logger)
-
-    @app.exception_handler(RequestValidationError)
-    async def value_error_exception_handler(request:Request, exc:ValueError):
-        return PlainTextResponse(str(exc), status.HTTP_422_UNPROCESSABLE_ENTITY)
+    load_keys()
 
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request:Request, exc:ValueError):
         exc_str = f'{exc}.'.replace('\n', '').replace(' ',' ')
-        print(f"EXCEPTION HANDLER PYDANDIC ERROR: {request}: {exc_str}")
-        logger.error(f"{request}: {exc_str}")
+        logger.error(f"PYDANTIC REQUEST VALIDATION ERROR: {request}: {exc_str}")
         content = {'status_code': 10422,'message': exc_str, 'data':None}
         return JSONResponse(content=content, status_code = status.HTTP_422_UNPROCESSABLE_ENTITY)
 
     @app.exception_handler(ValidationError)
     async def validation_exception_handler(request:Request, exc:ValueError):
         exc_str = f'{exc}.'.replace('\n', '').replace(' ',' ')
-        print(f"PYDANTIC ValidationError: {request}: {exc_str}")
-        logger.error(f"PYDANTIC ValidationError: {request}: {exc_str}")
+        logger.error(f"PYDANTIC VALIDATION ERROR: {request}: {exc_str}")
         content = {'status_code': 10422,'message': 'PYDANTIC ValidationError' + exc_str , 'data':None}
         return JSONResponse(content=content, status_code = status.HTTP_422_UNPROCESSABLE_ENTITY)
 
@@ -124,6 +121,13 @@ def load_modules(app=None):
             extra={"color_message": msg + click.style("%s", fg="cyan")},
         )
 
+def load_keys():
+    try:
+        config.GEARBOX_KEY_CONFIG['GEARBOX_MIDDLEWARE_PUBLIC_KEY'] = SignatureManager(key_path=config.GEARBOX_MIDDLEWARE_PUBLIC_KEY_Path).key
+    except NoKeyError:
+        logger.warn("GEARBOX_PUBLIC_KEY not found")
+    except KeyPathInvalidError:
+        logger.warn("GEARBOX_PUBLIC_KEY_PATH invalid")
 
 router = APIRouter()
 

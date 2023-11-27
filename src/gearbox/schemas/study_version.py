@@ -1,8 +1,8 @@
 from urllib.request import HTTPDefaultErrorHandler
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel 
 from datetime import datetime
 from typing import Sequence, List, Optional
-from gearbox.schemas import StudyAlgorithmEngineCreate, StudyAlgorithmEngine
+from gearbox.schemas import EligibilityCriteriaInfo, Study
 
 class StudyVersionBase(BaseModel):
     study_id: int
@@ -15,12 +15,21 @@ class StudyVersionBase(BaseModel):
 
 class StudyVersion(StudyVersionBase):
     id: int
+    class Config:
+        orm_mode = True
 
 class StudyVersionCreate(BaseModel):
     study_id: int
     create_date: Optional[datetime]
     active: Optional[bool]
     study_version: Optional[int]
+
+    class Config:
+        orm_mode = True
+
+class StudyVersionInfo(StudyVersion):
+    eligibility_criteria_infos: List[EligibilityCriteriaInfo]
+    study: Study
 
     class Config:
         orm_mode = True

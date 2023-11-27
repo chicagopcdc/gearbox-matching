@@ -64,6 +64,7 @@ if TESTING:
     print(f"BYPASS FENCE: {BYPASS_FENCE}")
     print(f"BYPASS S3: {BYPASS_S3}")
     print(f"DEBUG: {DEBUG}")
+
 DB_STRING = DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST + ":" + str(DB_PORT) + "/" + DB_DATABASE
 ALEMBIC_DB_STRING = ALEMBIC_DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST + ":" + str(DB_PORT) + "/" + DB_DATABASE
 
@@ -87,6 +88,8 @@ DB_DSN = config(
         database=DB_DATABASE,
     ),
 )
+
+
 DB_MIN_SIZE = config("DB_MIN_SIZE", cast=int, default=1)  # deprecated
 DB_POOL_MIN_SIZE = config("DB_POOL_MIN_SIZE", cast=int, default=DB_MIN_SIZE)
 DB_MAX_SIZE = config("DB_MAX_SIZE", cast=int, default=10)  # deprecated
@@ -122,11 +125,11 @@ DATA_ACCESS_SERVICE_ENDPOINT = config(
     "DATA_ACCESS_SERVICE_ENDPOINT", cast=str, default="http://fence-service"
 )
 
-# S3
-S3_BUCKET_NAME = config("S3_BUCKET_NAME", default='commons-gearbox-data-bucket-with-versioning')
-S3_BUCKET_MATCH_CONDITIONS_KEY_NAME = config("S3_BUCKET_MATCH_CONDITIONS_KEY_NAME", default='match_conditions.json')
-S3_BUCKET_MATCH_FORM_KEY_NAME = config("S3_BUCKET_MATCH_FORM_KEY_NAME", default='match_form.json')
-S3_BUCKET_STUDIES_KEY_NAME = config("S3_BUCKET_STUDIES_KEY_NAME", default='gearbox_studies.json')
-S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME = config("S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME", default='eligibility_criteria.json')
-
 AWS_REGION = config("AWS_REGION", default='us-east-1')
+
+# NEW FEATURES
+ENABLE_PHI = config("ENABLE_PHI", default=False)
+
+GEARBOX_MIDDLEWARE_PUBLIC_KEY_Path = config("GEARBOX_MIDDLEWARE_PUBLIC_KEY_PATH", default='src/gearbox/keys/jwt_public_key.pem')
+
+GEARBOX_KEY_CONFIG = {}
