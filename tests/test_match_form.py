@@ -14,6 +14,17 @@ from starlette.status import (
 )
 
 from gearbox import config
+def test_build_match_form_no_save(setup_database, client):
+    """
+    Test create /match_form endpoint
+    valid input, ensure correct response.
+    """
+    errors = []
+    fake_jwt = "1.2.3"
+    resp = client.post("/build-match-form/?save=False", headers={"Authorization": f"bearer {fake_jwt}"})
+    full_res = resp.json()
+
+    resp.raise_for_status()
 
 def test_build_match_form(setup_database, client):
     """
@@ -22,10 +33,11 @@ def test_build_match_form(setup_database, client):
     """
     errors = []
     fake_jwt = "1.2.3"
-    resp = client.post("/build-match-form", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.post("/build-match-form/", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
 
     resp.raise_for_status()
+    print(f"-------------------> RESPONSE STATUS: {resp.status_code}")
 
     matchformdata_file = './tests/data/match_form_compare_dat.json'
 
@@ -82,7 +94,7 @@ def test_update_match_form(setup_database, client):
     # -- NEED TO SEND A MATCH-FORM WITH THE TEST! --
     # -- USE THE ONE IN THE DATA DIR --
     # url_str =  url.content.decode('ascii').strip('\"')
-    resp = client.post("/build-match-form", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.post("/build-match-form/", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
 
     resp.raise_for_status()
