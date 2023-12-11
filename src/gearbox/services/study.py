@@ -86,13 +86,14 @@ async def update_studies(session: Session, updates: StudyUpdates):
             no_update_cols=no_update_cols, 
             constraint_cols=constraint_cols
         )
+        # if study is inactive then update all study versions and 
+        # eligibility_criteria_info rows
 
         for site in study.sites:
             row = {
                 'name': site.name,
                 'code': site.code,
                 'country': site.country,
-                'status': site.status,
                 'city': site.city,
                 'state': site.state,
                 'zip': site.zip,

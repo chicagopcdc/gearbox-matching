@@ -31,7 +31,6 @@ class SiteBase(BaseModel):
     name: str
     code: Optional[str]
     country: Optional[str]
-    status: Optional[str]
     city: Optional[str]
     state: Optional[str]
     zip: Optional[str]
@@ -49,14 +48,3 @@ class SiteCreate(SiteBase):
 
 class SiteSearchResults(BaseModel):
     results: Sequence[Site]
-
-"""
-class SiteResponse(BaseModel):
-    current_date: str
-    current_time: str
-    status: str
-    body: List[Site]
-
-    class Config:
-        orm_mode = True
-"""
