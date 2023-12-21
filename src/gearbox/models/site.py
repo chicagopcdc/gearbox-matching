@@ -14,7 +14,6 @@ class Site(Base):
     state = Column(String, nullable=True)
     zip = Column(String, nullable=True)
     create_date = Column(DateTime, nullable=True)
-    active = Column(Boolean, nullable=True)
 
     UniqueConstraint(name, code, name='site_uix')
 

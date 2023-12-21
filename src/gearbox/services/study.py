@@ -7,6 +7,7 @@ from gearbox.schemas import StudyCreate, StudySearchResults, Study as StudySchem
 from gearbox.util import status
 from gearbox.crud import study_crud, site_crud, site_has_study_crud, study_link_crud, site_has_study_crud, study_external_id_crud
 from gearbox.models import Study, Site, StudyLink, SiteHasStudy, StudyExternalId
+from gearbox.services import study_version
 
 async def get_study_info(session: Session, id: int) -> StudySchema:
     aes = await study_crud.get_single_study_info(session, id)
@@ -62,8 +63,14 @@ async def update_study(session: Session, study: StudyCreate, study_id: int) -> S
 async def update_studies(session: Session, updates: StudyUpdates):
 
     # Reset active to false for all rows in all study-related tables
+    # TO DO: MODIFY THIS TO ONLY RESET STUDY INFORMATION
+    # FOR STUDIES WITH SAME SOURCE AS INPUT DATA
+    # THIS WILL HANDLE CASES WHERE WE ARE GETTING
+    # STUDIES FROM A SOURCE OTHER THAN clinicaltrials.gov
+    # --> WHAT ABOUT THE SAME STUDY COMING FROM 2 DIFFERENT SOURCES? 
     await study_crud.set_active_all_rows(db=session, active_upd=False)
-    await site_crud.set_active_all_rows(db=session, active_upd=False)
+    # WHAT ABOUT SITES FROM 2 DIFFERENT SOURCES? --> THAT IS COMMON TO BOTH?
+#    await site_crud.set_active_all_rows(db=session, active_upd=False)
     await site_has_study_crud.set_active_all_rows(db=session, active_upd=False)
     await study_link_crud.set_active_all_rows(db=session, active_upd=False)
 
@@ -86,8 +93,9 @@ async def update_studies(session: Session, updates: StudyUpdates):
             no_update_cols=no_update_cols, 
             constraint_cols=constraint_cols
         )
-        # if study is inactive then update all study versions and 
-        # eligibility_criteria_info rows
+        # if study is inactive then set all study_versions to inactive
+        if not study.active:
+            study_version.reset_active_status(session=session, study_id=new_or_updated_study_id)
 
         for site in study.sites:
             row = {

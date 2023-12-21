@@ -9,6 +9,7 @@ from gearbox.util import status
 from gearbox.crud import study_version_crud
 from typing import List
 from gearbox.util.types import EligibilityCriteriaInfoStatus
+from gearbox.services import eligibility_criteria_info
 
 async def get_latest_study_version(session: Session, study_id: int) -> int:
     try:
@@ -27,14 +28,16 @@ async def get_latest_study_version(session: Session, study_id: int) -> int:
 
 async def reset_active_status(session: Session, study_id: int) -> bool:
     # set all rows related to the study_version to false
-    sae_to_update = await study_version_crud.get_multi(
+    sv_to_update = await study_version_crud.get_multi(
         db=session, 
         active=True, 
         where=[f"study_version.study_id = {study_id}"]
     )
-    for sae in sae_to_update:
-        # set all to false
-        await study_version_crud.update(db=session, db_obj=sae, obj_in={"active":False})
+    for sv in sv_to_update:
+        # set study_version
+        await study_version_crud.update(db=session, db_obj=sv, obj_in={"active":False})
+        # set all eligibility_criteria_info rows to false for the study_version
+        await eligibility_criteria_info.reset_active_status(session=session, study_version_id=sv.id)
     return True
 
 async def get_study_version(session: Session, id: int) -> StudyVersionSchema:
