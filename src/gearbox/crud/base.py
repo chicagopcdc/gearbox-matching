@@ -11,6 +11,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.dialects import postgresql
 from gearbox.util import status
 from sqlalchemy import inspect
+from sqlalchemy.orm import noload
 
 from datetime import datetime
 from ..models import *
@@ -65,7 +66,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             logger.error(f"SQL ERROR IN base.get method: {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
 
-    async def get_multi( self, db: Session, active: bool = None, where: List[str] = None ) -> List[ModelType]:
+    async def get_multi( self, db: Session, active: bool = None, where: List[str] = None, noload_rel: List[ModelType] = None ) -> List[ModelType]:
 
         stmt = select(self.model)
         if active != None:
@@ -73,6 +74,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             if 'active' in cols:
                 stmt = stmt.where(self.model.active == active)
             else:
+                logger.error(f"ERROR no 'active' attribute in model")
                 raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{self.model.__tablename__} does not inlude 'active' attribute")        
 
         # enables querying on cols 
@@ -80,6 +82,10 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             for w in where:
                 stmt = stmt.where(text(w))
 
+        # exclude relationships from query
+        if noload_rel:
+            for noload_relationships in noload_rel:
+                stmt = stmt.options(noload(noload_relationships))
         try:
             result_db = await db.execute(statement=stmt)
             result = result_db.unique().scalars().all()
@@ -156,12 +162,15 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             db.add(db_obj)
             await db.commit()
             return db_obj
+
         except IntegrityError as e:
             logger.error(f"INTEGREITY ERROR IN BASE UPDATE: {e}")
             raise HTTPException(status.HTTP_409_CONFLICT, f"INTEGRITY SQL ERROR: {type(e)}: {e}")
         except exc.SQLAlchemyError as e:
+            logger.error(f"SQLALCHEMY ERROR IN BASE UPDATE: {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
         except Exception as e:
+            logger.error(f"OTHER ERROR IN BASE UPDATE: {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: {type(e)}: {e}")        
 
     def compile_query(self,query):

@@ -27,7 +27,6 @@ class SiteStudy(BaseModel):
 
 class SiteBase(BaseModel):
     name: str
-    code: Optional[str]
     country: Optional[str]
     city: Optional[str]
     state: Optional[str]

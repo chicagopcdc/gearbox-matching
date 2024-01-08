@@ -13,7 +13,7 @@ from pydantic.utils import GetterDict
 class StudySiteGetter(GetterDict):
     # map and reformat study fields
     def get(self, key: str, default: Any = None) -> Any:
-        if key in ('id','name','code','create_date'):
+        if key in ('id','name','create_date','city','state','zip'):
             return getattr(self._obj.site, key)
         else:
             return super(StudySiteGetter, self).get(key, default)
@@ -21,7 +21,6 @@ class StudySiteGetter(GetterDict):
 class StudySite(BaseModel):
     id: int
     name: Optional[str]
-    code: Optional[str]
     country: Optional[str]
     city: Optional[str]
     state: Optional[str]

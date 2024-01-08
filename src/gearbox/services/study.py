@@ -100,15 +100,14 @@ async def update_studies(session: Session, updates: StudyUpdates):
         for site in study.sites:
             row = {
                 'name': site.name,
-                'code': site.code,
                 'country': site.country,
                 'city': site.city,
                 'state': site.state,
                 'zip': site.zip,
-                'active': site.active,
                 'create_date': datetime.now()
             }
-            constraint_cols = [Site.code, Site.name]
+            # Cites are unique name / zip
+            constraint_cols = [Site.name, Site.zip]
             no_update_cols=['create_date']
             new_or_updated_site_id = await site_crud.upsert(
                 db=session, 
@@ -122,7 +121,6 @@ async def update_studies(session: Session, updates: StudyUpdates):
             row = {
                 'study_id': new_or_updated_study_id,
                 'site_id': new_or_updated_site_id,
-                'active': site.active,
                 'create_date': datetime.now()
             }
             no_update_cols = ['create_date']

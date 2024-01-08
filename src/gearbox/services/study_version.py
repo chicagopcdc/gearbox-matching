@@ -13,7 +13,7 @@ from gearbox.services import eligibility_criteria_info
 
 async def get_latest_study_version(session: Session, study_id: int) -> int:
     try:
-        result = await session.execute(select(func.max(StudyVersion.study_version))
+        result = await session.execute(select(func.max(StudyVersion.study_version_num))
             .where(StudyVersion.study_id == study_id)
         )
         latest_study_version = result.scalar_one()
@@ -60,7 +60,8 @@ async def get_study_versions_by_status(session: Session, study_version_status:st
 async def create_study_version(session: Session, study_version: StudyVersionCreate) -> StudyVersionSchema:
 
     # find
-    study_version.study_version = await get_latest_study_version(session, study_version.study_id) + 1
+    study_version.study_version_num = await get_latest_study_version(session, study_version.study_id) + 1
+
     # set others to inactive if incoming is active
     if study_version.active:
         reset_active = await reset_active_status(session, study_version.study_id)

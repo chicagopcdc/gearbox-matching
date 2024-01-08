@@ -25,8 +25,7 @@ def test_get_site(setup_database, client):
 @pytest.mark.parametrize(
     "data", [ 
         {
-            "name": "CREATE UPDATE TEST SITE NAME",
-            "code": "TEST SITE CODE"
+            "name": "CREATE UPDATE TEST SITE NAME"
     }
     ]
 )
@@ -35,8 +34,6 @@ def test_create_site(setup_database, client, data, connection):
     Comments: test create a new site and validates row created in db
     """
     fake_jwt = "1.2.3"
-    test_site_code = 'TESTCODE' + str(random.randint(0,9999))
-    data['code'] = test_site_code
     resp = client.post("/site", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
 
@@ -44,9 +41,10 @@ def test_create_site(setup_database, client, data, connection):
     try: 
         Session = sessionmaker(bind=connection)
         db_session = Session()
-        site = db_session.query(Site).filter(Site.code==test_site_code).first()
+        test_site_name = "CREATE UPDATE TEST SITE NAME"
+        site = db_session.query(Site).filter(Site.name==test_site_name).first()
         if not site: 
-            errors.append(f"Site (code): {test_site_code} not created")
+            errors.append(f"Site: {test_site_name} not created")
 
     except Exception as e:
         errors.append(f"Test site unexpected exception: {str(e)}")
