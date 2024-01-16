@@ -57,4 +57,5 @@ class StudySearchResults(BaseModel):
     results: Sequence[Study]
 
 class StudyUpdates(BaseModel):
+    source: str
     studies: Sequence[StudyCreate]

@@ -5,7 +5,7 @@ from sqlalchemy import exc
 from fastapi import HTTPException
 from gearbox.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate, StudyUpdates
 from gearbox.util import status
-from gearbox.crud import study_crud, site_crud, site_has_study_crud, study_link_crud, site_has_study_crud, study_external_id_crud
+from gearbox.crud import study_crud, site_crud, site_has_study_crud, study_link_crud, site_has_study_crud, study_external_id_crud, source_crud
 from gearbox.models import Study, Site, StudyLink, SiteHasStudy, StudyExternalId
 from gearbox.services import study_version
 
@@ -63,110 +63,126 @@ async def update_study(session: Session, study: StudyCreate, study_id: int) -> S
 async def update_studies(session: Session, updates: StudyUpdates):
 
     # Reset active to false for all rows in all study-related tables
-    # TO DO: MODIFY THIS TO ONLY RESET STUDY INFORMATION
-    # FOR STUDIES WITH SAME SOURCE AS INPUT DATA
-    # THIS WILL HANDLE CASES WHERE WE ARE GETTING
-    # STUDIES FROM A SOURCE OTHER THAN clinicaltrials.gov
-    # --> WHAT ABOUT THE SAME STUDY COMING FROM 2 DIFFERENT SOURCES? 
-    await study_crud.set_active_all_rows(db=session, active_upd=False)
-    # WHAT ABOUT SITES FROM 2 DIFFERENT SOURCES? --> THAT IS COMMON TO BOTH?
-#    await site_crud.set_active_all_rows(db=session, active_upd=False)
-    await site_has_study_crud.set_active_all_rows(db=session, active_upd=False)
-    await study_link_crud.set_active_all_rows(db=session, active_upd=False)
+    # For studies coming from the same source
+    source = updates.source
+    study_ids = await study_crud.get_study_ids_for_source(db=session, source=source)
+    await study_crud.set_active_all_rows(db=session, active_upd=False, ids=study_ids)
+    await site_has_study_crud.set_active_all_rows(db=session, active_upd=False, ids=study_ids)
+    await study_link_crud.set_active_all_rows(db=session, active_upd=False, ids=study_ids)
+
+    # get study.code for all studies at the same or lower priority
+    # input = source, output = list of study.code
+    priority = await source_crud.get_priority(db=session, source=source)
+
+    existing_studies = await study_crud.get_existing_studies(db=session)
+
+    # get new studies
+    incoming_studies = []
+    for study in updates.studies:
+        incoming_studies.append(study.code)
+
+    new_studies = [ x for x in incoming_studies if x not in existing_studies]
+
+    studies_to_update = await study_crud.get_studies_for_update(db=session, priority=priority)
+    studies_to_update.extend(new_studies)
 
     for study in updates.studies:
 
-        row = {
-            'name':study.name,
-            'code':study.code,
-            'description':study.description,
-            'active':study.active,
-            'create_date': datetime.now()
-        }
-        no_update_cols = ['create_date']
-        constraint_cols = [Study.code]
-        new_or_updated_study_id = await study_crud.upsert(
-            db=session, 
-            model=Study, 
-            row=row, 
-            as_of_date_col='create_date', 
-            no_update_cols=no_update_cols, 
-            constraint_cols=constraint_cols
-        )
-        # if study is inactive then set all study_versions to inactive
-        if not study.active:
-            study_version.reset_active_status(session=session, study_id=new_or_updated_study_id)
+        if study.code in studies_to_update:
 
-        for site in study.sites:
             row = {
-                'name': site.name,
-                'country': site.country,
-                'city': site.city,
-                'state': site.state,
-                'zip': site.zip,
+                'name':study.name,
+                'code':study.code,
+                'description':study.description,
+                'active':study.active,
                 'create_date': datetime.now()
             }
-            # Cites are unique name / zip
-            constraint_cols = [Site.name, Site.zip]
-            no_update_cols=['create_date']
-            new_or_updated_site_id = await site_crud.upsert(
+            no_update_cols = ['create_date']
+            constraint_cols = [Study.code]
+            new_or_updated_study_id = await study_crud.upsert(
                 db=session, 
-                model=Site, 
+                model=Study, 
                 row=row, 
                 as_of_date_col='create_date', 
                 no_update_cols=no_update_cols, 
                 constraint_cols=constraint_cols
             )
+            # if study is inactive then set all study_versions to inactive
+            if not study.active:
+                study_version.reset_active_status(session=session, study_id=new_or_updated_study_id)
 
-            row = {
-                'study_id': new_or_updated_study_id,
-                'site_id': new_or_updated_site_id,
-                'create_date': datetime.now()
-            }
-            no_update_cols = ['create_date']
-            constraint_cols = [Site.id, Study.id]
-            new_or_updated_site_has_study_id = await site_has_study_crud.upsert(
-                db=session, 
-                model=SiteHasStudy, 
-                row=row, 
-                as_of_date_col='create_date', 
-                no_update_cols=no_update_cols
-            )
+            for site in study.sites:
+                row = {
+                    'name': site.name,
+                    'country': site.country,
+                    'city': site.city,
+                    'state': site.state,
+                    'zip': site.zip,
+                    'create_date': datetime.now()
+                }
+            
+                # Cites are unique name / zip
+                constraint_cols = [Site.name, Site.zip]
+                no_update_cols=['create_date']
+                new_or_updated_site_id = await site_crud.upsert(
+                    db=session, 
+                    model=Site, 
+                    row=row, 
+                    as_of_date_col='create_date', 
+                    no_update_cols=no_update_cols, 
+                    constraint_cols=constraint_cols
+                )
 
-        for link in study.links:
-            row = {
-                'name': link.name,
-                'href': link.href,
-                'study_id' : new_or_updated_study_id,
-                'active': link.active,
-                'create_date': datetime.now()
-            }
-            no_update_cols = ['create_date']
-            constraint_cols = [StudyLink.study_id, StudyLink.href]
-            new_or_updated_link_id = await study_link_crud.upsert(
-                db=session, 
-                model=StudyLink, 
-                row=row, 
-                no_update_cols=no_update_cols, 
-                constraint_cols=constraint_cols
-            )
+                row = {
+                    'study_id': new_or_updated_study_id,
+                    'site_id': new_or_updated_site_id,
+                    'create_date': datetime.now()
+                }
+                no_update_cols = ['create_date']
+                constraint_cols = [Site.id, Study.id]
+                new_or_updated_site_has_study_id = await site_has_study_crud.upsert(
+                    db=session, 
+                    model=SiteHasStudy, 
+                    row=row, 
+                    as_of_date_col='create_date', 
+                    no_update_cols=no_update_cols
+                )
 
-        for ext_id in study.ext_ids:
-            row = {
-                'study_id' : new_or_updated_study_id,
-                'ext_id': ext_id.ext_id,
-                'source': ext_id.source,
-                'source_url': ext_id.source_url,
-                'active': ext_id.active,
-                'create_date': datetime.now()
-            }
-            no_update_cols = ['create_date']
-            constraint_cols = [StudyExternalId.study_id, StudyExternalId.ext_id]
-            new_or_updated_ext_id = await study_external_id_crud.upsert(
-                db=session, 
-                model=StudyExternalId, 
-                row=row, 
-                no_update_cols=no_update_cols, 
-                constraint_cols=constraint_cols
-            )
+            for link in study.links:
+                row = {
+                    'name': link.name,
+                    'href': link.href,
+                    'study_id' : new_or_updated_study_id,
+                    'active': link.active,
+                    'create_date': datetime.now()
+                }
+                no_update_cols = ['create_date']
+                constraint_cols = [StudyLink.study_id, StudyLink.href]
+                new_or_updated_link_id = await study_link_crud.upsert(
+                    db=session, 
+                    model=StudyLink, 
+                    row=row, 
+                    no_update_cols=no_update_cols, 
+                    constraint_cols=constraint_cols
+                )
+
+            for ext_id in study.ext_ids:
+                row = {
+                    'study_id' : new_or_updated_study_id,
+                    'ext_id': ext_id.ext_id,
+                    'source': ext_id.source,
+                    'source_url': ext_id.source_url,
+                    'active': ext_id.active,
+                    'create_date': datetime.now()
+                }
+                no_update_cols = ['create_date']
+                constraint_cols = [StudyExternalId.study_id, StudyExternalId.ext_id]
+                new_or_updated_ext_id = await study_external_id_crud.upsert(
+                    db=session, 
+                    model=StudyExternalId, 
+                    row=row, 
+                    no_update_cols=no_update_cols, 
+                    constraint_cols=constraint_cols
+                )
+
     return True

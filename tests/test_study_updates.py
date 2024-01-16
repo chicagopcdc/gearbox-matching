@@ -39,8 +39,8 @@ from .test_utils import is_aws_url
                 ]
             },
             {
-                "name": "TEST STUDY UPDATES - *TEST STUDY NAME FIRST!!!*",
-                "code": "NEW_STUDY_CODE",
+                "name": "TEST STUDY UPDATES - *TEST STUDY NAME SECOND!!!*",
+                "code": "NEW_STUDY_CODE_2",
                 "description": "test study description",
                 "active": True,
                 "sites": [ 
@@ -71,7 +71,8 @@ from .test_utils import is_aws_url
                     }
             ]
             }
-            ]
+            ],
+            "source": "clinicaltrials.gov"
         }
     ]
 )
