@@ -1,7 +1,6 @@
 from . import logger
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession as Session
-from sqlalchemy import exc 
 from fastapi import HTTPException
 from gearbox.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate, StudyUpdates
 from gearbox.util import status
@@ -32,7 +31,6 @@ async def create_study(session: Session, study: StudyCreate) -> StudySchema:
     links = study.links
     new_study = await study_crud.create(db=session, obj_in=study)
 
-
     if sites:
         new_site_ids = []
         for site in sites:
@@ -56,24 +54,31 @@ async def update_study(session: Session, study: StudyCreate, study_id: int) -> S
     if study_in:
         upd_study = await study_crud.update(db=session, db_obj=study_in, obj_in=study)
     else:
+        logger.error(f"ERROR: Study for id: {study_id} not found for update.")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study for id: {study_id} not found for update.") 
     await session.commit() 
     return upd_study
 
 async def update_studies(session: Session, updates: StudyUpdates):
 
+    source = updates.source
+    source_id = await source_crud.get_id(db=session, source=source)
+    if not source_id:
+        logger.error(f"ERROR: refresh study info source: {source} does not exist in source table.")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Error: refresh study info source: {source} does not exist")
+
+
+    source_study_ids = await study_crud.get_study_ids_for_source(db=session, source=source)
     # Reset active to false for all rows in all study-related tables
     # For studies coming from the same source
     source = updates.source
-    study_ids = await study_crud.get_study_ids_for_source(db=session, source=source)
-    await study_crud.set_active_all_rows(db=session, active_upd=False, ids=study_ids)
-    await site_has_study_crud.set_active_all_rows(db=session, active_upd=False, ids=study_ids)
-    await study_link_crud.set_active_all_rows(db=session, active_upd=False, ids=study_ids)
+    await study_crud.set_active_all_rows(db=session, active_upd=False, ids=source_study_ids)
+    await site_has_study_crud.set_active_all_rows(db=session, active_upd=False, ids=source_study_ids)
+    await study_link_crud.set_active_all_rows(db=session, active_upd=False, ids=source_study_ids)
 
-    # get study.code for all studies at the same or lower priority
-    # input = source, output = list of study.code
     priority = await source_crud.get_priority(db=session, source=source)
 
+    # get a list of existing studies
     existing_studies = await study_crud.get_existing_studies(db=session)
 
     # get new studies
@@ -83,11 +88,11 @@ async def update_studies(session: Session, updates: StudyUpdates):
 
     new_studies = [ x for x in incoming_studies if x not in existing_studies]
 
+    # get study.code for all studies at the same or lower priority
     studies_to_update = await study_crud.get_studies_for_update(db=session, priority=priority)
     studies_to_update.extend(new_studies)
 
     for study in updates.studies:
-
         if study.code in studies_to_update:
 
             row = {
@@ -95,7 +100,8 @@ async def update_studies(session: Session, updates: StudyUpdates):
                 'code':study.code,
                 'description':study.description,
                 'active':study.active,
-                'create_date': datetime.now()
+                'create_date': datetime.now(),
+                'source_id': source_id
             }
             no_update_cols = ['create_date']
             constraint_cols = [Study.code]
@@ -107,9 +113,6 @@ async def update_studies(session: Session, updates: StudyUpdates):
                 no_update_cols=no_update_cols, 
                 constraint_cols=constraint_cols
             )
-            # if study is inactive then set all study_versions to inactive
-            if not study.active:
-                study_version.reset_active_status(session=session, study_id=new_or_updated_study_id)
 
             for site in study.sites:
                 row = {
@@ -118,10 +121,10 @@ async def update_studies(session: Session, updates: StudyUpdates):
                     'city': site.city,
                     'state': site.state,
                     'zip': site.zip,
-                    'create_date': datetime.now()
+                    'create_date': datetime.now(),
+                    'source_id': source_id
                 }
-            
-                # Cites are unique name / zip
+                # name / zipcode are unique to site
                 constraint_cols = [Site.name, Site.zip]
                 no_update_cols=['create_date']
                 new_or_updated_site_id = await site_crud.upsert(
@@ -136,7 +139,8 @@ async def update_studies(session: Session, updates: StudyUpdates):
                 row = {
                     'study_id': new_or_updated_study_id,
                     'site_id': new_or_updated_site_id,
-                    'create_date': datetime.now()
+                    'create_date': datetime.now(),
+                    'active': study.active
                 }
                 no_update_cols = ['create_date']
                 constraint_cols = [Site.id, Study.id]
@@ -153,7 +157,7 @@ async def update_studies(session: Session, updates: StudyUpdates):
                     'name': link.name,
                     'href': link.href,
                     'study_id' : new_or_updated_study_id,
-                    'active': link.active,
+                    'active': study.active,
                     'create_date': datetime.now()
                 }
                 no_update_cols = ['create_date']

@@ -12,4 +12,11 @@ class CRUDSource(CRUDBase [Source, SourceCreate, SourceSearchResults]):
         priority = result.scalars().first()
         return priority
 
+    async def get_id(self, db: Session, source: str) -> int: 
+        stmt = select(Source.id).where(Source.source == source)
+        result = await db.execute(stmt)
+        id = result.scalars().first()
+        return id
+    
+
 source_crud = CRUDSource(Source)

@@ -1,16 +1,15 @@
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
+from typing import Any, Dict, Generic, List, Type, TypeVar, Union
 
 from fastapi.encoders import jsonable_encoder
 from fastapi import HTTPException
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy.sql import text
-from sqlalchemy import func, update, select, exc
+from sqlalchemy import update, select, exc
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.dialects import postgresql
 from gearbox.util import status
-from sqlalchemy import inspect
 from sqlalchemy.orm import noload
 
 from datetime import datetime
@@ -204,14 +203,17 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
                 ).returning(None)
 
             # Print the query for debugging
-            # print(f"HERE IS THE QUERY: {self.compile_query(on_conflict_stmt)}")
+            # print(f"HERE IS THE UPSERT QUERY: {self.compile_query(on_conflict_stmt)}")
             retval = await db.execute(on_conflict_stmt)
+
             # convert id returned to an int
             updated_id = retval.scalar()
             await db.commit()
             return updated_id
         
         except exc.SQLAlchemyError as e:
-            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
+            logger.error(f"SQL ERROR IN UPSERT {type(e)} {e}")
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR IN UPSERT: {type(e)}: {e}")        
         except Exception as e:
-            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: {type(e)}: {e}")       
+            logger.error(f"ERROR IN UPSERT: {type(e)}: {e}") 
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR IN UPSERT: {type(e)}: {e}")       
