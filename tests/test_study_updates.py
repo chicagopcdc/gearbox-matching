@@ -189,7 +189,6 @@ def test_study_updates_unknown_source(setup_database, client, data, connection):
     """
     fake_jwt = "1.2.3"
     resp = client.post("/update-studies", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
-    print(f"-------> UNKNOWN SOURCE RESPONSE: {resp.status_code} {HTTP_500_INTERNAL_SERVER_ERROR}")
     assert resp.status_code == HTTP_500_INTERNAL_SERVER_ERROR
 
 @pytest.mark.parametrize(
@@ -236,5 +235,4 @@ def test_study_updates_missing_source(setup_database, client, data, connection):
     """
     fake_jwt = "1.2.3"
     resp = client.post("/update-studies", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
-    print(f"-------> UNKNOWN SOURCE RESPONSE: {resp.status_code} {HTTP_500_INTERNAL_SERVER_ERROR}")
     assert resp.status_code == HTTP_422_UNPROCESSABLE_ENTITY
