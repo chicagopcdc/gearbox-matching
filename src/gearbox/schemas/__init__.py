@@ -17,6 +17,7 @@ from .input_type import InputTypeCreate, InputTypeSearchResults, InputType
 from .ontology_code import OntologyCodeCreate, OntologyCodeSearchResults, OntologyCode
 from .el_criteria_has_criterion import ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterionCreate, ElCriteriaHasCriterion, ElCriteriaHasCriterions
 from .algorithm_engine import AlgorithmResponse
+from .source import Source, SourceCreate, SourceSearchResults
 from .study import StudySearchResults, StudyCreate, Study, StudyUpdates
 from .study_link import StudyLinkSearchResults, StudyLinkCreate, StudyLink
 from .study_version import StudyVersionSearchResults, StudyVersionCreate, StudyVersion, StudyVersionInfo

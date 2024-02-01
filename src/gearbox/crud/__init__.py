@@ -14,6 +14,7 @@ from .study import study_crud
 from .study_link import study_link_crud
 from .site import site_crud
 from .site_has_study import site_has_study_crud
+from .source import source_crud
 from .study_version import study_version_crud
 from .study_has_patient import study_has_patient_crud
 from .study_external_id import study_external_id_crud

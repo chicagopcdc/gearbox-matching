@@ -11,6 +11,7 @@ from .eligibility_criteria import EligibilityCriteria
 from .input_type import InputType
 from .note import Note
 from .ontology_code import OntologyCode
+from .source import Source
 from .site_has_study import SiteHasStudy
 from .site import Site
 from .study_algorithm_engine import StudyAlgorithmEngine

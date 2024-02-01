@@ -7,7 +7,7 @@ from gearbox.schemas import EligibilityCriteriaInfo, Study
 class StudyVersionBase(BaseModel):
     study_id: int
     create_date: Optional[datetime]
-    study_version: int
+    study_version_num: int
     active: Optional[bool]
 
     class Config:
@@ -22,7 +22,7 @@ class StudyVersionCreate(BaseModel):
     study_id: int
     create_date: Optional[datetime]
     active: Optional[bool]
-    study_version: Optional[int]
+    study_version_num: Optional[int]
 
     class Config:
         orm_mode = True

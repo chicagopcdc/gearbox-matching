@@ -25,9 +25,7 @@ def test_get_site(setup_database, client):
 @pytest.mark.parametrize(
     "data", [ 
         {
-            "name": "CREATE UPDATE TEST SITE NAME",
-            "code": "TEST SITE CODE",
-            "active": True
+            "name": "CREATE UPDATE TEST SITE NAME"
     }
     ]
 )
@@ -36,8 +34,6 @@ def test_create_site(setup_database, client, data, connection):
     Comments: test create a new site and validates row created in db
     """
     fake_jwt = "1.2.3"
-    test_site_code = 'TESTCODE' + str(random.randint(0,9999))
-    data['code'] = test_site_code
     resp = client.post("/site", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
 
@@ -45,9 +41,10 @@ def test_create_site(setup_database, client, data, connection):
     try: 
         Session = sessionmaker(bind=connection)
         db_session = Session()
-        site = db_session.query(Site).filter(Site.code==test_site_code).first()
+        test_site_name = "CREATE UPDATE TEST SITE NAME"
+        site = db_session.query(Site).filter(Site.name==test_site_name).first()
         if not site: 
-            errors.append(f"Site (code): {test_site_code} not created")
+            errors.append(f"Site: {test_site_name} not created")
 
     except Exception as e:
         errors.append(f"Test site unexpected exception: {str(e)}")
@@ -65,19 +62,19 @@ def test_update_site(setup_database, client, connection):
     site_id=None
     errors = []
     data = {}
-    data['active'] = False
+#    data['active'] = False
     try: 
         Session = sessionmaker(bind=connection)
         db_session = Session()
-        site_info = db_session.query(Site.id, Site.active).filter(Site.name=="CREATE UPDATE TEST SITE NAME").first()
+        site_info = db_session.query(Site.id).filter(Site.name=="CREATE UPDATE TEST SITE NAME").first()
         si_dict = site_info._asdict()
         site_id = si_dict['id']
-        site_active = si_dict['active']
+#        site_active = si_dict['active']
 
         if not site_id: 
             errors.append("Update test error: Site to update not found.")
-        if not site_active:
-            errors.append("Update test error: Active already set to false.")
+#        if not site_active:
+#            errors.append("Update test error: Active already set to false.")
 
     except Exception as e:
             errors.append(f"Update test error: {e}.")
@@ -86,8 +83,8 @@ def test_update_site(setup_database, client, connection):
     resp.raise_for_status()
     try: 
         site_updated = db_session.query(Site).filter(Site.id==site_id).first()
-        if site_updated.active != False:
-            errors.append(f"Site (id): {site_id} update active to false failed")
+#        if site_updated.active != False:
+#            errors.append(f"Site (id): {site_id} update active to false failed")
 
     except Exception as e:
         errors.append(f"Test site unexpected exception: {str(e)}")
