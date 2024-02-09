@@ -102,16 +102,12 @@ async def get_match_form(session):
                         tb_value = ''
                         if (tb.path):
                             pathlist.append(tb.path)
-                        if tb.value.type == 'Integer':
-                            try:
-                                tb_value = int(tb.value.value_string)
-                            except ValueError:
-                                logger.error(f"Value {tb.value.value_string} cannot be converted to Integer") 
-                        elif tb.value.type == 'Float':
+                        # MODIFY TO tb.value.is_numeric
+                        if tb.value.is_numeric:
                             try:
                                 tb_value = float(tb.value.value_string)
                             except ValueError:
-                                logger.error(f"Value {tb.value.value_string} cannot be converted to Integer") 
+                                logger.error(f"Value {tb.value.value_string} cannot be converted to number") 
                         else:
                             tb_value = tb.value.id
 
@@ -184,7 +180,12 @@ async def update(match_form, session):
                 tb_row['id'] = triggered_by_id
                 tb_row['display_rules_id'] = display_rules_id   
                 tb_row['criterion_id'] = show_if_criterion.get('id')
-                tb_row['value_id'] = show_if_criterion.get('valueId')
+                value_id = show_if_criteria.get('valueId')
+                if value_id:
+                    tb_row['value_id'] = value_id
+                else:
+                    #find value id
+                    pass
                 tb_row['active'] = True
                 if show_if_path_count > 1:
                     tb_row['path'] ='.'.join(map(str,path_ids))

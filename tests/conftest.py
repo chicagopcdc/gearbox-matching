@@ -63,7 +63,9 @@ def connection():
 
 def file_to_table(conn, cursor, table_name, file_name):
     with open(file_name, 'r') as f:
+        print(f"COPY SQL--------------------------")
         copy_sql = "COPY " + table_name + " FROM stdin DELIMITER E'\t' CSV HEADER"
+        print(f"{copy_sql}")
         cursor.copy_expert(sql=copy_sql, file=f)
 
 @pytest.fixture(scope="session")
@@ -89,6 +91,7 @@ def setup_database(connection) -> Engine:
     file_to_table(conn, cursor,'site_has_study', './postgres-data/td_site_has_study.tsv')
     file_to_table(conn, cursor,'study_version', './postgres-data/td_study_version.tsv')
     file_to_table(conn, cursor,'study_algorithm_engine', './postgres-data/td_study_algorithm_engine.tsv')
+    file_to_table(conn, cursor,'unit', './postgres-data/td_unit.tsv')
     file_to_table(conn, cursor,'value', './postgres-data/td_value.tsv')
     file_to_table(conn, cursor,'input_type', './postgres-data/td_input_type.tsv')
     file_to_table(conn, cursor,'tag', './postgres-data/td_tag.tsv')
@@ -116,6 +119,7 @@ def setup_database(connection) -> Engine:
     cursor.execute("SELECT setval('tag_id_seq', (SELECT MAX(id) FROM tag));")
     cursor.execute("SELECT setval('triggered_by_id_seq', (SELECT MAX(id) FROM triggered_by));")
     cursor.execute("SELECT setval('value_id_seq', (SELECT MAX(id) FROM value));")
+    cursor.execute("SELECT setval('unit_id_seq', (SELECT MAX(id) FROM unit));")
     file_to_table(conn, cursor,'eligibility_criteria_info', './postgres-data/td_eligibility_criteria_info.tsv')
     cursor.execute("SELECT setval('eligibility_criteria_info_id_seq', (SELECT MAX(id) FROM eligibility_criteria_info));")
     conn.commit()

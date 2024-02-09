@@ -23,6 +23,7 @@ def test_build_match_form_no_save(setup_database, client):
     fake_jwt = "1.2.3"
     resp = client.post("/build-match-form/?save=False", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
+    print(f"FULL RES: {json.dumps(full_res)}")
 
     resp.raise_for_status()
 

@@ -21,6 +21,7 @@ from .study import Study
 from .tag import Tag
 from .triggered_by import TriggeredBy
 from .value import Value
+from .unit import Unit
 from .eligibility_criteria_info import EligibilityCriteriaInfo
 from .study_has_patient import StudyHasPatient
 from .study_external_id import StudyExternalId
