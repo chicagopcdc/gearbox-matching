@@ -27,3 +27,4 @@ from .study_version_eligibility_criteria import StudyVersionEligibilityCriteriaC
 from .study_version_eligibility_criteria import StudyVersionEligibilityCriteriaCreate, StudyVersionEligibilityCriteria
 from .study_has_patient import StudyHasPatient, StudyHasPatientCreate, StudyHasPatientSearchResults
 from .study_external_id import StudyExternalIdCreate, StudyExternalIdSearchResults
+from .unit import Unit, UnitCreate, UnitSearchResults
