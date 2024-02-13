@@ -3,7 +3,8 @@ from ..util.bounds import bounds
 from . import logger
 from gearbox.crud.match_form import get_form_info, clear_display_rules_and_triggered_by, insert_display_rules, insert_triggered_by
 from .match_conditions import get_tree
-from gearbox.schemas import MatchForm, ValueCreate
+from gearbox.schemas import MatchForm 
+from gearbox.services import value as value_service
 import re
 
 def update_dict(d, critlookup):
@@ -181,18 +182,23 @@ async def update(match_form, session):
                 tb_row['display_rules_id'] = display_rules_id   
                 tb_row['criterion_id'] = show_if_criterion.get('id')
                 value_id = show_if_criteria.get('valueId')
+
                 if value_id:
                     tb_row['value_id'] = value_id
                 else:
-                    #find value or create value / unit
-                    # set value_id to newly created value.id
                     operator = show_if_criteria.get('operator')
                     value = show_if_criteria.get('value')
                     unit = show_if_criteria.get('unit')
                     is_numeric = show_if_criteria.get('is_numeric')
-                    chv = ValueCreate(criterion_id=new_criterion.id, value_id=v_id)
-                    new_value = await criterion_has_value_crud.create(db=session,obj_in=chv)
-                    pass
+                    # get value_id from existing or new value
+                    value_id = value_service.get_value_id(
+                        value_str=value, 
+                        operator=operator,
+                        unit=unit,
+                        is_numeric=is_numeric
+                        )
+                    tb_row['value_id'] = value_id
+
                 tb_row['active'] = True
                 if show_if_path_count > 1:
                     tb_row['path'] ='.'.join(map(str,path_ids))

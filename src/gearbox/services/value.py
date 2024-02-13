@@ -5,6 +5,7 @@ from fastapi import HTTPException
 from gearbox.schemas import ValueCreate, ValueSearchResults, Value as ValueSchema
 from gearbox.util import status
 from gearbox.crud import value_crud, unit_crud
+from gearbox.schemas import ValueCreate
 
 async def get_value(session: Session, id: int) -> ValueSchema:
     aes = await value_crud.get(session, id)
@@ -21,6 +22,7 @@ async def create_value(session: Session, value: ValueCreate) -> ValueSchema:
     if not unit:
         unit = unit_crud.create(value.unit_name)
     # add returned unit.id to the new value
+        value.unit_id = unit.id
     new_value = await value_crud.create(db=session, obj_in=value)
     await session.commit() 
     return new_value
@@ -34,14 +36,16 @@ async def update_value(session: Session, value: ValueCreate, value_id: int) -> V
     await session.commit() 
     return upd_value
 
-"""
-async def build_new_value(value_str: str, operator: str, unit: str, is_numeric: bool) -> ValueCreate:
-    # build code and description from input and return ValueCreate schema
-    if is_numeric:
-        unit_abrv = None
-        match unit:
-            case: "days" or "months" or "years"
-        code = operator + '_' + value_str + '_' + 
-
-    return ValueCreate()
-"""
+async def get_value_id(value_str: str, operator: str, unit: str, is_numeric: bool) -> int:
+    # check if value exists
+    # if not, then create one
+    value_id = value_crud.get_value(value_str=value_str, operator=operator, unit=unit, is_numeric=is_numeric)
+    if not value_id:
+        value = ValueCreate(description=value_str, 
+                            value_str=value_str,
+                            unit_name=unit,
+                            operator=operator,
+                            is_numeric=is_numeric)
+        new_value = create_value(value)
+        value_id = new_value.id
+    return value_id

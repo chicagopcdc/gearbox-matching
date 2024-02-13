@@ -4,11 +4,10 @@ from typing import Optional, Sequence, List
 from .unit import Unit
 
 class ValueBase(BaseModel):
-    code: Optional[str]
     description: Optional[str]
     type: Optional[str]
     value_string: Optional[str]
-    unit: Optional[Unit]
+    unit_id: Optional[Unit]
     operator: Optional[str]
     create_date: Optional[datetime]
     active: Optional[bool]
@@ -21,7 +20,7 @@ class Value(ValueBase):
     id: int
 
 class ValueCreate(ValueBase):
-    unit_name: str
+    unit_name: Optional[str]
     pass
 
 class ValueUpdate(BaseModel):
