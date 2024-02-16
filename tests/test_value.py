@@ -13,11 +13,10 @@ from starlette.status import (
 @pytest.mark.parametrize(
     "data", [ 
         {
-            "code": "TESTCODE",
             "description": "string",
-            "type": "string",
+            "is_numeric": False,
             "value_string": "string",
-            "unit": "string",
+            "unit_name": "string",
             "operator": "string",
             "active": 1
     }
@@ -29,9 +28,9 @@ def test_create_value(setup_database, client, data):
     Test create value
     """
     fake_jwt = "1.2.3"
-    data['code'] = 'PYTEST CREATE VALUE TEST' + str(random.randint(0,9999))
+    data['description'] = 'PYTEST CREATE VALUE TEST' + str(random.randint(0,9999))
     # add random value string to satisfy unique constraint for test
-    data['value_string'] += data['code']
+    data['value_string'] += data['description']
     resp = client.post("/value", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
     assert str(resp.status_code).startswith("20")

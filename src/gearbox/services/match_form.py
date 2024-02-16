@@ -181,17 +181,18 @@ async def update(match_form, session):
                 tb_row['id'] = triggered_by_id
                 tb_row['display_rules_id'] = display_rules_id   
                 tb_row['criterion_id'] = show_if_criterion.get('id')
-                value_id = show_if_criteria.get('valueId')
+                value_id = show_if_criterion.get('valueId')
 
                 if value_id:
                     tb_row['value_id'] = value_id
                 else:
-                    operator = show_if_criteria.get('operator')
-                    value = show_if_criteria.get('value')
-                    unit = show_if_criteria.get('unit')
-                    is_numeric = show_if_criteria.get('is_numeric')
+                    operator = show_if_criterion.get('operator')
+                    value = show_if_criterion.get('value')
+                    unit = show_if_criterion.get('unit')
+                    is_numeric = show_if_criterion.get('is_numeric')
                     # get value_id from existing or new value
-                    value_id = value_service.get_value_id(
+                    value_id = await value_service.get_value_id(
+                        session=session,
                         value_str=value, 
                         operator=operator,
                         unit=unit,

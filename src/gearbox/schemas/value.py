@@ -5,10 +5,10 @@ from .unit import Unit
 
 class ValueBase(BaseModel):
     description: Optional[str]
-    type: Optional[str]
-    value_string: Optional[str]
-    unit_id: Optional[Unit]
-    operator: Optional[str]
+    is_numeric: bool
+    value_string: str
+    unit_id: Optional[int]
+    operator: str
     create_date: Optional[datetime]
     active: Optional[bool]
 
@@ -21,6 +21,9 @@ class Value(ValueBase):
 
 class ValueCreate(ValueBase):
     unit_name: Optional[str]
+    pass
+
+class ValueSave(ValueBase):
     pass
 
 class ValueUpdate(BaseModel):
