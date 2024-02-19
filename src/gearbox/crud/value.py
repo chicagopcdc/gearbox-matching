@@ -1,8 +1,9 @@
 from .base import CRUDBase
-from gearbox.models import Value
+from gearbox.models import Value, Unit
 from gearbox.schemas import ValueSearchResults, ValueCreate
 from sqlalchemy.orm import Session
-from sqlalchemy import func, update, select, exc
+from sqlalchemy import func, update, select, exc, subquery
+
 
 class CRUDValue(CRUDBase [Value, ValueCreate, ValueSearchResults]):
 
@@ -10,17 +11,13 @@ class CRUDValue(CRUDBase [Value, ValueCreate, ValueSearchResults]):
                         db: Session, 
                         value_str: str, 
                         operator: str,
-                        unit: str,
+                        unit_name: str,
                         is_numeric: bool):
-        print(f'IN CRUD 1')
-        # stmt = select(Value).where(Value.value_string==value_str).where(Value.operator==operator).where(Value.unit==unit).where(Value.is_numeric==is_numeric)
-        print(f"VALUE STR: {value_str} TYPE: {type(value_str)}")
-        stmt = select(Value).where(Value.value_string == value_str)
-        print(f'IN CRUD 2')
+
+        unit_subq = select(Unit).where(Unit.name==unit_name).subquery()
+        stmt = select(Value).join(unit_subq, Value.unit_id == unit_subq.c.id)
         result = await db.execute(stmt)
-        print(f'IN CRUD 3')
         value = result.unique().scalars().first()
-        print(f'IN CRUD 4')
         return value
 
 value_crud = CRUDValue(Value)

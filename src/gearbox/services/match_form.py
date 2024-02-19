@@ -5,6 +5,7 @@ from gearbox.crud.match_form import get_form_info, clear_display_rules_and_trigg
 from .match_conditions import get_tree
 from gearbox.schemas import MatchForm 
 from gearbox.services import value as value_service
+from gearbox.services import unit as unit_service
 import re
 
 def update_dict(d, critlookup):
@@ -188,14 +189,17 @@ async def update(match_form, session):
                 else:
                     operator = show_if_criterion.get('operator')
                     value = show_if_criterion.get('value')
-                    unit = show_if_criterion.get('unit')
+                    unit_name = show_if_criterion.get('unit')
+                    if not unit_name:
+                        unit_name = 'none'
+                    # GET UNIT-ID AND PASS TO THE get_value_id METHOD BELOW!!!!!
                     is_numeric = show_if_criterion.get('is_numeric')
                     # get value_id from existing or new value
                     value_id = await value_service.get_value_id(
                         session=session,
                         value_str=value, 
                         operator=operator,
-                        unit=unit,
+                        unit=unit_name,
                         is_numeric=is_numeric
                         )
                     tb_row['value_id'] = value_id

@@ -11,19 +11,21 @@ from gearbox.util import status, json_utils
 from gearbox.crud import unit_crud
 
 async def get_unit(session: Session, id: int) -> UnitSchema:
-    aes = await unit_crud.get(session, id)
-    return aes
+    unit = await unit_crud.get(session, id)
+    return unit
+
+async def get_unit(session: Session, name: str) -> UnitSchema:
+    unit = await unit_crud.get_unit(session, name)
+    return unit
 
 async def get_units(session: Session) -> UnitSearchResults:
-    aes = await unit_crud.get_multi(session)
-    return aes
+    unit = await unit_crud.get_multi(session)
+    return unit
     pass
 
 async def create_unit(session: Session, unit: UnitCreate) -> UnitSchema:
 
-    print(f"HERE IN CREATE UNIT FUNC------------")
     new_unit = await unit_crud.create(db=session, obj_in=unit)
-    print(f"HERE IN CREATE UNIT FUNC 2------------ {new_unit}")
     return new_unit
 
 async def update_unit(session: Session, unit: UnitCreate, unit_id: int) -> UnitSchema:
