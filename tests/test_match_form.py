@@ -199,3 +199,13 @@ def test_update_match_form_new_value(setup_database, client, connection):
         print("Problem in db")
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))   
+
+def test_update_match_form_new_value_invalid_number(setup_database, client, connection):
+    errors = []
+    fake_jwt = "1.2.3"
+    matchformdata_file = './tests/data/match_form_update_compare_dat_new_value_input_bad_number.json'
+    with open(matchformdata_file, 'r') as comp_file:
+        match_form_for_update = json.load(comp_file)
+
+    resp = client.post("/update-match-form", json=match_form_for_update, headers={"Authorization": f"bearer {fake_jwt}"})
+    assert resp.status_code == HTTP_500_INTERNAL_SERVER_ERROR

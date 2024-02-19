@@ -6,6 +6,9 @@ from .match_conditions import get_tree
 from gearbox.schemas import MatchForm 
 from gearbox.services import value as value_service
 from gearbox.services import unit as unit_service
+from fastapi import HTTPException
+from gearbox.util import status
+
 import re
 
 def update_dict(d, critlookup):
@@ -192,8 +195,15 @@ async def update(match_form, session):
                     unit_name = show_if_criterion.get('unit')
                     if not unit_name:
                         unit_name = 'none'
-                    # GET UNIT-ID AND PASS TO THE get_value_id METHOD BELOW!!!!!
                     is_numeric = show_if_criterion.get('is_numeric')
+
+                    if is_numeric:
+                        try:
+                            check_value_num = float(value)
+                        except ValueError:
+                            logger.error(f"Value {value} cannot be converted to number") 
+                            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, 
+                                f"Value {value} cannot be converted to number")
                     # get value_id from existing or new value
                     value_id = await value_service.get_value_id(
                         session=session,
