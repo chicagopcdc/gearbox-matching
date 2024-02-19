@@ -26,7 +26,6 @@ def test_build_match_form_no_save(setup_database, client):
     fake_jwt = "1.2.3"
     resp = client.post("/build-match-form/?save=False", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
-    print(f"FULL RES: {json.dumps(full_res)}")
 
     resp.raise_for_status()
 
@@ -41,7 +40,6 @@ def test_build_match_form(setup_database, client):
     full_res = resp.json()
 
     resp.raise_for_status()
-    print(f"-------------------> RESPONSE STATUS: {resp.status_code}")
 
     matchformdata_file = './tests/data/match_form_compare_dat.json'
 
@@ -146,12 +144,8 @@ def test_update_match_form_new_value(setup_database, client, connection):
     resp = client.post("/update-match-form", json=match_form_for_update, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
     assert str(resp.status_code).startswith("20")
-    # -- NEED TO SEND A MATCH-FORM WITH THE TEST! --
-    # -- USE THE ONE IN THE DATA DIR --
-    # url_str =  url.content.decode('ascii').strip('\"')
     resp = client.post("/build-match-form/", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
-    print(f"FULL RES: {json.dumps(full_res)}")
 
     resp.raise_for_status()
     matchformdata_file = './tests/data/match_form_update_compare_dat_new_value.json'
@@ -196,7 +190,7 @@ def test_update_match_form_new_value(setup_database, client, connection):
         if not newunit: errors.append("Unit: 'some_new_unit' not created")
 
     except Exception as e:
-        print("Problem in db")
+        print(f"Problem validating new rows in test update match form with new values: {e}")
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))   
 

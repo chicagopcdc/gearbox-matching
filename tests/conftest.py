@@ -63,9 +63,7 @@ def connection():
 
 def file_to_table(conn, cursor, table_name, file_name):
     with open(file_name, 'r') as f:
-        print(f"COPY SQL--------------------------")
         copy_sql = "COPY " + table_name + " FROM stdin DELIMITER E'\t' CSV HEADER"
-        print(f"{copy_sql}")
         cursor.copy_expert(sql=copy_sql, file=f)
 
 @pytest.fixture(scope="session")
