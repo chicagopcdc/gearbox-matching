@@ -2,6 +2,9 @@ import json
 from .test_utils import is_aws_url
 import pytest
 
+from sqlalchemy.orm import sessionmaker
+from gearbox.models import Value, Unit
+
 from deepdiff import DeepDiff
 from starlette.config import environ
 from starlette.status import (
@@ -133,7 +136,7 @@ def test_update_match_form(setup_database, client):
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))            
 
-def test_update_match_form_new_value(setup_database, client):
+def test_update_match_form_new_value(setup_database, client, connection):
     errors = []
     fake_jwt = "1.2.3"
     matchformdata_file = './tests/data/match_form_update_compare_dat_new_value_input.json'
@@ -182,5 +185,17 @@ def test_update_match_form_new_value(setup_database, client):
                 diff = DeepDiff(field_comp, field)
                 if diff:
                     errors.append(f"FIELD ID: {field_comp['id']} DOES NOT MATCH {diff}")
+
+    try:
+        # Validate new db rows for value and unit
+        Session = sessionmaker(bind=connection)
+        db_session = Session()
+        newval = db_session.query(Value).filter(Value.value_string=='99999999').first()
+        if not newval: errors.append("Value: '99999999' not created")
+        newunit = db_session.query(Unit).filter(Unit.name=='some_new_unit').first()
+        if not newunit: errors.append("Unit: 'some_new_unit' not created")
+
+    except Exception as e:
+        print("Problem in db")
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))   
