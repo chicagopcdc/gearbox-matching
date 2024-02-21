@@ -30,7 +30,7 @@ async def get_all_units(
     return { "results": list(units)}
 
 @mod.post("/unit", response_model=UnitSchema,status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
-async def save_object(
+async def save_unit(
     body: UnitCreate,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
@@ -40,7 +40,7 @@ async def save_object(
     return new_unit
 
 @mod.post("/update-unit/{unit_id}", response_model=UnitSchema, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
-async def update_object(
+async def update_unit(
     unit_id: int,
     body: dict,
     request: Request,
