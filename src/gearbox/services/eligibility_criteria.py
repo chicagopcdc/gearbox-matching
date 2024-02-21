@@ -57,7 +57,7 @@ async def get_eligibility_criteria_set(session, id: int=None):
                 if render_type in ['radio','select']:
                     fieldValue = value_id
                 elif render_type in ['age']:
-                    unit = the_value.unit
+                    unit = the_value.unit.name
                     if unit in ['years']:
                         fieldValue = eval(the_value.value_string)
                     else:
