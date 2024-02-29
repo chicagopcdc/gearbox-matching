@@ -51,14 +51,14 @@ async def update_value(session: Session, value: ValueCreate, value_id: int) -> V
 async def get_value_id(session: Session, value_str: str, operator: str, unit: str, is_numeric: bool) -> int:
     # check if value exists
     # if not, then create one
-    value_id = await value_crud.get_value(db=session, value_str=value_str, operator=operator, unit_name=unit, is_numeric=is_numeric)
-    if not value_id:
-        value = ValueCreate(description=value_str, 
+    value = await value_crud.get_value(db=session, value_str=value_str, operator=operator, unit_name=unit, is_numeric=is_numeric)
+    if not value:
+        value_cr = ValueCreate(description=value_str, 
                             value_string=value_str,
                             unit_name=unit,
                             operator=operator,
                             is_numeric=is_numeric, 
                             active=True)
-        new_value = await create_value(session=session, value=value)
-        value_id = new_value.id
-    return value_id
+        value = await create_value(session=session, value=value_cr)
+
+    return value.id

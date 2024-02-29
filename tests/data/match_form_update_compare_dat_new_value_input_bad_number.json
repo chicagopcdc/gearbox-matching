@@ -235,7 +235,7 @@
                         "value": "xxx99999999",
                         "operator": "eq",
 			"unit": "some_new_unit",
-			"is_numeric": "True"
+			"is_numeric": true
                     }
                 ]
             }
