@@ -219,7 +219,6 @@ async def update(match_form, session):
                     tb_row['path'] ='.'.join(map(str,path_ids))
                 tb_rows.append(tb_row)
                 tb_row = {}
-
     await clear_display_rules_and_triggered_by(current_session=session) 
     await insert_display_rules(current_session=session, display_rules_rows=dr_rows)
     await insert_triggered_by(current_session=session, triggered_by_rows=tb_rows)

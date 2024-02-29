@@ -15,7 +15,10 @@ class CRUDValue(CRUDBase [Value, ValueCreate, ValueSearchResults]):
                         is_numeric: bool):
 
         unit_subq = select(Unit).where(Unit.name==unit_name).subquery()
-        stmt = select(Value).join(unit_subq, Value.unit_id == unit_subq.c.id)
+        stmt = select(Value).where(Value.value_string == value_str).\
+                where(Value.operator == operator).\
+                where(Value.is_numeric == is_numeric).\
+                join(unit_subq, Value.unit_id == unit_subq.c.id)
         result = await db.execute(stmt)
         value = result.unique().scalars().first()
         return value
