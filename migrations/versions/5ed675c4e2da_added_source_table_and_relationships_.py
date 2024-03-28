@@ -25,10 +25,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('source', name='source_uix')
     )
-    op.add_column('site', sa.Column('country', sa.String(), nullable=True))
-    op.add_column('site', sa.Column('city', sa.String(), nullable=True))
-    op.add_column('site', sa.Column('state', sa.String(), nullable=True))
-    op.add_column('site', sa.Column('zip', sa.String(), nullable=True))
     op.add_column('site', sa.Column('source_id', sa.Integer(), nullable=True))
     op.drop_constraint('site_uix', 'site', type_='unique')
     op.create_unique_constraint('site_uix', 'site', ['name', 'zip'])
@@ -51,10 +47,6 @@ def downgrade():
     op.drop_constraint('site_uix', 'site', type_='unique')
     op.create_unique_constraint('site_uix', 'site', ['name', 'code'])
     op.drop_column('site', 'source_id')
-    op.drop_column('site', 'zip')
-    op.drop_column('site', 'state')
-    op.drop_column('site', 'city')
-    op.drop_column('site', 'country')
     op.drop_table('source')
     op.drop_column('study_external_id', 'create_date')
     # ### end Alembic commands ###
