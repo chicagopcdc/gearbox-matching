@@ -17,8 +17,8 @@ depends_on = None
 
 
 def upgrade():
-    pass
+    op.add_column('study_external_id', sa.Column('create_date', sa.DateTime(), nullable=True))
 
 
 def downgrade():
-    pass
+    op.drop_column('study_external_id', 'create_date')
