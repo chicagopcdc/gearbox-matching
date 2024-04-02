@@ -28,6 +28,9 @@ def upgrade():
     op.create_unique_constraint('criterion_code_uix', 'criterion', ['code'])
     op.create_unique_constraint('criterion_display_name_uix', 'criterion', ['display_name'])
     op.create_unique_constraint('ontology_code_uix', 'ontology_code', ['name', 'code', 'version'])
+    op.alter_column('value', 'code',
+               existing_type=sa.VARCHAR(),
+               nullable=True)
     op.drop_constraint('value_code_unit_uix', 'value', type_='unique')
     op.create_unique_constraint('value_code_unit_uix', 'value', ['type', 'unit', 'value_string', 'operator'])
     op.create_unique_constraint('value_code_uix', 'value', ['code'])
@@ -39,6 +42,9 @@ def downgrade():
     op.drop_constraint('value_code_uix', 'value', type_='unique')
     op.drop_constraint('value_code_unit_uix', 'value', type_='unique')
     op.create_unique_constraint('value_code_unit_uix', 'value', ['code', 'type', 'unit', 'value_string', 'operator'])
+    op.alter_column('value', 'code',
+               existing_type=sa.VARCHAR(),
+               nullable=False)
     op.drop_constraint('ontology_code_uix', 'ontology_code', type_='unique')
     op.drop_constraint('criterion_display_name_uix', 'criterion', type_='unique')
     op.drop_constraint('criterion_code_uix', 'criterion', type_='unique')
