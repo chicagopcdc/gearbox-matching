@@ -1,5 +1,6 @@
 from gearbox.crud import eligibility_criteria_info_crud, study_version_crud, eligibility_criteria_crud, study_algorithm_engine_crud
 from gearbox.schemas import EligibilityCriteriaInfoCreate, EligibilityCriteriaInfoSearchResults, EligibilityCriteriaInfo as EligibilityCriteriaInfoSchema
+from gearbox.models import EligibilityCriteriaInfo
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import HTTPException
 from gearbox.util import status
@@ -8,13 +9,14 @@ from gearbox.util.types import EligibilityCriteriaInfoStatus
 async def reset_active_status(session: Session, study_version_id: int) -> bool:
 
     # set all currently active rows related to the study_version to inactive
-    sae_to_update = await eligibility_criteria_info_crud.get_multi(
+    eci_to_update = await eligibility_criteria_info_crud.get_multi(
         db=session,
-        where=[f"eligibility_criteria_info.study_version_id = {study_version_id} and eligibility_criteria_info.status = '{EligibilityCriteriaInfoStatus.ACTIVE.value}'"]
+        where=[f"eligibility_criteria_info.study_version_id = {study_version_id} and eligibility_criteria_info.status = '{EligibilityCriteriaInfoStatus.ACTIVE.value}'"],
+        noload_rel = [EligibilityCriteriaInfo.study_version]
     )
-    for sae in sae_to_update:
+    for eci in eci_to_update:
         # set all to false
-        await eligibility_criteria_info_crud.update(db=session, db_obj=sae, obj_in={"status":EligibilityCriteriaInfoStatus.INACTIVE.value})
+        await eligibility_criteria_info_crud.update(db=session, db_obj=eci, obj_in={"status":EligibilityCriteriaInfoStatus.INACTIVE.value})
     return True
 
 async def get_eligibility_criteria_info(session: Session, id: int) -> EligibilityCriteriaInfoSchema:

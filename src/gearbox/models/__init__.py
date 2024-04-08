@@ -11,6 +11,7 @@ from .eligibility_criteria import EligibilityCriteria
 from .input_type import InputType
 from .note import Note
 from .ontology_code import OntologyCode
+from .source import Source
 from .site_has_study import SiteHasStudy
 from .site import Site
 from .study_algorithm_engine import StudyAlgorithmEngine
@@ -20,6 +21,7 @@ from .study import Study
 from .tag import Tag
 from .triggered_by import TriggeredBy
 from .value import Value
+from .unit import Unit
 from .eligibility_criteria_info import EligibilityCriteriaInfo
 from .study_has_patient import StudyHasPatient
 from .study_external_id import StudyExternalId

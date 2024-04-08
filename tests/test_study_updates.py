@@ -5,6 +5,17 @@ from sqlalchemy.orm import sessionmaker
 from gearbox.models import Study, StudyLink, Site, StudyExternalId, SiteHasStudy
 from .test_utils import is_aws_url
 
+from starlette.status import (
+    HTTP_201_CREATED,
+    HTTP_409_CONFLICT,
+    HTTP_400_BAD_REQUEST,
+    HTTP_401_UNAUTHORIZED,
+    HTTP_403_FORBIDDEN,
+    HTTP_422_UNPROCESSABLE_ENTITY,
+    HTTP_500_INTERNAL_SERVER_ERROR,
+)
+
+
 @pytest.mark.parametrize(
     "data", [ 
         {
@@ -18,7 +29,6 @@ from .test_utils import is_aws_url
                     {
                         "name": "TEST STUDY UPDATES TEST SITE NAME",
                         "code": "TEST SITE CODE",
-                        "active": True
                     }
                 ],
                 "links": [ 
@@ -40,15 +50,14 @@ from .test_utils import is_aws_url
                 ]
             },
             {
-                "name": "TEST STUDY UPDATES - *TEST STUDY NAME FIRST!!!*",
-                "code": "NEW_STUDY_CODE",
+                "name": "TEST STUDY UPDATES - *TEST STUDY NAME SECOND!!!*",
+                "code": "NEW_STUDY_CODE_2",
                 "description": "test study description",
                 "active": True,
                 "sites": [ 
                     {
                         "name": "TEST STUDY UPDATES TEST SITE NAME -> UPDATED",
                         "code": "TEST SITE CODE",
-                        "active": True,
                         "country": "USA",
                         "status":"recruiting",
                         "city":"Chicago",
@@ -73,7 +82,8 @@ from .test_utils import is_aws_url
                     }
             ]
             }
-            ]
+            ],
+            "source": "clinicaltrials.gov"
         }
     ]
 )
@@ -115,9 +125,114 @@ def test_study_updates(setup_database, client, data, connection):
         if not site_has_study: 
             errors.append(f"Site has study(study_id): {study.id} not created")
         
+        active_studies = db_session.query(Study).filter(Study.active==True).all()
+        if not len(active_studies) == 2:
+            errors.append(f"ERROR: should be 2 active studies, found: {len(active_studies)} active studies in study table.")
+
+        active_links = db_session.query(StudyLink).filter(StudyLink.active==True).all()
+        if not len(active_links) == 2:
+            errors.append(f"ERROR: should be 2 active study links, found: {len(active_links)} active study links in study_links table.")
+
+        active_study_sites = db_session.query(SiteHasStudy).filter(SiteHasStudy.active==True).all()
+        if not len(active_study_sites) == 2:
+            errors.append(f"ERROR: should be 2 active study sites, found: {len(active_study_sites)} active study sites in site_has_study table.")
+        
     except Exception as e:
         errors.append(f"Test study unexpected exception: {str(e)}")
     if not str(resp.status_code).startswith("20"):
         errors.append(f"Invalid https status code returned from test_create_study (create): {resp.status_code} ")
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))
+
+@pytest.mark.parametrize(
+    "data", [ 
+        {
+            "studies": [
+            {
+                "name": "TEST STUDY UPDATES - *TEST STUDY NAME FIRST!!!*",
+                "code": "NEW_STUDY_CODE",
+                "description": "test study description",
+                "active": True,
+                "sites": [ 
+                    {
+                        "name": "TEST STUDY UPDATES TEST SITE NAME",
+                        "code": "TEST SITE CODE",
+                    }
+                ],
+                "links": [ 
+                    {
+                        "name": "UPDATED-----TEST STUDY UPDATES LINK NAME",
+                        "href": "http://www.testlink.org",
+                        "active": True
+                    }
+                ],
+                "ext_ids": [
+                    {
+                        "ext_id": "testexternalstudyid1",
+                        "source": "test ext id source",
+                        "source_url": "http://www.testsourceurl.gov",
+                        "active": True
+
+                    }
+
+                ]
+            }
+            ],
+            "source": "unknown_source.gov"
+        }
+    ]
+)
+@pytest.mark.asyncio
+def test_study_updates_unknown_source(setup_database, client, data, connection):
+    """
+    Comments: test create a new study and validates row created in db
+    """
+    fake_jwt = "1.2.3"
+    resp = client.post("/update-studies", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    assert resp.status_code == HTTP_500_INTERNAL_SERVER_ERROR
+
+@pytest.mark.parametrize(
+    "data", [ 
+        {
+            "studies": [
+            {
+                "name": "TEST STUDY UPDATES - *TEST STUDY NAME FIRST!!!*",
+                "code": "NEW_STUDY_CODE",
+                "description": "test study description",
+                "active": True,
+                "sites": [ 
+                    {
+                        "name": "TEST STUDY UPDATES TEST SITE NAME",
+                        "code": "TEST SITE CODE",
+                    }
+                ],
+                "links": [ 
+                    {
+                        "name": "UPDATED-----TEST STUDY UPDATES LINK NAME",
+                        "href": "http://www.testlink.org",
+                        "active": True
+                    }
+                ],
+                "ext_ids": [
+                    {
+                        "ext_id": "testexternalstudyid1",
+                        "source": "test ext id source",
+                        "source_url": "http://www.testsourceurl.gov",
+                        "active": True
+
+                    }
+
+                ]
+            }
+            ]
+        }
+    ]
+)
+@pytest.mark.asyncio
+def test_study_updates_missing_source(setup_database, client, data, connection):
+    """
+    Comments: test create a new study and validates row created in db
+    """
+    fake_jwt = "1.2.3"
+    resp = client.post("/update-studies", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    assert resp.status_code == HTTP_422_UNPROCESSABLE_ENTITY

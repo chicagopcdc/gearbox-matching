@@ -30,10 +30,10 @@ def test_studies_compare(setup_database, client):
     resp.raise_for_status()
     studydata_file = './tests/data/studies.json'
 
-    """ SERIALIZE STUDIES TO COMPARE AGAINST - UNCOMMENT TO WRITE NEW COMPARE DATA
-    with open(studydata_file,'w') as comp_file:
-        json.dump(full_res, comp_file)
-    """
+    #""" SERIALIZE STUDIES TO COMPARE AGAINST - UNCOMMENT TO WRITE NEW COMPARE DATA
+    #with open(studydata_file,'w') as comp_file:
+    #    json.dump(full_res, comp_file)
+    #"""
 
     with open(studydata_file, 'r') as comp_file:
         study_compare = json.load(comp_file)
