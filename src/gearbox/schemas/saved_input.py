@@ -6,6 +6,7 @@ from typing import Sequence, List, Optional
 
 class SavedInputBase(BaseModel):
     user_id: int
+    name: Optional[str]
     patient_id: Optional[int]
     data: List[dict]
     create_date: Optional[datetime]
@@ -29,16 +30,13 @@ class SavedInput(SavedInputDB):
 class SavedInputSearchResults(BaseModel):
     results: List[dict]
     id: int
+    name: Optional[str]
 
 class SavedInputCreate(BaseModel):
     data: List[dict]
     id: Optional[int]
+    name: Optional[str]
 
 class SavedInputPost(SavedInputBase):
     id: Optional[int]
     pass
-
-# this is the response for the /user-input/all endpoint
-# it returns a list of saved inputs
-class SavedInputAll(BaseModel):
-    results: List[dict]

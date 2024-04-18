@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, Column, Integer, DateTime, Text
+from sqlalchemy import ForeignKey, Column, Integer, DateTime, Text, String
 from sqlalchemy.dialects.postgresql import JSONB
 
 from .base_class import Base
@@ -9,6 +9,7 @@ class SavedInput(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, nullable=False)
+    name = Column(String)
     patient_id = Column(Integer, nullable=True)
     create_date = Column(DateTime, nullable=False)
     update_date = Column(DateTime, nullable=False)
