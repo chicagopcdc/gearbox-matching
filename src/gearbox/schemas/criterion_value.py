@@ -6,7 +6,7 @@ from pydantic.utils import GetterDict
 class CriterionValueGetter(GetterDict):
     # map and reformat 'value' fields
     def get(self, key: str, default: Any = None) -> Any:
-        if key in ('id','code','description','type','value_string','unit','operator','create_date','active','el_criteria_has_criterions'):
+        if key in ('id','description','value_string','operator','create_date','active','is_numeric','unit_id'):
             # note 'value' is the table name here
             return getattr(self._obj.value, key)
         else:

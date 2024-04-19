@@ -11,9 +11,25 @@ from gearbox.schemas import SavedInputSearchResults, SavedInputCreate, SavedInpu
 from gearbox.services import user_input as user_input_service
 from gearbox import deps
 from gearbox import auth 
+from gearbox.admin_login import admin_required
 from gearbox import config
-
+from gearbox.util.user_input_validation import user_input_validation 
 mod = APIRouter()
+
+
+@mod.get("/user-input/validation-update", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+async def get_object_latest(
+    request: Request,
+    session: Session = Depends(deps.get_session),
+):
+    try:
+        message = await user_input_validation.update_validation(session)
+    except Exception as e:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "something went wrong when updating validation data check logs")
+        
+    return message
+
+
 
 @mod.post("/user-input", response_model=SavedInputSearchResults, status_code=status.HTTP_200_OK,dependencies=[ Depends(auth.authenticate)])
 async def save_object(
@@ -30,6 +46,8 @@ async def save_object(
             request (Request): starlette request (which contains reference to FastAPI app)
             token (HTTPAuthorizationCredentials, optional): bearer token
     """
+    #validate here
+    user_input_validation.validate_input(body.data)
     saved_user_input = await user_input_service.create_saved_input(session=session, user_input=body, user_id=int(user_id))
     return saved_user_input
 

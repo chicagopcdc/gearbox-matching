@@ -34,7 +34,6 @@ async def create_saved_input(session: Session, user_input: SavedInputCreate, use
     uid = dict(user_input)
     uid['user_id'] = user_id
     user_input_post = SavedInputPost(**uid)
-
     if not user_input_post.id:
         si = await saved_input_crud.create(db=session,  obj_in=user_input_post)
     else:

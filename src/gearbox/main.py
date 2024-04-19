@@ -15,6 +15,8 @@ from pcdc_aws_client.boto import BotoManager
 import uvicorn
 from pcdcutils.signature import SignatureManager
 from pcdcutils.errors import KeyPathInvalidError, NoKeyError
+from gearbox.util.user_input_validation import user_input_validation 
+
 
 logger_name = 'gb-logger'
 logger = cdislogging.get_logger(logger_name, log_level="debug" if config.DEBUG else "info")
@@ -140,4 +142,6 @@ def get_version():
 @router.get("/_status")
 async def get_status(db: Session = Depends(deps.get_session)):
     now = await db.execute("SELECT now()")
+    if user_input_validation.start_up_reset:
+        await user_input_validation.update_validation(db)
     return dict( status="OK", timestamp=now.scalars().first())

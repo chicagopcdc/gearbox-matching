@@ -3,12 +3,17 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from . import logger
 from gearbox.util import status
-from gearbox.schemas import CriterionCreateIn, CriterionCreate, CriterionHasValueCreate, CriterionHasTagCreate, DisplayRulesCreate, TriggeredByCreate, Criterion as CriterionSchema
+from gearbox.schemas import CriterionSearchResults, CriterionCreateIn, CriterionCreate, CriterionHasValueCreate, CriterionHasTagCreate, DisplayRulesCreate, TriggeredByCreate, Criterion as CriterionSchema
 from gearbox.crud import criterion_crud, criterion_has_value_crud, criterion_has_tag_crud, display_rules_crud, triggered_by_crud, value_crud, tag_crud
 
 async def get_criterion(session: Session, id: int) -> CriterionSchema:
     crit = await criterion_crud.get(session, id)
     return crit
+
+async def get_criteria(session: Session) -> CriterionSearchResults:
+    aes = await criterion_crud.get_multi(session)
+    return aes
+
 
 async def create_new_criterion(session: Session, input_criterion_info: CriterionCreateIn):
     # keep track of any non-existent fks
