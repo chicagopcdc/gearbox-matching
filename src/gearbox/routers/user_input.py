@@ -6,8 +6,9 @@ from fastapi import Request, Depends
 from sqlalchemy.orm import Session
 from . import logger
 from gearbox.util import status
+from typing import List
 
-from gearbox.schemas import SavedInputSearchResults, SavedInputCreate, SavedInputAll
+from gearbox.schemas import SavedInputSearchResults, SavedInputCreate 
 from gearbox.services import user_input as user_input_service
 from gearbox import deps
 from gearbox import auth 
@@ -55,7 +56,7 @@ async def get_object_latest(
     return saved_user_input
 
 # get all saved inputs for a user
-@mod.get("/user-input/all", response_model=SavedInputSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
+@mod.get("/user-input/all", response_model=List[SavedInputSearchResults], status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
 async def get_object_all(
     request: Request,
     session: Session = Depends(deps.get_session),
