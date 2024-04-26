@@ -13,8 +13,7 @@ async def get_latest_user_input(session: Session, user_id: int) -> SavedInputSea
     if latest_saved_input:
         response = {
             "results": latest_saved_input.data,
-            "id": latest_saved_input.id,
-            "name": latest_saved_input.name
+            "id": latest_saved_input.id
         }
     else:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Saved input not found for user '{user_id}'")
