@@ -129,7 +129,7 @@ def test_build_studies(setup_database, client):
     ]
 )
 @pytest.mark.asyncio
-def test_build_studies_query(setup_database, client, data):
+def test_build_studies_query(setup_database, client, data, connection):
     errors = []
     fake_jwt = "1.2.3"
     # insert test study
@@ -145,6 +145,15 @@ def test_build_studies_query(setup_database, client, data):
 
     if not str(resp.status_code).startswith("20"):
         errors.append(f'ERROR: build-studies failed status: {resp.status_code} ') 
+    
+    #cleanup
+    Session = sessionmaker(bind=connection)
+    db_session = Session()
+    d = db_session.query(Study).filter(Study.code=='TEST-BUILD-STUDIES-QUERY-CODE').delete()
+    db_session.commit()
+    db_session.close()
+
+
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))
 
