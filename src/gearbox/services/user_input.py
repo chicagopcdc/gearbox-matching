@@ -1,4 +1,4 @@
-from gearbox.schemas import SavedInputCreate, SavedInputPost, SavedInputSearchResults, SavedInputAll
+from gearbox.schemas import SavedInputCreate, SavedInputPost, SavedInputSearchResults 
 from gearbox.models import SavedInput
 from . import logger
 from sqlalchemy.ext.asyncio import AsyncSession as Session
@@ -6,6 +6,7 @@ from gearbox.crud.saved_input import saved_input_crud
 from sqlalchemy import select, exc
 from fastapi import HTTPException
 from gearbox.util import status
+from typing import List
 
 async def get_latest_user_input(session: Session, user_id: int) -> SavedInputSearchResults:
     latest_saved_input = await saved_input_crud.get_latest_saved_input(session, user_id)
@@ -18,15 +19,11 @@ async def get_latest_user_input(session: Session, user_id: int) -> SavedInputSea
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Saved input not found for user '{user_id}'")
     return response
 
-async def get_all_user_input(session: Session, user_id: int) -> SavedInputAll:
+async def get_all_user_input(session: Session, user_id: int) -> List[SavedInputSearchResults]:
     # this method returns an array of saved inputs
     saved_inputs = await saved_input_crud.get_all_saved_input(session, user_id)
-    saved_inputs = [{"filter": si.data, "id": si.id} for si in saved_inputs]
-
-    response = {
-        "results": saved_inputs,
-        "id": user_id
-    }
+    saved_inputs = [{"results": si.data, "id": si.id, "name": si.name} for si in saved_inputs]
+    response = saved_inputs
     return response
 
 
@@ -49,7 +46,8 @@ async def create_saved_input(session: Session, user_input: SavedInputCreate, use
 
     response = {
         "results": si.data,
-        "id": si.id
+        "id": si.id,
+        "name": si.name
     }
     await session.commit()
     return response
