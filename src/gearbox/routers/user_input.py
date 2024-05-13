@@ -23,6 +23,17 @@ async def get_object_latest(
     request: Request,
     session: Session = Depends(deps.get_session),
 ):
+    """
+        reset cache of criteria data for validating user input.
+
+        Args:
+            request (Request): starlette request (which contains reference to FastAPI app)
+            token (HTTPAuthorizationCredentials, optional): bearer token
+        
+        returns:
+            200: "User input validation update COMPLETED"
+            4xx-5xx: if there is in error with collecting data from DB
+    """
     try:
         message = await user_input_validation.update_validation(session)
     except Exception as e:

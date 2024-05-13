@@ -108,19 +108,3 @@ class UserInputValidation():
 
 
 user_input_validation = UserInputValidation()
-
-
-"""
-
-print(criterion.id, criterion.display_name, criterion.input_type.data_type, [value.value_id for value in criterion.values])
-
-[{id: 3, value: 1}]
-
-[{id: 1, value: "5"}, {id: 3, value: 1}]
-
-from criterion table:
-
-id = 1 input_type_id = 6
-
-
-"""
