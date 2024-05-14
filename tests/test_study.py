@@ -16,20 +16,20 @@ def test_studies_compare(setup_database, client):
     errors = []
     fake_jwt = "1.2.3"
     resp = client.post("/build-studies", headers={"Authorization": f"bearer {fake_jwt}"})
-    full_res = resp.json()
+    test_studies = resp.json().get('studies')
 
     resp.raise_for_status()
     studydata_file = './tests/data/studies.json'
 
-    #""" SERIALIZE STUDIES TO COMPARE AGAINST - UNCOMMENT TO WRITE NEW COMPARE DATA
-    #with open(studydata_file,'w') as comp_file:
-    #    json.dump(full_res, comp_file)
-    #"""
+    """ SERIALIZE STUDIES TO COMPARE AGAINST - UNCOMMENT TO WRITE NEW COMPARE DATA
+    with open(studydata_file,'w') as comp_file:
+        json.dump(test_studies, comp_file)
+    """
 
     with open(studydata_file, 'r') as comp_file:
         study_compare = json.load(comp_file)
 
-    studies = full_res
+    studies = test_studies
     study_compare = study_compare
 
     diff = []
@@ -50,6 +50,7 @@ def test_get_studies(setup_database, client):
     fake_jwt = "1.2.3"
     url = client.get("/studies", headers={"Authorization": f"bearer {fake_jwt}"})
     url_str =  url.content.decode('ascii').strip('\"')
+    print(f"------> URL STR: {url_str}")
 
     assert is_aws_url(url_str)
 
@@ -107,7 +108,7 @@ def test_create_study(setup_database, client, data, connection):
     if not str(resp.status_code).startswith("20"):
         errors.append(f"Invalid https status code returned from test_create_study (create): {resp.status_code} ")
 
-    assert not errors, "errors occurred: \n{}".format("\n".join(errors))
+    assert not errors, "errors occurred in test_create_study: \n{}".format("\n".join(errors))
 
 @pytest.mark.asyncio
 def test_build_studies(setup_database, client):
@@ -116,7 +117,15 @@ def test_build_studies(setup_database, client):
     resp = client.post("/build-studies", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
 
-    assert str(resp.status_code).startswith("20")
+    if not full_res.get('version'):
+        errors.append("No version found in study json returned in test_build_studies")
+
+    if not str(resp.status_code).startswith("20"):
+        errors.append(f"Invalid https status code returned from test_build_study (create): {resp.status_code} ")
+
+    assert not errors, "errors occurred in test_build_studies: \n{}".format("\n".join(errors))
+
+
 
 @pytest.mark.parametrize(
     "data", [ 
@@ -129,24 +138,33 @@ def test_build_studies(setup_database, client):
     ]
 )
 @pytest.mark.asyncio
-def test_build_studies_query(setup_database, client, data):
+def test_build_studies_query(setup_database, client, data, connection):
     errors = []
     fake_jwt = "1.2.3"
     # insert test study
     resp = client.post("/study", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
     resp = client.post("/build-studies", headers={"Authorization": f"bearer {fake_jwt}"})
-    full_res = resp.json()
+    studies = resp.json().get('studies')
 
     # TEST-BUILD-STUDIES-QUERY-CODE should not be in the response because it has no associated
     # active study_version in the test data files
-    if 'TEST-BUILD-STUDIES-QUERY-CODE' in [ x.get('code') for x in full_res]:
+    if 'TEST-BUILD-STUDIES-QUERY-CODE' in [ study.get('code') for study in studies]:
         errors.append('ERROR: Study code TEST-BUILD-STUDIES-QUERY-CODE found in response - study has no associated study_version.')
 
     if not str(resp.status_code).startswith("20"):
         errors.append(f'ERROR: build-studies failed status: {resp.status_code} ') 
+    
+    #cleanup
+    Session = sessionmaker(bind=connection)
+    db_session = Session()
+    d = db_session.query(Study).filter(Study.code=='TEST-BUILD-STUDIES-QUERY-CODE').delete()
+    db_session.commit()
+    db_session.close()
 
-    assert not errors, "errors occurred: \n{}".format("\n".join(errors))
+
+
+    assert not errors, "errors occurred in test_build_studies_query: \n{}".format("\n".join(errors))
 
 @pytest.mark.asyncio
 def test_update_study(setup_database, client, connection):

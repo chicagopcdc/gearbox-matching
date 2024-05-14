@@ -18,7 +18,7 @@ from .ontology_code import OntologyCodeCreate, OntologyCodeSearchResults, Ontolo
 from .el_criteria_has_criterion import ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterionCreate, ElCriteriaHasCriterion, ElCriteriaHasCriterions
 from .algorithm_engine import AlgorithmResponse
 from .source import Source, SourceCreate, SourceSearchResults
-from .study import StudySearchResults, StudyCreate, Study, StudyUpdates
+from .study import StudySearchResults, StudyCreate, Study, StudyUpdates, StudyResults
 from .study_link import StudyLinkSearchResults, StudyLinkCreate, StudyLink
 from .study_version import StudyVersionSearchResults, StudyVersionCreate, StudyVersion, StudyVersionInfo
 from .eligibility_criteria_response import EligibilityCriteriaResponseResults
