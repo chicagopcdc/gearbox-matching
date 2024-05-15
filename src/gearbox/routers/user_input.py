@@ -14,7 +14,6 @@ from gearbox import deps
 from gearbox import auth 
 from gearbox.admin_login import admin_required
 from gearbox import config
-from gearbox.util.user_input_validation import user_input_validation 
 mod = APIRouter()
 
 
@@ -34,12 +33,9 @@ async def get_object_latest(
             200: "User input validation update COMPLETED"
             4xx-5xx: if there is in error with collecting data from DB
     """
-    try:
-        message = await user_input_validation.update_validation(session)
-    except Exception as e:
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "something went wrong when updating validation data check logs")
-        
-    return message
+    await user_input_service.reset_user_validation_data()
+
+    return "user_validation data cleared"
 
 
 
@@ -59,7 +55,7 @@ async def save_object(
             token (HTTPAuthorizationCredentials, optional): bearer token
     """
     #validate here
-    user_input_validation.validate_input(body.data)
+    await user_input_service.validate_user_input(session, body.data)
     saved_user_input = await user_input_service.create_saved_input(session=session, user_input=body, user_id=int(user_id))
     return saved_user_input
 

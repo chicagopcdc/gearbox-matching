@@ -12,7 +12,7 @@ from gearbox.schemas import CriterionSearchResults, CriterionCreateIn, Criterion
 from gearbox.crud import criterion_crud
 from gearbox import deps
 from gearbox import auth 
-from gearbox.util.user_input_validation import user_input_validation
+from gearbox.services.user_input import reset_user_validation_data
 
 mod = APIRouter()
 
@@ -44,7 +44,7 @@ async def save_object(
 
     new_criterion = await criterion_service.create_new_criterion(session, body)
     await session.commit()
-    user_input_validation.update_validation(session)
+    reset_user_validation_data()
     return new_criterion
 
 def init_app(app):

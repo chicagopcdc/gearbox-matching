@@ -56,7 +56,7 @@ def test_admin_load_data(client):
     resp.raise_for_status()
 
     assert str(resp.status_code).startswith("20")
-    assert resp.json() == "User input validation update COMPLETED"
+    assert resp.json() == "user_validation data cleared"
 
 @pytest.mark.run(order=2)
 def test_send_first_input_request(send_validation_request_function):
