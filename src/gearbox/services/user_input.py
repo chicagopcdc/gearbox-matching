@@ -10,7 +10,7 @@ from typing import List
 from gearbox.services.criterion import get_criteria
 import asyncio
 import time
-from aiocache import cached, Cache, SimpleMemoryCache, caches
+from aiocache import cached, Cache, caches
 from aiocache.serializers import JsonSerializer
 import json
 
