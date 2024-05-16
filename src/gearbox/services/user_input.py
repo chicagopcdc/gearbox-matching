@@ -30,7 +30,7 @@ async def reset_user_validation_data():
         logger.error(e)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "something went wrong when clearing validation data check logs")
 
-@cached(cache=Cache.MEMORY, serializer=JsonSerializer(), key='update_user_validation_data')
+@cached(key='update_user_validation_data')
 async def update_user_validation_data(session: Session) -> dict:
     logger.info("User input validation data update STARTING")
     valid_criterion_format = {}
@@ -42,7 +42,7 @@ async def update_user_validation_data(session: Session) -> dict:
             valid_criterion_format[str(criterion.id)] = {
                 "display_name": criterion.display_name, 
                 "input_type": criterion.input_type.data_type, 
-                "values": list(value.value_id for value in criterion.values) if criterion.values else None,
+                "values": set(value.value_id for value in criterion.values) if criterion.values else None,
                 "constraints": None 
             }
     except Exception as e:
@@ -50,7 +50,6 @@ async def update_user_validation_data(session: Session) -> dict:
         logger.error(f"Maintaining previous validation Data")
 
     logger.info("User input validation update COMPLETED")
-    valid_criterion_json = json.dumps(valid_criterion_format)
     return valid_criterion_format
 
 
