@@ -41,7 +41,7 @@ pcdc-aws-client = {git = "https://github.com/chicagopcdc/pcdc-aws-client.git", r
 jsonschema = "^4.17.3"
 werkzeug = "2.2.2"
 pcdcutils = {git = "https://github.com/chicagopcdc/pcdcutils.git", rev = "0.1.2"}
-
+aiocache = "0.11.1"
 
 
 [tool.poetry.dev-dependencies]
