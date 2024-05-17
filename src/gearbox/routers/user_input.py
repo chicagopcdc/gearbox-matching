@@ -30,7 +30,7 @@ async def get_object_latest(
             token (HTTPAuthorizationCredentials, optional): bearer token
         
         returns:
-            200: "User input validation update COMPLETED"
+            200: "user_validation data cleared"
             4xx-5xx: if there is in error with collecting data from DB
     """
     await user_input_service.reset_user_validation_data()

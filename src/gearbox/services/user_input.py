@@ -14,9 +14,6 @@ from aiocache import cached, Cache, caches
 from aiocache.serializers import JsonSerializer
 import json
 
-"""
-impliment the user input validation cache version here
-"""
 
 async def reset_user_validation_data():
     try:

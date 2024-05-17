@@ -140,11 +140,5 @@ def get_version():
 
 @router.get("/_status")
 async def get_status(db: Session = Depends(deps.get_session)):
-    """
-    After application starts up, the first time a request is sent to _status
-    the user input validation data is cached. If running in development you
-    will have to manually do this, if running with Kubernetes this will be done
-    automatically
-    """
     now = await db.execute("SELECT now()")
     return dict( status="OK", timestamp=now.scalars().first())
