@@ -19,3 +19,4 @@ from .study_version import study_version_crud
 from .study_has_patient import study_has_patient_crud
 from .study_external_id import study_external_id_crud
 from .unit import unit_crud
+from .input_type import input_type_crud
