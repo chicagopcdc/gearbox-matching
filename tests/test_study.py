@@ -37,7 +37,7 @@ def test_studies_compare(setup_database, client):
     for i in range (len(study_compare)):
         study_diff = DeepDiff(studies[i], study_compare[i], ignore_order=True)
         if (study_diff):
-            diff.append(study_diff)
+            diff.append(str(study_diff))
     
     assert not diff, "differences occurred: \n{}".format("\n".join(diff))            
 
