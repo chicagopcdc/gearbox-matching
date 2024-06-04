@@ -32,16 +32,16 @@ async def get_all_study_versions(
     study_versions = await study_version_service.get_study_versions(session)
     return study_versions
 
-@mod.get("/study-versions/{study_version_status}", response_model=List[StudyVersionInfo], status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])
+@mod.get("/study-versions/{eligibility_criteria_info_status}", response_model=List[StudyVersionInfo], status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])
 async def get_study_versions(
-    study_version_status: str,
+    eligibility_criteria_info_status: str,
     request: Request,
     session: AsyncSession = Depends(deps.get_session)
 ):
     """
     Comments: Get all study versions with a given status
     """
-    study_versions = await study_version_service.get_study_versions_by_status(session, study_version_status)
+    study_versions = await study_version_service.get_study_versions_by_status(session, eligibility_criteria_info_status)
     return study_versions
 
 @mod.post("/study-version", response_model=StudyVersionSchema, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])

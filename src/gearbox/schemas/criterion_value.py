@@ -21,7 +21,7 @@ class CriterionValue(BaseModel):
     unit: Optional[str]
     operator: Optional[str]
     create_date: Optional[datetime]
-    active: Optional[bool]
+    status: Optional[str]
 
     class Config:
         orm_mode = True

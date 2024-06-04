@@ -3,6 +3,7 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from . import logger
 from gearbox.util import status
+from gearbox.util.types import CriterionStatus
 from gearbox.schemas import CriterionSearchResults, CriterionCreateIn, CriterionCreate, CriterionHasValueCreate, CriterionHasTagCreate, DisplayRulesCreate, TriggeredByCreate, Criterion as CriterionSchema
 from gearbox.crud import criterion_crud, criterion_has_value_crud, criterion_has_tag_crud, display_rules_crud, triggered_by_crud, value_crud, tag_crud
 
@@ -67,3 +68,12 @@ async def create_new_criterion(session: Session, input_criterion_info: Criterion
     # commit if no exceptions encountered 
     await session.commit()
     return jsonable_encoder(new_criterion)
+
+async def get_criteria_by_status(session: Session, criterion_status:str ) -> CriterionSearchResults:
+
+    # check for valid status value 
+    if criterion_status not in [item.value for item in CriterionStatus]:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"INVALID CRITERION STATUS: {criterion_status}") 
+
+    sv = await criterion_crud.get_criteria_by_status(session, criterion_status)
+    return sv

@@ -35,6 +35,18 @@ async def get_criterion(
     criterion = await criterion_service.get_criterion(session=session, id=criterion_id)
     return criterion
 
+@mod.get("/criterion/{criterion_status}", response_model=CriterionSearchResults, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])
+async def get_criteria_by_status(
+    criterion_status: str,
+    request: Request,
+    session: AsyncSession = Depends(deps.get_session)
+):
+    """
+    Comments: Get all study versions with a given status
+    """
+    criteria = await criterion_service.get_criteria_by_status(session, criterion_status)
+    return criteria
+
 @mod.post("/criterion", response_model=Criterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
     body: CriterionCreateIn,
