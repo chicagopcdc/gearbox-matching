@@ -12,7 +12,7 @@ class CriterionBase(BaseModel):
     display_name: Optional[str]
     description: Optional[str]
     create_date: Optional[datetime]
-    status: Optional[str]
+    active: Optional[bool]
     ontology_code_id: Optional[int]
     input_type_id: int
 

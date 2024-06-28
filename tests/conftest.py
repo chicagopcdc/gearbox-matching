@@ -195,7 +195,7 @@ def mock_new_criterion():
         code = "test_criteria"
         display_name = "this is a test criterion"
         description = "test is a test criterion"
-        active = False
+        active = True
         input_type_id = 1
         tags = [1]
         values = [3]

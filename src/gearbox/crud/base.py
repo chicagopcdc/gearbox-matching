@@ -104,7 +104,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             obj_in_data["update_date"] = datetime.now() if not obj_in_data["update_date"] else obj_in_data["update_date"]
         if "start_date" in obj_in_data.keys():
             obj_in_data["start_date"] = datetime.now() if not obj_in_data["start_date"] else obj_in_data["start_date"]
-        
+
         try:
             db_obj = self.model(**obj_in_data)
             db.add(db_obj)

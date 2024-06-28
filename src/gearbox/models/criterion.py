@@ -1,6 +1,5 @@
 from sqlalchemy import ForeignKey, Column, Integer, String, DateTime, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
-from gearbox.util.types import CriterionStatus
 from sqlalchemy.dialects.postgresql import ENUM
 from .base_class import Base
 
@@ -13,7 +12,7 @@ class Criterion(Base):
     display_name = Column(String)
     description = Column(String, nullable=True)
     create_date = Column(DateTime, nullable=True)
-    status = Column(ENUM(CriterionStatus), unique=False, nullable=True)
+    active = Column(Boolean, nullable=True)
     ontology_code_id = Column(Integer, ForeignKey('ontology_code.id'), nullable=True)
     input_type_id = Column(Integer, ForeignKey('input_type.id') )
 
