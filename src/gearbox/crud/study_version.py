@@ -1,5 +1,5 @@
 from .base import CRUDBase
-from gearbox.models import StudyVersion, EligibilityCriteriaInfo, Study
+from gearbox.models import StudyVersion, EligibilityCriteriaInfo
 from gearbox.schemas import StudyVersionSearchResults, StudyVersionCreate
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, update, select, exc

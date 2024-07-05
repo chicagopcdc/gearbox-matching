@@ -9,6 +9,7 @@ from . import logger
 from starlette.responses import JSONResponse
 from gearbox import auth
 from gearbox.schemas import MatchForm
+from gearbox.schemas.match_form import showif_logic_schema
 from gearbox import deps
 from gearbox.util import status, bucket_utils
 from gearbox.admin_login import admin_required
@@ -27,6 +28,8 @@ async def build_match_info(
     is set to true, it will save the match for to S3, if 'save' is false it will just return
     the match form without uploading to S3. 
     """
+    print(f"-----------> MATCH FORM INFO: {showif_logic_schema}")
+
     match_form = await match_form_service.get_match_form(session)
     if save:
         if not config.BYPASS_S3:

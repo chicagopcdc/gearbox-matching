@@ -70,6 +70,7 @@ nest-asyncio = "^1.5.1"
 "study_link" = "gearbox.routers.study_link"
 "study_has_patient" = "gearbox.routers.study_has_patient"
 "unit" = "gearbox.routers.unit"
+"raw_criteria" = "gearbox.routers.raw_criteria"
 
 
 [build-system]
