@@ -20,14 +20,6 @@ async def get_raw_criterias(session: Session) -> RawCriteriaSearchResults:
     return aes
     pass
 
-async def get_raw_criteria_by_status(session: Session, eligibility_criteria_status: str) -> RawCriteriaSearchResults:
-    # check for valid status value 
-    if eligibility_criteria_status not in [item.value for item in EligibilityCriteriaStatus]:
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"INVALID ELIGIBILITY CRITERIA STATUS: {eligibility_criteria_status}") 
-
-    sv = await raw_criteria_crud.get_raw_criteria_by_status(session, eligibility_criteria_status)
-    return sv
-
 async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaCreate) -> RawCriteriaSchema:
 
     new_raw_criteria = await raw_criteria_crud.create(db=session, obj_in=raw_criteria)

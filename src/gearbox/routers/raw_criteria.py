@@ -25,7 +25,7 @@ async def get_criteria(
     raw_criteria = await raw_criteria_service.get_criteria(session)
     return { "results" :list(raw_criteria) }
 
-@mod.get("/raw_criteria/{raw_criteria_id}", response_model=RawCriteria, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
+@mod.get("/raw-criteria/{raw_criteria_id}", response_model=RawCriteria, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
 async def get_raw_criteria(
     raw_criteria_id: int,
     request: Request,
@@ -35,19 +35,19 @@ async def get_raw_criteria(
     raw_criteria = await raw_criteria_service.get_raw_criteria(session=session, id=raw_criteria_id)
     return raw_criteria
 
-@mod.get("/raw_criteria/{eligibility_criteria_status}", response_model=RawCriteriaSearchResults, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])
-async def get_criteria_by_status(
-    eligibility_criteria_status: str,
+@mod.get("/raw-criteria/{raw_criteria_id}", response_model=RawCriteriaSearchResults, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])
+async def get_criteria_by_id(
+    raw_criteria_id: int,
     request: Request,
     session: AsyncSession = Depends(deps.get_session)
 ):
     """
     Comments: Get all study versions with a given status
     """
-    raw_criteria = await raw_criteria_service.get_raw_criteria_by_status(session, eligibility_criteria_status)
+    raw_criteria = await raw_criteria_service.get_raw_criteria(session, id=raw_criteria_id)
     return raw_criteria
 
-@mod.post("/raw_criteria", response_model=RawCriteria, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.post("/raw-criteria", response_model=RawCriteria, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
     body: RawCriteriaCreate,
     request: Request,
