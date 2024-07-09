@@ -35,16 +35,16 @@ async def get_raw_criteria(
     raw_criteria = await raw_criteria_service.get_raw_criteria(session=session, id=raw_criteria_id)
     return raw_criteria
 
-@mod.get("/raw-criteria/{raw_criteria_id}", response_model=RawCriteriaSearchResults, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])
-async def get_criteria_by_id(
-    raw_criteria_id: int,
+@mod.get("/raw-criteria-ec/{eligibility_criteria_id}", response_model=RawCriteria, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])
+async def get_criteria_by_eligibility_criteria_id(
+    eligibility_criteria_id: int,
     request: Request,
     session: AsyncSession = Depends(deps.get_session)
 ):
     """
-    Comments: Get all study versions with a given status
+    Comments: Get raw criteria by eligibility criteria id
     """
-    raw_criteria = await raw_criteria_service.get_raw_criteria(session, id=raw_criteria_id)
+    raw_criteria = await raw_criteria_service.get_raw_criteria_by_eligibility_criteria_id(session, eligibility_criteria_id=eligibility_criteria_id)
     return raw_criteria
 
 @mod.post("/raw-criteria", response_model=RawCriteria, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])

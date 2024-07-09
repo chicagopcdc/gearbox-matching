@@ -32,6 +32,14 @@ async def get_all_study_versions(
     study_versions = await study_version_service.get_study_versions(session)
     return study_versions
 
+@mod.get("/study-versions-adjudication", response_model=List[StudyVersionInfo], status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])
+async def get_all_study_versions(
+    request: Request,
+    session: AsyncSession = Depends(deps.get_session)
+):
+    study_versions = await study_version_service.get_study_versions_for_adjudication(session)
+    return study_versions
+
 @mod.get("/study-versions/{eligibility_criteria_info_status}", response_model=List[StudyVersionInfo], status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])
 async def get_study_versions(
     eligibility_criteria_info_status: str,

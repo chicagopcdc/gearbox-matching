@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy import exc, select
 from fastapi import HTTPException
 from gearbox.models import StudyVersion
-from gearbox.schemas import StudyVersionCreate, StudyVersionSearchResults, StudyVersion as StudyVersionSchema, StudyVersionInfo
+from gearbox.schemas import StudyVersionCreate, StudyVersionSearchResults, StudyVersion as StudyVersionSchema, StudyVersionInfo#, StudyVersionAdjudicationSearchResults
 from sqlalchemy.sql.functions import func
 from gearbox.util import status
 from gearbox.crud import study_version_crud
@@ -46,6 +46,10 @@ async def get_study_version(session: Session, id: int) -> StudyVersionSchema:
 
 async def get_study_versions(session: Session) -> StudyVersionSearchResults:
     sv = await study_version_crud.get_multi(session)
+    return sv
+
+async def get_study_versions_for_adjudication(session: Session) -> List[StudyVersionInfo]:
+    sv = await study_version_crud.get_study_versions_for_adjudication(session)
     return sv
 
 async def get_study_versions_by_status(session: Session, eligibility_criteria_info_status:str ) -> List[StudyVersionInfo]:

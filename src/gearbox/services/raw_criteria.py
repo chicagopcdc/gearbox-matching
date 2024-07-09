@@ -12,12 +12,16 @@ from gearbox.crud import raw_criteria_crud
 from gearbox.util.types import EligibilityCriteriaStatus
 
 async def get_raw_criteria(session: Session, id: int) -> RawCriteriaSchema:
-    aes = await raw_criteria_crud.get(session, id)
-    return aes
+    raw_crit = await raw_criteria_crud.get(session, id)
+    return raw_crit
+
+async def get_raw_criteria_by_eligibility_criteria_id(session: Session, eligibility_criteria_id: int) -> RawCriteriaSchema:
+    raw_crit = await raw_criteria_crud.get_by_eligibility_criteria_id(session, eligibility_criteria_id=eligibility_criteria_id)
+    return raw_crit
 
 async def get_raw_criterias(session: Session) -> RawCriteriaSearchResults:
-    aes = await raw_criteria_crud.get_multi(session)
-    return aes
+    raw_crit = await raw_criteria_crud.get_multi(session)
+    return raw_crit
     pass
 
 async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaCreate) -> RawCriteriaSchema:
