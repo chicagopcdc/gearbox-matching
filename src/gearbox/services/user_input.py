@@ -124,13 +124,10 @@ async def validate_user_input(session: Session, user_input: dict) -> bool:
 
 async def get_latest_user_input(session: Session, user_id: int) -> SavedInputSearchResults:
     latest_saved_input = await saved_input_crud.get_latest_saved_input(session, user_id)
-    if latest_saved_input:
-        response = {
-            "results": latest_saved_input.data,
-            "id": latest_saved_input.id
-        }
-    else:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Saved input not found for user '{user_id}'")
+    response = {
+        "results": [{}] if not latest_saved_input else latest_saved_input.data,
+        "id": user_id if not latest_saved_input else latest_saved_input.id
+    }
     return response
 
 async def get_all_user_input(session: Session, user_id: int) -> List[SavedInputSearchResults]:
