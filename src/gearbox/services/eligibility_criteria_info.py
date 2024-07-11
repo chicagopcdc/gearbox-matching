@@ -31,6 +31,7 @@ async def get_eligibility_criteria_infos(session: Session) -> EligibilityCriteri
 async def create_eligibility_criteria_info(session: Session, eligibility_criteria_info: EligibilityCriteriaInfoCreate) -> EligibilityCriteriaInfoSchema:
 
     # validate all fks in input
+    
     check_id_errors = []
     check_id_errors.append(await study_version_crud.check_key(db=session, ids_to_check=eligibility_criteria_info.study_version_id))
     check_id_errors.append(await study_algorithm_engine_crud.check_key(db=session, ids_to_check=eligibility_criteria_info.study_algorithm_engine_id))
@@ -46,7 +47,6 @@ async def create_eligibility_criteria_info(session: Session, eligibility_criteri
         retval = await reset_active_status(session=session, study_version_id=eligibility_criteria_info.study_version_id)
 
     new_eligibility_criteria_info = await eligibility_criteria_info_crud.create(db=session, obj_in=eligibility_criteria_info)
-    await session.commit() 
     return new_eligibility_criteria_info
 
 async def update_eligibility_criteria_info(session: Session, eligibility_criteria_info: EligibilityCriteriaInfoCreate, eligibility_criteria_info_id: int) -> EligibilityCriteriaInfoSchema:
@@ -60,6 +60,7 @@ async def update_eligibility_criteria_info(session: Session, eligibility_criteri
         upd_eligibility_criteria_info = await eligibility_criteria_info_crud.update(db=session, db_obj=eligibility_criteria_info_to_upd, obj_in=eligibility_criteria_info)
     else:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Eligibility_criteria id: {eligibility_criteria_info_id} not found for update.") 
-    await session.commit() 
+
+    # await session.commit() 
 
     return upd_eligibility_criteria_info

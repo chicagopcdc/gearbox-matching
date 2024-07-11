@@ -10,7 +10,7 @@ class RawCriteria(Base):
 
     id = Column(Integer, primary_key=True)
     eligibility_criteria_id = Column(Integer, ForeignKey('eligibility_criteria.id'))
-    raw_criteria = Column(JSON)
+    data = Column(JSON)
 
     UniqueConstraint(eligibility_criteria_id, name='raw_criteria_uix')
 

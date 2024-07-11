@@ -46,7 +46,6 @@ async def save_object(
     session: AsyncSession = Depends(deps.get_session),
 ):
     new_eligibility_criteria_info = await eligibility_criteria_info_service.create_eligibility_criteria_info(session, body)
-    await session.commit()
     return new_eligibility_criteria_info
 
 @mod.post("/update-eligibility-criteria-info/{eligibility_criteria_info_id}", response_model=EligibilityCriteriaInfoSchema, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])

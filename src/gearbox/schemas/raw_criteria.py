@@ -2,13 +2,13 @@ from __future__ import annotations
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 from jsonschema.exceptions import SchemaError 
-from pydantic import BaseModel, validator, Json
+from pydantic import BaseModel, validator, Json, root_validator
 from datetime import datetime
 from typing import Optional, List, Sequence, Any, Dict, Union
 
 from gearbox.models import raw_criteria
  
-# define the expected jsonschema schema for the algorithm logic
+# define the expected jsonschema schema for the raw criteria 
 raw_criteria_schema = {
     "type":"object",
     "properties": {
@@ -28,15 +28,13 @@ raw_criteria_schema = {
 }       
 
 class RawCriteriaBase(BaseModel):
-    eligibility_criteria_id: int
-    raw_criteria: Union[Json[Any],Dict] 
+    data: Union[Json[Any],Dict] 
 
-    @validator('raw_criteria')
+    @validator('data')
     def check_valid_vs_schema(cls, v):
-        
         try:
             # The validate method will throw a jsonschema.exceptions.ValidationError
-            # if algorithm_logic field fails to validate against the algorithm_logic_schema
+            # if raw_criteria fails to validate against the raw criteria schema 
             validate(v, raw_criteria_schema)
         except ValidationError as e:
             # ValueError will be caught and handled by the app (in main.py)
@@ -53,14 +51,16 @@ class RawCriteriaBase(BaseModel):
 
 class RawCriteria(RawCriteriaBase):
     id: int
+    eligibility_criteria_id: int
 
-class RawCriteriaSave(RawCriteriaBase):
-    pass
-
-class RawCriteriaCreate(RawCriteriaSave):
+class RawCriteriaIn(RawCriteriaBase):
     pass 
 
-class RawCriteriaUpdate(RawCriteriaSave):
+class RawCriteriaCreate(RawCriteriaBase):
+    eligibility_criteria_id: int
+    pass 
+
+class RawCriteriaUpdate(RawCriteriaBase):
     pass 
 
 class RawCriteriaSearchResults(BaseModel):

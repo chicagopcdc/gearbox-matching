@@ -96,7 +96,7 @@ async def update_studies(
         the 'active' flag is set to false for all studies that do not exist in the
         studyupdates json document.
     """
-    upd_study = await study_service.update_studies(session=session, updates=body)
+    res = await study_service.update_studies(session=session, updates=body)
     return JSONResponse(status.HTTP_200_OK)
 
 def init_app(app):

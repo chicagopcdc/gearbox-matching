@@ -109,6 +109,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             db_obj = self.model(**obj_in_data)
             db.add(db_obj)
             await db.flush()
+            await db.commit()
             return db_obj
         except IntegrityError as e:
             logger.error(f"CREATE CRUD IntegrityError ERROR {e}")
@@ -127,6 +128,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             .values(active=active_upd)
         )
         res = await db.execute(stmt)
+        await db.commit()
         return True
 
     async def set_active(self, db: Session, id: int, active: bool) -> ModelType: 
@@ -141,6 +143,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
         upd_obj.active = active
         db.flush()
+        await db.commit()
 
     async def update( self, db: Session, *, db_obj: ModelType, obj_in: Union[UpdateSchemaType, Dict[str, Any]]
     ) -> ModelType:
