@@ -1,6 +1,7 @@
 # from .saved_input import
 from .value import value_crud
 from .criterion import criterion_crud
+from .criterion_staging import criterion_staging_crud
 from .raw_criteria import raw_criteria_crud
 from .criterion_has_tag import criterion_has_tag_crud
 from .criterion_has_value import criterion_has_value_crud

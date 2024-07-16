@@ -10,9 +10,12 @@ class EligibilityCriteriaStatus(Enum):
     ACTIVE = 'ACTIVE'
     IN_PROCESS = 'IN_PROCESS'
     INACTIVE = 'INACTIVE'
+    CRITERIA_ADJUDICATION = 'CRITERIA_ADJUDICATION'
+    ECHC_ADJUDICATION = 'ECHC_ADJUDICATION'
 
-class CriteriaStagingStatus(Enum):
+class CriterionStagingStatus(Enum):
     NEW = 'NEW'
+    EXISTING = 'EXISTING'
     ACTIVE = 'ACTIVE'
     IN_PROCESS = 'IN_PROCESS'
     INACTIVE = 'INACTIVE'

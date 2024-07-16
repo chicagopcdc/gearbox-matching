@@ -13,6 +13,7 @@ from .eligibility_criteria_response import EligibilityCriteriaResponse
 from .eligibility_criteria import EligibilityCriteriaCreate, EligibilityCriteriaSearchResults, EligibilityCriteria
 from .eligibility_criteria_info import EligibilityCriteriaInfoCreate, EligibilityCriteriaInfoSearchResults, EligibilityCriteriaInfo
 from .criterion import CriterionCreate, CriterionSearchResults, CriterionCreateIn, Criterion
+from .criterion_staging import CriterionStaging, CriterionStagingCreate, CriterionStagingSearchResults
 from .raw_criteria import RawCriteriaCreate, RawCriteriaSearchResults, RawCriteria, RawCriteriaIn
 from .input_type import InputTypeCreate, InputTypeSearchResults, InputType
 from .ontology_code import OntologyCodeCreate, OntologyCodeSearchResults, OntologyCode

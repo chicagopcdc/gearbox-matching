@@ -39,6 +39,7 @@ async def create_new_criterion(session: Session, input_criterion_info: Criterion
     # which are separate inserts
     criterion_info_conv = jsonable_encoder(input_criterion_info)
     criterion_create = { key:value for key,value in criterion_info_conv.items() if key in CriterionCreate.__fields__.keys() }
+    criterion_create = CriterionCreate(**criterion_create)
     new_criterion = await criterion_crud.create(db=session, obj_in=criterion_create)
 
     if input_criterion_info.values:

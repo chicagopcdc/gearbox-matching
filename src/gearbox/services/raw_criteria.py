@@ -6,11 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy import exc
 from fastapi import HTTPException
 from gearbox.models import RawCriteria
-from gearbox.schemas import RawCriteriaCreate, RawCriteriaSearchResults, RawCriteria as RawCriteriaSchema, StudyVersionCreate, EligibilityCriteriaInfoCreate, RawCriteriaIn
+from gearbox.schemas import RawCriteriaCreate, RawCriteriaSearchResults, RawCriteria as RawCriteriaSchema, StudyVersionCreate, EligibilityCriteriaInfoCreate, RawCriteriaIn, CriterionStagingCreate
 from gearbox.util import status, json_utils
-from gearbox.util.types import EligibilityCriteriaInfoStatus
-from gearbox.crud import raw_criteria_crud
-from gearbox.services import study as study_service, study_version as study_version_service, eligibility_criteria as eligibility_criteria_service, eligibility_criteria_info as eligibility_criteria_info_service
+from gearbox.util.types import EligibilityCriteriaInfoStatus, CriterionStagingStatus
+from gearbox.crud import raw_criteria_crud, criterion_crud
+from gearbox.services import study as study_service, study_version as study_version_service, eligibility_criteria as eligibility_criteria_service, eligibility_criteria_info as eligibility_criteria_info_service, criterion_staging as criterion_staging_service
 
 async def get_raw_criteria(session: Session, id: int) -> RawCriteriaSchema:
     raw_crit = await raw_criteria_crud.get(session, id)
@@ -25,7 +25,30 @@ async def get_raw_criterias(session: Session) -> RawCriteriaSearchResults:
     return raw_crit
 
 async def stage_criteria(session: Session, raw_criteria: RawCriteria):
-    pass
+
+    staging_criteria = []
+    raw_text = raw_criteria.data.get('text')
+    for label in raw_criteria.data.get('label'):
+
+        ## get criterion_id from code here...
+        code = label[2]
+        criterion_id = await criterion_crud.get_criterion_id_by_code(db=session, code=code)
+
+        start_span = label[0]
+        end_span = label[1]
+        csc = CriterionStagingCreate(
+            eligibility_criteria_id = raw_criteria.eligibility_criteria_id,
+            code = code,
+            status = CriterionStagingStatus.NEW if criterion_id == None else CriterionStagingStatus.EXISTING,
+            start_char = start_span,
+            end_char = end_span,
+            text = raw_text[start_span:end_span],
+            criterion_id = criterion_id
+        )
+
+        res = await criterion_staging_service.create(session, csc)
+
+        staging_criteria.append(csc)
 
 async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn) -> RawCriteriaSchema:
 

@@ -4,6 +4,7 @@ from .saved_input import SavedInput
 from .criterion_has_tag import CriterionHasTag
 from .criterion_has_value import CriterionHasValue
 from .criterion import Criterion
+from .criterion_staging import CriterionStaging
 from .display_rules import DisplayRules
 from .el_criteria_has_criterion import ElCriteriaHasCriterion
 from .eligibility_criteria_has_note import EligibilityCriteriaHasNote

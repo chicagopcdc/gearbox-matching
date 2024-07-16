@@ -26,8 +26,7 @@ class Criterion(CriterionBase):
 #    el_criteria_has_criterions: List[ElCriteriaHasCriterionBase]
 
 class CriterionCreate(CriterionBase):
-    code: str
-    display_name: str
+    pass
 
 class CriterionCreateIn(CriterionBase):
     code: str
