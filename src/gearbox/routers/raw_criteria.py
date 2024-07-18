@@ -8,7 +8,7 @@ from gearbox.util import status
 from gearbox.services import raw_criteria as raw_criteria_service
 from gearbox.admin_login import admin_required
 
-from gearbox.schemas import RawCriteriaSearchResults, RawCriteriaIn, RawCriteria
+from gearbox.schemas import RawCriteriaIn, RawCriteria
 from gearbox.crud import raw_criteria_crud
 from gearbox import deps
 from gearbox import auth 

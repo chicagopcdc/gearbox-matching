@@ -63,5 +63,5 @@ class RawCriteriaCreate(RawCriteriaBase):
 class RawCriteriaUpdate(RawCriteriaBase):
     pass 
 
-class RawCriteriaSearchResults(BaseModel):
-    results: Sequence[RawCriteria]    
+#class RawCriteriaSearchResults(BaseModel):
+#    results: Sequence[RawCriteria]    

@@ -1,7 +1,6 @@
-from pydantic import BaseModel, ValidationError, validator
+from pydantic import BaseModel
 from datetime import datetime
 from typing import Sequence, List, Any, Optional
-from pydantic.utils import GetterDict
 from .input_type import InputType
 from gearbox.util.types import CriterionStagingStatus
 
@@ -26,19 +25,6 @@ class CriterionStagingBase(BaseModel):
 
 class CriterionStaging(CriterionStagingBase):
     id: int
-    #tags: Optional[List[CriterionStagingTag]]
-    #values: Optional[List[CriterionStagingValue]]
 
-# fields available in the doccano output
 class CriterionStagingCreate(CriterionStagingBase):
-    #input_id: str
-    #annotation_type: str
-    #model_type: Optional[str]
-    #start_char: int
-    #end_char: int
-    #text: str    
-    #code: Optional[str]
     pass
-
-class CriterionStagingSearchResults(BaseModel):
-    results: Sequence[CriterionStaging]    
