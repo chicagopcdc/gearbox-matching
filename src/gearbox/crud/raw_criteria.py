@@ -8,7 +8,7 @@ class CRUDRawCriteria(CRUDBase [RawCriteria, RawCriteriaSchema, RawCriteriaCreat
 
     async def get_by_eligibility_criteria_id(self, current_session: Session, eligibility_criteria_id: int):
         
-        stmt = select(RawCriteria).where(
+        stmt = select(RawCriteria.data).where(
             RawCriteria.eligibility_criteria_id == eligibility_criteria_id)
 
         result = await current_session.execute(stmt)

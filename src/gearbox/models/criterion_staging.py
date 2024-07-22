@@ -1,6 +1,7 @@
 from sqlalchemy import ForeignKey, Column, Integer, String, DateTime, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import ENUM
+from sqlalchemy.types import ARRAY
 from .base_class import Base
 from gearbox.util.types import CriterionStagingStatus
 
@@ -10,8 +11,8 @@ class CriterionStaging(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     eligibility_criteria_id = Column(Integer, ForeignKey('eligibility_criteria.id'), nullable=False)
     input_id = Column(String, nullable=True)
-    code = Column(String)
-    display_name = Column(String)
+    code = Column(String, nullable=True)
+    display_name = Column(String, nullable=True)
     description = Column(String, nullable=True)
     create_date = Column(DateTime, nullable=True)
     status = Column(ENUM(CriterionStagingStatus), unique=False, nullable=False)
@@ -24,10 +25,10 @@ class CriterionStaging(Base):
     text = Column(String, nullable=True)
     criterion_id = Column(Integer, ForeignKey('criterion.id'), nullable=True)
 
-    #tags = relationship("CriterionHasTag", back_populates="criterion", lazy="joined")
-    #el_criteria_has_criterions = relationship("ElCriteriaHasCriterion", back_populates="criterion", lazy="joined")
-    #values = relationship("CriterionHasValue", back_populates="criterion", lazy="joined")
-    # input_type = relationship("InputType", back_populates="criterions", lazy="joined")
-
-    #display_rules = relationship("DisplayRules", back_populates="criterion", lazy="joined")
-    #triggered_bys = relationship("TriggeredBy", back_populates="criterion", lazy="joined")
+    tags = Column(ARRAY(Integer), nullable=True)
+    values = Column(ARRAY(Integer), nullable=True)
+    display_rules_priority = Column(Integer, nullable=True)
+    display_rules_version = Column(Integer, nullable=True)
+    triggered_by_criterion_id = Column(Integer, nullable=True)
+    triggered_by_values_id = Column(Integer, nullable=True)
+    triggered_by_path = Column(String, nullable=True)

@@ -66,19 +66,26 @@ def file_to_table(conn, cursor, table_name, file_name):
         copy_sql = "COPY " + table_name + " FROM stdin DELIMITER E'\t' CSV HEADER"
         cursor.copy_expert(sql=copy_sql, file=f)
 
+def file_to_table_with_cols(conn, cursor, table_name, file_name, ordered_column_list):
+    with open(file_name, 'r') as f:
+        copy_sql = "COPY " + table_name +  ordered_column_list +  " FROM stdin DELIMITER E'\t' CSV HEADER"
+        cursor.copy_expert(sql=copy_sql, file=f)
+
 @pytest.fixture(scope="session")
 def setup_database(connection) -> Engine:
 
     Session = sessionmaker(bind=connection)
     session = Session()
 
-    main(["--raiseerr","downgrade","base"])
-    main(["--raiseerr","upgrade","head"])
-
-
     cursor = session.connection().connection.cursor()
     conn = session.connection().connection
 
+    # cleanup criterion_staging prior to alembic setup
+    cursor.execute("DELETE FROM criterion_staging;")
+    conn.commit()
+
+    main(["--raiseerr","downgrade","base"])
+    main(["--raiseerr","upgrade","head"])
 
 
     # COPY DATA INTO TABLES
@@ -102,6 +109,7 @@ def setup_database(connection) -> Engine:
     file_to_table(conn, cursor,'triggered_by', './postgres-data/td_triggered_by.tsv')
     file_to_table(conn, cursor,'criterion_has_tag', './postgres-data/td_criterion_has_tag.tsv')
     file_to_table(conn, cursor,'el_criteria_has_criterion', './postgres-data/td_el_criteria_has_criterion.tsv')
+    file_to_table_with_cols(conn, cursor,'criterion_staging', './postgres-data/td_criterion_staging.tsv', '(id,code,create_date,start_char,end_char,text,criterion_id,status,eligibility_criteria_id)')
     # file_to_table(conn, cursor,'study_algorithm_engine', './postgres-data/td_study_algorithm_engine.tsv')
     conn.commit()
 
@@ -124,6 +132,7 @@ def setup_database(connection) -> Engine:
     cursor.execute("SELECT setval('unit_id_seq', (SELECT MAX(id) FROM unit));")
     file_to_table(conn, cursor,'eligibility_criteria_info', './postgres-data/td_eligibility_criteria_info.tsv')
     cursor.execute("SELECT setval('eligibility_criteria_info_id_seq', (SELECT MAX(id) FROM eligibility_criteria_info));")
+    cursor.execute("SELECT setval('criterion_staging_id_seq', (SELECT MAX(id) FROM criterion_staging));")
     conn.commit()
 
     yield session

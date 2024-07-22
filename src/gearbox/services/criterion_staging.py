@@ -17,11 +17,7 @@ async def get_criteria_staging(session: Session) -> List[CriterionStagingSchema]
 
 async def get_criterion_staging_by_ec_id(session: Session, eligibility_criteria_id: int) -> List[CriterionStagingSchema]:
     cs = await criterion_staging_crud.get_criterion_staging_by_ec_id(session, eligibility_criteria_id)
-    print(f"TYPE CS -------------------> {type(cs)}")
-    print(f"TYPE CS -------------------> {type(cs[0])}")
     return cs
-# async def get_criteria_staging_by_id
-
 
 async def create(session: Session, staging_criterion: CriterionStagingCreate)-> CriterionStagingSchema:
     # TO DO? - check code exists in the criterion table?
@@ -31,6 +27,8 @@ async def create(session: Session, staging_criterion: CriterionStagingCreate)-> 
 
 async def update_criterion_staging(session: Session, criterion: CriterionStagingSchema) -> CriterionStagingSchema:
     criterion_to_upd = await criterion_staging_crud.get(db=session, id=criterion.id)
+
+    ## save the user-id of the user making the update
 
     if criterion_to_upd:
         upd_criterion = await criterion_staging_crud.update(db=session, db_obj=criterion_to_upd, obj_in=criterion)

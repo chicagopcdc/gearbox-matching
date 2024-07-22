@@ -1,7 +1,5 @@
-from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter
-from fastapi import Request, Depends
+from fastapi import APIRouter, HTTPException, Request, Depends
 from typing import List
 from . import logger
 from gearbox.util import status
@@ -24,7 +22,10 @@ async def get_staging_criterion_by_eligibility_criteria_id(
 ):
 
     cs = await criterion_staging_service.get_criterion_staging_by_ec_id(session, eligibility_criteria_id)
-    return cs
+    if not cs:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, f"criterion-staging not found for id: {eligibility_criteria_id}")
+    else:
+        return cs
 
 @mod.post("/update-criterion-staging", response_model=CriterionStaging, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def update_object(

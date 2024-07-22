@@ -17,9 +17,10 @@ async def get_raw_criteria(session: Session, id: int) -> RawCriteriaSchema:
     raw_crit = await raw_criteria_crud.get(session, id)
     return raw_crit
 
-async def get_raw_criteria_by_eligibility_criteria_id(session: Session, eligibility_criteria_id: int) -> RawCriteriaSchema:
+async def get_raw_criteria_by_eligibility_criteria_id(session: Session, eligibility_criteria_id: int):
     raw_crit = await raw_criteria_crud.get_by_eligibility_criteria_id(session, eligibility_criteria_id=eligibility_criteria_id)
-    return raw_crit
+    raw_crit_text = raw_crit.get('text')
+    return raw_crit_text
 
 async def get_raw_criterias(session: Session) -> List[RawCriteria]:
     raw_crit = await raw_criteria_crud.get_multi(session)

@@ -20,6 +20,14 @@ class CriterionStagingBase(BaseModel):
     text: str
     criterion_id: Optional[int]
 
+    tags: Optional[List[int]]
+    values: Optional[List[int]]
+    display_rules_priority: Optional[int]
+    display_rules_version: Optional[int]
+    triggered_by_criterion_id: Optional[int]
+    triggered_by_values_id: Optional[int]
+    triggered_by_path: Optional[str]
+
     class Config:
         orm_mode = True
 
