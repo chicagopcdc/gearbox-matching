@@ -84,6 +84,7 @@ def setup_database(connection) -> Engine:
     # COPY DATA INTO TABLES
     file_to_table(conn, cursor,'source', './postgres-data/td_source.tsv')
     file_to_table(conn, cursor,'study', './postgres-data/td_study.tsv')
+    file_to_table(conn, cursor,'study_external_id', './postgres-data/td_study_external_id.tsv')
     file_to_table(conn, cursor,'study_links', './postgres-data/td_study_links.tsv')
     file_to_table(conn, cursor,'site', './postgres-data/td_site.tsv')
     file_to_table(conn, cursor,'site_has_study', './postgres-data/td_site_has_study.tsv')
@@ -111,6 +112,7 @@ def setup_database(connection) -> Engine:
     cursor.execute("SELECT setval('input_type_id_seq', (SELECT MAX(id) FROM input_type));")
     cursor.execute("SELECT setval('site_id_seq', (SELECT MAX(id) FROM site));")
     cursor.execute("SELECT setval('study_id_seq', (SELECT MAX(id) FROM study));")
+    cursor.execute("SELECT setval('study_external_id_id_seq', (SELECT MAX(id) FROM study_external_id));")
     cursor.execute("SELECT setval('study_algorithm_engine_id_seq', (SELECT MAX(id) FROM study_algorithm_engine));")
     cursor.execute("SELECT setval('study_links_id_seq', (SELECT MAX(id) FROM study_links));")
     cursor.execute("SELECT setval('study_version_id_seq', (SELECT MAX(id) FROM study_version));")

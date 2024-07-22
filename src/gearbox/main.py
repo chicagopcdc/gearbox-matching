@@ -16,6 +16,7 @@ import uvicorn
 from pcdcutils.signature import SignatureManager
 from pcdcutils.errors import KeyPathInvalidError, NoKeyError
 
+
 logger_name = 'gb-logger'
 logger = cdislogging.get_logger(logger_name, log_level="debug" if config.DEBUG else "info")
 

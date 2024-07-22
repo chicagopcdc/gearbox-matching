@@ -47,6 +47,9 @@ class Study(StudyBase):
     links: List[StudyLink]
     sites: List[StudySite]
 
+class StudyResults(BaseModel):
+    version: Optional[str]
+    studies: List[Study]
 
 class StudyCreate(StudyBase):
     sites: Optional[List[SiteCreate]]

@@ -37,11 +37,11 @@ certifi = "^2022.6.15"
 python-dateutil = "^2.8.2"
 six = "^1.16.0"
 urllib3 = "^1.26.9"
-pcdc-aws-client = {git = "https://github.com/chicagopcdc/pcdc-aws-client.git", rev = "1.2.3"}
+pcdc-aws-client = {git = "https://github.com/chicagopcdc/pcdc-aws-client.git", rev = "1.2.7"}
 jsonschema = "^4.17.3"
 werkzeug = "2.2.2"
 pcdcutils = {git = "https://github.com/chicagopcdc/pcdcutils.git", rev = "0.1.2"}
-
+aiocache = "0.11.1"
 
 
 [tool.poetry.dev-dependencies]
@@ -59,6 +59,7 @@ nest-asyncio = "^1.5.1"
 "eligibility_criteria" = "gearbox.routers.eligibility_criteria"
 "eligibility_criteria_info" = "gearbox.routers.eligibility_criteria_info"
 "el_criteria_has_criterion" = "gearbox.routers.el_criteria_has_criterion"
+"input_type" = "gearbox.routers.input_type"
 "match_conditions" = "gearbox.routers.match_conditions"
 "match_form" = "gearbox.routers.match_form"
 "value" = "gearbox.routers.value"

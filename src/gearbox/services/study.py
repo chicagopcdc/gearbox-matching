@@ -190,3 +190,13 @@ async def update_studies(session: Session, updates: StudyUpdates):
                 )
 
     return True
+
+def get_new_version(study_info: dict) -> str:
+    ts = datetime.now().strftime('%m-%d-%Y:%H-%M-%S')
+    version = 1
+    if isinstance(study_info, dict): 
+        current_version = study_info.get("version")
+        if current_version:
+            version = int(current_version.split(":")[0]) + 1
+    return str(version) + ':' + ts
+

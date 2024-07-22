@@ -12,6 +12,7 @@ from gearbox.schemas import CriterionSearchResults, CriterionCreateIn, Criterion
 from gearbox.crud import criterion_crud
 from gearbox import deps
 from gearbox import auth 
+from gearbox.services.user_input import reset_user_validation_data
 
 mod = APIRouter()
 
@@ -21,7 +22,7 @@ async def get_criteria(
     session: AsyncSession = Depends(deps.get_session),
 ):
 
-    criteria = await criterion_crud.get(session)
+    criteria = await criterion_service.get_criteria(session)
     return { "results" :list(criteria) }
 
 @mod.get("/criterion/{criterion_id}", response_model=Criterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
@@ -43,6 +44,7 @@ async def save_object(
 
     new_criterion = await criterion_service.create_new_criterion(session, body)
     await session.commit()
+    reset_user_validation_data()
     return new_criterion
 
 def init_app(app):
