@@ -9,7 +9,6 @@ from .display_rules import display_rules_crud
 from .triggered_by import triggered_by_crud
 from .tag import tag_crud
 from .eligibility_criteria import eligibility_criteria_crud
-from .eligibility_criteria_info import eligibility_criteria_info_crud
 from .el_criteria_has_criterion import el_criteria_has_criterion_crud
 from .study_algorithm_engine import study_algorithm_engine_crud
 from .study import study_crud

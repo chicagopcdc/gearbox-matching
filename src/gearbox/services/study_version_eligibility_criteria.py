@@ -1,8 +1,8 @@
 from . import logger
 from sqlalchemy.ext.asyncio import AsyncSession as Session
-from gearbox.schemas import StudyVersionEligibilityCriteriaCreate, StudyVersionEligibilityCriteria as StudyVersionEligibilityCriteriaSchema, EligibilityCriteriaInfoCreate
+from gearbox.schemas import StudyVersionEligibilityCriteriaCreate, StudyVersionEligibilityCriteria as StudyVersionEligibilityCriteriaSchema
 from gearbox.services import study_version as study_version_service, eligibility_criteria as eligibility_criteria_service, el_criteria_has_criterion as el_criteria_has_criterion_service, eligibility_criteria_info as eligibility_criteria_info_service
-from gearbox.util.types import EligibilityCriteriaInfoStatus
+from gearbox.util.types import StudyVersionStatus
 
 async def create_study_version_eligibility_criteria(session: Session, study_version_eligibility_criteria: StudyVersionEligibilityCriteriaCreate) -> StudyVersionEligibilityCriteriaSchema:
     new_study_version = await study_version_service.create_study_version(session, study_version_eligibility_criteria.study_version) 
@@ -15,6 +15,7 @@ async def create_study_version_eligibility_criteria(session: Session, study_vers
     new_el_criteria_has_criterion = await el_criteria_has_criterion_service.create_el_criteria_has_criterion(session, study_version_eligibility_criteria.el_criteria_has_criterion) 
     new_echcs = [x.__dict__ for x in new_el_criteria_has_criterion]
 
+    """
     ecic = EligibilityCriteriaInfoCreate(
         study_version_id=new_study_version.id, 
         eligibility_criteria_id = new_eligibility_criteria.id,
@@ -32,3 +33,5 @@ async def create_study_version_eligibility_criteria(session: Session, study_vers
     await session.commit() 
 
     return ret_val
+    """
+    return None

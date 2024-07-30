@@ -1,23 +1,35 @@
 from .base import CRUDBase
-from gearbox.models import StudyVersion, EligibilityCriteriaInfo, EligibilityCriteria
-from gearbox.schemas import StudyVersionSearchResults, StudyVersionCreate
+from typing import List
+from gearbox.models import StudyVersion, EligibilityCriteria
+from gearbox.schemas import StudyVersionSearchResults, StudyVersionCreate, StudyVersion as StudyVersionSchema
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, update, select, exc, or_
-from gearbox.util.types import EligibilityCriteriaStatus, EligibilityCriteriaInfoStatus
+from gearbox.util.types import EligibilityCriteriaStatus
 
 class CRUDStudyVersion(CRUDBase [StudyVersion, StudyVersionCreate, StudyVersionSearchResults]):
 
-    async def get_study_versions_by_status(self, current_session: Session, eligibility_criteria_info_status: str):
+    """ REPLACE WITH GET MULTI PASS WHERE CLAUSE AS PARAM
+    async def get_study_versions_by_status(self, current_session: Session, study_version_status: str) -> List[StudyVersionSchema]:
 
         stmt = select(StudyVersion).where(
-            StudyVersion.eligibility_criteria_infos.any(EligibilityCriteriaInfo.status == 
-                eligibility_criteria_info_status)
-        ).order_by(StudyVersion.id)
+            StudyVersion.status == study_version_status).order_by(StudyVersion.id)
         result = await current_session.execute(stmt)
         studies = result.unique().scalars().all()
 
         return studies
-    
+
+    async def get_study_versions_by_status(self, current_session: Session, study_version_status: str, study_id: int) -> List[StudyVersionSchema]:
+
+        stmt = select(StudyVersion).where(
+            StudyVersion.status == study_version_status).where(
+                StudyVersion.study_id == study_id
+                ).order_by(StudyVersion.id)
+        result = await current_session.execute(stmt)
+        studies = result.unique().scalars().all()
+
+        return studies
+    """
+    """ 
     async def get_study_versions_for_adjudication(self, current_session: Session):
 
         stmt = select(StudyVersion).where(
@@ -32,5 +44,5 @@ class CRUDStudyVersion(CRUDBase [StudyVersion, StudyVersionCreate, StudyVersionS
         result = await current_session.execute(stmt)
         studies = result.unique().scalars().all()
         return studies
-
+    """
 study_version_crud = CRUDStudyVersion(StudyVersion)

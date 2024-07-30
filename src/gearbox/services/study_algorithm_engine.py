@@ -7,15 +7,16 @@ from . import logger
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy import select, exc
 from fastapi import HTTPException
-from gearbox.models import ElCriteriaHasCriterion, EligibilityCriteria, EligibilityCriteriaInfo 
+from gearbox.models import ElCriteriaHasCriterion, EligibilityCriteria
 from gearbox.schemas import StudyAlgorithmEngine as StudyAlgorithmEngineSchema
 from gearbox.schemas import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSave, StudyAlgorithmEngineSearchResults, StudyAlgorithmEngineSave, StudyAlgorithmEngineUpdate
 from sqlalchemy.sql.functions import func
 from gearbox.util import status, json_utils
 from gearbox.crud import study_algorithm_engine_crud
-from gearbox.services import eligibility_criteria_info as eligibility_criteria_info_service
+#from gearbox.services import eligibility_criteria_info as eligibility_criteria_info_service
 
 async def get_eligibility_criteria_id(session: Session, eligibility_criteria_info_id_for_lookup: int) -> int:
+    """
     try:
         result = await session.execute(select(EligibilityCriteriaInfo.eligibility_criteria_id)
             .where(EligibilityCriteriaInfo.id == eligibility_criteria_info_id_for_lookup))
@@ -25,6 +26,8 @@ async def get_eligibility_criteria_id(session: Session, eligibility_criteria_inf
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
     
     return eligibility_criteria_id
+    """
+    return 1
 
 async def get_study_algorithm_engine(session: Session, id: int) -> StudyAlgorithmEngineSchema:
     aes = await study_algorithm_engine_crud.get(session, id)
@@ -80,6 +83,7 @@ async def validate_eligibility_criteria_ids(session: Session, algorithm_logic: s
 
 
 async def get_latest_algorithm_version(session: Session, eligibility_criteria_info_id: int) -> int:
+    """
     try:
         result = await session.execute(select(func.max(StudyAlgorithmEngine.algorithm_version))
             .join(StudyAlgorithmEngine.eligibility_criteria_info)
@@ -95,6 +99,8 @@ async def get_latest_algorithm_version(session: Session, eligibility_criteria_in
         return latest_algorithm_version
     else:
         return 0
+    """
+    return 0
 
 async def get_existing_algorithm_logic_duplicate(session: Session, algorithm_logic: str, eligibility_criteria_info_id: int) -> StudyAlgorithmEngine:
     """
@@ -104,6 +110,7 @@ async def get_existing_algorithm_logic_duplicate(session: Session, algorithm_log
         in the algorithm_engine table. If a duplicate is found, the id
         of the duplicate row is returned which can then be used to assign
         to the appropriate study_version.
+    """
     """
     try:
         result = await session.execute(
@@ -122,13 +129,13 @@ async def get_existing_algorithm_logic_duplicate(session: Session, algorithm_log
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
     except Exception as e:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: {type(e)}: {e}")        
-
+    
     if existing_algorithms:
         for ex in existing_algorithms:
             a, b = json.dumps(ex.algorithm_logic), json.dumps(algorithm_logic)
             if a == b:
                 return ex
-
+    """
     return None
 
 async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineCreate) -> StudyAlgorithmEngine:
@@ -154,7 +161,7 @@ async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineC
 
     # update eligibility_criteria_info with new study_algorithm_engine_id
     eci_upd = {'study_algorithm_engine_id': study_algorithm_engine_id}
-    updated_eci = await eligibility_criteria_info_service.update_eligibility_criteria_info(session, eligibility_criteria_info=eci_upd, eligibility_criteria_info_id=study_algorithm_engine.eligibility_criteria_info_id)
+#    updated_eci = await eligibility_criteria_info_service.update_eligibility_criteria_info(session, eligibility_criteria_info=eci_upd, eligibility_criteria_info_id=study_algorithm_engine.eligibility_criteria_info_id)
     return retval
 
 async def update(session: Session, study_algorithm_engine: StudyAlgorithmEngineUpdate) -> StudyAlgorithmEngine:

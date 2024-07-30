@@ -11,7 +11,6 @@ from .criterion_has_value import CriterionHasValue, CriterionHasValueCreate, Cri
 from .study_response import StudyResponseSearchResults, StudyResponse
 from .eligibility_criteria_response import EligibilityCriteriaResponse
 from .eligibility_criteria import EligibilityCriteriaCreate, EligibilityCriteriaSearchResults, EligibilityCriteria
-from .eligibility_criteria_info import EligibilityCriteriaInfoCreate, EligibilityCriteriaInfoSearchResults, EligibilityCriteriaInfo
 from .criterion import CriterionCreate, CriterionSearchResults, CriterionCreateIn, Criterion
 from .criterion_staging import CriterionStaging, CriterionStagingCreate
 from .raw_criteria import RawCriteriaCreate, RawCriteria, RawCriteriaIn

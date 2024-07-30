@@ -15,4 +15,4 @@ class StudyAlgorithmEngine(Base):
     class Config:
         orm_mode = True  
 
-    eligibility_criteria_info = relationship("EligibilityCriteriaInfo", back_populates="study_algorithm_engine")
+    study_version = relationship("StudyVersion", back_populates="study_algorithm_engine")

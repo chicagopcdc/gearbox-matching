@@ -57,10 +57,10 @@ class StudyAlgorithmEngineSave(StudyAlgorithmEngineBase):
     pass
 
 class StudyAlgorithmEngineCreate(StudyAlgorithmEngineSave):
-    eligibility_criteria_info_id: int
+    study_version_id: int
 
 class StudyAlgorithmEngineUpdate(StudyAlgorithmEngineSave):
-    eligibility_criteria_info_id: int
+    study_version_id: int
     id: int
 
 class StudyAlgorithmEngineSearchResults(BaseModel):

@@ -14,5 +14,5 @@ class EligibilityCriteria(Base):
 
     notes = relationship("EligibilityCriteriaHasNote", back_populates="eligibility_criteria")
     el_criteria_has_criterions = relationship("ElCriteriaHasCriterion", back_populates="eligibility_criteria")
-    eligibility_criteria_info = relationship("EligibilityCriteriaInfo", back_populates="eligibility_criteria")
+    study_version = relationship("StudyVersion", back_populates="eligibility_criteria")
     raw_criteria = relationship("RawCriteria", back_populates="eligibility_criteria")

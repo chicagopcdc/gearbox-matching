@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Sequence, List, Any, Optional
 from .input_type import InputType
-from gearbox.util.types import CriterionStagingStatus
+from gearbox.util.types import AdjudicationStatus, EchcAdjudicationStatus
 
 class CriterionStagingBase(BaseModel):
     eligibility_criteria_id: int
@@ -11,7 +11,8 @@ class CriterionStagingBase(BaseModel):
     display_name: Optional[str]
     description: Optional[str]
     create_date: Optional[datetime]
-    status: Optional[CriterionStagingStatus]
+    criterion_adjudication_status: AdjudicationStatus
+    echc_adjudication_status: EchcAdjudicationStatus
     ontology_code_id: Optional[int]
     input_type_id: Optional[int]
 

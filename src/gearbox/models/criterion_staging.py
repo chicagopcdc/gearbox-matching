@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.types import ARRAY
 from .base_class import Base
-from gearbox.util.types import CriterionStagingStatus
+from gearbox.util.types import AdjudicationStatus,  EchcAdjudicationStatus
 
 class CriterionStaging(Base):
     __tablename__ = 'criterion_staging'
@@ -15,7 +15,8 @@ class CriterionStaging(Base):
     display_name = Column(String, nullable=True)
     description = Column(String, nullable=True)
     create_date = Column(DateTime, nullable=True)
-    status = Column(ENUM(CriterionStagingStatus), unique=False, nullable=False)
+    criterion_adjudication_status = Column(ENUM(AdjudicationStatus), unique=False, nullable=False)
+    echc_adjudication_status= Column(ENUM(EchcAdjudicationStatus), unique=False, nullable=False)
 
     ontology_code_id = Column(Integer, ForeignKey('ontology_code.id'), nullable=True)
     input_type_id = Column(Integer, ForeignKey('input_type.id'), nullable=True )
