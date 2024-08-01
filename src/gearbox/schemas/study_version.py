@@ -30,6 +30,14 @@ class StudyVersionCreate(BaseModel):
     class Config:
         orm_mode = True
 
+class StudyVersionUpdate(BaseModel):
+    id: int
+    create_date: Optional[datetime]
+    study_version_num: Optional[int]
+    status: Optional[StudyVersionStatus]
+    eligibility_criteria_id: Optional[int]
+    study_algorithm_engine_id: Optional[int]
+
 class StudyVersionInfo(StudyVersion):
     study: StudyBaseInfo
 

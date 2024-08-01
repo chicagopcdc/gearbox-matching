@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy import exc, select
 from fastapi import HTTPException
 from gearbox.models import StudyVersion
-from gearbox.schemas import StudyVersionCreate, StudyVersionSearchResults, StudyVersion as StudyVersionSchema, StudyVersionInfo#, StudyVersionAdjudicationSearchResults
+from gearbox.schemas import StudyVersionCreate, StudyVersionSearchResults, StudyVersion as StudyVersionSchema, StudyVersionInfo, StudyVersionUpdate
 from sqlalchemy.sql.functions import func
 from gearbox.util import status
 from gearbox.crud import study_version_crud
@@ -68,19 +68,18 @@ async def create_study_version(session: Session, study_version: StudyVersionCrea
     study_version.study_version_num = await get_latest_study_version(session, study_version.study_id) + 1
 
     # set others to inactive if incoming is active
-    #if study_version.status == StudyVersionStatus.ACTIVE:
-    if study_version.status == StudyVersionStatus.NEW: # FOR TESTING!!!
+    if study_version.status == StudyVersionStatus.ACTIVE:
         reset_active = await reset_active_status(session, study_version.study_id)
     new_study_version = await study_version_crud.create(db=session, obj_in=study_version)
 
-    await session.commit() 
+    # await session.commit() 
     return new_study_version
 
-async def update_study_version(session: Session, study_version: StudyVersionCreate, study_version_id: int) -> StudyVersionSchema:
-    study_version_in = await study_version_crud.get(db=session, id=study_version_id)
+async def update_study_version(session: Session, study_version: StudyVersionUpdate) -> StudyVersionSchema:
+    study_version_in = await study_version_crud.get(db=session, id=study_version.id)
     if study_version_in:
         upd_study_version = await study_version_crud.update(db=session, db_obj=study_version_in, obj_in=study_version)
     else:
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study version for id: {study_version_id} not found for update.") 
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study version for id: {study_version.id} not found for update.") 
     await session.commit() 
     return upd_study_version

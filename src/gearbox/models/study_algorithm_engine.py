@@ -10,7 +10,6 @@ class StudyAlgorithmEngine(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     start_date = Column(DateTime, nullable=True)
     algorithm_logic = Column(JSON)
-    algorithm_version = Column(Integer)
 
     class Config:
         orm_mode = True  

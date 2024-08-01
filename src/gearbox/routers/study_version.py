@@ -8,7 +8,7 @@ from . import logger
 from ..util import status
 from typing import List
 from gearbox import auth
-from gearbox.schemas import StudyVersionSearchResults, StudyVersion as StudyVersionSchema, StudyVersionCreate, StudyVersionInfo
+from gearbox.schemas import StudyVersionUpdate, StudyVersion as StudyVersionSchema, StudyVersionCreate, StudyVersionInfo
 from gearbox import deps
 from gearbox.services import study_version  as study_version_service
 from gearbox.admin_login import admin_required
@@ -74,14 +74,14 @@ async def save_object(
     return JSONResponse(jsonable_encoder(new_study_version), status.HTTP_201_CREATED)
 """
 
-@mod.post("/update-study-version/{study_version_id}", response_model=StudyVersionSchema, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+# THE BODY SHOULD BE StudyVersionUpdate type & get rid of study_version_id in the URL
+@mod.post("/update-study-version", response_model=StudyVersionSchema, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def update_object(
-    study_version_id: int,
-    body: dict,
+    body: StudyVersionUpdate,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    upd_study_version = await study_version_service.update_study_version(session=session, study_version=body, study_version_id=study_version_id)
+    upd_study_version = await study_version_service.update_study_version(session=session, study_version=body)
     return upd_study_version
 
 def init_app(app):

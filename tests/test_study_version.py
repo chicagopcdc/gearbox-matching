@@ -1,6 +1,7 @@
 import pytest
 from sqlalchemy.orm import sessionmaker 
 from gearbox.models import StudyVersion
+from gearbox.util.types import StudyVersionStatus
 from .test_utils import is_aws_url
 
 
@@ -22,6 +23,7 @@ def test_get_study_versions_for_adjudication(setup_database, client):
     errors = []
     fake_jwt = "1.2.3"
     resp = client.get("/study-versions-adjudication", headers={"Authorization": f"bearer {fake_jwt}"})
+    full_res = resp.json()
     assert str(resp.status_code).startswith("20")
 
 @pytest.mark.asyncio
@@ -38,7 +40,8 @@ def test_get_study_versions_by_status(setup_database, client):
     "data", [ 
         {
             "study_id": 1,
-            "active": True
+            "active": True,
+            "status":"ACTIVE"
     }
     ]
 )
@@ -79,17 +82,16 @@ def test_update_study_version(setup_database, client, connection):
 #    """
     fake_jwt = "1.2.3"
     errors = []
-    data = {"active":False}
-    study_version_id = 2
+    data = {"id":2, "status":"IN_PROCESS"}
 
-    resp = client.post(f"/update-study-version/{study_version_id}", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.post(f"/update-study-version", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
     try: 
         Session = sessionmaker(bind=connection)
         db_session = Session()
-        study_version_updated = db_session.query(StudyVersion).filter(StudyVersion.id==study_version_id).first()
-        if study_version_updated.active != False:
-            errors.append(f"Study version (id): {study_version_id} update active to false failed")
+        study_version_updated = db_session.query(StudyVersion).filter(StudyVersion.id==data.get('id')).first()
+        if study_version_updated.status!= StudyVersionStatus.IN_PROCESS:
+            errors.append(f"Study version (id): {data.get('id')} update active to false failed")
 
     except Exception as e:
         errors.append(f"Test study_version unexpected exception: {str(e)}")

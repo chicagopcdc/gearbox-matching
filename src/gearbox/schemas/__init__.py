@@ -21,7 +21,7 @@ from .algorithm_engine import AlgorithmResponse
 from .source import Source, SourceCreate, SourceSearchResults
 from .study import StudySearchResults, StudyCreate, Study, StudyUpdates, StudyResults, StudyBaseInfo
 from .study_link import StudyLinkSearchResults, StudyLinkCreate, StudyLink
-from .study_version import StudyVersionSearchResults, StudyVersionCreate, StudyVersion, StudyVersionInfo 
+from .study_version import StudyVersionSearchResults, StudyVersionCreate, StudyVersion, StudyVersionInfo , StudyVersionUpdate
 from .eligibility_criteria_response import EligibilityCriteriaResponseResults
 from .match_form import MatchForm
 from .study_version_eligibility_criteria import StudyVersionEligibilityCriteriaCreate, StudyVersionEligibilityCriteria
