@@ -24,6 +24,7 @@ def test_get_study_versions_for_adjudication(setup_database, client):
     fake_jwt = "1.2.3"
     resp = client.get("/study-versions-adjudication", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
+    print(f'STUDIES FOR ADJUDICATION FULL RES: {full_res}')
     assert str(resp.status_code).startswith("20")
 
 @pytest.mark.asyncio
@@ -64,7 +65,7 @@ def test_create_study_version(setup_database, client, data, connection):
         #
         # Test: confirm that there exists only one active study version for the study id.
         #
-        active_study_versions = db_session.query(StudyVersion).filter(StudyVersion.study_id==data['study_id']).filter(StudyVersion.active==True).all()
+        active_study_versions = db_session.query(StudyVersion).filter(StudyVersion.study_id==data['study_id']).filter(StudyVersion.status==StudyVersionStatus.ACTIVE).all()
         if len(active_study_versions) != 1:
             errors.append(f"Study id: {data['study_id']} has {len(active_study_versions)} active study versions, should have exactly 1.")
 

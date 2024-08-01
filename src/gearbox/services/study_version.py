@@ -33,8 +33,7 @@ async def reset_active_status(session: Session, study_id: int) -> bool:
         where=[f"{StudyVersion.__table__.name}.study_id = {study_id} AND {StudyVersion.__table__.name}.status = '{StudyVersionStatus.ACTIVE.value}'"]
     )
     for sv in sv_to_update:
-        # set study_version
-        await study_version_crud.update(db=session, db_obj=sv, obj_in={"active":False})
+        await study_version_crud.update(db=session, db_obj=sv, obj_in={"status":StudyVersionStatus.INACTIVE})
     return True
 
 async def get_study_version(session: Session, id: int) -> StudyVersionSchema:
@@ -51,15 +50,10 @@ async def get_study_versions_for_adjudication(session: Session) -> List[StudyVer
 
 async def get_study_versions_by_status(session: Session, study_version_status:StudyVersionStatus ) -> List[StudyVersionInfo]:
 
-    # check for valid status value 
-    #if study_version_status not in [item.value for item in StudyVersionStatus]:
-    #    raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"INVALID STUDY VERSION STATUS: {study_version_status}") 
     sv = await study_version_crud.get_multi(
         db=session, 
         where=[f"{StudyVersion.__table__.name}.status = '{study_version_status}'"]
     )
-
-    #sv = await study_version_crud.get_study_versions_by_status(session, study_version_status)
     return sv
 
 async def create_study_version(session: Session, study_version: StudyVersionCreate ) -> StudyVersionSchema:
