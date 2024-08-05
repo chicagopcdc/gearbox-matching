@@ -1,7 +1,7 @@
 from . import logger
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from gearbox.schemas import StudyVersionEligibilityCriteriaCreate, StudyVersionEligibilityCriteria as StudyVersionEligibilityCriteriaSchema
-from gearbox.services import study_version as study_version_service, eligibility_criteria as eligibility_criteria_service, el_criteria_has_criterion as el_criteria_has_criterion_service, eligibility_criteria_info as eligibility_criteria_info_service
+from gearbox.services import study_version as study_version_service, eligibility_criteria as eligibility_criteria_service, el_criteria_has_criterion as el_criteria_has_criterion_service 
 from gearbox.util.types import StudyVersionStatus
 
 async def create_study_version_eligibility_criteria(session: Session, study_version_eligibility_criteria: StudyVersionEligibilityCriteriaCreate) -> StudyVersionEligibilityCriteriaSchema:

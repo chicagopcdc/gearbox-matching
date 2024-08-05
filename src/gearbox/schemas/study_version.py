@@ -12,6 +12,7 @@ class StudyVersionBase(BaseModel):
     eligibility_criteria_id: Optional[int]
     study_algorithm_engine_id: Optional[int]
     status: Optional[StudyVersionStatus]
+    comments: Optional[str]
 
     class Config:
         orm_mode = True    
@@ -26,6 +27,7 @@ class StudyVersionCreate(BaseModel):
     create_date: Optional[datetime]
     study_version_num: Optional[int]
     status: Optional[StudyVersionStatus]
+    comments: Optional[str]
 
     class Config:
         orm_mode = True

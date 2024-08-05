@@ -3,8 +3,10 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from . import logger
 from gearbox.util import status
-from gearbox.schemas import CriterionSearchResults, CriterionCreateIn, CriterionCreate, CriterionHasValueCreate, CriterionHasTagCreate, DisplayRulesCreate, TriggeredByCreate, Criterion as CriterionSchema
+from gearbox.schemas import CriterionSearchResults, CriterionCreateIn, CriterionCreate, CriterionHasValueCreate, CriterionHasTagCreate, DisplayRulesCreate, TriggeredByCreate, Criterion as CriterionSchema, CriterionStagingUpdate
 from gearbox.crud import criterion_crud, criterion_has_value_crud, criterion_has_tag_crud, display_rules_crud, triggered_by_crud, value_crud, tag_crud
+from gearbox.services import criterion_staging
+from gearbox.util.types import AdjudicationStatus
 
 async def get_criterion(session: Session, id: int) -> CriterionSchema:
     crit = await criterion_crud.get(session, id)
@@ -65,6 +67,17 @@ async def create_new_criterion(session: Session, input_criterion_info: Criterion
             path=input_criterion_info.triggered_by_path
         )
         new_triggered_by = await triggered_by_crud.create(db=session, obj_in=tb)
+
+    # After creating a new criterion, update criterion_staging
+    # with the new criterion id and set status to ACTIVE
+    if input_criterion_info.criterion_staging_id:
+        criterion_staging_update = {
+            "id": input_criterion_info.criterion_staging_id,
+            "criterion_adjudication_status": AdjudicationStatus.ACTIVE,
+            "criterion_id": new_criterion.id
+        } 
+        csu = CriterionStagingUpdate(**criterion_staging_update)
+        csu_update = await criterion_staging.update(session, criterion=csu)
 
     # commit if no exceptions encountered 
     await session.commit()

@@ -10,7 +10,7 @@ from gearbox.schemas import RawCriteriaCreate, RawCriteria as RawCriteriaSchema,
 from gearbox.util import status, json_utils
 from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus
 from gearbox.crud import raw_criteria_crud, criterion_crud
-from gearbox.services import study as study_service, study_version as study_version_service, eligibility_criteria as eligibility_criteria_service, eligibility_criteria_info as eligibility_criteria_info_service, criterion_staging as criterion_staging_service
+from gearbox.services import study as study_service, study_version as study_version_service, eligibility_criteria as eligibility_criteria_service, criterion_staging as criterion_staging_service
 from typing import List
 
 async def get_raw_criteria(session: Session, id: int) -> RawCriteriaSchema:
@@ -60,27 +60,24 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn) -> 
 
     """
     This function will create a new raw_criteria for adjudication along with associated
-    relationships including: study_version, eligibility_criteria_info and eligibility_criteria. 
-    It also stages the criteria in the raw_criteria in the criteria_staging table.
+    relationships including: study_version, and eligibility_criteria,
+    and criteria_staging. The criteria_staging table is used to stage the criteria
+    for adjudication. 
     """
     # Get the study_id for the study based on the id in the raw criteria json
     ext_id = raw_criteria.data.get("nct")
     study_id = await study_service.get_study_id_by_ext_id(session, ext_id)
     if not study_id:
          raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study for id: {ext_id} not found for update.") 
-
+    
     # Create a new study_version
     # SET ANY EXISTING 'NEW' TO INACTIVE??? 
-    new_study_version = StudyVersionCreate(study_id=study_id, status=StudyVersionStatus.NEW)
+    comments = raw_criteria.data.get("comments")
+    new_study_version = StudyVersionCreate(study_id=study_id, status=StudyVersionStatus.NEW, comments=comments)
     study_version = await study_version_service.create_study_version(session,new_study_version)
 
     # Create a new eligibility criteria
     eligibility_criteria = await eligibility_criteria_service.create_eligibility_criteria(session)
-
-    """
-    new_eligibility_criteria_info = EligibilityCriteriaInfoCreate(study_version_id=study_version.id, eligibility_criteria_id=eligibility_criteria.id, status=EligibilityCriteriaInfoStatus.IN_PROCESS.value)
-    eligibility_criteria_info = await eligibility_criteria_info_service.create_eligibility_criteria_info(session, new_eligibility_criteria_info)
-    """
 
     # Create the new raw criteria
     new_raw_criteria = RawCriteriaCreate(data=raw_criteria.data, eligibility_criteria_id=eligibility_criteria.id)

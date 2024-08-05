@@ -37,6 +37,7 @@ class CriterionCreateIn(CriterionBase):
     triggered_by_criterion_id: Optional[int]
     triggered_by_value_id: Optional[int]
     triggered_by_path: Optional[str]
+    criterion_staging_id: Optional[int]
 
 
 class CriterionSearchResults(BaseModel):

@@ -35,5 +35,14 @@ class CriterionStagingBase(BaseModel):
 class CriterionStaging(CriterionStagingBase):
     id: int
 
+class CriterionStagingUpdate(CriterionStagingBase):
+    id: int
+    start_char: Optional[int]
+    end_char: Optional[int]
+    text: Optional[str]
+    eligibility_criteria_id: Optional[int]
+    criterion_adjudication_status: Optional[AdjudicationStatus]
+    echc_adjudication_status: Optional[EchcAdjudicationStatus]
+
 class CriterionStagingCreate(CriterionStagingBase):
     pass

@@ -154,7 +154,7 @@ async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineC
         study_algorithm_engine_id = dup_study_algorithm_engine.id
         retval = dup_study_algorithm_engine
 
-    # update eligibility_criteria_info with new study_algorithm_engine_id
+    # update study_version with new study_algorithm_engine_id
     sv_upd = StudyVersionUpdate(id=study_algorithm_engine.study_version_id, study_algorithm_engine_id= study_algorithm_engine_id, status=StudyVersionStatus.IN_PROCESS)
     updated_sv = await study_version_service.update_study_version(session, study_version=sv_upd)
     return retval

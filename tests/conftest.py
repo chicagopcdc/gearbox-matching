@@ -214,6 +214,7 @@ def mock_new_criterion():
         triggered_by_criterion_id = 1
         triggered_by_value_id = 1
         triggered_by_path = "2.3.4"
+        criterion_staging_id = None
 
         def to_json(self):
             return {
@@ -228,6 +229,7 @@ def mock_new_criterion():
                 "display_rules_version": self.display_rules_version,
                 "triggered_by_criterion_id": self.triggered_by_criterion_id,
                 "triggered_by_value_id": self.triggered_by_value_id,
-                "triggered_by_path": self.triggered_by_path
+                "triggered_by_path": self.triggered_by_path,
+                "criterion_staging_id": self.criterion_staging_id
             }
     return MockNewCriterion()

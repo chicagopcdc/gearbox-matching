@@ -552,14 +552,14 @@ async def get_match_conditions(session: Session) -> List[AlgorithmResponse]:
         match_conds.append(study_logic)
 
     # check for duplicate study ids in match conditions list, this can happen if
-    # there are more than 1 active entry for a study in the eligibility_criteria_info table
+    # there are more than 1 active entry for a study in the study_version table
     studyIds = [ x['studyId'] for x in match_conds ]
 
     dupes = [ x for n, x in enumerate(studyIds) if x in studyIds[:n]]
     if dupes:
-        logger.error(f"Duplicte active studies found in eligibility_criteria_info table for the following study ids: {dupes}")
+        logger.error(f"Duplicte active studies found in study_version table for the following study ids: {dupes}")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, 
-            f"Duplicte active studies found in eligibility_criteria_info table for the following study ids: {dupes}") 
+            f"Duplicte active studies found in study_version table for the following study ids: {dupes}") 
 
     # sort by studyId before returning
     match_conds = sorted(match_conds, key=lambda k: k['studyId'])

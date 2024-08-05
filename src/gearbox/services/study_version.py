@@ -9,7 +9,6 @@ from gearbox.util import status
 from gearbox.crud import study_version_crud
 from typing import List
 from gearbox.util.types import StudyVersionStatus
-from gearbox.services import eligibility_criteria_info
 
 async def get_latest_study_version(session: Session, study_id: int) -> int:
     try:

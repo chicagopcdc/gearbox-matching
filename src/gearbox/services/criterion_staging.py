@@ -25,7 +25,7 @@ async def create(session: Session, staging_criterion: CriterionStagingCreate)-> 
     new_staging_criterion = await criterion_staging_crud.create(db=session, obj_in=staging_criterion)
     return new_staging_criterion
 
-async def update_criterion_staging(session: Session, criterion: CriterionStagingSchema) -> CriterionStagingSchema:
+async def update(session: Session, criterion: CriterionStagingSchema) -> CriterionStagingSchema:
     criterion_to_upd = await criterion_staging_crud.get(db=session, id=criterion.id)
 
     ## save the user-id of the user making the update

@@ -6,7 +6,7 @@ from gearbox.util import status
 from gearbox.services import criterion_staging as criterion_staging_service
 from gearbox.admin_login import admin_required
 
-from gearbox.schemas import CriterionStagingCreate, CriterionStaging
+from gearbox.schemas import CriterionStaging, CriterionStagingUpdate
 from gearbox.crud import criterion_staging_crud
 from gearbox import deps
 from gearbox import auth 
@@ -29,7 +29,7 @@ async def get_staging_criterion_by_eligibility_criteria_id(
 
 @mod.post("/update-criterion-staging", response_model=CriterionStaging, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def update_object(
-    body: CriterionStaging,
+    body: CriterionStagingUpdate,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):

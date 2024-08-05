@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, Column, Integer, DateTime, Boolean
+from sqlalchemy import ForeignKey, Column, Integer, DateTime, String
 from sqlalchemy.orm import relationship
 from gearbox.util.types import StudyVersionStatus
 from sqlalchemy.dialects.postgresql import ENUM
@@ -16,6 +16,7 @@ class StudyVersion(Base):
     status = Column(ENUM(StudyVersionStatus), unique=False, nullable=False)
     eligibility_criteria_id = Column(Integer, ForeignKey('eligibility_criteria.id', name='fk_eligibility_criteria_id'))
     study_algorithm_engine_id = Column(Integer, ForeignKey('study_algorithm_engine.id', name='fk_study_algorithm_engine_id'), nullable=True)
+    comments = Column(String, nullable=True)
 
     eligibility_criteria = relationship("EligibilityCriteria", back_populates="study_version", lazy="joined")
     study_algorithm_engine = relationship("StudyAlgorithmEngine", back_populates="study_version", lazy="joined")
