@@ -52,9 +52,10 @@ async def save_object(
     body: CriterionCreateIn,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
+    user_id: int = Depends(auth.authenticate_user)
 ):
 
-    new_criterion = await criterion_service.create_new_criterion(session, body)
+    new_criterion = await criterion_service.create_new_criterion(session, body, user_id=user_id)
     await session.commit()
     reset_user_validation_data()
     return new_criterion

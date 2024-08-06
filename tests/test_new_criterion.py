@@ -142,8 +142,8 @@ def test_create_criterion_minimum_values_required(setup_database, client, valid_
 
 def test_create_criterion_with_staging_id(setup_database, client, mock_new_criterion, connection):
     """
-    Test create /user-input response for a valid user with authorization and
-    valid input, ensure correct response.
+    Test create new criterion and update criterion_staging with criterion_id 
+    
     """
     errors=[]
     fake_jwt = "1.2.3"
