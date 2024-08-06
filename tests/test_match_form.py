@@ -83,6 +83,14 @@ def test_get_match_form(setup_database, client):
 
     assert is_aws_url(url_str)
 
+def test_get_important_questions(setup_database, client):
+    errors = []
+    fake_jwt = "1.2.3"
+    url = client.get("/important-questions", headers={"Authorization": f"bearer {fake_jwt}"})
+    url_str =  url.content.decode('ascii').strip('\"')
+
+    assert is_aws_url(url_str)
+
 def test_update_match_form(setup_database, client):
     errors = []
     fake_jwt = "1.2.3"
