@@ -1,11 +1,10 @@
 from fastapi import HTTPException
-from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession as Session
-from . import logger
 from gearbox.util import status
 from gearbox.schemas import CriterionStaging as CriterionStagingSchema, CriterionStagingCreate
-from gearbox.crud import criterion_staging_crud, criterion_has_value_crud, criterion_has_tag_crud, display_rules_crud, triggered_by_crud, value_crud, tag_crud
+from gearbox.crud import criterion_staging_crud , study_version_crud
 from typing import List
+from gearbox.util.types import StudyVersionStatus
 
 async def get_criterion_staging(session: Session, id: int) -> CriterionStagingSchema:
     crit = await criterion_staging_crud.get(session, id)
@@ -20,17 +19,18 @@ async def get_criterion_staging_by_ec_id(session: Session, eligibility_criteria_
     return cs
 
 async def create(session: Session, staging_criterion: CriterionStagingCreate)-> CriterionStagingSchema:
-    # TO DO? - check code exists in the criterion table?
 
     new_staging_criterion = await criterion_staging_crud.create(db=session, obj_in=staging_criterion)
     return new_staging_criterion
 
-async def update(session: Session, criterion: CriterionStagingSchema) -> CriterionStagingSchema:
-    criterion_to_upd = await criterion_staging_crud.get(db=session, id=criterion.id)
+async def update(session: Session, criterion: CriterionStagingSchema, user_id: int) -> CriterionStagingSchema:
 
-    ## save the user-id of the user making the update
+    criterion_to_upd = await criterion_staging_crud.get(db=session, id=criterion.id)
+    study_version_to_upd = await study_version_crud.get_study_version_ec_id(current_session=session, eligibility_criteria_id = criterion_to_upd.eligibility_criteria_id )
+    sv = await study_version_crud.update(db=session, db_obj=study_version_to_upd, obj_in={"status": StudyVersionStatus.IN_PROCESS})
 
     if criterion_to_upd:
+        criterion_to_upd.last_updated_by = user_id
         upd_criterion = await criterion_staging_crud.update(db=session, db_obj=criterion_to_upd, obj_in=criterion)
     else:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Criterion id: {criterion.id} not found for update.") 

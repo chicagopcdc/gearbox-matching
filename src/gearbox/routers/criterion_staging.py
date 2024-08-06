@@ -1,16 +1,13 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, HTTPException, Request, Depends
 from typing import List
-from . import logger
 from gearbox.util import status
 from gearbox.services import criterion_staging as criterion_staging_service
 from gearbox.admin_login import admin_required
 
 from gearbox.schemas import CriterionStaging, CriterionStagingUpdate
-from gearbox.crud import criterion_staging_crud
 from gearbox import deps
 from gearbox import auth 
-from gearbox.services.user_input import reset_user_validation_data
 
 mod = APIRouter()
 
@@ -32,11 +29,12 @@ async def update_object(
     body: CriterionStagingUpdate,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
+    user_id: int = Depends(auth.authenticate_user)
 ):
     """
     Comments:
     """
-    upd_value = await criterion_staging_service.update_criterion_staging(session=session, criterion=body)
+    upd_value = await criterion_staging_service.update(session=session, criterion=body, user_id=user_id)
     return upd_value
 
 

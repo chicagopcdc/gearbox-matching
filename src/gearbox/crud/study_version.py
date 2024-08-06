@@ -16,7 +16,17 @@ class CRUDStudyVersion(CRUDBase [StudyVersion, StudyVersionCreate, StudyVersionS
         ).order_by(StudyVersion.id)
 
         result = await current_session.execute(stmt)
-        studies = result.unique().scalars().all()
-        return studies
+        study_versions = result.unique().scalars().all()
+        return study_versions
+    
+    async def get_study_version_ec_id(self, current_session: Session, eligibility_criteria_id: int):
+
+        stmt = select(StudyVersion).where(StudyVersion.eligibility_criteria_id == eligibility_criteria_id)
+
+        result = await current_session.execute(stmt)
+        study_version = result.unique().scalars().first()
+        return study_version
+
+
     
 study_version_crud = CRUDStudyVersion(StudyVersion)

@@ -1,13 +1,8 @@
-import json
-from datetime import datetime
-
-from . import logger
 from sqlalchemy.ext.asyncio import AsyncSession as Session
-from sqlalchemy import exc
 from fastapi import HTTPException
 from gearbox.models import RawCriteria
 from gearbox.schemas import RawCriteriaCreate, RawCriteria as RawCriteriaSchema, StudyVersionCreate, RawCriteriaIn, CriterionStagingCreate
-from gearbox.util import status, json_utils
+from gearbox.util import status 
 from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus
 from gearbox.crud import raw_criteria_crud, criterion_crud
 from gearbox.services import study as study_service, study_version as study_version_service, eligibility_criteria as eligibility_criteria_service, criterion_staging as criterion_staging_service
@@ -28,12 +23,11 @@ async def get_raw_criterias(session: Session) -> List[RawCriteria]:
 
 async def stage_criteria(session: Session, raw_criteria: RawCriteria):
 
-    #staging_criteria = []
     raw_text = raw_criteria.data.get('text')
     input_id = raw_criteria.data.get('id')
     for label in raw_criteria.data.get('label'):
 
-        ## get criterion_id from code here...
+        ## get criterion_id from code
         code = label[2]
         criterion_id = await criterion_crud.get_criterion_id_by_code(db=session, code=code)
 
@@ -53,10 +47,9 @@ async def stage_criteria(session: Session, raw_criteria: RawCriteria):
         )
 
         res = await criterion_staging_service.create(session, csc)
-        #staging_criteria.append(csc)
-    # TO DO - RETURN SUCCSS HERE
 
-async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn) -> RawCriteriaSchema:
+
+async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn):
 
     """
     This function will create a new raw_criteria for adjudication along with associated
@@ -71,8 +64,7 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn) -> 
          raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study for id: {ext_id} not found for update.") 
     
     # Create a new study_version
-    # SET ANY EXISTING 'NEW' TO INACTIVE??? 
-    comments = raw_criteria.data.get("comments")
+    comments = ''.join(raw_criteria.data.get("Comments"))
     new_study_version = StudyVersionCreate(study_id=study_id, status=StudyVersionStatus.NEW, comments=comments)
     study_version = await study_version_service.create_study_version(session,new_study_version)
 
@@ -84,9 +76,8 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn) -> 
     raw_criteria = await raw_criteria_crud.create(db=session, obj_in=new_raw_criteria)
 
     await stage_criteria(session, raw_criteria)
-    return raw_criteria
 
-async def update_raw_criteria(session: Session, raw_criteria: RawCriteriaCreate, raw_criteria_id: int) -> RawCriteriaSchema:
+async def update_raw_criteria(session: Session, raw_criteria: RawCriteriaCreate, raw_criteria_id: int):
     raw_criteria_in = await raw_criteria_crud.get(db=session, id=raw_criteria_id)
     if raw_criteria_in:
         upd_raw_criteria = await raw_criteria_crud.update(db=session, db_obj=raw_criteria_in, obj_in=raw_criteria)
