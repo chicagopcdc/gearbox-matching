@@ -9,7 +9,7 @@ def test_get_criterion_staging(setup_database, client):
     """
     
     fake_jwt = "1.2.3"
-    resp = client.get("/criterion-staging/1", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.get("/criterion-staging/3", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
     resp.raise_for_status()
 

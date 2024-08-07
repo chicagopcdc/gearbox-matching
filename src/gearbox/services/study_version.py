@@ -73,6 +73,7 @@ async def update_study_version(session: Session, study_version: StudyVersionUpda
     if study_version_in:
         upd_study_version = await study_version_crud.update(db=session, db_obj=study_version_in, obj_in=study_version)
     else:
+        logger.error(f"Study version for id: {study_version.id} not found for update.") 
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study version for id: {study_version.id} not found for update.") 
     await session.commit() 
     return upd_study_version

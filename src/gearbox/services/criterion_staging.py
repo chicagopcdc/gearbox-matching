@@ -5,6 +5,7 @@ from gearbox.schemas import CriterionStaging as CriterionStagingSchema, Criterio
 from gearbox.crud import criterion_staging_crud , study_version_crud
 from typing import List
 from gearbox.util.types import StudyVersionStatus
+from . import logger
 
 async def get_criterion_staging(session: Session, id: int) -> CriterionStagingSchema:
     crit = await criterion_staging_crud.get(session, id)
@@ -33,7 +34,9 @@ async def update(session: Session, criterion: CriterionStagingSchema, user_id: i
         criterion_to_upd.last_updated_by = user_id
         upd_criterion = await criterion_staging_crud.update(db=session, db_obj=criterion_to_upd, obj_in=criterion)
     else:
+        logger.error(f"Criterion id: {criterion.id} not found for update.") 
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Criterion id: {criterion.id} not found for update.") 
     await session.commit() 
+    logger.info(f"Criterion staging id: {criterion_to_upd.id} updated by: {user_id}")
 
     return upd_criterion

@@ -40,7 +40,7 @@ def test_get_study_versions_by_status(setup_database, client):
 @pytest.mark.parametrize(
     "data", [ 
         {
-            "study_id": 1,
+            "study_id": 3,
             "active": True,
             "status":"ACTIVE"
     }
@@ -83,7 +83,7 @@ def test_update_study_version(setup_database, client, connection):
 #    """
     fake_jwt = "1.2.3"
     errors = []
-    data = {"id":2, "status":"IN_PROCESS"}
+    data = {"id":3, "status":"IN_PROCESS"}
 
     resp = client.post(f"/update-study-version", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()

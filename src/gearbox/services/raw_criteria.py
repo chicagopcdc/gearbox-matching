@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession as Session
+from . import logger
 from fastapi import HTTPException
 from gearbox.models import RawCriteria
 from gearbox.schemas import RawCriteriaCreate, RawCriteria as RawCriteriaSchema, StudyVersionCreate, RawCriteriaIn, CriterionStagingCreate
@@ -61,6 +62,7 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn):
     ext_id = raw_criteria.data.get("nct")
     study_id = await study_service.get_study_id_by_ext_id(session, ext_id)
     if not study_id:
+         logger.error(f"Study for id: {ext_id} not found for update.") 
          raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study for id: {ext_id} not found for update.") 
     
     # Create a new study_version
@@ -76,11 +78,12 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn):
     raw_criteria = await raw_criteria_crud.create(db=session, obj_in=new_raw_criteria)
 
     await stage_criteria(session, raw_criteria)
+    logger.info(f"Raw criteria for study {ext_id} successfully staged.")
 
 async def update_raw_criteria(session: Session, raw_criteria: RawCriteriaCreate, raw_criteria_id: int):
     raw_criteria_in = await raw_criteria_crud.get(db=session, id=raw_criteria_id)
     if raw_criteria_in:
         upd_raw_criteria = await raw_criteria_crud.update(db=session, db_obj=raw_criteria_in, obj_in=raw_criteria)
     else:
+        logger.error(f"Raw criteria id: {raw_criteria_id} not found for update.") 
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Raw criteria id: {raw_criteria_id} not found for update.") 
-

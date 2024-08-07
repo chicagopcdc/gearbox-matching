@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, update, select, exc, or_
 from gearbox.util.types import StudyVersionStatus 
 
-class CRUDStudyVersion(CRUDBase [StudyVersion, StudyVersionCreate, StudyVersionSearchResults]):
+class CRUDStudyVersion(CRUDBase [StudyVersion, StudyVersionSchema, StudyVersionCreate]):
 
     async def get_study_versions_for_adjudication(self, current_session: Session):
 
