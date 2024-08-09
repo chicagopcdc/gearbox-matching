@@ -30,6 +30,15 @@ async def update(session: Session, criterion: CriterionStagingSchema, user_id: i
     study_version_to_upd = await study_version_crud.get_study_version_ec_id(current_session=session, eligibility_criteria_id = criterion_to_upd.eligibility_criteria_id )
     sv = await study_version_crud.update(db=session, db_obj=study_version_to_upd, obj_in={"status": StudyVersionStatus.IN_PROCESS})
 
+    criterion_in_dict = dict(criterion)
+    to_upd_dict = criterion_to_upd.__dict__
+    updates=[]
+
+    # Track any updates besides status updates for logging
+    for key in criterion_in_dict:
+        if criterion_in_dict.get(key) and criterion_in_dict.get(key) != to_upd_dict.get(key) and "status" not in key:
+            updates.append(f'criterion_staging update:  {key} changed from {criterion_in_dict.get(key)} to {to_upd_dict.get(key)}')
+
     if criterion_to_upd:
         criterion_to_upd.last_updated_by = user_id
         upd_criterion = await criterion_staging_crud.update(db=session, db_obj=criterion_to_upd, obj_in=criterion)
@@ -37,6 +46,7 @@ async def update(session: Session, criterion: CriterionStagingSchema, user_id: i
         logger.error(f"Criterion id: {criterion.id} not found for update.") 
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Criterion id: {criterion.id} not found for update.") 
     await session.commit() 
-    logger.info(f"Criterion staging id: {criterion_to_upd.id} updated by: {user_id}")
+    if updates:
+        logger.info(f"Criterion staging id: {criterion_to_upd.id} updated by user_id: {user_id} updates include: {updates}")
 
     return upd_criterion

@@ -23,7 +23,7 @@ def get_presigned_url(request, key_name, pu_config, method):
     bucket_name = get_bucket_name()
     presigned_url = ''
     try:
-        presigned_url = request.app.boto_manager.presigned_url(bucket_name,key_name, config.S3_PRESIGNED_URL_EXPIRES, pu_config, method) 
+        presigned_url = request.app.boto_manager.presigned_url(bucket_name,key_name, config.S3_PRESIGNED_URL_EXPIRES, pu_config, method, dummy_s3=config.DUMMY_S3) 
 
         if config.DUMMY_S3:
             start_idx = presigned_url.find("Signature")

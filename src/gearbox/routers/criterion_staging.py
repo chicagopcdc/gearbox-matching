@@ -34,7 +34,8 @@ async def update_object(
     """
     Comments:
     """
-    await criterion_staging_service.update(session=session, criterion=body, user_id=user_id)
+    upd_value = await criterion_staging_service.update(session=session, criterion=body, user_id=user_id)
+    return upd_value
 
 
 def init_app(app):
