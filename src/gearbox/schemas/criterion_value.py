@@ -17,6 +17,7 @@ class CriterionValue(BaseModel):
     description: Optional[str]
     type: Optional[str]
     value_string: Optional[str]
+    unit_name: Optional[str]
     operator: Optional[str]
     create_date: Optional[datetime]
     active: Optional[bool]
