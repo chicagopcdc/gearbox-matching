@@ -27,10 +27,4 @@ class CriterionStaging(Base):
     text = Column(String, nullable=True)
     criterion_id = Column(Integer, ForeignKey('criterion.id'), nullable=True)
 
-    tags = Column(ARRAY(Integer), nullable=True)
     values = Column(ARRAY(Integer), nullable=True)
-    display_rules_priority = Column(Integer, nullable=True)
-    display_rules_version = Column(Integer, nullable=True)
-    triggered_by_criterion_id = Column(Integer, nullable=True)
-    triggered_by_values_id = Column(Integer, nullable=True)
-    triggered_by_path = Column(String, nullable=True)
