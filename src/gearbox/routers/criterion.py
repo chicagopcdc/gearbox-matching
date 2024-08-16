@@ -9,23 +9,34 @@ from gearbox.services import criterion as criterion_service
 from gearbox.admin_login import admin_required
 
 from gearbox.schemas import CriterionSearchResults, CriterionCreateIn, Criterion
-from gearbox.crud import criterion_crud
 from gearbox import deps
 from gearbox import auth 
 from gearbox.services.user_input import reset_user_validation_data
 
 mod = APIRouter()
 
-@mod.get("/criteria", response_model=CriterionSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
+@mod.get("/criteria", response_model=CriterionSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def get_criteria(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
 
     criteria = await criterion_service.get_criteria(session)
-    return { "results" :list(criteria) }
+    return { "results" :criteria }
 
-@mod.get("/criterion/{criterion_id}", response_model=Criterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
+@mod.get("/criteria-not-exist-in-match-form", response_model=CriterionSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+async def get_criteria(
+    request: Request,
+    session: AsyncSession = Depends(deps.get_session),
+):
+    """
+    Comments: This endpoint returns all criteria in the criterion table that are currently 
+    active but do not yet exist in the match_form. 
+    """
+    criteria = await criterion_service.get_criteria_not_exist_in_match_form(session)
+    return { "results" : criteria }
+
+@mod.get("/criterion/{criterion_id}", response_model=Criterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def get_criterion(
     criterion_id: int,
     request: Request,
@@ -34,18 +45,6 @@ async def get_criterion(
 
     criterion = await criterion_service.get_criterion(session=session, id=criterion_id)
     return criterion
-
-@mod.get("/criterion/{criterion_status}", response_model=CriterionSearchResults, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])
-async def get_criteria_by_status(
-    criterion_status: str,
-    request: Request,
-    session: AsyncSession = Depends(deps.get_session)
-):
-    """
-    Comments: Get all study versions with a given status
-    """
-    criteria = await criterion_service.get_criteria_by_status(session, criterion_status)
-    return criteria
 
 @mod.post("/criterion", response_model=Criterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(

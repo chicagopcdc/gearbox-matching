@@ -3,10 +3,11 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from . import logger
 from gearbox.util import status
-from gearbox.schemas import CriterionSearchResults, CriterionCreateIn, CriterionCreate, CriterionHasValueCreate, CriterionHasTagCreate, DisplayRulesCreate, TriggeredByCreate, Criterion as CriterionSchema, CriterionStagingUpdate
+from gearbox.schemas import CriterionSearchResults, CriterionCreateIn, CriterionCreate, CriterionHasValueCreate, CriterionHasTagCreate, DisplayRulesCreate, TriggeredByCreate, Criterion as CriterionSchema, CriterionStagingUpdate 
 from gearbox.crud import criterion_crud, criterion_has_value_crud, criterion_has_tag_crud, display_rules_crud, triggered_by_crud, value_crud, tag_crud
 from gearbox.services import criterion_staging
 from gearbox.util.types import AdjudicationStatus
+from typing import List
 
 async def get_criterion(session: Session, id: int) -> CriterionSchema:
     crit = await criterion_crud.get(session, id)
@@ -93,3 +94,13 @@ async def update_criterion(session: Session, criterion: CriterionCreateIn, crite
     await session.commit() 
 
     return upd_criterion
+
+async def save_criterion(session: Session, criterion: CriterionCreate) -> CriterionSchema:
+    print(f"SAVE CRITERION: 1")
+    new_criterion = await criterion_crud.create(db=session, obj_in=criterion)
+    print(f"SAVE CRITERION: 2")
+    return new_criterion
+
+async def get_criteria_not_exist_in_match_form(session: Session) -> List[CriterionSchema]:
+    criteria = await criterion_crud.get_criteria_not_exist_in_match_form(db=session)
+    return criteria

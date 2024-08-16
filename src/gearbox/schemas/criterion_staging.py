@@ -12,7 +12,7 @@ class CriterionStagingBase(BaseModel):
     description: Optional[str]
     create_date: Optional[datetime]
     criterion_adjudication_status: AdjudicationStatus
-    echc_adjudication_status: EchcAdjudicationStatus
+    echc_adjudication_status: Optional[EchcAdjudicationStatus]
     ontology_code_id: Optional[int]
     input_type_id: Optional[int]
 
@@ -21,13 +21,8 @@ class CriterionStagingBase(BaseModel):
     text: str
     criterion_id: Optional[int]
 
-    tags: Optional[List[int]]
     values: Optional[List[int]]
-    display_rules_priority: Optional[int]
-    display_rules_version: Optional[int]
-    triggered_by_criterion_id: Optional[int]
-    triggered_by_values_id: Optional[int]
-    triggered_by_path: Optional[str]
+    last_updated_by_user_id: Optional[int]
 
     class Config:
         orm_mode = True

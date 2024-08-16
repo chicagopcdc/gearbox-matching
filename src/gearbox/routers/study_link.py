@@ -12,7 +12,7 @@ from gearbox.admin_login import admin_required
 
 mod = APIRouter()
 
-@mod.get("/study-link/{study_link_id}", response_model=StudyLinkSchema, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)] )
+@mod.get("/study-link/{study_link_id}", response_model=StudyLinkSchema, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate), Depends(admin_required)] )
 async def get_study_link(
     request: Request,
     study_link_id: int,
@@ -21,7 +21,7 @@ async def get_study_link(
     ret_study_link = await study_link_service.get_single_study_link(session, study_link_id)
     return ret_study_link
 
-@mod.get("/study-links", response_model=StudyLinkSearchResults, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])
+@mod.get("/study-links", response_model=StudyLinkSearchResults, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate), Depends(admin_required)])
 async def get_all_study_links(
     request: Request,
     session: AsyncSession = Depends(deps.get_session)

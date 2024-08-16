@@ -13,7 +13,7 @@ from gearbox import auth
 
 mod = APIRouter()
 
-@mod.get("/study-algorithm-engines", response_model=StudyAlgorithmEngineSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
+@mod.get("/study-algorithm-engines", response_model=StudyAlgorithmEngineSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def get_saes(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
@@ -21,7 +21,7 @@ async def get_saes(
     aes = await study_algorithm_engine.get_study_algorithm_engines(session=session)
     return { "results": list(aes) }
 
-@mod.get("/study-algorithm-engine/{algorithm_engine_id}", response_model=StudyAlgorithmEngine, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
+@mod.get("/study-algorithm-engine/{algorithm_engine_id}", response_model=StudyAlgorithmEngine, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def get_sae(
     algorithm_engine_id: int,
     request: Request,

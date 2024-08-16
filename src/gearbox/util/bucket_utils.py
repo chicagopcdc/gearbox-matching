@@ -46,7 +46,7 @@ def get_object(request, bucket_name, key_name, expires, boto_params=[], method=N
 
     if config.DUMMY_S3:
         try:
-            presigned_url = request.app.boto_manager.presigned_url(bucket_name,key_name, config.S3_PRESIGNED_URL_EXPIRES, boto_params, method) 
+            presigned_url = request.app.boto_manager.presigned_url(bucket_name,key_name, config.S3_PRESIGNED_URL_EXPIRES, boto_params, method, dummy_s3=config.DUMMY_S3) 
             start_idx = presigned_url.find("Signature")
             end_idx = presigned_url.find("&", start_idx)
             presigned_url = presigned_url[:start_idx] + presigned_url[end_idx + 1:]
