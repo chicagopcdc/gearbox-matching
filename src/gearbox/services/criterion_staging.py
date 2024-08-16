@@ -33,31 +33,27 @@ async def publish_criterion(session: Session, criterion: CriterionPublish, user_
         check_id_errors.append(await value_crud.check_key(db=session, ids_to_check=criterion.values))
         if not all(i is None for i in check_id_errors):
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR PUBLISHING CRITERION: missing FKs for criterion creation: {[error for error in check_id_errors if error]}")        
-        # check that input_type.data_type is list for the input_type_id
+
+        # qc input_type: check that input_type.data_type is list for the input_type_id
         input_type = await input_type_crud.get(db=session, id=criterion.input_type_id)
-        print(f"TYPE INPUT-TYPE: {type(input_type)} TYPE: {input_type.data_type}")
         # only 'list' input-types can have criterion_has_value rows
         if input_type.data_type != "list":
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR PUBLISHING CRITERION: {input_type.data_type} can not have associated values.") 
 
 
-    print(f"PUBLISH CRITERION: 1")
     # Convert criterion to CriterionCreate
     criterion_save=CriterionCreate(**criterion.dict())
     new_criterion = await criterion_service.save_criterion(session=session, criterion=criterion_save)
-    print(f"PUBLISH CRITERION: 2")
 
     # Create criterion has values here
     if criterion.values:
         for v_id in criterion.values:
             chv = CriterionHasValueCreate(criterion_id=new_criterion.id, value_id=v_id)
-            new_value = await criterion_has_value_crud.create(db=session,obj_in=chv)
+            await criterion_has_value_crud.create(db=session,obj_in=chv)
 
-    # Call update method below
+    # Call update method below - set criterion_staging criteria adjudication status to active
     stage_upd = CriterionStagingUpdate(id=criterion.criterion_staging_id, criterion_id=new_criterion.id, criterion_adjudication_status=AdjudicationStatus.ACTIVE)
-    print(f"PUBLISH CRITERION: 3")
     update(session=session, criterion=stage_upd, user_id=user_id)
-    print(f"PUBLISH CRITERION: 4")
 
 async def update(session: Session, criterion: CriterionStagingUpdate, user_id: int ) -> CriterionStagingSchema:
 
