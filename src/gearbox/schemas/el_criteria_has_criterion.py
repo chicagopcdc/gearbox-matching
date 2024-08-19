@@ -19,8 +19,8 @@ class ElCriteriaHasCriterion(ElCriteriaHasCriterionBase):
 class ElCriteriaHasCriterions(BaseModel):
     echcs: Sequence[ElCriteriaHasCriterion]
 
-class ElCriteriaHasCriterionCreate(BaseModel):
-    echcs: Sequence[ElCriteriaHasCriterionBase]
+class ElCriteriaHasCriterionCreate(ElCriteriaHasCriterionBase):
+    pass
 
 class ElCriteriaHasCriterions(BaseModel):
     echcs: Sequence[ElCriteriaHasCriterion]

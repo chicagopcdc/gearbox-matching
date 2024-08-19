@@ -32,7 +32,9 @@ async def get_el_criteria_has_criterion(
     ret_el_criteria_has_criterion = await el_criteria_has_criterion_service.get_el_criteria_has_criterion(session=session, id=el_criteria_has_criterion_id)
     return ret_el_criteria_has_criterion
 
-@mod.post("/el-criteria-has-criterion", response_model=ElCriteriaHasCriterions, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+# TO DO: modify to only post one criterion at a time & just return 200 on success, no need to 
+# return the added echc row object
+@mod.post("/el-criteria-has-criterion", response_model=ElCriteriaHasCriterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
     body: ElCriteriaHasCriterionCreate,
     request: Request,
