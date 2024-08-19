@@ -18,7 +18,7 @@ from typing import List
 mod = APIRouter()
 
 # create methods to get all patients for a study, get all studies for a patient, and add a patient to a study
-@mod.get("/study-has-patients", response_model=List[StudyHasPatient], status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
+@mod.get("/study-has-patients", response_model=List[StudyHasPatient], status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def get_study_has_patients(
     study_id: int,
     request: Request,
@@ -30,7 +30,7 @@ async def get_study_has_patients(
     study_has_patients = await study_has_patient_service.get_study_has_patients(session=session, column='study_id', id=study_id)
     return study_has_patients
 
-@mod.get("/patient-has-studies", response_model=List[StudyHasPatient], status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
+@mod.get("/patient-has-studies", response_model=List[StudyHasPatient], status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def get_patient_has_studies(
     patient_id: str,
     request: Request,

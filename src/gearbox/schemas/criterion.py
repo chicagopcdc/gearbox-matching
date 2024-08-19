@@ -28,6 +28,18 @@ class Criterion(CriterionBase):
 class CriterionCreate(CriterionBase):
     pass
 
+class CriterionPublish(CriterionBase):
+    criterion_staging_id: int
+    code: str
+    display_name: str
+    description: str
+    create_date: Optional[datetime]
+    active: Optional[bool]
+    ontology_code_id: Optional[int]
+    input_type_id: int
+    values: Optional[List[int]]
+    pass
+
 class CriterionCreateIn(CriterionBase):
     code: str
     tags: List[int]

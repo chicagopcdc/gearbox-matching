@@ -16,7 +16,7 @@ from starlette.responses import JSONResponse
 
 mod = APIRouter()
 
-@mod.get("/raw-criteria/{raw_criteria_id}", response_model=RawCriteria, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
+@mod.get("/raw-criteria/{raw_criteria_id}", response_model=RawCriteria, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def get_raw_criteria(
     raw_criteria_id: int,
     request: Request,
@@ -26,7 +26,7 @@ async def get_raw_criteria(
     raw_criteria = await raw_criteria_service.get_raw_criteria(session=session, id=raw_criteria_id)
     return raw_criteria
 
-@mod.get("/raw-criteria-ec/{eligibility_criteria_id}", status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])
+@mod.get("/raw-criteria-ec/{eligibility_criteria_id}", status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate), Depends(admin_required)])
 async def get_criteria_by_eligibility_criteria_id(
     eligibility_criteria_id: int,
     request: Request,
@@ -41,14 +41,15 @@ async def get_criteria_by_eligibility_criteria_id(
 
 @mod.post("/raw-criteria", response_model=RawCriteria, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
-    body: RawCriteriaIn,
+    body: dict,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
     """
     Comments: Save raw_criteria 
     """
-    new_raw_criteria = await raw_criteria_service.create_raw_criteria(session, body)
+    raw_criteria = RawCriteriaIn(data=body)
+    new_raw_criteria = await raw_criteria_service.create_raw_criteria(session, raw_criteria)
     return JSONResponse(status.HTTP_200_OK)
 
 def init_app(app):

@@ -28,8 +28,6 @@ async def build_match_info(
     is set to true, it will save the match for to S3, if 'save' is false it will just return
     the match form without uploading to S3. 
     """
-    print(f"-----------> MATCH FORM INFO: {showif_logic_schema}")
-
     match_form = await match_form_service.get_match_form(session)
     if save:
         if not config.BYPASS_S3:
@@ -43,6 +41,10 @@ async def get_match_form(
     request: Request,
     session: Session = Depends(deps.get_session)
 ):
+    """
+    Comments: This endpoint is called by the front-end to return the presigned_url to the S3
+    bucket that the match form file.
+    """
     params = []
     presigned_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_MATCH_FORM_KEY_NAME, params, "get_object")
     return JSONResponse(presigned_url, status.HTTP_200_OK)
