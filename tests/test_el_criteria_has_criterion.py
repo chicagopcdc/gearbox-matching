@@ -54,9 +54,10 @@ def test_create_el_criteria_has_criterion(setup_database, client, data):
     Test create el_criteria_has_criterion
     """
     fake_jwt = "1.2.3"
-    resp = client.post("/el-criteria-has-criterion", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
-    resp.raise_for_status()
-    assert str(resp.status_code).startswith("20")
+    for i in range(len(data)):
+        resp = client.post("/el-criteria-has-criterion", json=data.get('echcs')[i], headers={"Authorization": f"bearer {fake_jwt}"})
+        resp.raise_for_status()
+        assert str(resp.status_code).startswith("20")
 
 @pytest.mark.parametrize(
     "data", [ 
@@ -84,25 +85,20 @@ def test_create_duplicate_el_criteria_has_criterion(setup_database, client, data
     Test create el_criteria_has_criterion
     """
     fake_jwt = "1.2.3"
-    resp = client.post("/el-criteria-has-criterion", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    for i in range(len(data)):
+        resp = client.post("/el-criteria-has-criterion", json=data.get('echcs')[i], headers={"Authorization": f"bearer {fake_jwt}"})
     assert str(resp.status_code).startswith("409")
 
 @pytest.mark.parametrize(
     "data", [ 
-        { "echcs":
+        { "echc":
             [
                 {
             "criterion_id": 1,
             "eligibility_criteria_id": 1,
             "active": True,
             "value_id": 22 
-                },
-                {
-            "criterion_id": 8,
-            "eligibility_criteria_id": 2,
-            "active": True,
-            "value_id": 59 
-                },
+                }
             ]
         }
     ]
@@ -113,7 +109,7 @@ def test_create_duplicate_db_el_criteria_has_criterion(setup_database, client, d
     Test create el_criteria_has_criterion
     """
     fake_jwt = "1.2.3"
-    resp = client.post("/el-criteria-has-criterion", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.post("/el-criteria-has-criterion", json=data.get('echc')[0], headers={"Authorization": f"bearer {fake_jwt}"})
     assert str(resp.status_code).startswith("409")
 
 @pytest.mark.asyncio
@@ -123,6 +119,15 @@ def test_get_el_criteria_has_criterions(setup_database, client):
     """
     fake_jwt = "1.2.3"
     resp = client.get("/el-criteria-has-criterions", headers={"Authorization": f"bearer {fake_jwt}"})
+    assert resp.status_code == 200
+
+@pytest.mark.asyncio
+def test_get_el_criteria_has_criterions_by_echc_id(setup_database, client):
+    """
+    Test that the /el_criteria_has_criterions endpoint returns a 200 and the id of the latest saved obj
+    """
+    fake_jwt = "1.2.3"
+    resp = client.get("/el-criteria-has-criterions/1", headers={"Authorization": f"bearer {fake_jwt}"})
     assert resp.status_code == 200
 
 @pytest.mark.asyncio

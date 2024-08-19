@@ -28,3 +28,4 @@ class CriterionStaging(Base):
     criterion_id = Column(Integer, ForeignKey('criterion.id'), nullable=True)
 
     values = Column(ARRAY(Integer), nullable=True)
+    echc_value_id = Column(Integer, ForeignKey('value.id'), nullable=True)

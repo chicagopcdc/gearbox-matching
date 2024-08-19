@@ -16,7 +16,7 @@ from starlette.status import (
             "description": "string",
             "is_numeric": False,
             "value_string": "string",
-            "unit_name": "string",
+            "unit_name": "TEST_NEW_UNIT_NAME",
             "operator": "string",
             "active": 1
     }
