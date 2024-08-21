@@ -22,6 +22,9 @@ class ElCriteriaHasCriterions(BaseModel):
 class ElCriteriaHasCriterionCreate(ElCriteriaHasCriterionBase):
     pass
 
+class ElCriteriaHasCriterionPublish(ElCriteriaHasCriterionBase):
+    criterion_staging_id: int
+
 class ElCriteriaHasCriterions(BaseModel):
     echcs: Sequence[ElCriteriaHasCriterion]
 

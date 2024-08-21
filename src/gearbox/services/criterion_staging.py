@@ -1,11 +1,11 @@
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from gearbox.util import status
-from gearbox.schemas import CriterionStaging as CriterionStagingSchema, CriterionStagingCreate, CriterionPublish, CriterionCreate, CriterionStagingUpdate, CriterionHasValueCreate
+from gearbox.schemas import CriterionStaging as CriterionStagingSchema, CriterionStagingCreate, CriterionPublish, CriterionCreate, CriterionStagingUpdate, CriterionHasValueCreate, ElCriteriaHasCriterionPublish, ElCriteriaHasCriterionCreate
 from gearbox.crud import criterion_staging_crud , study_version_crud, value_crud, criterion_has_value_crud, input_type_crud
 from typing import List
-from gearbox.util.types import StudyVersionStatus, AdjudicationStatus
-from gearbox.services import criterion as criterion_service
+from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus
+from gearbox.services import criterion as criterion_service, el_criteria_has_criterion as el_criteria_has_criterion_service
 from . import logger
 
 async def get_criterion_staging(session: Session, id: int) -> CriterionStagingSchema:
@@ -81,3 +81,19 @@ async def update(session: Session, criterion: CriterionStagingUpdate, user_id: i
         logger.info(f"Criterion staging id: {criterion_to_upd.id} updated by user_id: {user_id} updates include: {updates}")
 
     return upd_criterion
+
+async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish, user_id: int):
+
+    existing_staging = await get_criterion_staging(session=session, id=echc.criterion_staging_id)
+    if existing_staging.criterion_adjudication_status not in (AdjudicationStatus.ACTIVE, AdjudicationStatus.EXISTING):
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            f"Criterion staging id: {echc.id} status must be active in order to publish el_criteria_has_criterion. The current status is: {existing_staging.criterion_adjudication_status} - finalize criterion adjudication before publishing.")
+
+    # Convert criterion to CriterionCreate
+    echc_save=ElCriteriaHasCriterionCreate(**echc.dict())
+    new_echc = await el_criteria_has_criterion_service.create_el_criteria_has_criterion(session=session, el_criteria_has_criterion=echc_save)
+
+    # Call update method below - set criterion_staging criteria adjudication status to active
+    stage_upd = CriterionStagingUpdate(id=echc.criterion_staging_id, el_criteria_has_criterion_id=new_echc.id, echc_adjudication_status=EchcAdjudicationStatus.ACTIVE)
+
+    await update(session=session, criterion=stage_upd, user_id=user_id)

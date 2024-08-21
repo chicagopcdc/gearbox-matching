@@ -16,7 +16,7 @@ from .criterion_staging import CriterionStaging, CriterionStagingCreate, Criteri
 from .raw_criteria import RawCriteriaCreate, RawCriteria, RawCriteriaIn
 from .input_type import InputTypeCreate, InputTypeSearchResults, InputType
 from .ontology_code import OntologyCodeCreate, OntologyCodeSearchResults, OntologyCode
-from .el_criteria_has_criterion import ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterionCreate, ElCriteriaHasCriterion, ElCriteriaHasCriterions
+from .el_criteria_has_criterion import ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterionCreate, ElCriteriaHasCriterion, ElCriteriaHasCriterions, ElCriteriaHasCriterionPublish
 from .algorithm_engine import AlgorithmResponse
 from .source import Source, SourceCreate, SourceSearchResults
 from .study import StudySearchResults, StudyCreate, Study, StudyUpdates, StudyResults, StudyBaseInfo

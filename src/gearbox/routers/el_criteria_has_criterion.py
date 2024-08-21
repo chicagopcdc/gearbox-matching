@@ -6,10 +6,11 @@ from fastapi import APIRouter
 from fastapi import Request, Depends
 from . import logger
 from gearbox.util import status
+from gearbox.util.types import EchcAdjudicationStatus
 from gearbox.admin_login import admin_required
 
-from gearbox.schemas import ElCriteriaHasCriterionCreate, ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterion, ElCriteriaHasCriterions
-from gearbox.services import el_criteria_has_criterion as el_criteria_has_criterion_service
+from gearbox.schemas import ElCriteriaHasCriterionCreate, ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterion, ElCriteriaHasCriterions, CriterionStagingUpdate
+from gearbox.services import el_criteria_has_criterion as el_criteria_has_criterion_service, criterion_staging as criterion_staging_service
 from gearbox import deps
 from gearbox import auth 
 
@@ -29,12 +30,11 @@ async def get_el_criteria_has_criterions(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    el_criteria_has_criterions = await el_criteria_has_criterion_service.get_el_criteria_has_criterions_by_ecid(session=session, ecid=eligibility_criteria_id)
-    return { "results" :list(el_criteria_has_criterions) }
     """
     Comments: Fetch all el_criteria_has_criterion rows for a particular eligibility_criteria_id (study-version)
     """
-    pass
+    el_criteria_has_criterions = await el_criteria_has_criterion_service.get_el_criteria_has_criterions_by_ecid(session=session, ecid=eligibility_criteria_id)
+    return { "results" :list(el_criteria_has_criterions) }
 
 @mod.get("/el-criteria-has-criterion/{el_criteria_has_criterion_id}", response_model=ElCriteriaHasCriterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def get_el_criteria_has_criterion(
@@ -49,7 +49,7 @@ async def get_el_criteria_has_criterion(
 async def save_object(
     body: ElCriteriaHasCriterionCreate,
     request: Request,
-    session: AsyncSession = Depends(deps.get_session),
+    session: AsyncSession = Depends(deps.get_session)
 ):
     """
     Comments: Save a row to the el_criteria_has_crition table

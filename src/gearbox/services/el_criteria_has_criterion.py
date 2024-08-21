@@ -19,8 +19,9 @@ async def get_el_criteria_has_criterions_by_ecid(session: Session, ecid: int) ->
     ecs = await el_criteria_has_criterion_crud.get_multi(session, where=[f"eligibility_criteria_id = {ecid}"])
     return ecs
 
-async def create_el_criteria_has_criterion(session: Session, el_criteria_has_criterion: ElCriteriaHasCriterionCreate):
-    await el_criteria_has_criterion_crud.create(db=session, obj_in=el_criteria_has_criterion)
+async def create_el_criteria_has_criterion(session: Session, el_criteria_has_criterion: ElCriteriaHasCriterionCreate) -> ElCriteriaHasCriterion:
+    new_echc = await el_criteria_has_criterion_crud.create(db=session, obj_in=el_criteria_has_criterion)
+    return new_echc
 
 async def update_el_criteria_has_criterion(session: Session, el_criteria_has_criterion: ElCriteriaHasCriterionCreate, el_criteria_has_criterion_id: int) -> ElCriteriaHasCriterionSchema:
     el_criteria_has_criterion_in = await el_criteria_has_criterion_crud.get(db=session, id=el_criteria_has_criterion_id)

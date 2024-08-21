@@ -5,7 +5,7 @@ from gearbox.util import status
 from gearbox.services import criterion_staging as criterion_staging_service
 from gearbox.admin_login import admin_required
 
-from gearbox.schemas import CriterionStaging, CriterionStagingUpdate, CriterionPublish, CriterionStagingCreate
+from gearbox.schemas import CriterionStaging, CriterionStagingUpdate, CriterionPublish, CriterionStagingCreate, ElCriteriaHasCriterionPublish
 from gearbox import deps
 from gearbox import auth 
 
@@ -37,7 +37,7 @@ async def update_object(
     upd_value = await criterion_staging_service.update(session=session, criterion=body, user_id=user_id)
     return upd_value
 
-@mod.post("/criterion-staging-publish", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.post("/criterion-staging-publish-criterion", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def publish(
     body: CriterionPublish,
     request: Request,
@@ -49,6 +49,19 @@ async def publish(
     criterion table which makes it available to the match-form build. 
     """
     await criterion_staging_service.publish_criterion(session=session, criterion=body, user_id=user_id)
+
+@mod.post("/criterion-staging-publish-echc", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+async def publish(
+    body: ElCriteriaHasCriterionPublish,
+    request: Request,
+    session: AsyncSession = Depends(deps.get_session),
+    user_id: int = Depends(auth.authenticate_user)
+):
+    """
+    Comments: The purpose of this endpoint is to 'publish' a criterion_staging row into the 
+    criterion table which makes it available to the match-form build. 
+    """
+    await criterion_staging_service.publish_echc(session=session, echc=body, user_id=user_id)
 
 @mod.post("/criterion-staging", response_model=CriterionStaging, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(

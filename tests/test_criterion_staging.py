@@ -35,17 +35,6 @@ def test_update_criterion_staging(setup_database, client, data, connection):
     resp.raise_for_status()
     assert str(resp.status_code).startswith("20")
 
-
-"""
-criterion_staging_id: Optional[int]
-    code: Optional[str]
-    display_name: Optional[str]
-    description: Optional[str]
-    create_date: Optional[datetime]
-    active: Optional[bool]
-    ontology_code_id: Optional[int]
-    input_type_id: int
-"""
 @pytest.mark.parametrize(
     "data", [ 
         {
@@ -58,9 +47,12 @@ criterion_staging_id: Optional[int]
     ]
 )
 def test_publish_criterion_staging(setup_database, client, data, connection):
+    """
+    Test endpoint that publishes a criterion_staging object to the criterion table
+    """
 
     fake_jwt = "1.2.3"
-    resp = client.post(f"/criterion-staging-publish", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.post(f"/criterion-staging-publish-criterion", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
     assert str(resp.status_code).startswith("20")
 
@@ -77,9 +69,13 @@ def test_publish_criterion_staging(setup_database, client, data, connection):
     ]
 )
 def test_publish_criterion_staging_with_values(setup_database, client, data, connection):
+    """
+    Test endpoint that publishes a criterion_staging object to the criterion table
+    with a criterion that has associated discrete values.
+    """
 
     fake_jwt = "1.2.3"
-    resp = client.post(f"/criterion-staging-publish", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.post(f"/criterion-staging-publish-criterion", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
     assert str(resp.status_code).startswith("20")
 
@@ -122,8 +118,65 @@ def test_publish_criterion_staging_with_values_duplicate(setup_database, client,
     ]
 )
 def test_post_criterion_staging(setup_database, client, data, connection):
+    """
+    This tests endpoint that adds a row to the criterion_staging table directly.
+    """
 
     fake_jwt = "1.2.3"
     resp = client.post(f"/criterion-staging", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
     assert str(resp.status_code).startswith("20")
+
+@pytest.mark.parametrize(
+    "data", [ 
+        {
+            "criterion_id": 28,
+            "eligibility_criteria_id": 3,
+            "value_id": 4,
+            "criterion_staging_id": 25
+        }
+    ]
+)
+def test_publish_echc_criterion_staging(setup_database, client, data, connection):
+    """
+    This test publishes an el_criteria_has_criterion row (study-specific criteria)
+    from the criterion_staging table. This is done as part of the finalization of the
+    echc adjudication process.
+    """
+
+    fake_jwt = "1.2.3"
+    resp = client.post(f"/criterion-staging-publish-echc", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    resp.raise_for_status()
+    assert str(resp.status_code).startswith("20")
+
+@pytest.mark.parametrize(
+    "data", [ 
+        {
+            "criterion_id": 29,
+            "eligibility_criteria_id": 3,
+            "value_id": 4,
+            "criterion_staging_id": 25
+        }
+    ]
+)
+def test_publish_echc_criterion_staging_invalid_status(setup_database, client, data, connection):
+
+    fake_jwt = "1.2.3"
+    resp = client.post(f"/criterion-staging-publish-echc", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    resp.raise_for_status()
+    assert str(resp.status_code).startswith("20")
+
+@pytest.mark.parametrize(
+    "data", [ 
+        {
+            "criterion_id": 28,
+            "eligibility_criteria_id": 3,
+            "value_id": 4
+        }
+    ]
+)
+def test_publish_echc_criterion_staging_invalid_missing_staging_id(setup_database, client, data, connection):
+
+    fake_jwt = "1.2.3"
+    resp = client.post(f"/criterion-staging-publish-echc", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    assert str(resp.status_code).startswith("422")
