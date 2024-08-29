@@ -91,7 +91,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             return result
 
         except exc.SQLAlchemyError as e:
-            logger.error(f"SQL ERROR IN base.get method: {e}")
+            logger.error(f"SQL ERROR IN base.get_multi method: {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
 
     async def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:

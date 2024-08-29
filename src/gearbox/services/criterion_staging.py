@@ -1,11 +1,11 @@
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from gearbox.util import status
-from gearbox.schemas import CriterionStaging as CriterionStagingSchema, CriterionStagingCreate, CriterionPublish, CriterionCreate, CriterionStagingUpdate, CriterionHasValueCreate
+from gearbox.schemas import CriterionStaging as CriterionStagingSchema, CriterionStagingCreate, CriterionPublish, CriterionCreate, CriterionStagingUpdate, CriterionHasValueCreate, CriterionStagingSearchResult
 from gearbox.crud import criterion_staging_crud , study_version_crud, value_crud, criterion_has_value_crud, input_type_crud
 from typing import List
 from gearbox.util.types import StudyVersionStatus, AdjudicationStatus
-from gearbox.services import criterion as criterion_service
+from gearbox.services import criterion as criterion_service, value as value_service
 from . import logger
 
 async def get_criterion_staging(session: Session, id: int) -> CriterionStagingSchema:
@@ -16,9 +16,21 @@ async def get_criteria_staging(session: Session) -> List[CriterionStagingSchema]
     cs = await criterion_staging_crud.get_multi(session)
     return cs
 
-async def get_criterion_staging_by_ec_id(session: Session, eligibility_criteria_id: int) -> List[CriterionStagingSchema]:
+#async def get_criterion_staging_by_ec_id(session: Session, eligibility_criteria_id: int) -> List[CriterionStagingSchema]:
+async def get_criterion_staging_by_ec_id(session: Session, eligibility_criteria_id: int) -> List[CriterionStagingSearchResult]:
     cs = await criterion_staging_crud.get_criterion_staging_by_ec_id(session, eligibility_criteria_id)
-    return cs
+    criterion_staging_ret = []
+
+    for c in cs:
+        if c.values:
+            values = await value_service.get_values(session=session, ids=c.values)
+        criterion_staging = CriterionStagingSearchResult(**c.__dict__)
+        if values: 
+            criterion_staging.value_list = values 
+        criterion_staging_ret.append(criterion_staging)
+
+    #return cs
+    return criterion_staging_ret
 
 async def create(session: Session, staging_criterion: CriterionStagingCreate)-> CriterionStagingSchema:
 
