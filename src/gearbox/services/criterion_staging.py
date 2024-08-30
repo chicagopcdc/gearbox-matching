@@ -22,14 +22,16 @@ async def get_criterion_staging_by_ec_id(session: Session, eligibility_criteria_
     criterion_staging_ret = []
 
     for c in cs:
+        criterion_staging = CriterionStagingSearchResult(**c.__dict__)
+        # only call get if values exist, because we are calling it with the ids parameter
+        # and if ids are None, then value service will return all values in the table
         if c.values:
             values = await value_service.get_values(session=session, ids=c.values)
-        criterion_staging = CriterionStagingSearchResult(**c.__dict__)
-        if values: 
-            criterion_staging.value_list = values 
+            if values: 
+                criterion_staging.value_list = values 
+
         criterion_staging_ret.append(criterion_staging)
 
-    #return cs
     return criterion_staging_ret
 
 async def create(session: Session, staging_criterion: CriterionStagingCreate)-> CriterionStagingSchema:
