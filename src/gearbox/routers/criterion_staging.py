@@ -33,7 +33,7 @@ async def update_object(
     """
     Comments:
     """
-    upd_value = await criterion_staging_service.update(session=session, criterion=body, user_id=user_id)
+    upd_value = await criterion_staging_service.update(session=session, criterion=body, user_id=int(user_id))
     return upd_value
 
 @mod.post("/criterion-staging-publish", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
@@ -47,7 +47,7 @@ async def publish(
     Comments: The purpose of this endpoint is to 'publish' a criterion_staging row into the 
     criterion table which makes it available to the match-form build. 
     """
-    await criterion_staging_service.publish_criterion(session=session, criterion=body, user_id=user_id)
+    await criterion_staging_service.publish_criterion(session=session, criterion=body, user_id=int(user_id))
 
 @mod.post("/criterion-staging", response_model=CriterionStaging, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
