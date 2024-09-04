@@ -67,7 +67,7 @@ async def publish_criterion(session: Session, criterion: CriterionPublish, user_
 
     # Call update method below - set criterion_staging criteria adjudication status to active
     stage_upd = CriterionStagingUpdate(id=criterion.criterion_staging_id, criterion_id=new_criterion.id, criterion_adjudication_status=AdjudicationStatus.ACTIVE)
-    update(session=session, criterion=stage_upd, user_id=user_id)
+    await update(session=session, criterion=stage_upd, user_id=user_id)
 
 async def update(session: Session, criterion: CriterionStagingUpdate, user_id: int ) -> CriterionStagingSchema:
 
@@ -82,7 +82,7 @@ async def update(session: Session, criterion: CriterionStagingUpdate, user_id: i
     # Track any updates besides status updates for logging
     for key in criterion_in_dict:
         if criterion_in_dict.get(key) and criterion_in_dict.get(key) != to_upd_dict.get(key) and "status" not in key:
-            updates.append(f'criterion_staging update:  {key} changed from {criterion_in_dict.get(key)} to {to_upd_dict.get(key)}')
+            updates.append(f'criterion_staging update:  {key} changed from {to_upd_dict.get(key)} to {criterion_in_dict.get(key)}')
 
     if criterion_to_upd:
         criterion.last_updated_by_user_id = user_id
