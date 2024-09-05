@@ -1,11 +1,12 @@
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from gearbox.util import status
-from gearbox.schemas import CriterionStaging as CriterionStagingSchema, CriterionStagingCreate, CriterionPublish, CriterionCreate, CriterionStagingUpdate, CriterionHasValueCreate, ElCriteriaHasCriterionPublish, ElCriteriaHasCriterionCreate
+from gearbox.schemas import CriterionStaging as CriterionStagingSchema, CriterionStagingCreate, CriterionPublish, CriterionCreate, CriterionStagingUpdate, CriterionHasValueCreate, CriterionStagingSearchResult
 from gearbox.crud import criterion_staging_crud , study_version_crud, value_crud, criterion_has_value_crud, input_type_crud
 from typing import List
-from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus
-from gearbox.services import criterion as criterion_service, el_criteria_has_criterion as el_criteria_has_criterion_service
+from gearbox.util.types import StudyVersionStatus, AdjudicationStatus
+from gearbox.services import criterion as criterion_service, value as value_service
+
 from . import logger
 
 async def get_criterion_staging(session: Session, id: int) -> CriterionStagingSchema:
@@ -16,9 +17,23 @@ async def get_criteria_staging(session: Session) -> List[CriterionStagingSchema]
     cs = await criterion_staging_crud.get_multi(session)
     return cs
 
-async def get_criterion_staging_by_ec_id(session: Session, eligibility_criteria_id: int) -> List[CriterionStagingSchema]:
+#async def get_criterion_staging_by_ec_id(session: Session, eligibility_criteria_id: int) -> List[CriterionStagingSchema]:
+async def get_criterion_staging_by_ec_id(session: Session, eligibility_criteria_id: int) -> List[CriterionStagingSearchResult]:
     cs = await criterion_staging_crud.get_criterion_staging_by_ec_id(session, eligibility_criteria_id)
-    return cs
+    criterion_staging_ret = []
+
+    for c in cs:
+        criterion_staging = CriterionStagingSearchResult(**c.__dict__)
+        # only call get if values exist, because we are calling it with the ids parameter
+        # and if ids are None, then value service will return all values in the table
+        if c.values:
+            values = await value_service.get_values(session=session, ids=c.values)
+            if values: 
+                criterion_staging.value_list = values 
+
+        criterion_staging_ret.append(criterion_staging)
+
+    return criterion_staging_ret
 
 async def create(session: Session, staging_criterion: CriterionStagingCreate)-> CriterionStagingSchema:
 
@@ -53,7 +68,7 @@ async def publish_criterion(session: Session, criterion: CriterionPublish, user_
 
     # Call update method below - set criterion_staging criteria adjudication status to active
     stage_upd = CriterionStagingUpdate(id=criterion.criterion_staging_id, criterion_id=new_criterion.id, criterion_adjudication_status=AdjudicationStatus.ACTIVE)
-    update(session=session, criterion=stage_upd, user_id=user_id)
+    await update(session=session, criterion=stage_upd, user_id=user_id)
 
 async def update(session: Session, criterion: CriterionStagingUpdate, user_id: int ) -> CriterionStagingSchema:
 
@@ -68,7 +83,7 @@ async def update(session: Session, criterion: CriterionStagingUpdate, user_id: i
     # Track any updates besides status updates for logging
     for key in criterion_in_dict:
         if criterion_in_dict.get(key) and criterion_in_dict.get(key) != to_upd_dict.get(key) and "status" not in key:
-            updates.append(f'criterion_staging update:  {key} changed from {criterion_in_dict.get(key)} to {to_upd_dict.get(key)}')
+            updates.append(f'criterion_staging update:  {key} changed from {to_upd_dict.get(key)} to {criterion_in_dict.get(key)}')
 
     if criterion_to_upd:
         criterion.last_updated_by_user_id = user_id

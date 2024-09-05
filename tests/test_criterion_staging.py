@@ -1,6 +1,11 @@
 import pytest
 
 from gearbox import config
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import select
+from gearbox.models import CriterionStaging, Criterion
+from gearbox.util.types import AdjudicationStatus
+
 
 @pytest.mark.asyncio
 def test_get_criterion_staging(setup_database, client):
@@ -23,8 +28,23 @@ def test_get_criterion_staging_not_found(setup_database, client):
 @pytest.mark.parametrize(
     "data", [ 
         {
-            "id": 1,
-            "criterion_adjudication_status": "INACTIVE"
+            "id": 28,
+            "eligibility_criteria_id": 3,
+            "input_id": None,
+            "code": "karnofsky_score",
+            "display_name": "display name",
+            "description": "description",
+            "create_date": "2024-07-22T12:26:36",
+            "criterion_adjudication_status": "NEW",
+            "echc_adjudication_status": "NEW",
+            "ontology_code_id": None,
+            "input_type_id": 3,
+            "start_char": 2304,
+            "end_char": 2340,
+            "text": "TEST",
+            "criterion_id": None,
+            "last_updated_by_user_id": 1,
+            "values": []
         }
     ]
 )
@@ -51,10 +71,34 @@ def test_publish_criterion_staging(setup_database, client, data, connection):
     Test endpoint that publishes a criterion_staging object to the criterion table
     """
 
+    errors = []
     fake_jwt = "1.2.3"
     resp = client.post(f"/criterion-staging-publish-criterion", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
-    assert str(resp.status_code).startswith("20")
+
+    try:
+        Session = sessionmaker(bind=connection)
+        db_session = Session()
+        stmt = select(CriterionStaging).where(CriterionStaging.id == data.get('criterion_staging_id'))
+        row = db_session.execute(stmt).first()
+
+        if not row:
+            errors.append(f"ERROR: publish criterion_staging test failed to confirm new criterion_staging row found.")
+
+        # validate status of newly published criterion staging
+        elif row.CriterionStaging.criterion_adjudication_status != AdjudicationStatus.ACTIVE:
+            errors.append(f"The published criterion (id={data.get('criterion_staging_id')} has the wrong status: {row.CriterionStaging.criterion_adjudication_status}")
+
+        # validate row for new criterion was created
+        stmt = select(Criterion).where(Criterion.id == row.CriterionStaging.criterion_id)
+        row = db_session.execute(stmt).first()
+        if not row:
+            errors.append(f"Criterion not created during publish test for criterion_staging id {row.CriterionStaging.id}")
+        
+    except Exception as e:
+        errors.append(f"SQL ERROR: publishing criterion_staging to criterion: {e}")
+
+    assert not errors, "errors occurred: \n{}".format("\n".join(errors))
 
 @pytest.mark.parametrize(
     "data", [ 
@@ -126,57 +170,3 @@ def test_post_criterion_staging(setup_database, client, data, connection):
     resp = client.post(f"/criterion-staging", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
     assert str(resp.status_code).startswith("20")
-
-@pytest.mark.parametrize(
-    "data", [ 
-        {
-            "criterion_id": 28,
-            "eligibility_criteria_id": 3,
-            "value_id": 4,
-            "criterion_staging_id": 25
-        }
-    ]
-)
-def test_publish_echc_criterion_staging(setup_database, client, data, connection):
-    """
-    This test publishes an el_criteria_has_criterion row (study-specific criteria)
-    from the criterion_staging table. This is done as part of the finalization of the
-    echc adjudication process.
-    """
-
-    fake_jwt = "1.2.3"
-    resp = client.post(f"/criterion-staging-publish-echc", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
-    resp.raise_for_status()
-    assert str(resp.status_code).startswith("20")
-
-@pytest.mark.parametrize(
-    "data", [ 
-        {
-            "criterion_id": 29,
-            "eligibility_criteria_id": 3,
-            "value_id": 4,
-            "criterion_staging_id": 25
-        }
-    ]
-)
-def test_publish_echc_criterion_staging_invalid_status(setup_database, client, data, connection):
-
-    fake_jwt = "1.2.3"
-    resp = client.post(f"/criterion-staging-publish-echc", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
-    resp.raise_for_status()
-    assert str(resp.status_code).startswith("20")
-
-@pytest.mark.parametrize(
-    "data", [ 
-        {
-            "criterion_id": 28,
-            "eligibility_criteria_id": 3,
-            "value_id": 4
-        }
-    ]
-)
-def test_publish_echc_criterion_staging_invalid_missing_staging_id(setup_database, client, data, connection):
-
-    fake_jwt = "1.2.3"
-    resp = client.post(f"/criterion-staging-publish-echc", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
-    assert str(resp.status_code).startswith("422")
