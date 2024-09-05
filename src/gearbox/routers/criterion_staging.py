@@ -5,11 +5,7 @@ from gearbox.util import status
 from gearbox.services import criterion_staging as criterion_staging_service
 from gearbox.admin_login import admin_required
 
-<<<<<<< HEAD
-from gearbox.schemas import CriterionStaging, CriterionStagingUpdate, CriterionPublish, CriterionStagingCreate, ElCriteriaHasCriterionPublish
-=======
-from gearbox.schemas import CriterionStaging, CriterionStagingUpdate, CriterionPublish, CriterionStagingCreate, CriterionStagingSearchResult
->>>>>>> GEAR-423
+from gearbox.schemas import CriterionStaging, CriterionStagingUpdate, CriterionPublish, CriterionStagingCreate, CriterionStagingSearchResult, ElCriteriaHasCriterionPublish
 from gearbox import deps
 from gearbox import auth 
 
