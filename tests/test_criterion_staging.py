@@ -1,6 +1,11 @@
 import pytest
 
 from gearbox import config
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import select
+from gearbox.models import CriterionStaging, Criterion
+from gearbox.util.types import AdjudicationStatus
+
 
 @pytest.mark.asyncio
 def test_get_criterion_staging(setup_database, client):
@@ -23,8 +28,23 @@ def test_get_criterion_staging_not_found(setup_database, client):
 @pytest.mark.parametrize(
     "data", [ 
         {
-            "id": 1,
-            "criterion_adjudication_status": "INACTIVE"
+            "id": 28,
+            "eligibility_criteria_id": 3,
+            "input_id": None,
+            "code": "karnofsky_score",
+            "display_name": "display name",
+            "description": "description",
+            "create_date": "2024-07-22T12:26:36",
+            "criterion_adjudication_status": "NEW",
+            "echc_adjudication_status": "NEW",
+            "ontology_code_id": None,
+            "input_type_id": 3,
+            "start_char": 2304,
+            "end_char": 2340,
+            "text": "TEST",
+            "criterion_id": None,
+            "last_updated_by_user_id": 1,
+            "values": []
         }
     ]
 )
@@ -59,10 +79,34 @@ criterion_staging_id: Optional[int]
 )
 def test_publish_criterion_staging(setup_database, client, data, connection):
 
+    errors = []
     fake_jwt = "1.2.3"
     resp = client.post(f"/criterion-staging-publish", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
-    assert str(resp.status_code).startswith("20")
+
+    try:
+        Session = sessionmaker(bind=connection)
+        db_session = Session()
+        stmt = select(CriterionStaging).where(CriterionStaging.id == data.get('criterion_staging_id'))
+        row = db_session.execute(stmt).first()
+
+        if not row:
+            errors.append(f"ERROR: publish criterion_staging test failed to confirm new study_algorithm_engine row created.")
+
+        # validate status of newly published criterion staging
+        elif row.CriterionStaging.criterion_adjudication_status != AdjudicationStatus.ACTIVE:
+            errors.append(f"The published criterion (id={data.get('criterion_staging_id')} has the wrong status: {row.CriterionStaging.criterion_adjudication_status}")
+
+        # validate row for new criterion was created
+        stmt = select(Criterion).where(Criterion.id == row.CriterionStaging.criterion_id)
+        row = db_session.execute(stmt).first()
+        if not row:
+            errors.append(f"Criterion not created during publish test for criterion_staging id {row.CriterionStaging.id}")
+        
+    except Exception as e:
+        errors.append(f"SQL ERROR: create_new_study_algorithm_engine: {e}")
+
+    assert not errors, "errors occurred: \n{}".format("\n".join(errors))
 
 @pytest.mark.parametrize(
     "data", [ 
