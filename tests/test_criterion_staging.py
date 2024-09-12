@@ -171,3 +171,35 @@ def test_post_criterion_staging(setup_database, client, data, connection):
     resp = client.post(f"/criterion-staging", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
     assert str(resp.status_code).startswith("20")
+
+@pytest.mark.parametrize(
+    "data", [ 
+        {
+            "id": 29,
+            "eligibility_criteria_id": 3,
+            "input_id": None,
+            "code": "save_test_criterion",
+            "display_name": "save test ",
+            "description": "description",
+            "create_date": "2024-07-22T12:26:36",
+            "ontology_code_id": None,
+            "input_type_id": 3,
+            "criterion_id": None,
+            "values": []
+        }
+    ]
+)
+
+def test_save_criterion_staging(setup_database, client, data, connection):
+
+    fake_jwt = "1.2.3"
+    resp = client.post(f"/save-criterion-staging", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    resp.raise_for_status()
+    assert str(resp.status_code).startswith("20")
+
+def test_accept_criterion_staging(setup_database, client, connection):
+
+    fake_jwt = "1.2.3"
+    resp = client.post(f"/accept-criterion-staging/1", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp.raise_for_status()
+    assert str(resp.status_code).startswith("20")

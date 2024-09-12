@@ -95,3 +95,19 @@ async def update(session: Session, criterion: CriterionStagingUpdate, user_id: i
         logger.info(f"Criterion staging id: {criterion_to_upd.id} updated by user_id: {user_id} updates include: {updates}")
 
     return upd_criterion
+
+
+async def accept_criterion_staging(session: Session, id: int, user_id: int):
+    """
+    Comments: This function sets the indicated criterion_staging row criterion_adjudication_status
+    to 'ACTIVE' if the row is in 'EXISTING' status indicating that the adjudication
+    process confirmed that the criterion already exists
+    """
+    # GET THE criterion_staging ROW
+    criterion_staging = await get_criterion_staging(session=session, id=id)
+    if criterion_staging.criterion_adjudication_status != AdjudicationStatus.EXISTING:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: cannot accept criterion staging {id} because status is {criterion_staging.criterion_adjudication_status} needs to be {AdjudicationStatus.EXISTING}.")
+    
+    criterion_staging.criterion_adjudication_status = AdjudicationStatus.ACTIVE
+    criterion_upd = CriterionStagingUpdate(**criterion_staging.__dict__)
+    await update(session=session, criterion=criterion_upd, user_id=user_id)

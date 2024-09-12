@@ -48,6 +48,7 @@ async def save_object(
     """
     Comments: Save raw_criteria 
     """
+    # pydantic needs a root node in the json
     raw_criteria = RawCriteriaIn(data=body)
     new_raw_criteria = await raw_criteria_service.create_raw_criteria(session, raw_criteria)
     return JSONResponse(status.HTTP_200_OK)
