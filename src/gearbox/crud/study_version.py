@@ -1,3 +1,4 @@
+from . import logger
 from .base import CRUDBase
 from typing import List
 from gearbox.models import StudyVersion, EligibilityCriteria
@@ -5,6 +6,8 @@ from gearbox.schemas import StudyVersionSearchResults, StudyVersionCreate, Study
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, update, select, exc, or_
 from gearbox.util.types import StudyVersionStatus 
+from fastapi import HTTPException
+from gearbox.util import status
 
 class CRUDStudyVersion(CRUDBase [StudyVersion, StudyVersionSchema, StudyVersionCreate]):
 
@@ -27,6 +30,22 @@ class CRUDStudyVersion(CRUDBase [StudyVersion, StudyVersionSchema, StudyVersionC
         study_version = result.unique().scalars().first()
         return study_version
 
+    async def get_latest_study_version(self, current_session: Session, study_id: int) -> StudyVersionSchema:
+
+        study_version = None
+        try:
+            max_ver_subq = select(func.max(StudyVersion.study_version_num)) \
+                .where(StudyVersion.study_id == study_id)
+            stmt = select(StudyVersion).where(StudyVersion.study_id == study_id). \
+                where(StudyVersion.study_version_num == max_ver_subq)
+                #join(max_ver_subq, StudyVersion.study_version_num == max_ver_subq)
+            result = await current_session.execute(stmt)
+            study_version = result.unique().scalars().first()
+        except exc.SQLAlchemyError as e:
+            logger.error(f"SQL ERROR IN get_latest_study_version method: {e}")
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")    
+
+        return study_version
 
     
 study_version_crud = CRUDStudyVersion(StudyVersion)
