@@ -1,4 +1,3 @@
-from . import logger
 from .base import CRUDBase
 from typing import List
 from gearbox.models import StudyVersion, EligibilityCriteria
@@ -42,7 +41,6 @@ class CRUDStudyVersion(CRUDBase [StudyVersion, StudyVersionSchema, StudyVersionC
             result = await current_session.execute(stmt)
             study_version = result.unique().scalars().first()
         except exc.SQLAlchemyError as e:
-            logger.error(f"SQL ERROR IN get_latest_study_version method: {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")    
 
         return study_version
