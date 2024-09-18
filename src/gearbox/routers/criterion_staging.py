@@ -51,7 +51,7 @@ async def publish(
     await criterion_staging_service.publish_criterion(session=session, criterion=body, user_id=int(user_id))
 
 @mod.post("/criterion-staging", response_model=CriterionStaging, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
-async def save_object(
+async def create_object(
     body: CriterionStagingCreate,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
@@ -62,7 +62,7 @@ async def save_object(
     return new_criterion_staging
 
 @mod.post("/save-criterion-staging", response_model=CriterionStaging, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
-async def update_object(
+async def save_object(
     body: CriterionStagingUpdate,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
@@ -90,13 +90,7 @@ async def accept_object(
     for criterion that are identified as 'EXISTING' and are confirmed as existing
     by the adjudicator
     """
-
-    # NEED TO CHECK THAT THE CURRENT STATUS IS 'EXISTING' BEFORE SETTING TO 'ACTIVE'
-
-    # NEED TO CREATE AN UPDATE OBJECT WITH ONLY ID AND STATUS = 'ACTIVE'
-
-    # body.criterion_adjudication_status = AdjudicationStatus.IN_PROCESS
-    await criterion_staging_service.accept_criterion_staging(session=session , id=criterion_staging_id, user_id=user_id )
+    await criterion_staging_service.accept_criterion_staging(session=session , id=criterion_staging_id, user_id=int(user_id))
 
 def init_app(app):
     app.include_router(mod, tags=["criterion-staging"])
