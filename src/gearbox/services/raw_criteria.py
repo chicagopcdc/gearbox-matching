@@ -5,7 +5,7 @@ from gearbox.models import RawCriteria
 from gearbox.schemas import RawCriteriaCreate, RawCriteria as RawCriteriaSchema, StudyVersionCreate, RawCriteriaIn, CriterionStagingCreate
 from gearbox.util import status 
 from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus
-from gearbox.crud import raw_criteria_crud, criterion_crud
+from gearbox.crud import raw_criteria_crud, criterion_crud, study_version_crud
 from gearbox.services import study as study_service, study_version as study_version_service, eligibility_criteria as eligibility_criteria_service, criterion_staging as criterion_staging_service
 from typing import List
 
@@ -49,6 +49,20 @@ async def stage_criteria(session: Session, raw_criteria: RawCriteria):
 
         res = await criterion_staging_service.create(session, csc)
 
+def get_incoming_raw_criteria(raw_criteria: RawCriteriaIn)-> List:
+    extracted_crit = []
+    raw_text = raw_criteria.data.get('text')
+    for labelinfo in raw_criteria.data.get('label'):
+        code=labelinfo[2]
+        start_span=labelinfo[0]
+        end_span=labelinfo[1]
+        text = raw_text[start_span:end_span]
+
+        print(f"{labelinfo[2], labelinfo[0], labelinfo[1], text}")
+
+        crit_info = (code,text.strip())
+        extracted_crit.append(crit_info)
+    return extracted_crit
 
 async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn):
 
@@ -65,20 +79,63 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn):
          logger.error(f"Study for id: {ext_id} not found for update.") 
          raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study for id: {ext_id} not found for update.") 
     
-    # Create a new study_version
-    comments = ''.join(raw_criteria.data.get("Comments"))
-    new_study_version = StudyVersionCreate(study_id=study_id, status=StudyVersionStatus.NEW, comments=comments)
-    study_version = await study_version_service.create_study_version(session,new_study_version)
+    # Get existing study_version if exists
+    latest_study_version = await study_version_crud.get_latest_study_version(current_session=session, study_id=study_id)
 
-    # Create a new eligibility criteria
-    eligibility_criteria = await eligibility_criteria_service.create_eligibility_criteria(session)
+    if not latest_study_version or latest_study_version.status in (StudyVersionStatus.ACTIVE, StudyVersionStatus.INACTIVE):
+        """
+        If the study version is currently active or inactive create a new study version
+        and associated relationships.
+        """
+    
+        # Create a new eligibility criteria
+        eligibility_criteria = await eligibility_criteria_service.create_eligibility_criteria(session)
 
-    # Create the new raw criteria
-    new_raw_criteria = RawCriteriaCreate(data=raw_criteria.data, eligibility_criteria_id=eligibility_criteria.id)
-    raw_criteria = await raw_criteria_crud.create(db=session, obj_in=new_raw_criteria)
+        # Create a new study_version
+        comments = ''.join(raw_criteria.data.get("Comments"))
+        new_study_version = StudyVersionCreate(study_id=study_id, status=StudyVersionStatus.NEW, comments=comments, eligibility_criteria_id=eligibility_criteria.id)
+        study_version = await study_version_service.create_study_version(session,new_study_version)
 
-    await stage_criteria(session, raw_criteria)
-    logger.info(f"Raw criteria for study {ext_id} successfully staged.")
+        # Save the new raw criteria to the db
+        new_raw_criteria = RawCriteriaCreate(data=raw_criteria.data, eligibility_criteria_id=eligibility_criteria.id)
+        raw_criteria = await raw_criteria_crud.create(db=session, obj_in=new_raw_criteria)
+
+        # Create criterion_staging rows from the raw criteria json
+        await stage_criteria(session, raw_criteria)
+        logger.info(f"Raw criteria for study {ext_id} successfully staged.")
+
+    else: 
+        """
+        This logic is for situations when the user re-uploads from doccano and the process
+        needs to account for any changes to criteria in the criteiron_staging table
+        """
+        # set to inactive all criterion_staging rows for labels (code) that do not exist
+        # in the current doccano output
+        #for label in raw_criteria.data.get('label'):
+        #    print(f"LABEL: {label}")
+        # get all codes in the doccano output
+        # get all codes in the criterion_staging table
+        criterion_staging = await criterion_staging_service.get_criterion_staging_by_ec_id(session=session , eligibility_criteria_id=latest_study_version.eligibility_criteria_id )
+        print(f"LEN CURRENT: {len(criterion_staging)}")
+        incoming_raw_criteria = get_incoming_raw_criteria(raw_criteria)
+        #existing_staging = []
+        #for crit in criterion_staging:
+        #    existing_staging.append((crit.code, crit.text))
+
+        existing_staging = [(crit.code, crit.text) for crit in criterion_staging]        
+        #print(f"INCOMING RAW CRI: {incoming_raw_criteria}")
+        #print(f"EXISTING STAGING: {existing_staging}")
+
+        new_to_add = set(incoming_raw_criteria) - set(existing_staging)
+        print(f"LEN NEW TO ADD: {len(new_to_add)}")
+        old_to_set_inactive = set(existing_staging) - set(incoming_raw_criteria)
+        print(f"LEN OLD: {len(old_to_set_inactive)}")
+
+
+
+
+
+
 
 async def update_raw_criteria(session: Session, raw_criteria: RawCriteriaCreate, raw_criteria_id: int):
     raw_criteria_in = await raw_criteria_crud.get(db=session, id=raw_criteria_id)
