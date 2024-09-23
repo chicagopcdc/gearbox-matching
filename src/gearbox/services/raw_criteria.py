@@ -65,8 +65,8 @@ async def stage_criteria(session: Session, raw_criteria: RawCriteria):
         )
 
 
-def get_incoming_raw_criteria(raw_criteria: RawCriteriaIn)-> List:
-    extracted_crit = []
+def get_incoming_raw_criteria(raw_criteria: RawCriteriaIn)-> dict:
+    extracted_crit = {}
     raw_text = raw_criteria.data.get('text')
     for labelinfo in raw_criteria.data.get('label'):
         code=labelinfo[2]
@@ -75,7 +75,7 @@ def get_incoming_raw_criteria(raw_criteria: RawCriteriaIn)-> List:
         text = raw_text[start_span:end_span]
 
         crit_info = (code,text.strip(), start_span, end_span)
-        extracted_crit.append(crit_info)
+        extracted_crit.update({(code,text.strip()):(start_span,end_span)})
     return extracted_crit
 
 async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, user_id: int):
@@ -128,26 +128,26 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
 
         existing_staging = [(crit.code, crit.text) for crit in criterion_staging]        
 
-        incoming_raw_criteria_code_text = [(inc[0], inc[1]) for inc in incoming_raw_criteria]
-        new_to_add = set(incoming_raw_criteria_code_text) - set(existing_staging)
+        #incoming_raw_criteria_code_text = [(inc[0], inc[1]) for inc in incoming_raw_criteria]
+        new_to_add = set(incoming_raw_criteria.keys()) - set(existing_staging)
+        new_to_add_dict = {k:v for k,v in incoming_raw_criteria.items() if k in new_to_add}
 
         # get list of new_to_add raw_criteria objs and pass to stage func
         incoming_text = raw_criteria.data.get('text')
-        for new in new_to_add:
-            for incoming in raw_criteria.data.get('label'):
-                if new == (incoming[2],incoming_text[incoming[0]:incoming[1]]):
-                    await create_staging_criterion(session=session,
-                        input_id=raw_criteria.data.get('id'),
-                        eligibility_criteria_id=latest_study_version.eligibility_criteria_id,
-                        code=incoming[2],
-                        start_span=incoming[0],
-                        end_span=incoming[1],
-                        text = incoming_text[incoming[0]:incoming[1]]
-                    )
+        for incoming in raw_criteria.data.get('label'):
+            if new_to_add_dict.get((incoming[2],incoming_text[incoming[0]:incoming[1]])):
+                await create_staging_criterion(session=session,
+                    input_id=raw_criteria.data.get('id'),
+                    eligibility_criteria_id=latest_study_version.eligibility_criteria_id,
+                    code=incoming[2],
+                    start_span=incoming[0],
+                    end_span=incoming[1],
+                    text = incoming_text[incoming[0]:incoming[1]]
+                )
                     
         # set any criteria to INACTIVE that do not exist in incoming
-        old_to_set_inactive = set(existing_staging) - set(incoming_raw_criteria_code_text)
-        existing_no_change = set(existing_staging).union(set(incoming_raw_criteria_code_text))
+        old_to_set_inactive = set(existing_staging) - set(incoming_raw_criteria.keys())
+        existing_no_change = set(existing_staging).union(set(incoming_raw_criteria.keys()))
         for crit in criterion_staging:
             # set any criteria to INACTIVE that do not exist in incoming
             if (crit.code, crit.text) in old_to_set_inactive:
@@ -156,10 +156,9 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
             # only update start_char and end_char if no change in text
             elif (crit.code, crit.text) in existing_no_change:
                 # get start_char and end-char from incoming_raw_criteria
-                for inc in incoming_raw_criteria:
+                for inc in incoming_raw_criteria.keys(): # CHANGED
                     if (crit.code, crit.text) == (inc[0], inc[1]):
-                        crit.start_char = inc[2]
-                        crit.end_char= inc[3]
+                        crit.start_char, crit.end_char = incoming_raw_criteria.get(((inc[0],inc[1])))
                         await criterion_staging_service.update(session=session, criterion=crit, user_id=user_id)
 
 async def update_raw_criteria(session: Session, raw_criteria: RawCriteriaCreate, raw_criteria_id: int):
