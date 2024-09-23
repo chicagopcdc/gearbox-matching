@@ -44,13 +44,14 @@ async def save_object(
     body: dict,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
+    user_id: int = Depends(auth.authenticate_user)
 ):
     """
     Comments: Save raw_criteria 
     """
     # pydantic needs a root node in the json
     raw_criteria = RawCriteriaIn(data=body)
-    new_raw_criteria = await raw_criteria_service.create_raw_criteria(session, raw_criteria)
+    new_raw_criteria = await raw_criteria_service.create_raw_criteria(session, raw_criteria, user_id)
     return JSONResponse(status.HTTP_200_OK)
 
 def init_app(app):

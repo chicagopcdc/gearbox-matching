@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession as Session
 from . import logger
 from fastapi import HTTPException
 from gearbox.models import RawCriteria
-from gearbox.schemas import RawCriteriaCreate, RawCriteria as RawCriteriaSchema, StudyVersionCreate, RawCriteriaIn, CriterionStagingCreate
+from gearbox.schemas import RawCriteriaCreate, RawCriteria as RawCriteriaSchema, StudyVersionCreate, RawCriteriaIn, CriterionStagingCreate, CriterionStagingUpdate
 from gearbox.util import status 
 from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus
 from gearbox.crud import raw_criteria_crud, criterion_crud, study_version_crud
@@ -22,6 +22,26 @@ async def get_raw_criterias(session: Session) -> List[RawCriteria]:
     raw_crit = await raw_criteria_crud.get_multi(session)
     return raw_crit
 
+async def create_staging_criterion(session: Session, input_id: int, eligibility_criteria_id: int,
+        code: str, start_span: int, end_span:int, text: str):
+
+        criterion_id = await criterion_crud.get_criterion_id_by_code(db=session, code=code)
+
+        csc = CriterionStagingCreate(
+            input_id = input_id,
+            eligibility_criteria_id = eligibility_criteria_id,
+            code = code,
+            criterion_adjudication_status = AdjudicationStatus.NEW.value if criterion_id == None else AdjudicationStatus.EXISTING.value,
+            echc_adjudication_status = EchcAdjudicationStatus.NEW.value,
+            start_char = start_span,
+            end_char = end_span,
+            text = text,
+            criterion_id = criterion_id
+        )
+
+        res = await criterion_staging_service.create(session, csc)
+
+
 async def stage_criteria(session: Session, raw_criteria: RawCriteria):
 
     raw_text = raw_criteria.data.get('text')
@@ -35,19 +55,15 @@ async def stage_criteria(session: Session, raw_criteria: RawCriteria):
         start_span = label[0]
         end_span = label[1]
 
-        csc = CriterionStagingCreate(
-            input_id = input_id,
-            eligibility_criteria_id = raw_criteria.eligibility_criteria_id,
-            code = code,
-            criterion_adjudication_status = AdjudicationStatus.NEW.value if criterion_id == None else AdjudicationStatus.EXISTING.value,
-            echc_adjudication_status = EchcAdjudicationStatus.NEW.value,
-            start_char = start_span,
-            end_char = end_span,
-            text = raw_text[start_span:end_span],
-            criterion_id = criterion_id
+        await create_staging_criterion(session=session,
+            input_id=input_id,
+            eligibility_criteria_id=raw_criteria.eligibility_criteria_id,
+            code=code,
+            start_span=start_span,
+            end_span=end_span,
+            text = raw_text[start_span:end_span]
         )
 
-        res = await criterion_staging_service.create(session, csc)
 
 def get_incoming_raw_criteria(raw_criteria: RawCriteriaIn)-> List:
     extracted_crit = []
@@ -58,13 +74,11 @@ def get_incoming_raw_criteria(raw_criteria: RawCriteriaIn)-> List:
         end_span=labelinfo[1]
         text = raw_text[start_span:end_span]
 
-        print(f"{labelinfo[2], labelinfo[0], labelinfo[1], text}")
-
-        crit_info = (code,text.strip())
+        crit_info = (code,text.strip(), start_span, end_span)
         extracted_crit.append(crit_info)
     return extracted_crit
 
-async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn):
+async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, user_id: int):
 
     """
     This function will create a new raw_criteria for adjudication along with associated
@@ -109,33 +123,44 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn):
         This logic is for situations when the user re-uploads from doccano and the process
         needs to account for any changes to criteria in the criteiron_staging table
         """
-        # set to inactive all criterion_staging rows for labels (code) that do not exist
-        # in the current doccano output
-        #for label in raw_criteria.data.get('label'):
-        #    print(f"LABEL: {label}")
-        # get all codes in the doccano output
-        # get all codes in the criterion_staging table
         criterion_staging = await criterion_staging_service.get_criterion_staging_by_ec_id(session=session , eligibility_criteria_id=latest_study_version.eligibility_criteria_id )
-        print(f"LEN CURRENT: {len(criterion_staging)}")
         incoming_raw_criteria = get_incoming_raw_criteria(raw_criteria)
-        #existing_staging = []
-        #for crit in criterion_staging:
-        #    existing_staging.append((crit.code, crit.text))
 
         existing_staging = [(crit.code, crit.text) for crit in criterion_staging]        
-        #print(f"INCOMING RAW CRI: {incoming_raw_criteria}")
-        #print(f"EXISTING STAGING: {existing_staging}")
 
-        new_to_add = set(incoming_raw_criteria) - set(existing_staging)
-        print(f"LEN NEW TO ADD: {len(new_to_add)}")
-        old_to_set_inactive = set(existing_staging) - set(incoming_raw_criteria)
-        print(f"LEN OLD: {len(old_to_set_inactive)}")
+        incoming_raw_criteria_code_text = [(inc[0], inc[1]) for inc in incoming_raw_criteria]
+        new_to_add = set(incoming_raw_criteria_code_text) - set(existing_staging)
 
-
-
-
-
-
+        # get list of new_to_add raw_criteria objs and pass to stage func
+        incoming_text = raw_criteria.data.get('text')
+        for new in new_to_add:
+            for incoming in raw_criteria.data.get('label'):
+                if new == (incoming[2],incoming_text[incoming[0]:incoming[1]]):
+                    await create_staging_criterion(session=session,
+                        input_id=raw_criteria.data.get('id'),
+                        eligibility_criteria_id=latest_study_version.eligibility_criteria_id,
+                        code=incoming[2],
+                        start_span=incoming[0],
+                        end_span=incoming[1],
+                        text = incoming_text[incoming[0]:incoming[1]]
+                    )
+                    
+        # set any criteria to INACTIVE that do not exist in incoming
+        old_to_set_inactive = set(existing_staging) - set(incoming_raw_criteria_code_text)
+        existing_no_change = set(existing_staging).union(set(incoming_raw_criteria_code_text))
+        for crit in criterion_staging:
+            # set any criteria to INACTIVE that do not exist in incoming
+            if (crit.code, crit.text) in old_to_set_inactive:
+                crit.criterion_adjudication_status = AdjudicationStatus.INACTIVE
+                await criterion_staging_service.update(session=session, criterion=crit, user_id=user_id)
+            # only update start_char and end_char if no change in text
+            elif (crit.code, crit.text) in existing_no_change:
+                # get start_char and end-char from incoming_raw_criteria
+                for inc in incoming_raw_criteria:
+                    if (crit.code, crit.text) == (inc[0], inc[1]):
+                        crit.start_char = inc[2]
+                        crit.end_char= inc[3]
+                        await criterion_staging_service.update(session=session, criterion=crit, user_id=user_id)
 
 async def update_raw_criteria(session: Session, raw_criteria: RawCriteriaCreate, raw_criteria_id: int):
     raw_criteria_in = await raw_criteria_crud.get(db=session, id=raw_criteria_id)
