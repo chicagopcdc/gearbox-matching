@@ -84,6 +84,10 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
     relationships including: study_version, and eligibility_criteria,
     and criteria_staging. The criteria_staging table is used to stage the criteria
     for adjudication. 
+
+    If the same study_version was re-uploaded from doccano, this function will save
+    any adjudication that may have been performed on existing criteria and upload any 
+    criteria that have not yet been staged. 
     """
     # Get the study_id for the study based on the id in the raw criteria json
     ext_id = raw_criteria.data.get("nct")
@@ -97,8 +101,8 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
 
     if not latest_study_version or latest_study_version.status in (StudyVersionStatus.ACTIVE, StudyVersionStatus.INACTIVE):
         """
-        If the study version is currently active or inactive create a new study version
-        and associated relationships.
+        If the study version does not exist or is currently active or inactive 
+        create a new study version and associated relationships.
         """
     
         # Create a new eligibility criteria
@@ -127,7 +131,9 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
 
         existing_staging = [(crit.code, crit.text) for crit in criterion_staging]        
 
-        #incoming_raw_criteria_code_text = [(inc[0], inc[1]) for inc in incoming_raw_criteria]
+        # find any criteria in the incoming raw_criteria that do not exist
+        # in the criterion_staging table. the comparison is based on
+        # a tuple including (code, text)
         new_to_add = set(incoming_raw_criteria.keys()) - set(existing_staging)
         new_to_add_dict = {k:v for k,v in incoming_raw_criteria.items() if k in new_to_add}
 
@@ -147,6 +153,7 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
         # set of criteria that do not exist in incoming - set to INACTIVE
         old_to_set_inactive = set(existing_staging) - set(incoming_raw_criteria.keys())
         # set of criteria that did not change (text) - update start/end char only
+        # in case the raw text has changed
         existing_no_change = set(existing_staging).union(set(incoming_raw_criteria.keys()))
         for crit in criterion_staging:
             # set any criteria to INACTIVE that do not exist in incoming
@@ -156,7 +163,7 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
             # only update start_char and end_char if no change in text
             elif (crit.code, crit.text) in existing_no_change:
                 # get start_char and end-char from incoming_raw_criteria
-                for inc in incoming_raw_criteria.keys(): # CHANGED
+                for inc in incoming_raw_criteria.keys():
                     if (crit.code, crit.text) == inc:
                         crit.start_char, crit.end_char = incoming_raw_criteria.get((inc))
                         await criterion_staging_service.update(session=session, criterion=crit, user_id=user_id)
