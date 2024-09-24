@@ -74,7 +74,6 @@ def get_incoming_raw_criteria(raw_criteria: RawCriteriaIn)-> dict:
         end_span=labelinfo[1]
         text = raw_text[start_span:end_span]
 
-        crit_info = (code,text.strip(), start_span, end_span)
         extracted_crit.update({(code,text.strip()):(start_span,end_span)})
     return extracted_crit
 
@@ -145,8 +144,9 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
                     text = incoming_text[incoming[0]:incoming[1]]
                 )
                     
-        # set any criteria to INACTIVE that do not exist in incoming
+        # set of criteria that do not exist in incoming - set to INACTIVE
         old_to_set_inactive = set(existing_staging) - set(incoming_raw_criteria.keys())
+        # set of criteria that did not change (text) - update start/end char only
         existing_no_change = set(existing_staging).union(set(incoming_raw_criteria.keys()))
         for crit in criterion_staging:
             # set any criteria to INACTIVE that do not exist in incoming
@@ -157,14 +157,14 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
             elif (crit.code, crit.text) in existing_no_change:
                 # get start_char and end-char from incoming_raw_criteria
                 for inc in incoming_raw_criteria.keys(): # CHANGED
-                    if (crit.code, crit.text) == (inc[0], inc[1]):
-                        crit.start_char, crit.end_char = incoming_raw_criteria.get(((inc[0],inc[1])))
+                    if (crit.code, crit.text) == inc:
+                        crit.start_char, crit.end_char = incoming_raw_criteria.get((inc))
                         await criterion_staging_service.update(session=session, criterion=crit, user_id=user_id)
 
 async def update_raw_criteria(session: Session, raw_criteria: RawCriteriaCreate, raw_criteria_id: int):
     raw_criteria_in = await raw_criteria_crud.get(db=session, id=raw_criteria_id)
     if raw_criteria_in:
-        upd_raw_criteria = await raw_criteria_crud.update(db=session, db_obj=raw_criteria_in, obj_in=raw_criteria)
+        await raw_criteria_crud.update(db=session, db_obj=raw_criteria_in, obj_in=raw_criteria)
     else:
         logger.error(f"Raw criteria id: {raw_criteria_id} not found for update.") 
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Raw criteria id: {raw_criteria_id} not found for update.") 
