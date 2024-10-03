@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession as Session
+import json
 from . import logger
 from fastapi import HTTPException
 from gearbox.models import RawCriteria
@@ -15,8 +16,7 @@ async def get_raw_criteria(session: Session, id: int) -> RawCriteriaSchema:
 
 async def get_raw_criteria_by_eligibility_criteria_id(session: Session, eligibility_criteria_id: int):
     raw_crit = await raw_criteria_crud.get_by_eligibility_criteria_id(session, eligibility_criteria_id=eligibility_criteria_id)
-    raw_crit_text = raw_crit.get('text')
-    return raw_crit_text
+    return raw_crit
 
 async def get_raw_criterias(session: Session) -> List[RawCriteria]:
     raw_crit = await raw_criteria_crud.get_multi(session)
@@ -64,7 +64,6 @@ async def stage_criteria(session: Session, raw_criteria: RawCriteria):
             text = raw_text[start_span:end_span]
         )
 
-
 def get_incoming_raw_criteria(raw_criteria: RawCriteriaIn)-> dict:
     extracted_crit = {}
     raw_text = raw_criteria.data.get('text')
@@ -73,8 +72,7 @@ def get_incoming_raw_criteria(raw_criteria: RawCriteriaIn)-> dict:
         start_span=labelinfo[0]
         end_span=labelinfo[1]
         text = raw_text[start_span:end_span]
-
-        extracted_crit.update({(code,text.strip()):(start_span,end_span)})
+        extracted_crit.update({(code,text):(start_span,end_span)})
     return extracted_crit
 
 async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, user_id: int):
@@ -96,7 +94,7 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
          logger.error(f"Study for id: {ext_id} not found for update.") 
          raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study for id: {ext_id} not found for update.") 
     
-    # Get existing study_version if exists
+    # Get existing study_version if existsA
     latest_study_version = await study_version_crud.get_latest_study_version(current_session=session, study_id=study_id)
 
     if not latest_study_version or latest_study_version.status in (StudyVersionStatus.ACTIVE, StudyVersionStatus.INACTIVE):
@@ -107,7 +105,7 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
     
         # Create a new eligibility criteria
         eligibility_criteria = await eligibility_criteria_service.create_eligibility_criteria(session)
-
+        
         # Create a new study_version
         comments = ''.join(raw_criteria.data.get("Comments"))
         new_study_version = StudyVersionCreate(study_id=study_id, status=StudyVersionStatus.NEW, comments=comments, eligibility_criteria_id=eligibility_criteria.id)
@@ -124,15 +122,16 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
     else: 
         """
         This logic is for situations when the user re-uploads from doccano and the process
-        needs to account for any changes to criteria in the criteiron_staging table
+        needs to update the raw criteria and account for any changes to criteria in the 
+        criteiron_staging table
         """
         criterion_staging = await criterion_staging_service.get_criterion_staging_by_ec_id(session=session , eligibility_criteria_id=latest_study_version.eligibility_criteria_id )
         incoming_raw_criteria = get_incoming_raw_criteria(raw_criteria)
 
         existing_staging = [(crit.code, crit.text) for crit in criterion_staging]        
 
-        # find any criteria in the incoming raw_criteria that do not exist
-        # in the criterion_staging table. the comparison is based on
+        # Find any criteria in the incoming raw_criteria that do not exist
+        # in the criterion_staging table. The comparison is based on
         # a tuple including (code, text)
         new_to_add = set(incoming_raw_criteria.keys()) - set(existing_staging)
         new_to_add_dict = {k:v for k,v in incoming_raw_criteria.items() if k in new_to_add}
@@ -140,6 +139,7 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
         # get list of new_to_add raw_criteria objs and pass to stage func
         incoming_text = raw_criteria.data.get('text')
         for incoming in raw_criteria.data.get('label'):
+
             if new_to_add_dict.get((incoming[2],incoming_text[incoming[0]:incoming[1]])):
                 await create_staging_criterion(session=session,
                     input_id=raw_criteria.data.get('id'),
@@ -167,6 +167,18 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
                     if (crit.code, crit.text) == inc:
                         crit.start_char, crit.end_char = incoming_raw_criteria.get((inc))
                         await criterion_staging_service.update(session=session, criterion=crit, user_id=user_id)
+
+        row = {
+            'eligibility_criteria_id':latest_study_version.eligibility_criteria_id,
+            'data':raw_criteria.data
+        }
+
+        await raw_criteria_crud.upsert(
+            db=session,
+            model=RawCriteria,
+            row=row,
+            constraint_cols=[RawCriteria.eligibility_criteria_id]
+        )
 
 async def update_raw_criteria(session: Session, raw_criteria: RawCriteriaCreate, raw_criteria_id: int):
     raw_criteria_in = await raw_criteria_crud.get(db=session, id=raw_criteria_id)
