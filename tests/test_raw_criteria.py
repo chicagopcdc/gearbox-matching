@@ -29,36 +29,27 @@ def test_get_raw_criteria_by_id(setup_database, client):
 def test_create_raw_criteria(setup_database, client):
        
     fake_jwt = "1.2.3"
-    test_raw_crit = "./tests/data/test_raw_criteria.json"
-    with open(test_raw_crit, 'r') as test_raw_crit_file:
-        raw_crit_data = test_raw_crit_file.read()
-    
-    raw_crit_data = json.loads(raw_crit_data)
-    resp = client.post("/raw-criteria", json=raw_crit_data, headers={"Authorization": f"bearer {fake_jwt}"})
+    test_raw_crit = "./tests/data/test_raw_criteria.zip"
+    files = {'file': ('test_create_raw_criteria.zip', open(test_raw_crit, 'rb'), 'application/zip')}
+    resp = client.post("/raw-criteria", files=files, headers={"Authorization": f"bearer {fake_jwt}"})
     assert str(resp.status_code).startswith("20")
 
 @pytest.mark.asyncio
 def test_create_raw_criteria_invalid_nct_id(setup_database, client):
        
     fake_jwt = "1.2.3"
-    test_raw_crit = "./tests/data/test_raw_criteria_invalid_nct_id.json"
-    with open(test_raw_crit, 'r') as test_raw_crit_file:
-        raw_crit_data = test_raw_crit_file.read()
-    
-    raw_crit_data = json.loads(raw_crit_data)
-    resp = client.post("/raw-criteria", json=raw_crit_data, headers={"Authorization": f"bearer {fake_jwt}"})
+    test_raw_crit = "./tests/data/test_raw_criteria_invalid_nct_id.zip"
+    files = {'file': ('test_raw_criteria_invalid_nct_id.zip', open(test_raw_crit, 'rb'), 'application/zip')}
+    resp = client.post("/raw-criteria", files=files, headers={"Authorization": f"bearer {fake_jwt}"})
     assert str(resp.status_code).startswith("50")
 
 @pytest.mark.asyncio
 def test_create_raw_criteria_invalid_schema(setup_database, client):
        
     fake_jwt = "1.2.3"
-    test_raw_crit = "./tests/data/test_raw_criteria_invalid_schema.json"
-    with open(test_raw_crit, 'r') as test_raw_crit_file:
-        raw_crit_data = test_raw_crit_file.read()
-    
-    raw_crit_data = json.loads(raw_crit_data)
-    resp = client.post("/raw-criteria", json=raw_crit_data, headers={"Authorization": f"bearer {fake_jwt}"})
+    test_raw_crit = "./tests/data/test_raw_criteria_invalid_schema.zip"
+    files = {'file': ('test_raw_criteria_invalid_schema.zip', open(test_raw_crit, 'rb'), 'application/zip')}
+    resp = client.post("/raw-criteria", files=files, headers={"Authorization": f"bearer {fake_jwt}"})
     assert str(resp.status_code).startswith("422")
 
 @pytest.mark.asyncio
@@ -70,21 +61,15 @@ def test_create_raw_criteria_reupload(setup_database, client, connection):
     """
     errors = []   
     fake_jwt = "1.2.3"
-    test_raw_crit = "./tests/data/test_raw_criteria_reupload.json"
-    with open(test_raw_crit, 'r') as test_raw_crit_file:
-        raw_crit_data = test_raw_crit_file.read()
-    
-    raw_crit_data = json.loads(raw_crit_data)
-    resp = client.post("/raw-criteria", json=raw_crit_data, headers={"Authorization": f"bearer {fake_jwt}"})
+    test_raw_crit = "./tests/data/test_raw_criteria_reupload.zip"
+    files = {'file': ('test_raw_criteria_reupload.zip', open(test_raw_crit, 'rb'), 'application/zip')}
+    resp = client.post("/raw-criteria", files=files, headers={"Authorization": f"bearer {fake_jwt}"})
     if not str(resp.status_code).startswith("20"):
         errors.append(f"Raw-criteria re-upload first post failed: {resp.status_code}")
 
-    test_raw_crit = "./tests/data/test_raw_criteria_reupload_with_changes.json"
-    with open(test_raw_crit, 'r') as test_raw_crit_file:
-        raw_crit_data = test_raw_crit_file.read()
-    
-    raw_crit_data = json.loads(raw_crit_data)
-    resp = client.post("/raw-criteria", json=raw_crit_data, headers={"Authorization": f"bearer {fake_jwt}"})
+    test_raw_crit = "./tests/data/test_raw_criteria_reupload_with_changes.zip"
+    files = {'file': ('test_raw_criteria_reupload_with_changes.zip', open(test_raw_crit, 'rb'), 'application/zip')}
+    resp = client.post("/raw-criteria", files=files, headers={"Authorization": f"bearer {fake_jwt}"})
     if not str(resp.status_code).startswith("20"):
         errors.append(f"Raw-criteria re-upload second post failed: {resp.status_code}")
 
@@ -136,14 +121,14 @@ def test_create_raw_criteria_reupload_exact_dup(setup_database, client, connecti
     """
     errors = []   
     fake_jwt = "1.2.3"
-    test_raw_crit = "./tests/data/test_raw_criteria_exact_dup.json"
-    with open(test_raw_crit, 'r') as test_raw_crit_file:
-        raw_crit_data = test_raw_crit_file.read()
-    
-    raw_crit_data = json.loads(raw_crit_data)
-    resp = client.post("/raw-criteria", json=raw_crit_data, headers={"Authorization": f"bearer {fake_jwt}"})
+    test_raw_crit = "./tests/data/test_raw_criteria_exact_dup.zip"
+
+    files = {'file': ('test_exact_dup.zip', open(test_raw_crit, 'rb'), 'application/zip')}
+    resp = client.post("/raw-criteria", files=files, headers={"Authorization": f"bearer {fake_jwt}"})
+
     # load exact dup
-    resp = client.post("/raw-criteria", json=raw_crit_data, headers={"Authorization": f"bearer {fake_jwt}"})
+    files = {'file': ('test_exact_dup.zip', open(test_raw_crit, 'rb'), 'application/zip')}
+    resp = client.post("/raw-criteria", files=files, headers={"Authorization": f"bearer {fake_jwt}"})
 
     try:
         Session = sessionmaker(bind=connection)
