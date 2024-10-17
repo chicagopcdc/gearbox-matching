@@ -15,10 +15,14 @@ raw_criteria_schema = {
         "text": {"type":"string"},
         "nct": {"type":"string"},
         "pre_annotated": {"type":"array",
-            "span":{"type":"array"
-            },
-            "matched-models":{"type":"array"
-            }
+                          "items": {
+                              "type":"object",
+                              "required":["span","matched_models"],
+                              "properties": {
+                                "span":{"type":"array"},
+                                "matched_models":{"type":"array" }
+                                }
+                          }
         },
         "entities": {"type":"array",
                      "items": {
