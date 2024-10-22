@@ -46,14 +46,14 @@ async def stage_criteria(session: Session, raw_criteria: RawCriteria):
 
     raw_text = raw_criteria.data.get('text')
     input_id = raw_criteria.data.get('id')
-    for label in raw_criteria.data.get('label'):
+    for entity in raw_criteria.data.get('entities'):
 
         ## get criterion_id from code
-        code = label[2]
+        code = entity.get("label")
         criterion_id = await criterion_crud.get_criterion_id_by_code(db=session, code=code)
 
-        start_span = label[0]
-        end_span = label[1]
+        start_span = entity.get("start_offset")
+        end_span = entity.get("end_offset")
 
         await create_staging_criterion(session=session,
             input_id=input_id,
@@ -67,10 +67,10 @@ async def stage_criteria(session: Session, raw_criteria: RawCriteria):
 def get_incoming_raw_criteria(raw_criteria: RawCriteriaIn)-> dict:
     extracted_crit = {}
     raw_text = raw_criteria.data.get('text')
-    for labelinfo in raw_criteria.data.get('label'):
-        code=labelinfo[2]
-        start_span=labelinfo[0]
-        end_span=labelinfo[1]
+    for labelinfo in raw_criteria.data.get('entities'):
+        code=labelinfo.get("label")
+        start_span=labelinfo.get("start_offset")
+        end_span=labelinfo.get("end_offset")
         text = raw_text[start_span:end_span]
         extracted_crit.update({(code,text):(start_span,end_span)})
     return extracted_crit
@@ -138,16 +138,16 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
 
         # get list of new_to_add raw_criteria objs and pass to stage func
         incoming_text = raw_criteria.data.get('text')
-        for incoming in raw_criteria.data.get('label'):
+        for incoming in raw_criteria.data.get('entities'):
 
-            if new_to_add_dict.get((incoming[2],incoming_text[incoming[0]:incoming[1]])):
+            if new_to_add_dict.get((incoming.get('label'),incoming_text[incoming.get('start_offset'):incoming.get('end_offset')])):
                 await create_staging_criterion(session=session,
                     input_id=raw_criteria.data.get('id'),
                     eligibility_criteria_id=latest_study_version.eligibility_criteria_id,
-                    code=incoming[2],
-                    start_span=incoming[0],
-                    end_span=incoming[1],
-                    text = incoming_text[incoming[0]:incoming[1]]
+                    code=incoming.get("label"),
+                    start_span=incoming.get("start_offset"),
+                    end_span=incoming.get("end_offset"),
+                    text = incoming_text[incoming.get("start_offset"):incoming.get("end_offset")]
                 )
                     
         # set of criteria that do not exist in incoming - set to INACTIVE

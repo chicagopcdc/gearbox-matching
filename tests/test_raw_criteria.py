@@ -1,9 +1,9 @@
 import pytest
 import json
 from sqlalchemy.orm import sessionmaker 
-from gearbox.models import CriterionStaging, StudyVersion, StudyExternalId, Study
+from gearbox.models import CriterionStaging, StudyVersion, StudyExternalId, EligibilityCriteria
 from .test_utils import is_aws_url
-from sqlalchemy import select
+from sqlalchemy import select, func
 from gearbox.util.types import AdjudicationStatus, StudyVersionStatus
 
 
@@ -29,7 +29,7 @@ def test_get_raw_criteria_by_id(setup_database, client):
 def test_create_raw_criteria(setup_database, client):
        
     fake_jwt = "1.2.3"
-    test_raw_crit = "./tests/data/test_raw_criteria.zip"
+    test_raw_crit = "./tests/data/test_raw_criteria_create.zip"
     files = {'file': ('test_create_raw_criteria.zip', open(test_raw_crit, 'rb'), 'application/zip')}
     resp = client.post("/raw-criteria", files=files, headers={"Authorization": f"bearer {fake_jwt}"})
     assert str(resp.status_code).startswith("20")
@@ -77,6 +77,11 @@ def test_create_raw_criteria_reupload(setup_database, client, connection):
         Session = sessionmaker(bind=connection)
         db_session = Session()
 
+        # fetch latest eligibility_criteria id
+        stmt = select(func.max(EligibilityCriteria.id))
+        res = db_session.execute(stmt)
+        new_ec_id = res.scalar_one()
+
         stmt = select(CriterionStaging.id).where(
             CriterionStaging.code == 'new_criteria_for_reload_test').where(
             CriterionStaging.criterion_adjudication_status == AdjudicationStatus.NEW
@@ -86,10 +91,10 @@ def test_create_raw_criteria_reupload(setup_database, client, connection):
             errors.append("new_criteria_for_reload_test new criterion code not found in criterion_staging")
 
         stmt = select(CriterionStaging.id).where(
-            CriterionStaging.code == 'meas_dlco').where(
-            CriterionStaging.eligibility_criteria_id == 18).where(
+            CriterionStaging.code == 'exp_anthracycline_ever').where(
+            CriterionStaging.eligibility_criteria_id == new_ec_id).where(
             CriterionStaging.criterion_adjudication_status == AdjudicationStatus.EXISTING).where(
-            CriterionStaging.text == "DLCO-TEST-EXISTING-TEXT-CHANGE ≥ 40%"
+            CriterionStaging.text == "Xnthracycline"
         )
 
         cs = db_session.execute(stmt).first()
@@ -97,11 +102,9 @@ def test_create_raw_criteria_reupload(setup_database, client, connection):
             errors.append("Updated criterion code not found in criterion_staging")
 
         stmt = select(CriterionStaging.id).where(
-            CriterionStaging.code == 'meas_dlco').where(
-            CriterionStaging.eligibility_criteria_id == 18).where(
-            CriterionStaging.criterion_adjudication_status == AdjudicationStatus.INACTIVE).where(
-            CriterionStaging.text == "DLCO ≥ 40%"
-        )
+            CriterionStaging.code == 'expression_flt3_itd').where(
+            CriterionStaging.eligibility_criteria_id == new_ec_id).where(
+            CriterionStaging.criterion_adjudication_status == AdjudicationStatus.INACTIVE)
 
         cs = db_session.execute(stmt).first()
         if not cs:
@@ -134,15 +137,15 @@ def test_create_raw_criteria_reupload_exact_dup(setup_database, client, connecti
         Session = sessionmaker(bind=connection)
         db_session = Session()
         """
-        Based on input data, study NCT05188170 should have exactly one row
+        Based on input data, study TESTRAWCRIT_EXACT_DUP should have exactly one row
         in IN_PROCESS status.
         """
         stmt = select(StudyVersion).join(StudyVersion.study).join(StudyExternalId).where(
-            StudyExternalId.ext_id == 'NCT05188170').where(
+            StudyExternalId.ext_id == 'TESTRAWCRIT_EXACT_DUP').where(
                 StudyVersion.status == StudyVersionStatus.IN_PROCESS)
         svs = db_session.execute(stmt).unique()
         sv_rows_returned = len(svs.all())
-        
+
         if sv_rows_returned != 1:
             errors.append(f"Raw-criteria exact dup re-upload test failed returned {sv_rows_returned} rows. Expecting one row.")
 
