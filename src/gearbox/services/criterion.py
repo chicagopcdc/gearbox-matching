@@ -96,9 +96,7 @@ async def update_criterion(session: Session, criterion: CriterionCreateIn, crite
     return upd_criterion
 
 async def save_criterion(session: Session, criterion: CriterionCreate) -> CriterionSchema:
-    print(f"SAVE CRITERION: 1")
     new_criterion = await criterion_crud.create(db=session, obj_in=criterion)
-    print(f"SAVE CRITERION: 2")
     return new_criterion
 
 async def get_criteria_not_exist_in_match_form(session: Session) -> List[CriterionSchema]:

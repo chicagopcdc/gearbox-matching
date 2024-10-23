@@ -71,14 +71,11 @@ async def publish_criterion(session: Session, criterion: CriterionPublish, user_
 async def update(session: Session, criterion: CriterionStagingUpdate, user_id: int ) -> CriterionStagingSchema:
 
     criterion_to_upd = await criterion_staging_crud.get(db=session, id=criterion.id)
-    study_version_to_upd = await study_version_crud.get_study_version_ec_id(current_session=session, eligibility_criteria_id = criterion_to_upd.eligibility_criteria_id )
-    sv = await study_version_crud.update(db=session, db_obj=study_version_to_upd, obj_in={"status": StudyVersionStatus.IN_PROCESS})
-
     criterion_in_dict = dict(criterion)
     to_upd_dict = criterion_to_upd.__dict__
     updates=[]
 
-    # Track any updates besides status updates for logging
+    # Log any updates besides status updates 
     for key in criterion_in_dict:
         if criterion_in_dict.get(key) and criterion_in_dict.get(key) != to_upd_dict.get(key) and "status" not in key:
             updates.append(f'criterion_staging update:  {key} changed from {to_upd_dict.get(key)} to {criterion_in_dict.get(key)}')
@@ -92,6 +89,10 @@ async def update(session: Session, criterion: CriterionStagingUpdate, user_id: i
     await session.commit() 
     if updates:
         logger.info(f"Criterion staging id: {criterion_to_upd.id} updated by user_id: {user_id} updates include: {updates}")
+
+    # update the study version status to "IN_PROCESS"
+    study_version_to_upd = await study_version_crud.get_study_version_ec_id(current_session=session, eligibility_criteria_id = criterion_to_upd.eligibility_criteria_id )
+    await study_version_crud.update(db=session, db_obj=study_version_to_upd, obj_in={"status": StudyVersionStatus.IN_PROCESS})
 
     return upd_criterion
 
