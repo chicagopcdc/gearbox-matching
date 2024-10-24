@@ -14,11 +14,10 @@ class CriterionValueGetter(GetterDict):
 
 class CriterionValue(BaseModel):
     id: int
-    code: Optional[str]
     description: Optional[str]
     type: Optional[str]
     value_string: Optional[str]
-    unit: Optional[str]
+    unit_name: Optional[str]
     operator: Optional[str]
     create_date: Optional[datetime]
     status: Optional[str]
@@ -26,4 +25,3 @@ class CriterionValue(BaseModel):
     class Config:
         orm_mode = True
         getter_dict = CriterionValueGetter
-
