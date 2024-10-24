@@ -55,16 +55,6 @@ def test_update_criterion_staging(setup_database, client, data, connection):
     assert str(resp.status_code).startswith("20")
 
 
-"""
-criterion_staging_id: Optional[int]
-    code: Optional[str]
-    display_name: Optional[str]
-    description: Optional[str]
-    create_date: Optional[datetime]
-    active: Optional[bool]
-    ontology_code_id: Optional[int]
-    input_type_id: int
-"""
 @pytest.mark.parametrize(
     "data", [ 
         {

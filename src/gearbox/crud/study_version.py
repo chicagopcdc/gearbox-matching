@@ -37,7 +37,6 @@ class CRUDStudyVersion(CRUDBase [StudyVersion, StudyVersionSchema, StudyVersionC
                 .where(StudyVersion.study_id == study_id)
             stmt = select(StudyVersion).where(StudyVersion.study_id == study_id). \
                 where(StudyVersion.study_version_num == max_ver_subq)
-                #join(max_ver_subq, StudyVersion.study_version_num == max_ver_subq)
             result = await current_session.execute(stmt)
             study_version = result.unique().scalars().first()
         except exc.SQLAlchemyError as e:
