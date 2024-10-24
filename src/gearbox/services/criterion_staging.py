@@ -7,6 +7,7 @@ from typing import List
 from gearbox.util.types import StudyVersionStatus, AdjudicationStatus
 from gearbox.services import criterion as criterion_service, value as value_service
 from . import logger
+from gearbox import config
 
 async def get_criterion_staging(session: Session, id: int) -> CriterionStagingSchema:
     crit = await criterion_staging_crud.get(session, id)
@@ -39,6 +40,14 @@ async def create(session: Session, staging_criterion: CriterionStagingCreate)-> 
     return new_staging_criterion
 
 async def publish_criterion(session: Session, criterion: CriterionPublish, user_id: int):
+    """
+    Comments: this function qc's and saves a criterion from the criterion_staging table
+    to the criterion table. 
+    """
+    # qc label is not the doccano placeholder - this will occur if the
+    # admin adjudicator does not assign a new code to the new criterion
+    if criterion.code == config.DOCCANO_PLACEHOLDER:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR PUBLISHING CRITERION: {criterion.description} - code not assigned.") 
 
     # qc values
     check_id_errors = []
