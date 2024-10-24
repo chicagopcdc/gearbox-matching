@@ -7,17 +7,32 @@ from gearbox.schemas import ValueCreate, ValueSearchResults, Value as ValueSchem
 from gearbox.util import status
 from gearbox.crud import value_crud, unit_crud
 from gearbox.schemas import ValueCreate, UnitCreate, ValueSave
+from gearbox.models import Value
+from typing import List
 
 async def get_value(session: Session, id: int) -> ValueSchema:
     aes = await value_crud.get(session, id)
     return aes
 
-async def get_values(session: Session) -> ValueSearchResults:
-    aes = await value_crud.get_multi(session)
+async def get_value_by_value_string(session: Session, value_string: str) -> ValueSchema:
+    val = await value_crud.get_value_by_value_string(session, value_string)
+    return val
+
+async def get_values(session: Session, ids: List[int] = []) -> ValueSearchResults:
+    if not ids:
+        aes = await value_crud.get_multi(session)
+    else:
+        query_ids =  ','.join(str(id) for id in ids)
+        aes = await value_crud.get_multi(session, where=[f"{Value.__table__.name}.id in ({query_ids})"])
     return aes
-    pass
 
 async def create_value(session: Session, value: ValueCreate) -> ValueSchema:
+
+    # if value is not numeric validate against existing values
+    if not value.is_numeric:
+        dup_val = await get_value_by_value_string(session=session, value_string=value.value_string)
+        if dup_val:
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Error creating value-string {value.value_string} already exists.")
 
     # if no unit_id, then find it or create it
     if not value.unit_id:
@@ -39,12 +54,20 @@ async def create_value(session: Session, value: ValueCreate) -> ValueSchema:
     await session.commit() 
     return new_value
 
-async def update_value(session: Session, value: ValueCreate, value_id: int) -> ValueSchema:
-    value_in = await value_crud.get(db=session, id=value_id)
+async def update_value(session: Session, value: ValueSchema) -> ValueSchema:
+    value_in = await value_crud.get(db=session, id=value.id)
+
+    # if not-numeric and the value-string has changed, validate 
+    # to ensure a duplicate value-string is not being created in the update
+    if not value_in.is_numeric and value_in.value_string != value.value_string:
+        existing_value = get_value_by_value_string(session=session, value_string=value_in.value_string)
+        if existing_value.id != value_in.id:
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Error value-string {value_in.value_string} already exists with id = {existing_value.id}.")
+
     if value_in:
         upd_value = await value_crud.update(db=session, db_obj=value_in, obj_in=value)
     else:
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Value for id: {value_id} not found for update.") 
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Value for id: {value.id} not found for update.") 
     await session.commit() 
     return upd_value
 

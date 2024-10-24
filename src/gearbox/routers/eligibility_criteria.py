@@ -16,18 +16,21 @@ from gearbox.admin_login import admin_required
 
 mod = APIRouter()
 
-# get eligibility-criteria set for the front end
-@mod.get("/eligibility-criteria", dependencies=[Depends(auth.authenticate)] )
+@mod.get("/eligibility-criteria", dependencies=[Depends(auth.authenticate) ] )
 async def get_ec(
     request: Request,
     session: Session = Depends(deps.get_session),
 ):
+    """
+    Comments: This endpoint is called by the front-end to return the presigned_url to the S3
+    bucket that contains a list of eligibility criteria.
+    """
     params = []
     presigned_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, params, "get_object")
     return JSONResponse(presigned_url, status.HTTP_200_OK) 
 
 # get single eligibility-criteria set 
-@mod.get("/eligibility-criteria/{ec_id}", dependencies=[Depends(auth.authenticate)] )
+@mod.get("/eligibility-criteria/{ec_id}", dependencies=[Depends(auth.authenticate), Depends(admin_required)] )
 async def get_ec(
     ec_id: int,
     request: Request,
@@ -50,16 +53,6 @@ async def build_eligibility_criteria(
         bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, eligibility_criteria)
 
     return eligibility_criteria
-
-"""
-@mod.get("/eligibility-criteria", response_model=EligibilityCriteriaSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
-async def get_eligibility_criteria(
-    request: Request,
-    session: Session = Depends(deps.get_session),
-):
-    eligibility_criteria = await ec.get_eligibility_criteria(session=session)
-    return { "results" :list(eligibility_criteria) }
-"""
 
 @mod.post("/eligibility-criteria", response_model=EligibilityCriteria, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(

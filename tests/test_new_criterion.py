@@ -139,3 +139,18 @@ def test_create_criterion_minimum_values_required(setup_database, client, valid_
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))
 
 # TO DO: create test for violating unique constraint,
+
+def test_create_criterion_with_staging_id(setup_database, client, mock_new_criterion, connection):
+    """
+    Test create new criterion and update criterion_staging with criterion_id 
+    
+    """
+    errors=[]
+    fake_jwt = "1.2.3"
+    test_criterion_code = 'PYTEST TESTCODE' + str(random.randint(0,9999))
+    mock_new_criterion.code = test_criterion_code
+    # adding code to ensure unique display name
+    mock_new_criterion.display_name += test_criterion_code
+    mock_new_criterion.criterion_staging_id = 1
+    resp = client.post("/criterion", json=mock_new_criterion.to_json(), headers={"Authorization": f"bearer {fake_jwt}"})
+    resp.raise_for_status()

@@ -47,6 +47,17 @@ class Study(StudyBase):
     links: List[StudyLink]
     sites: List[StudySite]
 
+class StudyBaseInfo(BaseModel):
+    id: int
+    name: Optional[str]
+    code: Optional[str]
+    description: Optional[str]
+    create_date: Optional[datetime]
+    active: Optional[bool]
+
+    class Config:
+        orm_mode = True    
+
 class StudyResults(BaseModel):
     version: Optional[str]
     studies: List[Study]

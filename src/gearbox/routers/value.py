@@ -15,7 +15,7 @@ from gearbox import auth
 
 mod = APIRouter()
 
-@mod.get("/values", response_model=ValueSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
+@mod.get("/values", response_model=ValueSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def get_values(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
@@ -23,7 +23,7 @@ async def get_values(
     values = await value_service.get_values(session=session)
     return { "results" :list(values) }
 
-@mod.get("/value/{value_id}", response_model=Value, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
+@mod.get("/value/{value_id}", response_model=Value, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def get_value(
     value_id: int,
     request: Request,

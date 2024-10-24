@@ -9,21 +9,25 @@ from gearbox.models import Study, Site, StudyLink, SiteHasStudy, StudyExternalId
 from gearbox.services import study_version
 
 async def get_study_info(session: Session, id: int) -> StudySchema:
-    aes = await study_crud.get_single_study_info(session, id)
-    return aes
+    study_info = await study_crud.get_single_study_info(session, id)
+    return study_info
 
 async def get_studies_info(session: Session) -> StudySearchResults:
-    aes = await study_crud.get_studies_info(session)
-    return aes
+    studies = await study_crud.get_studies_info(session)
+    return studies
     pass
 
+async def get_study_id_by_ext_id(session: Session, ext_id: str) -> int:
+    study_id = await study_external_id_crud.get_study_id_by_ext_id(session, ext_id)
+    return study_id
+
 async def get_study(session: Session, id: int) -> StudySchema:
-    aes = await study_crud.get(session, id)
-    return aes
+    study = await study_crud.get(session, id)
+    return study
 
 async def get_studies(session: Session) -> StudySearchResults:
-    aes = await study_crud.get_multi(session)
-    return aes
+    studies = await study_crud.get_multi(session)
+    return studies
 
 async def create_study(session: Session, study: StudyCreate) -> StudySchema:
 
@@ -180,7 +184,7 @@ async def update_studies(session: Session, updates: StudyUpdates):
                     'create_date': datetime.now()
                 }
                 no_update_cols = ['create_date']
-                constraint_cols = [StudyExternalId.study_id, StudyExternalId.ext_id]
+                constraint_cols = [StudyExternalId.ext_id]
                 new_or_updated_ext_id = await study_external_id_crud.upsert(
                     db=session, 
                     model=StudyExternalId, 

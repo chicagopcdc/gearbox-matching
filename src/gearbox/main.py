@@ -35,7 +35,7 @@ def get_app():
         title="Framework Services Object Management Service",
         version=pkg_resources.get_distribution("gearbox").version,
         debug=config.DEBUG,
-        openapi_prefix=config.URL_PREFIX,
+        openapi_prefix=config.URL_PREFIX
     )
     app.include_router(router)
     app.add_middleware(ClientDisconnectMiddleware)

@@ -9,7 +9,7 @@ from deepdiff import DeepDiff
 from .test_utils import is_aws_url
 
 @pytest.mark.asyncio
-def test_studies_compare(setup_database, client):
+def test_studies_compare(setup_database, client, connection):
     """
     Comments: This test builds the study document and compares vs studies.json 
     """
@@ -21,10 +21,10 @@ def test_studies_compare(setup_database, client):
     resp.raise_for_status()
     studydata_file = './tests/data/studies.json'
 
-    """ SERIALIZE STUDIES TO COMPARE AGAINST - UNCOMMENT TO WRITE NEW COMPARE DATA
+    """SERIALIZE STUDIES TO COMPARE AGAINST - UNCOMMENT TO WRITE NEW COMPARE DATA
     with open(studydata_file,'w') as comp_file:
         json.dump(test_studies, comp_file)
-    """
+    """ 
 
     with open(studydata_file, 'r') as comp_file:
         study_compare = json.load(comp_file)
@@ -34,7 +34,7 @@ def test_studies_compare(setup_database, client):
 
     diff = []
     # Diff all studies in the reponse that exist in the mock file
-    for i in range (len(study_compare)):
+    for i in range(len(study_compare)):
         study_diff = DeepDiff(studies[i], study_compare[i], ignore_order=True)
         if (study_diff):
             diff.append(str(study_diff))

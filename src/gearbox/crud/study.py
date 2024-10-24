@@ -7,6 +7,7 @@ from gearbox.models import Study, SiteHasStudy, Source, StudyVersion
 from gearbox.schemas import StudySearchResults, StudyCreate
 from fastapi import HTTPException
 from gearbox.util import status
+from gearbox.util.types import StudyVersionStatus
 from cdislogging import get_logger
 logger = get_logger(__name__)
 
@@ -14,7 +15,7 @@ class CRUDStudy(CRUDBase [Study, StudyCreate, StudySearchResults]):
 
     # Returns study information for ACTIVE studies
     async def get_studies_info(self, current_session: Session):
-        sv_subq = select(StudyVersion).where(StudyVersion.active==True).subquery()
+        sv_subq = select(StudyVersion).where(StudyVersion.status==StudyVersionStatus.ACTIVE).subquery()
         stmt = select(Study).options(
             joinedload(Study.sites).options(
                 joinedload(SiteHasStudy.site)

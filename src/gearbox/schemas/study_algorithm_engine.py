@@ -28,7 +28,6 @@ algorithm_logic_schema = {
 class StudyAlgorithmEngineBase(BaseModel):
     start_date: Optional[datetime]
     algorithm_logic: Union[Json[Any],Dict] 
-    algorithm_version: Optional[int]
 
     @validator('algorithm_logic')
     def check_valid_vs_schema(cls, v):
@@ -57,10 +56,10 @@ class StudyAlgorithmEngineSave(StudyAlgorithmEngineBase):
     pass
 
 class StudyAlgorithmEngineCreate(StudyAlgorithmEngineSave):
-    eligibility_criteria_info_id: int
+    study_version_id: int
 
 class StudyAlgorithmEngineUpdate(StudyAlgorithmEngineSave):
-    eligibility_criteria_info_id: int
+    study_version_id: int
     id: int
 
 class StudyAlgorithmEngineSearchResults(BaseModel):

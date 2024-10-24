@@ -10,9 +10,8 @@ class StudyAlgorithmEngine(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     start_date = Column(DateTime, nullable=True)
     algorithm_logic = Column(JSON)
-    algorithm_version = Column(Integer)
 
     class Config:
         orm_mode = True  
 
-    eligibility_criteria_info = relationship("EligibilityCriteriaInfo", back_populates="study_algorithm_engine")
+    study_version = relationship("StudyVersion", back_populates="study_algorithm_engine")

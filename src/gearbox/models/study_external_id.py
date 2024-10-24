@@ -15,6 +15,6 @@ class StudyExternalId(Base):
     active = Column(Boolean, nullable=True)
     create_date = Column(DateTime, nullable=True)
 
-    UniqueConstraint(study_id, ext_id, name='study_ext_id_uix')
+    UniqueConstraint(ext_id, name='study_ext_id_uix')
 
     study = relationship("Study", back_populates="ext_ids")

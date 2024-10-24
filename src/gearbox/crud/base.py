@@ -91,7 +91,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             return result
 
         except exc.SQLAlchemyError as e:
-            logger.error(f"SQL ERROR IN base.get method: {e}")
+            logger.error(f"SQL ERROR IN base.get_multi method: {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
 
     async def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
@@ -104,11 +104,12 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             obj_in_data["update_date"] = datetime.now() if not obj_in_data["update_date"] else obj_in_data["update_date"]
         if "start_date" in obj_in_data.keys():
             obj_in_data["start_date"] = datetime.now() if not obj_in_data["start_date"] else obj_in_data["start_date"]
-        
+
         try:
             db_obj = self.model(**obj_in_data)
             db.add(db_obj)
             await db.flush()
+            await db.commit()
             return db_obj
         except IntegrityError as e:
             logger.error(f"CREATE CRUD IntegrityError ERROR {e}")
@@ -127,6 +128,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             .values(active=active_upd)
         )
         res = await db.execute(stmt)
+        await db.commit()
         return True
 
     async def set_active(self, db: Session, id: int, active: bool) -> ModelType: 
@@ -141,6 +143,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
         upd_obj.active = active
         db.flush()
+        await db.commit()
 
     async def update( self, db: Session, *, db_obj: ModelType, obj_in: Union[UpdateSchemaType, Dict[str, Any]]
     ) -> ModelType:

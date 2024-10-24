@@ -15,7 +15,7 @@ from gearbox import auth
 
 mod = APIRouter()
 
-@mod.get("/el-criteria-has-criterions", response_model=ElCriteriaHasCriterionSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
+@mod.get("/el-criteria-has-criterions", response_model=ElCriteriaHasCriterionSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def get_el_criteria_has_criterions(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
@@ -23,7 +23,7 @@ async def get_el_criteria_has_criterions(
     el_criteria_has_criterions = await el_criteria_has_criterion_service.get_el_criteria_has_criterions(session=session)
     return { "results" :list(el_criteria_has_criterions) }
 
-@mod.get("/el-criteria-has-criterion/{el_criteria_has_criterion_id}", response_model=ElCriteriaHasCriterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
+@mod.get("/el-criteria-has-criterion/{el_criteria_has_criterion_id}", response_model=ElCriteriaHasCriterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def get_el_criteria_has_criterion(
     el_criteria_has_criterion_id: int,
     request: Request,
