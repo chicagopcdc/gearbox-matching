@@ -127,4 +127,4 @@ GEARBOX_MIDDLEWARE_PUBLIC_KEY_Path = config("GEARBOX_MIDDLEWARE_PUBLIC_KEY_PATH"
 GEARBOX_KEY_CONFIG = {}
 
 # DOCCANO placeholder for new criterion
-DOCCANO_PLACEHOLDER = config("DOCCANO_PLACEHOLDER", default="new_criterion_indicator")
+DOCCANO_PLACEHOLDER = config("DOCCANO_PLACEHOLDER", default="new_variable")
