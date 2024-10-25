@@ -50,11 +50,10 @@ async def get_criterion(
 async def save_object(
     body: CriterionCreateIn,
     request: Request,
-    session: AsyncSession = Depends(deps.get_session),
-    user_id: int = Depends(auth.authenticate_user)
+    session: AsyncSession = Depends(deps.get_session)
 ):
 
-    new_criterion = await criterion_service.create_new_criterion(session, body, user_id=user_id)
+    new_criterion = await criterion_service.create_new_criterion(session, body)
     await session.commit()
     reset_user_validation_data()
     return new_criterion

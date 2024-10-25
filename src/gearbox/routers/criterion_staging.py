@@ -28,34 +28,31 @@ async def get_staging_criterion_by_eligibility_criteria_id(
 async def update_object(
     body: CriterionStagingUpdate,
     request: Request,
-    session: AsyncSession = Depends(deps.get_session),
-    user_id: int = Depends(auth.authenticate_user)
+    session: AsyncSession = Depends(deps.get_session)
 ):
     """
     Comments:
     """
-    upd_value = await criterion_staging_service.update(session=session, criterion=body, user_id=int(user_id))
+    upd_value = await criterion_staging_service.update(session=session, criterion=body)
     return upd_value
 
 @mod.post("/criterion-staging-publish", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def publish(
     body: CriterionPublish,
     request: Request,
-    session: AsyncSession = Depends(deps.get_session),
-    user_id: int = Depends(auth.authenticate_user)
+    session: AsyncSession = Depends(deps.get_session)
 ):
     """
     Comments: The purpose of this endpoint is to 'publish' a criterion_staging row into the 
     criterion table which makes it available to the match-form build. 
     """
-    await criterion_staging_service.publish_criterion(session=session, criterion=body, user_id=int(user_id))
+    await criterion_staging_service.publish_criterion(session=session, criterion=body)
 
 @mod.post("/criterion-staging", response_model=CriterionStaging, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def create_object(
     body: CriterionStagingCreate,
     request: Request,
-    session: AsyncSession = Depends(deps.get_session),
-    user_id: int = Depends(auth.authenticate_user)
+    session: AsyncSession = Depends(deps.get_session)
 ):
     new_criterion_staging = await criterion_staging_service.create(session, body)
     await session.commit()
@@ -65,8 +62,7 @@ async def create_object(
 async def save_object(
     body: CriterionStagingUpdate,
     request: Request,
-    session: AsyncSession = Depends(deps.get_session),
-    user_id: int = Depends(auth.authenticate_user)
+    session: AsyncSession = Depends(deps.get_session)
 ):
     """
     Comments: this endpoint updates the criterion_staging row and sets the status to "IN_PROCESS"
@@ -75,22 +71,21 @@ async def save_object(
     """
 
     body.criterion_adjudication_status = AdjudicationStatus.IN_PROCESS
-    upd_value = await criterion_staging_service.update(session=session, criterion=body, user_id=int(user_id))
+    upd_value = await criterion_staging_service.update(session=session, criterion=body)
     return upd_value
 
 @mod.post("/accept-criterion-staging/{criterion_staging_id}", response_model=CriterionStaging, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def accept_object(
     criterion_staging_id: int,
     request: Request,
-    session: AsyncSession = Depends(deps.get_session),
-    user_id: int = Depends(auth.authenticate_user)
+    session: AsyncSession = Depends(deps.get_session)
 ):
     """
     Comments: this endpoint updates the criterion_staging row and sets the status to "ACTIVE"
     for criterion that are identified as 'EXISTING' and are confirmed as existing
     by the adjudicator
     """
-    await criterion_staging_service.accept_criterion_staging(session=session , id=criterion_staging_id, user_id=int(user_id))
+    await criterion_staging_service.accept_criterion_staging(session=session , id=criterion_staging_id)
 
 def init_app(app):
     app.include_router(mod, tags=["criterion-staging"])
