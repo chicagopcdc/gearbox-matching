@@ -198,7 +198,7 @@ def test_accept_criterion_staging(setup_database, client, connection):
         {
             "eligibility_criteria_id": 3,
             "input_id": None,
-            "code": config.DOCCANO_PLACEHOLDER,
+            "code": config.DOCCANO_MISSING_VALUE_PLACEHOLDER,
             "display_name": "test display name",
             "description": "test description",
             "criterion_adjudication_status": "NEW",

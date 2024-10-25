@@ -46,7 +46,7 @@ async def publish_criterion(session: Session, criterion: CriterionPublish, user_
     """
     # qc label is not the doccano placeholder - this will occur if the
     # admin adjudicator does not assign a new code to the new criterion
-    if criterion.code == config.DOCCANO_PLACEHOLDER:
+    if criterion.code == config.DOCCANO_MISSING_VALUE_PLACEHOLDER:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR PUBLISHING CRITERION: {criterion.description} - code not assigned.") 
 
     # qc values
