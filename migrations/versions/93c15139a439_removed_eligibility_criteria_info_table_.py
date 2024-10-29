@@ -65,7 +65,8 @@ def downgrade():
     sa.ForeignKeyConstraint(['eligibility_criteria_id'], ['eligibility_criteria.id'], name='fk_eligibility_criteria_id'),
     sa.ForeignKeyConstraint(['study_algorithm_engine_id'], ['study_algorithm_engine.id'], name='fk_study_algorithm_engine_id'),
     sa.ForeignKeyConstraint(['study_version_id'], ['study_version.id'], name='fk_study_version_id'),
-    sa.PrimaryKeyConstraint('id', name='eligibility_criteria_info_pkey')
+    sa.PrimaryKeyConstraint('id', name='eligibility_criteria_info_pkey'),
     )
     sa.Enum('NEW','ACTIVE', 'IN_PROCESS', 'INACTIVE',name='study_version_status').drop(op.get_bind())
+    op.add_column('eligibility_criteria_info', sa.Column('status', postgresql.ENUM('ACTIVE', 'IN_PROCESS', 'INACTIVE', name='eligibilityCriteriaInfoStatus'), nullable=False))
     # ### end Alembic commands ###
