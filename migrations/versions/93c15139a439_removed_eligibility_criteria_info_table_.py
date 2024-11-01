@@ -31,7 +31,7 @@ def upgrade():
     study_version_status = postgresql.ENUM('NEW','ACTIVE', 'IN_PROCESS', 'INACTIVE', name='study_version_status')
     study_version_status.create(op.get_bind())
 
-    op.add_column('study_version', sa.Column('status', postgresql.ENUM('NEW','ACTIVE', 'IN_PROCESS', 'INACTIVE', name='study_version_status'), nullable=False))
+    op.add_column('study_version', sa.Column('status', postgresql.ENUM('NEW','ACTIVE', 'IN_PROCESS', 'INACTIVE', name='study_version_status'), nullable=True))
     op.add_column('study_version', sa.Column('eligibility_criteria_id', sa.Integer(), nullable=True))
     op.add_column('study_version', sa.Column('study_algorithm_engine_id', sa.Integer(), nullable=True))
     op.create_foreign_key('fk_study_algorithm_engine_id', 'study_version', 'study_algorithm_engine', ['study_algorithm_engine_id'], ['id'])
