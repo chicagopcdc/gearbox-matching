@@ -3,7 +3,7 @@ import json
 
 from fastapi import HTTPException
 from starlette.config import environ
-from gearbox.models import StudyAlgorithmEngine, EligibilityCriteriaInfo
+from gearbox.models import StudyAlgorithmEngine, StudyVersion
 
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select
@@ -11,18 +11,16 @@ from sqlalchemy import select
 TEST_CREATE_LIST = [
         {
             "study_algorithm_engine": {
-                "algorithm_logic": None,
-                "algorithm_version": 1
+                "algorithm_logic": None
             },
             "test": "create_new_study_algorithm_engine",
             "logic_file": "./tests/data/new_algorithm_logic.json",
-            "eligibility_criteria_info_id": 7
+            "study_version_id": 7
         },
         {
                 "study_algorithm_engine": {
             "algorithm_logic": None,
-            "algorithm_version": 1,
-            "eligibility_criteria_info_id": 7,
+            "study_version_id": 7,
             "id": 7
                 },
             "logic_file": "./tests/data/update_algorithm_logic.json",
@@ -31,28 +29,25 @@ TEST_CREATE_LIST = [
         ,
         {
                 "study_algorithm_engine": {
-            "algorithm_logic": None,
-            "algorithm_version": 1
+            "algorithm_logic": None
                 },
-            "eligibility_criteria_info_id": 1,
+            "study_version_id": 1,
             "logic_file": "./tests/data/new_algorithm_logic.json",
             "test": "invalid_study_version"
         },
         {
                 "study_algorithm_engine": {
-            "algorithm_logic": None,
-            "algorithm_version": 2
+            "algorithm_logic": None
                 },
-            "eligibility_criteria_info_id": 1,
+            "study_version_id": 1,
             "logic_file": "./tests/data/algorithm_logic.json",
             "test": "duplicate_logic"
         },
         {
                 "study_algorithm_engine": {
-            "algorithm_logic": None,
-            "algorithm_version": 1
+            "algorithm_logic": None
                 },
-            "eligibility_criteria_info_id": 1,
+            "study_version_id": 1,
             "active": True,
             "logic_file": "./tests/data/algorithm_logic_invalid_el_criteria_has_criterion_ids.json",
             "test":"invalid_criteria_ids"
@@ -60,11 +55,10 @@ TEST_CREATE_LIST = [
         ,
         {
                 "study_algorithm_engine": {
-            "algorithm_logic": None,
-            "algorithm_version": 1
+            "algorithm_logic": None
                 },
             "active": True,
-            "eligibility_criteria_info_id": 1,
+            "study_version_id": 1,
             "logic_file": "./tests/data/algorithm_logic_invalid_schema.json",
             "test":"invalid_logic"
         }
@@ -91,7 +85,6 @@ def test_create_study_algorithm_engine(setup_database, client, test_create_data,
 
     data = {}
     data = {
-        "algorithm_version": test_create_data['study_algorithm_engine']['algorithm_version'],
         "algorithm_logic" : ae_logic_json
     }
 
@@ -99,12 +92,12 @@ def test_create_study_algorithm_engine(setup_database, client, test_create_data,
         # Set the id to update
         data['id'] = test_create_data['study_algorithm_engine']['id']
         data['algorithm_logic'] = ae_logic_json
-        data['algorithm_version'] = test_create_data['study_algorithm_engine']['algorithm_version']
-        data['eligibility_criteria_info_id'] = test_create_data['study_algorithm_engine']['eligibility_criteria_info_id']
+        data['study_version_id'] = test_create_data['study_algorithm_engine']['study_version_id']
 
         resp = client.post("/update-study-algorithm-engine", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+        pass
     else:
-        data['eligibility_criteria_info_id'] = test_create_data['eligibility_criteria_info_id']
+        data['study_version_id'] = test_create_data['study_version_id']
         resp = client.post("/study-algorithm-engine", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
 
     errors = []
@@ -130,10 +123,10 @@ def test_create_study_algorithm_engine(setup_database, client, test_create_data,
             if not ae_logic_json == ael.algorithm_logic:
                 errors.append(f"ERROR: create_new_study_algorithm_engine test db algorithm_logic does not match input data.")
 
-            stmt = select(EligibilityCriteriaInfo.study_algorithm_engine_id).where(EligibilityCriteriaInfo.study_algorithm_engine_id == new_ae_id)
-            eciid = db_session.execute(stmt).first()
-            if not eciid:
-                errors.append(f"ERROR: create_new_study_algorithm_engine test failed to confirm updated eligibility_criteria_info row for new study_algorithm_engine.")
+            stmt = select(StudyVersion.study_algorithm_engine_id).where(StudyVersion.study_algorithm_engine_id == new_ae_id)
+            sv = db_session.execute(stmt).first()
+            if not sv:
+                errors.append(f"ERROR: create_new_study_algorithm_engine test failed to confirm updated study_version row for new study_algorithm_engine.")
 
             db_session.close()
         except Exception as e:

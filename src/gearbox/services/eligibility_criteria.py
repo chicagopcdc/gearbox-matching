@@ -3,6 +3,7 @@ from gearbox.schemas import EligibilityCriteriaCreate, EligibilityCriteriaSearch
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import HTTPException
 from gearbox.util import status
+from gearbox.util.types import EligibilityCriteriaStatus
 
 async def reset_active_status(session: Session, study_version_id: int) -> bool:
     # set all rows related to the study_version to false
@@ -26,7 +27,7 @@ async def get_eligibility_criteria(session: Session) -> EligibilityCriteriaSearc
     pass
 
 async def create_eligibility_criteria(session: Session):
-    eligibility_criteria = EligibilityCriteriaCreate()
+    eligibility_criteria = EligibilityCriteriaCreate(status=EligibilityCriteriaStatus.NEW)
     new_eligibility_criteria = await eligibility_criteria_crud.create(db=session, obj_in=eligibility_criteria)
     await session.commit() 
     return new_eligibility_criteria

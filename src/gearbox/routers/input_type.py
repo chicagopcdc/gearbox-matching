@@ -8,10 +8,11 @@ from gearbox.services import input_type as input_type_service
 from gearbox.schemas import InputTypeSearchResults
 from gearbox import deps
 from gearbox import auth 
+from gearbox.admin_login import admin_required
 
 mod = APIRouter()
 
-@mod.get("/input-types", response_model=InputTypeSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)])
+@mod.get("/input-types", response_model=InputTypeSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def get_input_types(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),

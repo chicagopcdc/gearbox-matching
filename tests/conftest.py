@@ -66,19 +66,26 @@ def file_to_table(conn, cursor, table_name, file_name):
         copy_sql = "COPY " + table_name + " FROM stdin DELIMITER E'\t' CSV HEADER"
         cursor.copy_expert(sql=copy_sql, file=f)
 
+def file_to_table_with_cols(conn, cursor, table_name, file_name, ordered_column_list):
+    with open(file_name, 'r') as f:
+        copy_sql = "COPY " + table_name +  ordered_column_list +  " FROM stdin DELIMITER E'\t' CSV HEADER"
+        cursor.copy_expert(sql=copy_sql, file=f)
+
 @pytest.fixture(scope="session")
 def setup_database(connection) -> Engine:
 
     Session = sessionmaker(bind=connection)
     session = Session()
 
-    main(["--raiseerr","downgrade","base"])
-    main(["--raiseerr","upgrade","head"])
-
-
     cursor = session.connection().connection.cursor()
     conn = session.connection().connection
 
+    # cleanup criterion_staging prior to alembic setup
+    cursor.execute("DELETE FROM criterion_staging;")
+    conn.commit()
+
+    main(["--raiseerr","downgrade","base"])
+    main(["--raiseerr","upgrade","head"])
 
 
     # COPY DATA INTO TABLES
@@ -88,19 +95,22 @@ def setup_database(connection) -> Engine:
     file_to_table(conn, cursor,'study_links', './postgres-data/td_study_links.tsv')
     file_to_table(conn, cursor,'site', './postgres-data/td_site.tsv')
     file_to_table(conn, cursor,'site_has_study', './postgres-data/td_site_has_study.tsv')
-    file_to_table(conn, cursor,'study_version', './postgres-data/td_study_version.tsv')
+    file_to_table(conn, cursor,'eligibility_criteria', './postgres-data/td_eligibility_criteria.tsv')
     file_to_table(conn, cursor,'study_algorithm_engine', './postgres-data/td_study_algorithm_engine.tsv')
+    file_to_table(conn, cursor,'study_version', './postgres-data/td_study_version.tsv')
     file_to_table(conn, cursor,'unit', './postgres-data/td_unit.tsv')
     file_to_table(conn, cursor,'value', './postgres-data/td_value.tsv')
     file_to_table(conn, cursor,'input_type', './postgres-data/td_input_type.tsv')
     file_to_table(conn, cursor,'tag', './postgres-data/td_tag.tsv')
     file_to_table(conn, cursor,'criterion', './postgres-data/td_criterion.tsv')
     file_to_table(conn, cursor,'criterion_has_value', './postgres-data/td_criterion_has_value.tsv')
-    file_to_table(conn, cursor,'eligibility_criteria', './postgres-data/td_eligibility_criteria.tsv')
+    file_to_table(conn, cursor,'raw_criteria', './postgres-data/td_raw_criteria.tsv')
     file_to_table(conn, cursor,'display_rules', './postgres-data/td_display_rules.tsv')
     file_to_table(conn, cursor,'triggered_by', './postgres-data/td_triggered_by.tsv')
     file_to_table(conn, cursor,'criterion_has_tag', './postgres-data/td_criterion_has_tag.tsv')
     file_to_table(conn, cursor,'el_criteria_has_criterion', './postgres-data/td_el_criteria_has_criterion.tsv')
+    file_to_table(conn, cursor,'criterion_staging', './postgres-data/td_criterion_staging.tsv')
+    # file_to_table_with_cols(conn, cursor,'criterion_staging', './postgres-data/td_criterion_staging.tsv', '(id,code,create_date,start_char,end_char,text,criterion_id,status,eligibility_criteria_id)')
     # file_to_table(conn, cursor,'study_algorithm_engine', './postgres-data/td_study_algorithm_engine.tsv')
     conn.commit()
 
@@ -109,6 +119,7 @@ def setup_database(connection) -> Engine:
     cursor.execute("SELECT setval('display_rules_id_seq', (SELECT MAX(id) FROM display_rules));")
     cursor.execute("SELECT setval('el_criteria_has_criterion_id_seq', (SELECT MAX(id) FROM el_criteria_has_criterion));")
     cursor.execute("SELECT setval('eligibility_criteria_id_seq', (SELECT MAX(id) FROM eligibility_criteria));")
+    cursor.execute("SELECT setval('raw_criteria_id_seq', (SELECT MAX(id) FROM raw_criteria));")
     cursor.execute("SELECT setval('input_type_id_seq', (SELECT MAX(id) FROM input_type));")
     cursor.execute("SELECT setval('site_id_seq', (SELECT MAX(id) FROM site));")
     cursor.execute("SELECT setval('study_id_seq', (SELECT MAX(id) FROM study));")
@@ -120,8 +131,7 @@ def setup_database(connection) -> Engine:
     cursor.execute("SELECT setval('triggered_by_id_seq', (SELECT MAX(id) FROM triggered_by));")
     cursor.execute("SELECT setval('value_id_seq', (SELECT MAX(id) FROM value));")
     cursor.execute("SELECT setval('unit_id_seq', (SELECT MAX(id) FROM unit));")
-    file_to_table(conn, cursor,'eligibility_criteria_info', './postgres-data/td_eligibility_criteria_info.tsv')
-    cursor.execute("SELECT setval('eligibility_criteria_info_id_seq', (SELECT MAX(id) FROM eligibility_criteria_info));")
+    cursor.execute("SELECT setval('criterion_staging_id_seq', (SELECT MAX(id) FROM criterion_staging));")
     conn.commit()
 
     yield session
@@ -195,7 +205,7 @@ def mock_new_criterion():
         code = "test_criteria"
         display_name = "this is a test criterion"
         description = "test is a test criterion"
-        active = False
+        active = True
         input_type_id = 1
         tags = [1]
         values = [3]
@@ -204,6 +214,7 @@ def mock_new_criterion():
         triggered_by_criterion_id = 1
         triggered_by_value_id = 1
         triggered_by_path = "2.3.4"
+        criterion_staging_id = None
 
         def to_json(self):
             return {
@@ -218,6 +229,7 @@ def mock_new_criterion():
                 "display_rules_version": self.display_rules_version,
                 "triggered_by_criterion_id": self.triggered_by_criterion_id,
                 "triggered_by_value_id": self.triggered_by_value_id,
-                "triggered_by_path": self.triggered_by_path
+                "triggered_by_path": self.triggered_by_path,
+                "criterion_staging_id": self.criterion_staging_id
             }
     return MockNewCriterion()

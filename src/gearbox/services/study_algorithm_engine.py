@@ -7,18 +7,20 @@ from . import logger
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy import select, exc
 from fastapi import HTTPException
-from gearbox.models import ElCriteriaHasCriterion, EligibilityCriteria, EligibilityCriteriaInfo 
+from gearbox.models import ElCriteriaHasCriterion, EligibilityCriteria, StudyVersion
 from gearbox.schemas import StudyAlgorithmEngine as StudyAlgorithmEngineSchema
-from gearbox.schemas import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSave, StudyAlgorithmEngineSearchResults, StudyAlgorithmEngineSave, StudyAlgorithmEngineUpdate
+from gearbox.schemas import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSave, StudyAlgorithmEngineSearchResults, StudyAlgorithmEngineSave, StudyAlgorithmEngineUpdate, StudyVersionUpdate
 from sqlalchemy.sql.functions import func
 from gearbox.util import status, json_utils
-from gearbox.crud import study_algorithm_engine_crud
-from gearbox.services import eligibility_criteria_info as eligibility_criteria_info_service
+from gearbox.crud import study_algorithm_engine_crud, study_version_crud
+from gearbox.services import study_version as study_version_service
+from gearbox.util.types import StudyVersionStatus
 
-async def get_eligibility_criteria_id(session: Session, eligibility_criteria_info_id_for_lookup: int) -> int:
+async def get_study_version(session: Session, study_version_id: int) -> int:
+    
     try:
-        result = await session.execute(select(EligibilityCriteriaInfo.eligibility_criteria_id)
-            .where(EligibilityCriteriaInfo.id == eligibility_criteria_info_id_for_lookup))
+        result = await session.execute(select(StudyVersion.eligibility_criteria_id)
+            .where(StudyVersion.id == study_version_id))
         eligibility_criteria_id = result.scalar_one()
     except exc.SQLAlchemyError as e:
         logger.error(f"SQL ERROR IN get_eligibility_criteria_id method: {e}")
@@ -26,6 +28,30 @@ async def get_eligibility_criteria_id(session: Session, eligibility_criteria_inf
     
     return eligibility_criteria_id
 
+async def get_eligibility_criteria_id(session: Session, study_version_id: int) -> int:
+    
+    try:
+        result = await session.execute(select(StudyVersion.eligibility_criteria_id)
+            .where(StudyVersion.id == study_version_id))
+        eligibility_criteria_id = result.scalar_one()
+    except exc.SQLAlchemyError as e:
+        logger.error(f"SQL ERROR IN get_eligibility_criteria_id method: {e}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
+    
+    return eligibility_criteria_id
+
+async def get_study_id(session: Session, study_version_id: int) -> int:
+    
+    try:
+        result = await session.execute(select(StudyVersion.study_id)
+            .where(StudyVersion.id == study_version_id))
+        study_id = result.scalar_one()
+    except exc.SQLAlchemyError as e:
+        logger.error(f"SQL ERROR IN get_study_id method: {e}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
+    
+    return study_id
+    
 async def get_study_algorithm_engine(session: Session, id: int) -> StudyAlgorithmEngineSchema:
     aes = await study_algorithm_engine_crud.get(session, id)
     return aes
@@ -79,24 +105,7 @@ async def validate_eligibility_criteria_ids(session: Session, algorithm_logic: s
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
 
 
-async def get_latest_algorithm_version(session: Session, eligibility_criteria_info_id: int) -> int:
-    try:
-        result = await session.execute(select(func.max(StudyAlgorithmEngine.algorithm_version))
-            .join(StudyAlgorithmEngine.eligibility_criteria_info)
-            .where(EligibilityCriteriaInfo.id == eligibility_criteria_info_id)
-        )
-
-        latest_algorithm_version = result.scalar_one()
-    except exc.SQLAlchemyError as e:
-        logger.error(f"SQL ERROR IN get_latest_algorithm_version method: {e}")
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
-
-    if latest_algorithm_version:
-        return latest_algorithm_version
-    else:
-        return 0
-
-async def get_existing_algorithm_logic_duplicate(session: Session, algorithm_logic: str, eligibility_criteria_info_id: int) -> StudyAlgorithmEngine:
+async def get_existing_algorithm_logic_duplicate(session: Session, algorithm_logic: str, study_id: int) -> StudyAlgorithmEngine:
     """
     description:
         The purpose of this function is to find any existing
@@ -106,14 +115,10 @@ async def get_existing_algorithm_logic_duplicate(session: Session, algorithm_log
         to the appropriate study_version.
     """
     try:
-        result = await session.execute(
-            select(StudyAlgorithmEngine)
-                .where(StudyAlgorithmEngine.id.in_(
-                        select(EligibilityCriteriaInfo.study_algorithm_engine_id)
-                                .where(EligibilityCriteriaInfo.id == eligibility_criteria_info_id)
-                        )
-                )
-        )
+        sv_subq = select(StudyVersion).where(StudyVersion.study_id==study_id).subquery()
+        stmt = select(StudyAlgorithmEngine).join(sv_subq, StudyAlgorithmEngine.id == sv_subq.c.study_algorithm_engine_id).order_by(StudyAlgorithmEngine.id)
+
+        result = await session.execute(stmt)
         # * SQLAlchemy note * scalars().all() returns a list of db model types 
         # just .all() returns a list of SQLAlchemy row type 
         existing_algorithms = result.scalars().all()
@@ -122,29 +127,26 @@ async def get_existing_algorithm_logic_duplicate(session: Session, algorithm_log
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
     except Exception as e:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: {type(e)}: {e}")        
-
+    
     if existing_algorithms:
         for ex in existing_algorithms:
             a, b = json.dumps(ex.algorithm_logic), json.dumps(algorithm_logic)
             if a == b:
                 return ex
 
-    return None
-
 async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineCreate) -> StudyAlgorithmEngine:
 
-    # Get the eligibility_criteria_id
-    eligibility_criteria_id = await get_eligibility_criteria_id(session=session, eligibility_criteria_info_id_for_lookup=study_algorithm_engine.eligibility_criteria_info_id)
+    # Get the study_version
+    study_version = await study_version_crud.get(session, study_algorithm_engine.study_version_id)
 
     # Check el_criteria_has_criterion ids in incoming algoritm engine exist in the db
-    await validate_eligibility_criteria_ids(session, study_algorithm_engine.algorithm_logic, eligibility_criteria_id) 
+    await validate_eligibility_criteria_ids(session, study_algorithm_engine.algorithm_logic, study_version.eligibility_criteria_id) 
 
-    # Search for any existing exact duplicate algorithm logic for the study version
-    dup_study_algorithm_engine = await get_existing_algorithm_logic_duplicate(session, study_algorithm_engine.algorithm_logic, study_algorithm_engine.eligibility_criteria_info_id)
+    # Search for any existing exact duplicate algorithm logic for the study 
+    dup_study_algorithm_engine = await get_existing_algorithm_logic_duplicate(session, study_algorithm_engine.algorithm_logic, study_version.study_id)
 
     # if no duplicate is found, determine version and insert new study algorithm engine
     if not dup_study_algorithm_engine:
-        study_algorithm_engine.algorithm_version = await get_latest_algorithm_version(session, study_algorithm_engine.eligibility_criteria_info_id) + 1
         new_study_algorithm_engine = await save_study_algorithm_engine(session, study_algorithm_engine)
         study_algorithm_engine_id = new_study_algorithm_engine.id
         retval = new_study_algorithm_engine
@@ -152,14 +154,14 @@ async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineC
         study_algorithm_engine_id = dup_study_algorithm_engine.id
         retval = dup_study_algorithm_engine
 
-    # update eligibility_criteria_info with new study_algorithm_engine_id
-    eci_upd = {'study_algorithm_engine_id': study_algorithm_engine_id}
-    updated_eci = await eligibility_criteria_info_service.update_eligibility_criteria_info(session, eligibility_criteria_info=eci_upd, eligibility_criteria_info_id=study_algorithm_engine.eligibility_criteria_info_id)
+    # update study_version with new study_algorithm_engine_id
+    sv_upd = StudyVersionUpdate(id=study_algorithm_engine.study_version_id, study_algorithm_engine_id= study_algorithm_engine_id, status=StudyVersionStatus.IN_PROCESS)
+    updated_sv = await study_version_service.update_study_version(session, study_version=sv_upd)
     return retval
 
 async def update(session: Session, study_algorithm_engine: StudyAlgorithmEngineUpdate) -> StudyAlgorithmEngine:
 
-    eligibility_criteria_id = await get_eligibility_criteria_id(session=session, eligibility_criteria_info_id_for_lookup=study_algorithm_engine.eligibility_criteria_info_id)
+    eligibility_criteria_id = await get_eligibility_criteria_id(session=session, study_version_id=study_algorithm_engine.study_version_id)
 
     # Check el_criteria_has_criterion ids in incoming algoritm engine exist in the db
     await validate_eligibility_criteria_ids(session, study_algorithm_engine.algorithm_logic, eligibility_criteria_id) 

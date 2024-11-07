@@ -6,8 +6,10 @@ from gearbox.util import status
 import re
 from collections import deque
 from gearbox.routers import logger
-from gearbox.crud import study_algorithm_engine_crud, match_conditions
+from gearbox.models import StudyVersion
+from gearbox.crud import study_algorithm_engine_crud, match_conditions, study_version_crud
 from gearbox.schemas import AlgorithmResponse
+from gearbox.util.types import StudyVersionStatus
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from . import study_algorithm_engine
 
@@ -537,23 +539,27 @@ def get_tree(full_paths, study_id=None, suppress_header=False):
 
 async def get_match_conditions(session: Session) -> List[AlgorithmResponse]:
 
-    active_match_conds = await match_conditions.get_study_algorithm_engines(session=session)
+    active_match_conds = await study_version_crud.get_multi(
+        db=session, 
+        where=[f"{StudyVersion.__table__.name}.status = '{StudyVersionStatus.ACTIVE.value}'"]
+    )
     match_conds = []
 
     for a in active_match_conds:
         study_logic = {}
-        study_logic['studyId'] = a.study_version.study_id
+        study_logic['studyId'] = a.study_id
         study_logic['algorithm'] = a.study_algorithm_engine.algorithm_logic
         match_conds.append(study_logic)
 
     # check for duplicate study ids in match conditions list, this can happen if
-    # there are more than 1 active entry for a study in the eligibility_criteria_info table
+    # there are more than 1 active entry for a study in the study_version table
     studyIds = [ x['studyId'] for x in match_conds ]
+
     dupes = [ x for n, x in enumerate(studyIds) if x in studyIds[:n]]
     if dupes:
-        logger.error(f"Duplicte active studies found in eligibility_criteria_info table for the following study ids: {dupes}")
+        logger.error(f"Duplicte active studies found in study_version table for the following study ids: {dupes}")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, 
-            f"Duplicte active studies found in eligibility_criteria_info table for the following study ids: {dupes}") 
+            f"Duplicte active studies found in study_version table for the following study ids: {dupes}") 
 
     # sort by studyId before returning
     match_conds = sorted(match_conds, key=lambda k: k['studyId'])

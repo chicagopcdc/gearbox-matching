@@ -21,7 +21,7 @@ from fastapi.encoders import jsonable_encoder
 
 mod = APIRouter()
 
-@mod.get("/study/{study_id}", response_model=Study, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)] )
+@mod.get("/study/{study_id}", response_model=Study, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate), Depends(admin_required)] )
 async def get_study(
     request: Request,
     study_id: int,
@@ -57,6 +57,10 @@ async def get_all_studies(
     request: Request,
     session: AsyncSession = Depends(deps.get_session)
 ):
+    """
+    Comments: This endpoint is called by the front-end to return the presigned_url to the S3
+    bucket that contains the study file
+    """
     params = []
     presigned_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_STUDIES_KEY_NAME, params, "get_object")
     return JSONResponse(presigned_url, status.HTTP_200_OK)
@@ -96,7 +100,7 @@ async def update_studies(
         the 'active' flag is set to false for all studies that do not exist in the
         studyupdates json document.
     """
-    upd_study = await study_service.update_studies(session=session, updates=body)
+    res = await study_service.update_studies(session=session, updates=body)
     return JSONResponse(status.HTTP_200_OK)
 
 def init_app(app):
