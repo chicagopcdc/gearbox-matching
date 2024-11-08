@@ -101,3 +101,4 @@ def test_update_study_version(setup_database, client, connection):
         errors.append(f"Invalid https status code returned from test_create_study_version: {resp.status_code} ")
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))
+
