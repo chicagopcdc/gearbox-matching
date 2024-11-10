@@ -13,7 +13,7 @@ class StudyVersion(Base):
     study_id = Column(Integer, ForeignKey('study.id'))
     study_version_num = Column(Integer, nullable=False)
     create_date = Column(DateTime, nullable=True)
-    status = Column(ENUM(StudyVersionStatus), unique=False, nullable=False)
+    status = Column(ENUM(StudyVersionStatus), unique=False, nullable=True)
     eligibility_criteria_id = Column(Integer, ForeignKey('eligibility_criteria.id', name='fk_eligibility_criteria_id'))
     study_algorithm_engine_id = Column(Integer, ForeignKey('study_algorithm_engine.id', name='fk_study_algorithm_engine_id'), nullable=True)
     comments = Column(String, nullable=True)

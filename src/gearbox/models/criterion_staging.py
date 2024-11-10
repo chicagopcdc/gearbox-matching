@@ -17,6 +17,7 @@ class CriterionStaging(Base):
     create_date = Column(DateTime, nullable=True)
     criterion_adjudication_status = Column(ENUM(AdjudicationStatus), unique=False, nullable=False)
     echc_adjudication_status= Column(ENUM(EchcAdjudicationStatus), unique=False, nullable=False)
+    
     last_updated_by_user_id=Column(Integer, nullable=True)
 
     ontology_code_id = Column(Integer, ForeignKey('ontology_code.id'), nullable=True)

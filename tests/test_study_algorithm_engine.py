@@ -106,11 +106,7 @@ def test_create_study_algorithm_engine(setup_database, client, test_create_data,
         if not (str(resp.status_code).startswith("20")):
             errors.append(f"ERROR: create_new_study_algorithm_engine test: unexpected http status in response: {str(resp.status_code)}")
         full_res = resp.json()
-        print("*********************************************")
-        print(f"FULL RES: {full_res}")
-        print("*********************************************")
         new_ae_id = full_res['id']
-        print(f"NEW AE ID: {new_ae_id}")
         # verify row created 
         try:
             Session = sessionmaker(bind=connection)

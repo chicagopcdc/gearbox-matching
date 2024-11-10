@@ -11,17 +11,10 @@ from typing import List
 from gearbox.util.types import StudyVersionStatus
 
 async def get_latest_study_version(session: Session, study_id: int) -> int:
-    try:
-        result = await session.execute(select(func.max(StudyVersion.study_version_num))
-            .where(StudyVersion.study_id == study_id)
-        )
-        latest_study_version = result.scalar_one()
-    except exc.SQLAlchemyError as e:
-        logger.error(f"SQL ERROR IN get_latest_study_version method: {e}")
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
 
+    latest_study_version = await study_version_crud.get_latest_study_version(current_session=session, study_id=study_id)
     if latest_study_version:
-        return latest_study_version
+        return latest_study_version.study_version_num
     else:
         return 0
 

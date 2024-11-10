@@ -8,6 +8,8 @@ from gearbox.util.types import StudyVersionStatus, AdjudicationStatus
 from gearbox.services import criterion as criterion_service, value as value_service
 
 from . import logger
+from gearbox import config
+from gearbox import auth
 
 async def get_criterion_staging(session: Session, id: int) -> CriterionStagingSchema:
     crit = await criterion_staging_crud.get(session, id)
@@ -17,7 +19,6 @@ async def get_criteria_staging(session: Session) -> List[CriterionStagingSchema]
     cs = await criterion_staging_crud.get_multi(session)
     return cs
 
-#async def get_criterion_staging_by_ec_id(session: Session, eligibility_criteria_id: int) -> List[CriterionStagingSchema]:
 async def get_criterion_staging_by_ec_id(session: Session, eligibility_criteria_id: int) -> List[CriterionStagingSearchResult]:
     cs = await criterion_staging_crud.get_criterion_staging_by_ec_id(session, eligibility_criteria_id)
     criterion_staging_ret = []
@@ -40,7 +41,15 @@ async def create(session: Session, staging_criterion: CriterionStagingCreate)-> 
     new_staging_criterion = await criterion_staging_crud.create(db=session, obj_in=staging_criterion)
     return new_staging_criterion
 
-async def publish_criterion(session: Session, criterion: CriterionPublish, user_id: int):
+async def publish_criterion(session: Session, criterion: CriterionPublish):
+    """
+    Comments: this function qc's and saves a criterion from the criterion_staging table
+    to the criterion table. 
+    """
+    # qc label is not the doccano placeholder - this will occur if the
+    # admin adjudicator does not assign a new code to the new criterion
+    if criterion.code == config.DOCCANO_MISSING_VALUE_PLACEHOLDER:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR PUBLISHING CRITERION: {criterion.description} - code not assigned.") 
 
     # qc values
     check_id_errors = []
@@ -68,19 +77,18 @@ async def publish_criterion(session: Session, criterion: CriterionPublish, user_
 
     # Call update method below - set criterion_staging criteria adjudication status to active
     stage_upd = CriterionStagingUpdate(id=criterion.criterion_staging_id, criterion_id=new_criterion.id, criterion_adjudication_status=AdjudicationStatus.ACTIVE)
-    await update(session=session, criterion=stage_upd, user_id=user_id)
+    await update(session=session, criterion=stage_upd)
 
-async def update(session: Session, criterion: CriterionStagingUpdate, user_id: int ) -> CriterionStagingSchema:
+async def update(session: Session, criterion: CriterionStagingUpdate) -> CriterionStagingSchema:
+
+    user_id = int(await auth.authenticate_user())
 
     criterion_to_upd = await criterion_staging_crud.get(db=session, id=criterion.id)
-    study_version_to_upd = await study_version_crud.get_study_version_ec_id(current_session=session, eligibility_criteria_id = criterion_to_upd.eligibility_criteria_id )
-    sv = await study_version_crud.update(db=session, db_obj=study_version_to_upd, obj_in={"status": StudyVersionStatus.IN_PROCESS})
-
     criterion_in_dict = dict(criterion)
     to_upd_dict = criterion_to_upd.__dict__
     updates=[]
 
-    # Track any updates besides status updates for logging
+    # Log any updates besides status updates 
     for key in criterion_in_dict:
         if criterion_in_dict.get(key) and criterion_in_dict.get(key) != to_upd_dict.get(key) and "status" not in key:
             updates.append(f'criterion_staging update:  {key} changed from {to_upd_dict.get(key)} to {criterion_in_dict.get(key)}')
@@ -112,3 +120,25 @@ async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish, us
     stage_upd = CriterionStagingUpdate(id=echc.criterion_staging_id, el_criteria_has_criterion_id=new_echc.id, echc_adjudication_status=EchcAdjudicationStatus.ACTIVE)
 
     await update(session=session, criterion=stage_upd, user_id=user_id)
+    # update the study version status to "IN_PROCESS"
+    study_version_to_upd = await study_version_crud.get_study_version_ec_id(current_session=session, eligibility_criteria_id = criterion_to_upd.eligibility_criteria_id )
+    await study_version_crud.update(db=session, db_obj=study_version_to_upd, obj_in={"status": StudyVersionStatus.IN_PROCESS})
+
+    return upd_criterion
+
+
+async def accept_criterion_staging(session: Session, id: int):
+    """
+    Comments: This function sets the indicated criterion_staging row criterion_adjudication_status
+    to 'ACTIVE' if the row is in 'EXISTING' status indicating that the adjudication
+    process confirmed that the criterion already exists
+    """
+    user_id = int(await auth.authenticate_user())
+    # GET THE criterion_staging ROW
+    criterion_staging = await get_criterion_staging(session=session, id=id)
+    if criterion_staging.criterion_adjudication_status != AdjudicationStatus.EXISTING:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: cannot accept criterion staging {id} because status is {criterion_staging.criterion_adjudication_status} needs to be {AdjudicationStatus.EXISTING}.")
+    
+    criterion_staging.criterion_adjudication_status = AdjudicationStatus.ACTIVE
+    criterion_upd = CriterionStagingUpdate(**criterion_staging.__dict__)
+    await update(session=session, criterion=criterion_upd)

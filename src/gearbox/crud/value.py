@@ -9,8 +9,6 @@ class CRUDValue(CRUDBase [Value, ValueCreate, ValueSearchResults]):
 
     # This query is used to check if a value exists in the db. It is used to
     # make sure no duplicate values are created. 
-    # TO DO: replace this with a unique constraint on
-    # value_str, operator, unit (name, id?), is_numeric??
     async def get_value(self, 
                         db: Session, 
                         value_str: str, 

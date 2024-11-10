@@ -38,7 +38,6 @@ class CriterionPublish(CriterionBase):
     ontology_code_id: Optional[int]
     input_type_id: int
     values: Optional[List[int]]
-    pass
 
 class CriterionCreateIn(CriterionBase):
     code: str

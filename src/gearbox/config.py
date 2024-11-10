@@ -69,14 +69,6 @@ if TESTING:
 DB_STRING = DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST + ":" + str(DB_PORT) + "/" + DB_DATABASE
 ALEMBIC_DB_STRING = ALEMBIC_DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST + ":" + str(DB_PORT) + "/" + DB_DATABASE
 
-# host_server = os.environ.get('host_server', 'localhost')
-# db_server_port = urllib.parse.quote_plus(str(os.environ.get('db_server_port', '5432')))
-# database_name = os.environ.get('database_name', 'fastapi')
-# db_username = urllib.parse.quote_plus(str(os.environ.get('db_username', 'postgres')))
-# db_password = urllib.parse.quote_plus(str(os.environ.get('db_password', 'secret')))
-# ssl_mode = urllib.parse.quote_plus(str(os.environ.get('ssl_mode','prefer')))
-# DATABASE_URL = 'postgresql://{}:{}@{}:{}/{}?sslmode={}'.format(db_username, db_password, host_server, db_server_port, database_name, ssl_mode)
-
 DB_DSN = config(
     "DB_DSN",
     cast=make_url,
@@ -89,7 +81,6 @@ DB_DSN = config(
         database=DB_DATABASE,
     ),
 )
-
 
 DB_MIN_SIZE = config("DB_MIN_SIZE", cast=int, default=1)  # deprecated
 DB_POOL_MIN_SIZE = config("DB_POOL_MIN_SIZE", cast=int, default=DB_MIN_SIZE)
@@ -134,3 +125,6 @@ ENABLE_PHI = config("ENABLE_PHI", default=False)
 GEARBOX_MIDDLEWARE_PUBLIC_KEY_Path = config("GEARBOX_MIDDLEWARE_PUBLIC_KEY_PATH", default='src/gearbox/keys/jwt_public_key.pem')
 
 GEARBOX_KEY_CONFIG = {}
+
+# DOCCANO placeholder for new criterion
+DOCCANO_MISSING_VALUE_PLACEHOLDER = config("DOCCANO_MISSING_VALUE_PLACEHOLDER", default="new_variable")

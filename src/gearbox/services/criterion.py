@@ -18,7 +18,8 @@ async def get_criteria(session: Session) -> CriterionSearchResults:
     return aes
 
 
-async def create_new_criterion(session: Session, input_criterion_info: CriterionCreateIn, user_id: int):
+async def create_new_criterion(session: Session, input_criterion_info: CriterionCreateIn):
+
     # keep track of any non-existent fks
     check_id_errors = []
 
@@ -78,7 +79,7 @@ async def create_new_criterion(session: Session, input_criterion_info: Criterion
             "criterion_id": new_criterion.id
         } 
         csu = CriterionStagingUpdate(**criterion_staging_update)
-        csu_update = await criterion_staging.update(session, criterion=csu, user_id=user_id)
+        csu_update = await criterion_staging.update(session, criterion=csu)
 
     # commit if no exceptions encountered 
     await session.commit()
@@ -96,9 +97,7 @@ async def update_criterion(session: Session, criterion: CriterionCreateIn, crite
     return upd_criterion
 
 async def save_criterion(session: Session, criterion: CriterionCreate) -> CriterionSchema:
-    print(f"SAVE CRITERION: 1")
     new_criterion = await criterion_crud.create(db=session, obj_in=criterion)
-    print(f"SAVE CRITERION: 2")
     return new_criterion
 
 async def get_criteria_not_exist_in_match_form(session: Session) -> List[CriterionSchema]:

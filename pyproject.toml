@@ -42,6 +42,7 @@ jsonschema = "^4.17.3"
 werkzeug = "2.2.2"
 pcdcutils = {git = "https://github.com/chicagopcdc/pcdcutils.git", rev = "0.1.2"}
 aiocache = "0.11.1"
+python-multipart = "^0.0.12"
 
 
 [tool.poetry.dev-dependencies]
@@ -66,7 +67,6 @@ nest-asyncio = "^1.5.1"
 "criterion_staging"="gearbox.routers.criterion_staging"
 "study_algorithm_engine" = "gearbox.routers.study_algorithm_engine"
 "study_version" = "gearbox.routers.study_version"
-"study_version_eligibility_criteria" = "gearbox.routers.study_version_eligibility_criteria"
 "study_link" = "gearbox.routers.study_link"
 "study_has_patient" = "gearbox.routers.study_has_patient"
 "unit" = "gearbox.routers.unit"

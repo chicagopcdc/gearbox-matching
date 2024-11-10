@@ -1,4 +1,8 @@
 # from .saved_input import
+import cdislogging
+from .. import config
+#logger = cdislogging.get_logger(__name__, log_level="debug" if config.DEBUG else "info")
+
 from .value import value_crud
 from .criterion import criterion_crud
 from .criterion_staging import criterion_staging_crud
