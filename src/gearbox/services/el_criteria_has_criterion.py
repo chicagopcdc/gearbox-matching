@@ -7,6 +7,7 @@ from gearbox.util import status
 from gearbox.models import ElCriteriaHasCriterion
 from gearbox.services import criterion_staging as criterion_staging_service
 from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus
+from gearbox import auth
 
 async def get_el_criteria_has_criterion(session: Session, id: int) -> ElCriteriaHasCriterionSchema:
     ec = await el_criteria_has_criterion_crud.get(session, id)
@@ -65,4 +66,5 @@ async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish):
     study_version_to_upd = await study_version_crud.get_study_version_ec_id(current_session=session, eligibility_criteria_id = existing_staging.eligibility_criteria_id )
     await study_version_crud.update(db=session, db_obj=study_version_to_upd, obj_in={"status": StudyVersionStatus.IN_PROCESS})
 
-    logger.info(f"Published el_criteria_has_criterion {new_echc.id} criterion_id: {new_echc.criterion_id} value_id: {new_echc.value_id} for study version {study_version_to_upd.id}")
+    user_id = int(await auth.authenticate_user())
+    logger.info(f"User: {user_id} published el_criteria_has_criterion {new_echc.id} criterion_id: {new_echc.criterion_id} value_id: {new_echc.value_id} for study version {study_version_to_upd.id}")

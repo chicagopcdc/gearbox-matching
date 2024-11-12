@@ -79,7 +79,8 @@ async def publish_criterion(session: Session, criterion: CriterionPublish):
     stage_upd = CriterionStagingUpdate(id=criterion.criterion_staging_id, criterion_id=new_criterion.id, criterion_adjudication_status=AdjudicationStatus.ACTIVE)
     await update(session=session, criterion=stage_upd)
 
-    logger.info(f"Published criterion: {new_criterion.id} code: {new_criterion.code}")
+    user_id = int(await auth.authenticate_user())
+    logger.info(f"User: {user_id} published criterion: {new_criterion.id} code: {new_criterion.code}")
 
 async def update(session: Session, criterion: CriterionStagingUpdate) -> CriterionStagingSchema:
 
