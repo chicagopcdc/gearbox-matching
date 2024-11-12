@@ -1,11 +1,12 @@
 from . import logger
-from gearbox.crud import el_criteria_has_criterion_crud
-from gearbox.schemas import ElCriteriaHasCriterionCreate, ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterion as ElCriteriaHasCriterionSchema, ElCriteriaHasCriterions
+from gearbox.crud import el_criteria_has_criterion_crud, study_version_crud, eligibility_criteria_crud, value_crud, criterion_crud, criterion_staging_crud
+from gearbox.schemas import ElCriteriaHasCriterionCreate, ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterion as ElCriteriaHasCriterionSchema, ElCriteriaHasCriterionPublish, CriterionStagingUpdate
 from sqlalchemy.ext.asyncio import AsyncSession as Session
-from sqlalchemy import select
 from fastapi import HTTPException
 from gearbox.util import status
 from gearbox.models import ElCriteriaHasCriterion
+from gearbox.services import criterion_staging as criterion_staging_service
+from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus
 
 async def get_el_criteria_has_criterion(session: Session, id: int) -> ElCriteriaHasCriterionSchema:
     ec = await el_criteria_has_criterion_crud.get(session, id)
@@ -31,3 +32,37 @@ async def update_el_criteria_has_criterion(session: Session, el_criteria_has_cri
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"el_criteria_has_criterion id: {el_criteria_has_criterion_id} not found for update.") 
     await session.commit() 
     return upd_el_criteria_has_criterion
+
+async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish):
+
+    check_id_errors = []
+
+    existing_staging = await criterion_staging_service.get_criterion_staging(session=session, id=echc.criterion_staging_id)
+
+    # criterion (question) must be in ACTIVE or EXISTING status before we can assign a value to the study criteria
+    if existing_staging.criterion_adjudication_status not in (AdjudicationStatus.ACTIVE, AdjudicationStatus.EXISTING):
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            f"Criterion staging id: {echc.criterion_staging_id} status must be active in order to publish el_criteria_has_criterion. The current status is: {existing_staging.criterion_adjudication_status} - finalize criterion adjudication before publishing.")
+
+    # Check ids exist for value, eligibility_criteria, criterion
+    check_id_errors.append(await value_crud.check_key(db=session, ids_to_check=echc.value_id))
+    check_id_errors.append(await eligibility_criteria_crud.check_key(db=session, ids_to_check=echc.eligibility_criteria_id))
+    check_id_errors.append(await criterion_crud.check_key(db=session, ids_to_check=echc.criterion_id))
+    check_id_errors.append(await criterion_staging_crud.check_key(db=session, ids_to_check=echc.criterion_staging_id))
+
+    if not all(i is None for i in check_id_errors):
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: missing FKs for el_criteria_has_criterion publication: {[error for error in check_id_errors if error]}")
+
+    # Convert criterion to CriterionCreate
+    echc_save=ElCriteriaHasCriterionCreate(**echc.dict())
+    new_echc = await create_el_criteria_has_criterion(session=session, el_criteria_has_criterion=echc_save)
+
+    # Call update method below - set criterion_staging criteria adjudication status to active
+    stage_upd = CriterionStagingUpdate(id=echc.criterion_staging_id, el_criteria_has_criterion_id=new_echc.id, echc_adjudication_status=EchcAdjudicationStatus.ACTIVE)
+
+    await criterion_staging_service.update(session=session, criterion=stage_upd)
+    # update the study version status to "IN_PROCESS"
+    study_version_to_upd = await study_version_crud.get_study_version_ec_id(current_session=session, eligibility_criteria_id = existing_staging.eligibility_criteria_id )
+    await study_version_crud.update(db=session, db_obj=study_version_to_upd, obj_in={"status": StudyVersionStatus.IN_PROCESS})
+
+    logger.info(f"Published el_criteria_has_criterion {new_echc.id} criterion_id: {new_echc.criterion_id} value_id: {new_echc.value_id} for study version {study_version_to_upd.id}")

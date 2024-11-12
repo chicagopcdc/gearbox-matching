@@ -44,7 +44,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         else:
             errors = ids_to_check if not await self.get(db, id=ids_to_check) else None
         if errors:
-            error_msg = f"ids: {errors} do not exist in {self.model}."
+            error_msg = f"ids: {errors} do not exist in {self.model.__name__}."
         return error_msg
 
     async def get( self, db: Session, id: int, active: bool = None ) -> ModelType:

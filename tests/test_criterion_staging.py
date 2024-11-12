@@ -233,6 +233,7 @@ def test_publish_criterion_staging_code_not_set(setup_database, client, data, co
 
     errors = []
 
+    # create the row in the criterion_staging table
     fake_jwt = "1.2.3"
     resp = client.post(f"/criterion-staging", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
@@ -248,6 +249,7 @@ def test_publish_criterion_staging_code_not_set(setup_database, client, data, co
     except Exception as e:
         errors.append(f"SQL ERROR: create_new_study_algorithm_engine: {e}")
 
+    # publish the staging row to the criterion table
     pub_dict = {
         "criterion_staging_id": new_cs.id,
         "code": new_cs.code,
@@ -255,9 +257,11 @@ def test_publish_criterion_staging_code_not_set(setup_database, client, data, co
         "description": new_cs.description,
         "input_type_id": new_cs.input_type_id
     }
-    resp = client.post(f"/criterion-staging-publish", json=pub_dict, headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.post(f"/criterion-staging-publish-criterion", json=pub_dict, headers={"Authorization": f"bearer {fake_jwt}"})
 
     if not str(resp.status_code).startswith("500"):
-        errors.append(f"Error: Expecting status_code 500")
+        errors.append(f"Error: Expecting status_code 500 got code: {resp.status_code}")
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors)) 
+
+# add test for criterion-staging-publish-echc endpoint

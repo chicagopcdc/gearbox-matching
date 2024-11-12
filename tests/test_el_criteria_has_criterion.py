@@ -1,5 +1,4 @@
 import pytest
-import random
 from starlette.config import environ
 from starlette.status import (
     HTTP_201_CREATED,
@@ -138,3 +137,42 @@ def test_get_el_criteria_has_criterion(setup_database, client):
     fake_jwt = "1.2.3"
     resp = client.get("/el-criteria-has-criterion/1", headers={"Authorization": f"bearer {fake_jwt}"})
     assert resp.status_code == 200
+
+
+@pytest.mark.parametrize(
+    "data", [ 
+        {
+            "criterion_id": 8,
+            "eligibility_criteria_id":18,
+            "active":True,
+            "value_id":6,
+            "criterion_staging_id":82
+    }
+    ]
+)
+def test_publish_echc(setup_database, client, data, connection):
+    """
+    Comments: test create a new site and validates row created in db
+    """
+    fake_jwt = "1.2.3"
+    resp = client.post("/publish-el-criteria-has-criterion", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    resp.raise_for_status()
+
+@pytest.mark.parametrize(
+    "data", [ 
+        {
+            "criterion_id": 99999999,
+            "eligibility_criteria_id":18,
+            "active":True,
+            "value_id":6,
+            "criterion_staging_id":82
+    }
+    ]
+)
+def test_publish_echc_invalid_criterion_id(setup_database, client, data, connection):
+    """
+    Comments: test create a new site and validates row created in db
+    """
+    fake_jwt = "1.2.3"
+    resp = client.post("/publish-el-criteria-has-criterion", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    assert resp.status_code == HTTP_500_INTERNAL_SERVER_ERROR

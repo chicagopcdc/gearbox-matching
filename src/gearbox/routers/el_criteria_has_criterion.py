@@ -9,7 +9,7 @@ from gearbox.util import status
 from gearbox.util.types import EchcAdjudicationStatus
 from gearbox.admin_login import admin_required
 
-from gearbox.schemas import ElCriteriaHasCriterionCreate, ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterion, ElCriteriaHasCriterions, CriterionStagingUpdate
+from gearbox.schemas import ElCriteriaHasCriterionCreate, ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterion, ElCriteriaHasCriterions, CriterionStagingUpdate, ElCriteriaHasCriterionPublish
 from gearbox.services import el_criteria_has_criterion as el_criteria_has_criterion_service, criterion_staging as criterion_staging_service
 from gearbox import deps
 from gearbox import auth 
@@ -68,6 +68,20 @@ async def update_object(
     """
     upd_el_criteria_has_criterion = await el_criteria_has_criterion_service.update_el_criteria_has_criterion(session=session, el_criteria_has_criterion=body, el_criteria_has_criterion_id=el_criteria_has_criterion_id)
     return upd_el_criteria_has_criterion
+
+@mod.post("/publish-el-criteria-has-criterion", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+async def publish(
+    body: ElCriteriaHasCriterionPublish,
+    request: Request,
+    session: AsyncSession = Depends(deps.get_session),
+    user_id: int = Depends(auth.authenticate_user)
+):
+    """
+    Comments: The purpose of this endpoint is to 'publish' a criterion_staging row into the 
+    el_criteria_has_criterions table which stores study-related criteria along with 
+    any associated values for eligibility. 
+    """
+    await el_criteria_has_criterion_service.publish_echc(session=session, echc=body)
 
 def init_app(app):
     app.include_router(mod, tags=["el-criteria-has-criterion"])

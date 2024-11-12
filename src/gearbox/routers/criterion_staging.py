@@ -48,19 +48,6 @@ async def publish(
     """
     await criterion_staging_service.publish_criterion(session=session, criterion=body)
 
-@mod.post("/criterion-staging-publish-echc", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
-async def publish(
-    body: ElCriteriaHasCriterionPublish,
-    request: Request,
-    session: AsyncSession = Depends(deps.get_session),
-    user_id: int = Depends(auth.authenticate_user)
-):
-    """
-    Comments: The purpose of this endpoint is to 'publish' a criterion_staging row into the 
-    criterion table which makes it available to the match-form build. 
-    """
-    await criterion_staging_service.publish_echc(session=session, echc=body, user_id=user_id)
-
 @mod.post("/criterion-staging", response_model=CriterionStaging, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def create_object(
     body: CriterionStagingCreate,

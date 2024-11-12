@@ -1,11 +1,11 @@
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from gearbox.util import status
-from gearbox.schemas import CriterionStaging as CriterionStagingSchema, CriterionStagingCreate, CriterionPublish, CriterionCreate, CriterionStagingUpdate, CriterionHasValueCreate, CriterionStagingSearchResult, ElCriteriaHasCriterionPublish
-from gearbox.crud import criterion_staging_crud , study_version_crud, value_crud, criterion_has_value_crud, input_type_crud
+from gearbox.schemas import CriterionStaging as CriterionStagingSchema, CriterionStagingCreate, CriterionPublish, CriterionCreate, CriterionStagingUpdate, CriterionHasValueCreate, CriterionStagingSearchResult, ElCriteriaHasCriterionPublish, ElCriteriaHasCriterionCreate
+from gearbox.crud import criterion_staging_crud , value_crud, criterion_has_value_crud, input_type_crud
 from typing import List
-from gearbox.util.types import StudyVersionStatus, AdjudicationStatus
-from gearbox.services import criterion as criterion_service, value as value_service
+from gearbox.util.types import AdjudicationStatus
+from gearbox.services import criterion as criterion_service, value as value_service, el_criteria_has_criterion as el_criteria_has_criterion_service
 
 from . import logger
 from gearbox import config
@@ -79,6 +79,8 @@ async def publish_criterion(session: Session, criterion: CriterionPublish):
     stage_upd = CriterionStagingUpdate(id=criterion.criterion_staging_id, criterion_id=new_criterion.id, criterion_adjudication_status=AdjudicationStatus.ACTIVE)
     await update(session=session, criterion=stage_upd)
 
+    logger.info(f"Published criterion: {new_criterion.id} code: {new_criterion.code}")
+
 async def update(session: Session, criterion: CriterionStagingUpdate) -> CriterionStagingSchema:
 
     user_id = int(await auth.authenticate_user())
@@ -104,28 +106,6 @@ async def update(session: Session, criterion: CriterionStagingUpdate) -> Criteri
         logger.info(f"Criterion staging id: {criterion_to_upd.id} updated by user_id: {user_id} updates include: {updates}")
 
     return upd_criterion
-
-async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish, user_id: int):
-
-    existing_staging = await get_criterion_staging(session=session, id=echc.criterion_staging_id)
-    if existing_staging.criterion_adjudication_status not in (AdjudicationStatus.ACTIVE, AdjudicationStatus.EXISTING):
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, 
-            f"Criterion staging id: {echc.id} status must be active in order to publish el_criteria_has_criterion. The current status is: {existing_staging.criterion_adjudication_status} - finalize criterion adjudication before publishing.")
-
-    # Convert criterion to CriterionCreate
-    echc_save=ElCriteriaHasCriterionCreate(**echc.dict())
-    new_echc = await el_criteria_has_criterion_service.create_el_criteria_has_criterion(session=session, el_criteria_has_criterion=echc_save)
-
-    # Call update method below - set criterion_staging criteria adjudication status to active
-    stage_upd = CriterionStagingUpdate(id=echc.criterion_staging_id, el_criteria_has_criterion_id=new_echc.id, echc_adjudication_status=EchcAdjudicationStatus.ACTIVE)
-
-    await update(session=session, criterion=stage_upd, user_id=user_id)
-    # update the study version status to "IN_PROCESS"
-    study_version_to_upd = await study_version_crud.get_study_version_ec_id(current_session=session, eligibility_criteria_id = criterion_to_upd.eligibility_criteria_id )
-    await study_version_crud.update(db=session, db_obj=study_version_to_upd, obj_in={"status": StudyVersionStatus.IN_PROCESS})
-
-    return upd_criterion
-
 
 async def accept_criterion_staging(session: Session, id: int):
     """
