@@ -42,11 +42,11 @@ class CRUDStudy(CRUDBase [Study, StudyCreate, StudySearchResults]):
         study_ids = result.unique().scalars().all()
         return study_ids
 
-    async def get_studies_for_update(self, db: Session, priority: int) -> List[str]: 
-        stmt = select(Study.code).join(Source).where(Source.priority <= priority)
+    async def get_studies_for_update(self, db: Session, priority: int) -> List[Study]: 
+        stmt = select(Study).join(Source).where(Source.priority <= priority)
         result = await db.execute(stmt)
-        study_codes = result.unique().scalars().all()
-        return study_codes
+        studies= result.unique().scalars().all()
+        return studies
 
     async def get_existing_studies(self, db: Session) -> List[str]: 
         stmt = select(Study.code)

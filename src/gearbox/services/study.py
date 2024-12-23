@@ -8,6 +8,9 @@ from gearbox.crud import study_crud, site_crud, site_has_study_crud, study_link_
 from gearbox.models import Study, Site, StudyLink, SiteHasStudy, StudyExternalId
 from gearbox.services import study_version
 
+import json
+from operator import itemgetter
+
 async def get_study_info(session: Session, id: int) -> StudySchema:
     study_info = await study_crud.get_single_study_info(session, id)
     return study_info
@@ -63,7 +66,61 @@ async def update_study(session: Session, study: StudyCreate, study_id: int) -> S
     await session.commit() 
     return upd_study
 
+async def get_studies_to_update(existing_studies: list[Study], refresh_studies: list[StudyCreate]):
+    """
+    This function compares incoming refresh studies to studies existing
+    in the database. It returns a list of study codes that do not 
+    have an exact match for all study fields existing in the database.
+    The purpose of the function is to reduce the number of upsert operations
+    required for the update studies (refresh) process. 
+    """
+
+    studies_to_update = []
+    existing = [{'name':x.name, 
+                               'code':x.code, 
+                               'description': x.description,
+                               'links': [{'name':y.name,'href':y.href} for y in x.links],
+                               'sites': [{'name':z.site.name, 
+                                          'country':z.site.country,
+                                          'city':z.site.city,
+                                          'state':z.site.state,
+                                          'zip':z.site.zip
+                                          } for z in x.sites],
+                                'ext_ids': [{'ext_id':a.ext_id,
+                                             'source':a.source,
+                                             'source_url':a.source_url} for a in x.ext_ids]
+                               } for x in existing_studies]
+
+    refresh = [{'name':x.name, 
+                               'code':x.code, 
+                               'description': x.description,
+                               'links': [{'name':y.name,'href':str(y.href)} for y in x.links],
+                               'sites': [{'name':z.name, 
+                                          'country':z.country, 'city':z.city,
+                                          'state':z.state,
+                                          'zip':z.zip
+                                          } for z in x.sites],
+                                'ext_ids': [{'ext_id':a.ext_id,
+                                             'source':a.source,
+                                             'source_url':str(a.source_url)} for a in x.ext_ids]
+                               } for x in refresh_studies]
+    
+    existing = sorted(existing, key=itemgetter('code'))
+    refresh = sorted(refresh, key=itemgetter('code'))
+
+    for i in refresh:
+        # if a refresh study is not an exact match
+        # for an existing study
+        if i not in existing:
+            studies_to_update.append(i.get('code'))
+
+
+    return studies_to_update
+
 async def update_studies(session: Session, updates: StudyUpdates):
+
+    # TO DO: - check for other uses of the base upsert function
+    # and do the same
 
     source = updates.source
     source_id = await source_crud.get_id(db=session, source=source)
@@ -90,14 +147,15 @@ async def update_studies(session: Session, updates: StudyUpdates):
     for study in updates.studies:
         incoming_studies.append(study.code)
 
-    new_studies = [ x for x in incoming_studies if x not in existing_studies]
+    # get all studies in the db for the same or lower priority
+    existing_studies = await study_crud.get_studies_for_update(db=session, priority=priority)
 
-    # get study.code for all studies at the same or lower priority
-    studies_to_update = await study_crud.get_studies_for_update(db=session, priority=priority)
-    studies_to_update.extend(new_studies)
+    # get study codes for all studies that require upsert
+    study_codes_to_update = await get_studies_to_update(existing_studies=existing_studies, refresh_studies=updates.studies)
 
     for study in updates.studies:
-        if study.code in studies_to_update:
+
+        if study.code in study_codes_to_update:
 
             row = {
                 'name':study.name,
@@ -128,6 +186,7 @@ async def update_studies(session: Session, updates: StudyUpdates):
                     'create_date': datetime.now(),
                     'source_id': source_id
                 }
+
                 # name / zipcode are unique to site
                 constraint_cols = [Site.name, Site.zip]
                 no_update_cols=['create_date']
