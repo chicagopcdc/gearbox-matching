@@ -119,7 +119,7 @@ from starlette.status import (
                 "name": "GVAX Plus Checkpoint Blockade in Neuroblastoma",
                 "code": "19-680",
                 "description": "This research clinical trial is studying the creation and administration of GVAX, an irradiated GM-CSF secreting, autologous neuroblastoma cell vaccine (GVAX) in combination with nivolumab and ipilimumab as a possible treatment for neuroblastoma.  The names of the study drugs involved in this study are:  GVAX Vaccine, an immunotherapy developed from surgically removed tumor tissue Nivolumab Ipilimumab",
-                "active": False,
+                "active": True,
                 "sites": [ 
                      {
                 "name": "Dana Farber Cancer Institite"

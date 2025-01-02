@@ -119,9 +119,7 @@ async def get_studies_to_update(existing_studies: list[Study], refresh_studies: 
 
 async def update_studies(session: Session, updates: StudyUpdates):
 
-    # TO DO: - check for other uses of the base upsert function
-    # and do the same
-
+    # Get / validate the updates source
     source = updates.source
     source_id = await source_crud.get_id(db=session, source=source)
     if not source_id:
@@ -129,10 +127,11 @@ async def update_studies(session: Session, updates: StudyUpdates):
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Error: refresh study info source: {source} does not exist")
 
 
+    # Get study ids of all studies that exist in the db for the source
     source_study_ids = await study_crud.get_study_ids_for_source(db=session, source=source)
+
     # Reset active to false for all rows in all study-related tables
-    # For studies coming from the same source
-    source = updates.source
+    # For incoming studies from the same source
     await study_crud.set_active_all_rows(db=session, active_upd=False, ids=source_study_ids)
     await site_has_study_crud.set_active_all_rows(db=session, active_upd=False, ids=source_study_ids)
     await study_link_crud.set_active_all_rows(db=session, active_upd=False, ids=source_study_ids)
@@ -151,12 +150,19 @@ async def update_studies(session: Session, updates: StudyUpdates):
     existing_studies = await study_crud.get_studies_for_update(db=session, priority=priority)
 
     # get study codes for all studies that require upsert
+    # this function returns all studies in the incoming data
+    # that contain updates to existing studies or new studies
     study_codes_to_update = await get_studies_to_update(existing_studies=existing_studies, refresh_studies=updates.studies)
+    study_ids_reset_to_active = []
 
     for study in updates.studies:
 
-        if study.code in study_codes_to_update:
+        if study.code not in study_codes_to_update:
+            study_id = await study_crud.get_study_id_by_code(current_session=session , study_code=study.code)
+            if study_id:
+                study_ids_reset_to_active.append(study_id)
 
+        else:
             row = {
                 'name':study.name,
                 'code':study.code,
@@ -251,6 +257,12 @@ async def update_studies(session: Session, updates: StudyUpdates):
                     no_update_cols=no_update_cols, 
                     constraint_cols=constraint_cols
                 )
+
+    # Reset to active all study_ids that were in the incoming updates 
+    # but did not have any changes
+    await study_crud.set_active_all_rows(db=session, active_upd=True, ids=study_ids_reset_to_active)
+    await site_has_study_crud.set_active_all_rows(db=session, active_upd=True, ids=study_ids_reset_to_active)
+    await study_link_crud.set_active_all_rows(db=session, active_upd=True, ids=study_ids_reset_to_active)
 
     return True
 

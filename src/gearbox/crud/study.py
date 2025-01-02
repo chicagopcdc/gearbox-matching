@@ -13,6 +13,13 @@ logger = get_logger(__name__)
 
 class CRUDStudy(CRUDBase [Study, StudyCreate, StudySearchResults]):
 
+    async def get_study_id_by_code(self, current_session: Session, study_code: str):
+        stmt = select(Study.id).where(Study.code==study_code)
+        result = await current_session.execute(stmt)
+        # there is a unique constraint on study.code
+        study_id = result.unique().scalars().first()
+        return study_id
+
     # Returns study information for ACTIVE studies
     async def get_studies_info(self, current_session: Session):
         sv_subq = select(StudyVersion).where(StudyVersion.status==StudyVersionStatus.ACTIVE).subquery()
