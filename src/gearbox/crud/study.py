@@ -62,15 +62,17 @@ class CRUDStudy(CRUDBase [Study, StudyCreate, StudySearchResults]):
         return study_codes
 
     async def set_active_all_rows(self, db: Session, ids: List[int], active_upd: bool) -> bool: 
+
         try:
             stmt = ( update(Study)
                 .values(active=active_upd)
                 .where(Study.id.in_(ids))
             )
-            res = await db.execute(stmt)
-            db.commit()
+            await db.execute(stmt)
+            await db.commit()
+
         except exc.SQLAlchemyError as e:
-            db.rollback()
+            await db.rollback()
             logger.error(f"SQL ERROR IN CRUDStudy.set_active_all_rows method: {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
         return True

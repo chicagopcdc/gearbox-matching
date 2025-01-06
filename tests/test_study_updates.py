@@ -154,6 +154,7 @@ def test_study_updates(setup_database, client, data, connection):
     """
     fake_jwt = "1.2.3"
     resp = client.post("/update-studies", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+
     resp.raise_for_status()
 
     test_study_code = data.get('studies')[1].get('code')
@@ -165,6 +166,7 @@ def test_study_updates(setup_database, client, data, connection):
     try: 
         Session = sessionmaker(bind=connection)
         db_session = Session()
+
         study = db_session.query(Study).filter(Study.code==test_study_code).first()
         if not study: 
             errors.append(f"Study (code): {test_study_code} not created")
@@ -185,17 +187,18 @@ def test_study_updates(setup_database, client, data, connection):
         if not site_has_study: 
             errors.append(f"Site has study(study_id): {study.id} not created")
         
-#        active_studies = db_session.query(Study).filter(Study.active==True).all()
-#        if not len(active_studies) == 2:
-#            errors.append(f"ERROR: should be 2 active studies, found: {len(active_studies)} active studies in study table.")
 
-#        active_links = db_session.query(StudyLink).filter(StudyLink.active==True).all()
-#        if not len(active_links) == 2:
-#            errors.append(f"ERROR: should be 2 active study links, found: {len(active_links)} active study links in study_links table.")
+        active_studies = db_session.query(Study).filter(Study.active==True).all()
+        if not len(active_studies) == 3:
+            errors.append(f"ERROR: should be 2 active studies, found: {len(active_studies)} active studies in study table.")
 
-#        active_study_sites = db_session.query(SiteHasStudy).filter(SiteHasStudy.active==True).all()
-#        if not len(active_study_sites) == 2:
-#            errors.append(f"ERROR: should be 2 active study sites, found: {len(active_study_sites)} active study sites in site_has_study table.")
+        active_links = db_session.query(StudyLink).filter(StudyLink.active==True).all()
+        if not len(active_links) == 3:
+            errors.append(f"ERROR: should be 2 active study links, found: {len(active_links)} active study links in study_links table.")
+
+        active_study_sites = db_session.query(SiteHasStudy).filter(SiteHasStudy.active==True).all()
+        if not len(active_study_sites) == 4:
+            errors.append(f"ERROR: should be 2 active study sites, found: {len(active_study_sites)} active study sites in site_has_study table.")
         
     except Exception as e:
         errors.append(f"Test study unexpected exception: {str(e)}")

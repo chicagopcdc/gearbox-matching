@@ -17,8 +17,8 @@ class CRUDStudyLink(CRUDBase [StudyLink, StudyLinkCreate, StudyLinkSearchResults
                 .values(active=active_upd)
                 .where(StudyLink.study_id.in_(ids))
             )
-            res = await db.execute(stmt)
-            db.commit()
+            await db.execute(stmt)
+            await db.commit()
         except exc.SQLAlchemyError as e:
             db.rollback()
             logger.error(f"SQL ERROR IN CRUDStudyLink.set_active_all_rows method: {e}")
