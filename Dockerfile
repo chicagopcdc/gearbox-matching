@@ -15,8 +15,8 @@ RUN mkdir src/gearbox/keys/
 
 RUN poetry lock
 
-RUN python -m venv /env && . /env/bin/activate && poetry install --no-interaction --no-dev
-
+RUN python -m venv /env && . /env/bin/activate && poetry install --no-interaction --without dev
+# OR RUN python -m venv /env && . /env/bin/activate && poetry install --only main --no-interaction
 
 FROM base
 COPY --from=builder /env /env
