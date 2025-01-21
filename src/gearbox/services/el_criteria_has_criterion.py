@@ -34,7 +34,7 @@ async def update_el_criteria_has_criterion(session: Session, el_criteria_has_cri
     await session.commit() 
     return upd_el_criteria_has_criterion
 
-async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish):
+async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish, user_id: int):
 
     check_id_errors = []
 
@@ -61,10 +61,9 @@ async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish):
     # Call update method below - set criterion_staging criteria adjudication status to active
     stage_upd = CriterionStagingUpdate(id=echc.criterion_staging_id, el_criteria_has_criterion_id=new_echc.id, echc_adjudication_status=EchcAdjudicationStatus.ACTIVE)
 
-    await criterion_staging_service.update(session=session, criterion=stage_upd)
+    await criterion_staging_service.update(session=session, criterion=stage_upd, user_id=user_id)
     # update the study version status to "IN_PROCESS"
     study_version_to_upd = await study_version_crud.get_study_version_ec_id(current_session=session, eligibility_criteria_id = existing_staging.eligibility_criteria_id )
     await study_version_crud.update(db=session, db_obj=study_version_to_upd, obj_in={"status": StudyVersionStatus.IN_PROCESS})
 
-    user_id = int(await auth.authenticate_user())
     logger.info(f"User: {user_id} published el_criteria_has_criterion {new_echc.id} criterion_id: {new_echc.criterion_id} value_id: {new_echc.value_id} for study version {study_version_to_upd.id}")

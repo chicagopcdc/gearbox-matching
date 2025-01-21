@@ -9,7 +9,6 @@ from gearbox.services import criterion as criterion_service, value as value_serv
 
 from . import logger
 from gearbox import config
-from gearbox import auth
 
 async def get_criterion_staging(session: Session, id: int) -> CriterionStagingSchema:
     crit = await criterion_staging_crud.get(session, id)
@@ -41,7 +40,7 @@ async def create(session: Session, staging_criterion: CriterionStagingCreate)-> 
     new_staging_criterion = await criterion_staging_crud.create(db=session, obj_in=staging_criterion)
     return new_staging_criterion
 
-async def publish_criterion(session: Session, criterion: CriterionPublish):
+async def publish_criterion(session: Session, criterion: CriterionPublish, user_id: int):
     """
     Comments: this function qc's and saves a criterion from the criterion_staging table
     to the criterion table. 
@@ -77,14 +76,10 @@ async def publish_criterion(session: Session, criterion: CriterionPublish):
 
     # Call update method below - set criterion_staging criteria adjudication status to active
     stage_upd = CriterionStagingUpdate(id=criterion.criterion_staging_id, criterion_id=new_criterion.id, criterion_adjudication_status=AdjudicationStatus.ACTIVE)
-    await update(session=session, criterion=stage_upd)
-
-    user_id = int(await auth.authenticate_user())
+    await update(session=session, criterion=stage_upd, user_id=user_id)
     logger.info(f"User: {user_id} published criterion: {new_criterion.id} code: {new_criterion.code}")
 
-async def update(session: Session, criterion: CriterionStagingUpdate) -> CriterionStagingSchema:
-
-    user_id = int(await auth.authenticate_user())
+async def update(session: Session, criterion: CriterionStagingUpdate, user_id: int) -> CriterionStagingSchema:
 
     criterion_to_upd = await criterion_staging_crud.get(db=session, id=criterion.id)
     criterion_in_dict = dict(criterion)
@@ -97,7 +92,6 @@ async def update(session: Session, criterion: CriterionStagingUpdate) -> Criteri
             updates.append(f'criterion_staging update:  {key} changed from {to_upd_dict.get(key)} to {criterion_in_dict.get(key)}')
 
     if criterion_to_upd:
-        criterion.last_updated_by_user_id = user_id
         upd_criterion = await criterion_staging_crud.update(db=session, db_obj=criterion_to_upd, obj_in=criterion)
     else:
         logger.error(f"Criterion id: {criterion.id} not found for update.") 
@@ -108,18 +102,19 @@ async def update(session: Session, criterion: CriterionStagingUpdate) -> Criteri
 
     return upd_criterion
 
-async def accept_criterion_staging(session: Session, id: int):
+async def accept_criterion_staging(session: Session, id: int, user_id: int):
     """
     Comments: This function sets the indicated criterion_staging row criterion_adjudication_status
     to 'ACTIVE' if the row is in 'EXISTING' status indicating that the adjudication
     process confirmed that the criterion already exists
     """
-    user_id = int(await auth.authenticate_user())
+
     # GET THE criterion_staging ROW
     criterion_staging = await get_criterion_staging(session=session, id=id)
     if criterion_staging.criterion_adjudication_status != AdjudicationStatus.EXISTING:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: cannot accept criterion staging {id} because status is {criterion_staging.criterion_adjudication_status} needs to be {AdjudicationStatus.EXISTING}.")
-    
+
+    criterion_staging.last_updated_by_user_id = user_id 
     criterion_staging.criterion_adjudication_status = AdjudicationStatus.ACTIVE
     criterion_upd = CriterionStagingUpdate(**criterion_staging.__dict__)
-    await update(session=session, criterion=criterion_upd)
+    await update(session=session, criterion=criterion_upd, user_id = user_id)
