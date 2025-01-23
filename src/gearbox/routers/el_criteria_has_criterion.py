@@ -69,7 +69,7 @@ async def update_object(
     upd_el_criteria_has_criterion = await el_criteria_has_criterion_service.update_el_criteria_has_criterion(session=session, el_criteria_has_criterion=body, el_criteria_has_criterion_id=el_criteria_has_criterion_id)
     return upd_el_criteria_has_criterion
 
-@mod.post("/publish-el-criteria-has-criterion", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.post("/publish-el-criteria-has-criterion", response_model=ElCriteriaHasCriterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def publish(
     body: ElCriteriaHasCriterionPublish,
     request: Request,
@@ -81,7 +81,8 @@ async def publish(
     el_criteria_has_criterions table which stores study-related criteria along with 
     any associated values for eligibility. 
     """
-    await el_criteria_has_criterion_service.publish_echc(session=session, echc=body, user_id=int(user_id))
+    new_echc = await el_criteria_has_criterion_service.publish_echc(session=session, echc=body, user_id=int(user_id))
+    return new_echc
 
 def init_app(app):
     app.include_router(mod, tags=["el-criteria-has-criterion"])
