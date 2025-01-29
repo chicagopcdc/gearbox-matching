@@ -49,6 +49,7 @@ async def update_el_criteria_has_criterion(session: Session, el_criteria_has_cri
 
 async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish, user_id: int) -> ElCriteriaHasCriterion:
 
+    print(f"IN PUBLISH_ECHC SERVICE.....")
     check_id_errors = []
 
     existing_staging = await criterion_staging_service.get_criterion_staging(session=session, id=echc.criterion_staging_id)
@@ -59,7 +60,7 @@ async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish, us
             f"Criterion staging id: {echc.criterion_staging_id} status must be active in order to publish el_criteria_has_criterion. The current status is: {existing_staging.criterion_adjudication_status} - finalize criterion adjudication before publishing.")
 
     # Check ids exist for value, eligibility_criteria, criterion
-    check_id_errors.append(await value_crud.check_key(db=session, ids_to_check=echc.value_id))
+    check_id_errors.append(await value_crud.check_key(db=session, ids_to_check=echc.value_ids))
     check_id_errors.append(await eligibility_criteria_crud.check_key(db=session, ids_to_check=echc.eligibility_criteria_id))
     check_id_errors.append(await criterion_crud.check_key(db=session, ids_to_check=echc.criterion_id))
     check_id_errors.append(await criterion_staging_crud.check_key(db=session, ids_to_check=echc.criterion_staging_id))
@@ -67,11 +68,14 @@ async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish, us
     if not all(i is None for i in check_id_errors):
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: missing FKs for el_criteria_has_criterion publication: {[error for error in check_id_errors if error]}")
 
-    # Convert criterion to CriterionCreate
-    echc_save=ElCriteriaHasCriterionCreate(**echc.dict())
-    new_echc = await create_el_criteria_has_criterion(session=session, el_criteria_has_criterion=echc_save)
+    # Save echc for each value in publish object
+    for val in echc.value_ids:
+        echc_create = echc.dict()
+        echc_create['value_id'] = val
+        echc_save=ElCriteriaHasCriterionCreate(**echc_create)
+        new_echc = await create_el_criteria_has_criterion(session=session, el_criteria_has_criterion=echc_save)
 
-    # Call update method below - set criterion_staging criteria adjudication status to active
+    # Call update method below - set criterion_staging echc criteria adjudication status to active
     stage_upd = CriterionStagingUpdate(id=echc.criterion_staging_id, el_criteria_has_criterion_id=new_echc.id, echc_adjudication_status=EchcAdjudicationStatus.ACTIVE)
 
     await criterion_staging_service.update(session=session, criterion=stage_upd, user_id=user_id)

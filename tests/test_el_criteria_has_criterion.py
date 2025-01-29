@@ -145,7 +145,7 @@ def test_get_el_criteria_has_criterion(setup_database, client):
             "criterion_id": 8,
             "eligibility_criteria_id":18,
             "active":True,
-            "value_id":6,
+            "value_ids":[6,7,89],
             "criterion_staging_id":82
     }
     ]
@@ -164,7 +164,7 @@ def test_publish_echc(setup_database, client, data, connection):
             "criterion_id": 99999999,
             "eligibility_criteria_id":18,
             "active":True,
-            "value_id":6,
+            "value_ids":[6],
             "criterion_staging_id":82
     }
     ]

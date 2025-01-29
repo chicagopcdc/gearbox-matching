@@ -26,10 +26,10 @@ async def get_criterion_staging_by_ec_id(session: Session, eligibility_criteria_
         criterion_staging = CriterionStagingSearchResult(**c.__dict__)
         # only call get if values exist, because we are calling it with the ids parameter
         # and if ids are None, then value service will return all values in the table
-        if c.values:
-            values = await value_service.get_values(session=session, ids=c.values)
+        if c.criterion_values:
+            values = await value_service.get_values(session=session, ids=c.criterion_values)
             if values: 
-                criterion_staging.value_list = values 
+                criterion_staging.criterion_value_list = values 
 
         criterion_staging_ret.append(criterion_staging)
 
