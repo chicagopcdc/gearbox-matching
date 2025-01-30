@@ -22,7 +22,7 @@ class CriterionStagingBase(BaseModel):
     text: str
     criterion_id: Optional[int]
 
-    criterion_values: Optional[List[int]] = []
+    criterion_value_ids: Optional[List[int]] = []
     echc_value_ids: Optional[List[int]] = []
     last_updated_by_user_id: Optional[int]
 
