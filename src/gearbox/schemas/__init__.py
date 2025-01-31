@@ -14,6 +14,8 @@ from .eligibility_criteria import EligibilityCriteriaCreate, EligibilityCriteria
 from .criterion import CriterionCreate, CriterionSearchResults, CriterionCreateIn, Criterion, CriterionPublish
 from .criterion_staging import CriterionStaging, CriterionStagingCreate, CriterionStagingUpdate, CriterionStagingSearchResult
 from .raw_criteria import RawCriteriaCreate, RawCriteria, RawCriteriaIn
+from .pre_annotated_criterion import PreAnnotatedCriterion, PreAnnotatedCriterionCreate , PreAnnotatedCriterionSearchResults
+from .pre_annotated_criterion_model import PreAnnotatedCriterionModel, PreAnnotatedCriterionModelCreate, PreAnnotatedCriterionModelSearchResults
 from .input_type import InputTypeCreate, InputTypeSearchResults, InputType
 from .ontology_code import OntologyCodeCreate, OntologyCodeSearchResults, OntologyCode
 from .el_criteria_has_criterion import ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterionCreate, ElCriteriaHasCriterion, ElCriteriaHasCriterions, ElCriteriaHasCriterionPublish

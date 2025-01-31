@@ -110,6 +110,10 @@ def test_create_raw_criteria_reupload(setup_database, client, connection):
         if not cs:
             errors.append("Obsolete criterion code not found in criterion_staging")
         
+        stmt = "SELECT count(*) from pre_annotated_criterion"
+        pac_ct = db_session.execute(stmt)
+        ## TO DO - APPEND ERROR IF INSERT FAILED
+        
     except Exception as ex:
         errors.append(f"SQL ERROR: create_raw_criteria_reload test: {ex}")
 

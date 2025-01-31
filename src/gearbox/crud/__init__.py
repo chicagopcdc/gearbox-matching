@@ -25,3 +25,5 @@ from .study_has_patient import study_has_patient_crud
 from .study_external_id import study_external_id_crud
 from .unit import unit_crud
 from .input_type import input_type_crud
+from .pre_annotated_criterion import pre_annotated_criterion_crud
+from .pre_annotated_criterion_model import pre_annotated_criterion_model_crud
