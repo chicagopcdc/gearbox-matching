@@ -42,7 +42,6 @@ def test_get_criterion_staging_not_found(setup_database, client):
             "end_char": 2340,
             "text": "TEST",
             "criterion_id": None,
-            "last_updated_by_user_id": 1,
             "values": []
         }
     ]
@@ -155,8 +154,7 @@ def test_publish_criterion_staging_with_values_duplicate(setup_database, client,
             "end_char": 10,
             "text": "test text",
             "criterion_id": 8,
-            "values": [155,156,15],
-            "last_updated_by_user_id": 4
+            "values": [155,156,15]
         }
     ]
 )
@@ -182,8 +180,8 @@ def test_post_criterion_staging(setup_database, client, data, connection):
             "create_date": "2024-07-22T12:26:36",
             "ontology_code_id": None,
             "input_type_id": 3,
-            "criterion_id": None,
-            "values": []
+            "criterion_id": 1,
+            "criterion_value_ids": [1,2,3]
         }
     ]
 )
@@ -217,8 +215,7 @@ def test_accept_criterion_staging(setup_database, client, connection):
             "end_char": 10,
             "text": "test text",
             "criterion_id": 8,
-            "values": [],
-            "last_updated_by_user_id": 4
+            "values": []
         }
     ]
 )

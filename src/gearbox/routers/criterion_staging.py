@@ -5,7 +5,7 @@ from gearbox.util import status
 from gearbox.services import criterion_staging as criterion_staging_service
 from gearbox.admin_login import admin_required
 
-from gearbox.schemas import CriterionStaging, CriterionStagingUpdate, CriterionPublish, CriterionStagingCreate, CriterionStagingSearchResult, ElCriteriaHasCriterionPublish
+from gearbox.schemas import CriterionStaging, CriterionStagingUpdateIn, CriterionPublish, CriterionStagingCreate, CriterionStagingSearchResult, ElCriteriaHasCriterionPublish
 from gearbox import deps
 from gearbox import auth 
 from gearbox.util.types import AdjudicationStatus
@@ -26,7 +26,7 @@ async def get_staging_criterion_by_eligibility_criteria_id(
 
 @mod.post("/update-criterion-staging", response_model=CriterionStaging, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def update_object(
-    body: CriterionStagingUpdate,
+    body: CriterionStagingUpdateIn,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
     user_id: int = Depends(auth.authenticate_user)
@@ -62,7 +62,7 @@ async def create_object(
 
 @mod.post("/save-criterion-staging", response_model=CriterionStaging, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
-    body: CriterionStagingUpdate,
+    body: CriterionStagingUpdateIn,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
     user_id: int = Depends(auth.authenticate_user)
@@ -74,7 +74,6 @@ async def save_object(
     """
 
     body.criterion_adjudication_status = AdjudicationStatus.IN_PROCESS
-    body.last_updated_by_user_id = user_id
     upd_value = await criterion_staging_service.update(session=session, criterion=body, user_id = int(user_id))
     return upd_value
 
