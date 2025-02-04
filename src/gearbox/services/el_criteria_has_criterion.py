@@ -49,7 +49,6 @@ async def update_el_criteria_has_criterion(session: Session, el_criteria_has_cri
 
 async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish, user_id: int) -> ElCriteriaHasCriterion:
 
-    print(f"IN PUBLISH_ECHC SERVICE.....")
     check_id_errors = []
 
     existing_staging = await criterion_staging_service.get_criterion_staging(session=session, id=echc.criterion_staging_id)

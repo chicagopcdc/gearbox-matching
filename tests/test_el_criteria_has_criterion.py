@@ -161,6 +161,25 @@ def test_publish_echc(setup_database, client, data, connection):
 @pytest.mark.parametrize(
     "data", [ 
         {
+            "criterion_id": 8,
+            "eligibility_criteria_id":18,
+            "active":True,
+            "value_ids":[999999, 898989898],
+            "criterion_staging_id":82
+    }
+    ]
+)
+def test_publish_echc_invalid_value_ids(setup_database, client, data, connection):
+    """
+    Comments: test create a new site and validates row created in db
+    """
+    fake_jwt = "1.2.3"
+    resp = client.post("/publish-el-criteria-has-criterion", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    assert resp.status_code == HTTP_500_INTERNAL_SERVER_ERROR
+
+@pytest.mark.parametrize(
+    "data", [ 
+        {
             "criterion_id": 99999999,
             "eligibility_criteria_id":18,
             "active":True,

@@ -90,6 +90,22 @@ async def update(session: Session, criterion: CriterionStagingUpdateIn, user_id:
     criterion_obj = CriterionStagingUpdate(**criterion.dict(exclude_unset=True))
     criterion_obj.last_updated_by_user_id = user_id
 
+    # validate value ids if they exist in the staging row
+    id_error_msg = []
+    check_echc_id_errors = []
+    if criterion.echc_value_ids:
+        check_echc_id_errors.append(await value_crud.check_key(db=session, ids_to_check=criterion.echc_value_ids))
+        if not all(i is None for i in check_echc_id_errors):
+                id_error_msg.append(f"ERROR UPDATING CRITERION_STAGING: invalid echc_value_ids: {[error for error in check_echc_id_errors if error]}")
+
+    check_criterion_id_errors = []
+    if criterion.criterion_value_ids:
+        check_criterion_id_errors.append(await value_crud.check_key(db=session, ids_to_check=criterion.criterion_value_ids))
+        if not all(i is None for i in check_criterion_id_errors):
+                id_error_msg.append(f"ERROR UPDATING CRITERION_STAGING: invalid criterion_value_ids: {[error for error in check_criterion_id_errors if error]}")
+    if id_error_msg:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, id_error_msg)
+
     # Log any updates besides status updates 
     for key in criterion_in_dict:
         if criterion_in_dict.get(key) and criterion_in_dict.get(key) != to_upd_dict.get(key) and "status" not in key:
