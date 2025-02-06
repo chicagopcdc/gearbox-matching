@@ -53,6 +53,7 @@ class CriterionStagingSearchResult(BaseModel):
     criterion_id: Optional[int]
     last_updated_by_user_id: Optional[int]
     echc_value_ids: Optional[List[int]] = []
+    criterion_value_ids: Optional[List[int]] = []
 
 class CriterionStagingUpdateIn(CriterionStagingBase):
     id: int
