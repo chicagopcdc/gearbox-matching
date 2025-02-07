@@ -23,19 +23,6 @@ async def get_el_criteria_has_criterions_by_ecid(session: Session, ecid: int) ->
 
 async def create_el_criteria_has_criterion(session: Session, el_criteria_has_criterion: ElCriteriaHasCriterionCreate) -> ElCriteriaHasCriterion:
     new_echc = await el_criteria_has_criterion_crud.create(db=session, obj_in=el_criteria_has_criterion)
-    # What about questions that appear 2 or more times in a study with different values? (Yes/No nested for example)
-    constraint_cols = [ElCriteriaHasCriterion.criterion_id, ElCriteriaHasCriterion.eligibility_criteria_id]
-    """
-    no_update_cols = ['create_date']
-            constraint_cols = [Study.code]
-            new_or_updated_study_id = await study_crud.upsert(
-                db=session,
-                model=Study, 
-                row=row, 
-                as_of_date_col='create_date',
-                no_update_cols=no_update_cols,
-                constraint_cols=constraint_cols
-    """
     return new_echc
 
 async def update_el_criteria_has_criterion(session: Session, el_criteria_has_criterion: ElCriteriaHasCriterionCreate, el_criteria_has_criterion_id: int) -> ElCriteriaHasCriterionSchema:
@@ -47,7 +34,7 @@ async def update_el_criteria_has_criterion(session: Session, el_criteria_has_cri
     await session.commit() 
     return upd_el_criteria_has_criterion
 
-async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish, user_id: int) -> ElCriteriaHasCriterion:
+async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish, user_id: int):
 
     check_id_errors = []
 
@@ -67,12 +54,14 @@ async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish, us
     if not all(i is None for i in check_id_errors):
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: missing FKs for el_criteria_has_criterion publication: {[error for error in check_id_errors if error]}")
 
+    new_echc_list = []
     # Save echc for each value in publish object
     for val in echc.value_ids:
         echc_create = echc.dict()
         echc_create['value_id'] = val
         echc_save=ElCriteriaHasCriterionCreate(**echc_create)
         new_echc = await create_el_criteria_has_criterion(session=session, el_criteria_has_criterion=echc_save)
+        new_echc_list.append(new_echc)
 
     # Call update method below - set criterion_staging echc criteria adjudication status to active
     stage_upd = CriterionStagingUpdate(id=echc.criterion_staging_id, el_criteria_has_criterion_id=new_echc.id, echc_adjudication_status=EchcAdjudicationStatus.ACTIVE)
@@ -82,5 +71,5 @@ async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish, us
     study_version_to_upd = await study_version_crud.get_study_version_ec_id(current_session=session, eligibility_criteria_id = existing_staging.eligibility_criteria_id )
     await study_version_crud.update(db=session, db_obj=study_version_to_upd, obj_in={"status": StudyVersionStatus.IN_PROCESS})
 
-    logger.info(f"User: {user_id} published el_criteria_has_criterion {new_echc.id} criterion_id: {new_echc.criterion_id} value_id: {new_echc.value_id} for study version {study_version_to_upd.id}")
-    return new_echc
+    for echc in new_echc_list:
+        logger.info(f"User: {user_id} published el_criteria_has_criterion {echc.id} criterion_id: {echc.criterion_id} value_id: {echc.value_id} for study version {study_version_to_upd.id}")

@@ -20,7 +20,6 @@ class ElCriteriaHasCriterions(BaseModel):
 
 class ElCriteriaHasCriterionCreate(ElCriteriaHasCriterionBase):
     value_id: int
-    pass
 
 class ElCriteriaHasCriterionPublish(ElCriteriaHasCriterionBase):
     criterion_staging_id: int

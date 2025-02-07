@@ -87,6 +87,7 @@ async def update(session: Session, criterion: CriterionStagingUpdateIn, user_id:
     to_upd_dict = criterion_to_upd.__dict__
     updates=[]
 
+    # create an update object that only includes set fields
     criterion_obj = CriterionStagingUpdate(**criterion.dict(exclude_unset=True))
     criterion_obj.last_updated_by_user_id = user_id
 

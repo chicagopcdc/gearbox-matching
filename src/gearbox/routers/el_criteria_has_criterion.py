@@ -81,8 +81,7 @@ async def publish(
     el_criteria_has_criterions table which stores study-related criteria along with 
     any associated values for eligibility. 
     """
-    new_echc = await el_criteria_has_criterion_service.publish_echc(session=session, echc=body, user_id=int(user_id))
-    return new_echc
+    await el_criteria_has_criterion_service.publish_echc(session=session, echc=body, user_id=int(user_id))
 
 def init_app(app):
     app.include_router(mod, tags=["el-criteria-has-criterion"])
