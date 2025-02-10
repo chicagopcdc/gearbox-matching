@@ -105,7 +105,7 @@ async def create_pre_annotated(session: Session, raw_criteria: RawCriteria):
             await pre_annotated_criterion_model_crud.create(db=session, obj_in=pam_create)
 
 
-async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, user_id: int):
+async def create_raw_criteria(session: Session, raw_criteria_in: RawCriteriaIn, user_id: int):
 
     """
     This function will create a new raw_criteria for adjudication along with associated

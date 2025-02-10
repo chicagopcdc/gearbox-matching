@@ -55,7 +55,7 @@ async def save_object(file: UploadFile = File(...),
                 with zip_ref.open(filename) as file:
                     contents = file.read()
                     raw_criteria = RawCriteriaIn(data=contents)
-                    await raw_criteria_service.create_raw_criteria(session, raw_criteria=raw_criteria, user_id=user_id)
+                    await raw_criteria_service.create_raw_criteria(session, raw_criteria_in=raw_criteria, user_id=user_id)
 
     
     return JSONResponse(status.HTTP_200_OK)
