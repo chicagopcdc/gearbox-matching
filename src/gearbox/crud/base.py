@@ -40,7 +40,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """
         error_msg = None
         if isinstance(ids_to_check, list):
-            errors = '.'.join([str(id) for id in ids_to_check if not await self.get(db, id=id)])
+            errors = ','.join([str(id) for id in ids_to_check if not await self.get(db, id=id)])
         else:
             errors = ids_to_check if not await self.get(db, id=ids_to_check) else None
         if errors:

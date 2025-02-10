@@ -105,7 +105,7 @@ async def create_pre_annotated(session: Session, raw_criteria: RawCriteria):
             await pre_annotated_criterion_model_crud.create(db=session, obj_in=pam_create)
 
 
-async def create_raw_criteria(session: Session, raw_criteria_in: RawCriteriaIn):
+async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, user_id: int):
 
     """
     This function will create a new raw_criteria for adjudication along with associated
@@ -190,14 +190,14 @@ async def create_raw_criteria(session: Session, raw_criteria_in: RawCriteriaIn):
             # set any criteria to INACTIVE that do not exist in incoming
             if (crit.code, crit.text) in old_to_set_inactive:
                 crit.criterion_adjudication_status = AdjudicationStatus.INACTIVE
-                await criterion_staging_service.update(session=session, criterion=crit)
+                await criterion_staging_service.update(session=session, criterion=crit, user_id=user_id)
             # only update start_char and end_char if no change in text
             elif (crit.code, crit.text) in existing_no_change:
                 # get start_char and end-char from incoming_raw_criteria
                 for inc in incoming_raw_criteria.keys():
                     if (crit.code, crit.text) == inc:
                         crit.start_char, crit.end_char = incoming_raw_criteria.get((inc))
-                        await criterion_staging_service.update(session=session, criterion=crit)
+                        await criterion_staging_service.update(session=session, criterion=crit, user_id=user_id)
 
         row = {
             'eligibility_criteria_id':latest_study_version.eligibility_criteria_id,

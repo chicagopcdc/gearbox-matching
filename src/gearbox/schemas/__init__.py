@@ -12,7 +12,7 @@ from .study_response import StudyResponseSearchResults, StudyResponse
 from .eligibility_criteria_response import EligibilityCriteriaResponse
 from .eligibility_criteria import EligibilityCriteriaCreate, EligibilityCriteriaSearchResults, EligibilityCriteria
 from .criterion import CriterionCreate, CriterionSearchResults, CriterionCreateIn, Criterion, CriterionPublish
-from .criterion_staging import CriterionStaging, CriterionStagingCreate, CriterionStagingUpdate, CriterionStagingSearchResult
+from .criterion_staging import CriterionStaging, CriterionStagingCreate, CriterionStagingUpdate, CriterionStagingSearchResult, CriterionStagingUpdateIn
 from .raw_criteria import RawCriteriaCreate, RawCriteria, RawCriteriaIn
 from .pre_annotated_criterion import PreAnnotatedCriterion, PreAnnotatedCriterionCreate , PreAnnotatedCriterionSearchResults
 from .pre_annotated_criterion_model import PreAnnotatedCriterionModel, PreAnnotatedCriterionModelCreate, PreAnnotatedCriterionModelSearchResults

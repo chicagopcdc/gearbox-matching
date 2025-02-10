@@ -21,9 +21,9 @@ class CriterionStagingBase(BaseModel):
     end_char: int
     text: str
     criterion_id: Optional[int]
-    el_criteria_has_criterion_id: Optional[int]
 
-    values: Optional[List[int]] = []
+    criterion_value_ids: Optional[List[int]] = []
+    echc_value_ids: Optional[List[int]] = []
     last_updated_by_user_id: Optional[int]
 
     class Config:
@@ -34,7 +34,7 @@ class CriterionStaging(CriterionStagingBase):
 
 class CriterionStagingSearchResult(BaseModel):
     id: int
-    value_list: Optional[List[Value]]
+    criterion_value_list: Optional[List[Value]]
 
     eligibility_criteria_id: int
     input_id: Optional[str] = ""
@@ -51,12 +51,11 @@ class CriterionStagingSearchResult(BaseModel):
     end_char: int
     text: str
     criterion_id: Optional[int]
-
     last_updated_by_user_id: Optional[int]
-    echc_value_id: Optional[int]
-    el_criteria_has_criterion_id: Optional[int]
+    echc_value_ids: Optional[List[int]] = []
+    criterion_value_ids: Optional[List[int]] = []
 
-class CriterionStagingUpdate(CriterionStagingBase):
+class CriterionStagingUpdateIn(CriterionStagingBase):
     id: int
     start_char: Optional[int]
     end_char: Optional[int]
@@ -64,7 +63,9 @@ class CriterionStagingUpdate(CriterionStagingBase):
     eligibility_criteria_id: Optional[int]
     criterion_adjudication_status: Optional[AdjudicationStatus]
     echc_adjudication_status: Optional[EchcAdjudicationStatus]
-    el_criteria_has_criterion_id: Optional[int]
+
+class CriterionStagingUpdate(CriterionStagingUpdateIn):
+    last_updated_by_user_id: Optional[int]
 
 class CriterionStagingCreate(CriterionStagingBase):
     pass

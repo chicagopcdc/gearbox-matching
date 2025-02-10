@@ -40,8 +40,8 @@ async def get_criteria_by_eligibility_criteria_id(
 
 @mod.post("/raw-criteria", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(file: UploadFile = File(...),
-#    request: Request,
-    session: AsyncSession = Depends(deps.get_session)
+    session: AsyncSession = Depends(deps.get_session),
+    user_id: int = Depends(auth.authenticate_user)
 ):
     """
     Comments: Save raw_criteria 
@@ -55,7 +55,7 @@ async def save_object(file: UploadFile = File(...),
                 with zip_ref.open(filename) as file:
                     contents = file.read()
                     raw_criteria = RawCriteriaIn(data=contents)
-                    await raw_criteria_service.create_raw_criteria(session, raw_criteria)
+                    await raw_criteria_service.create_raw_criteria(session, raw_criteria=raw_criteria, user_id=user_id)
 
     
     return JSONResponse(status.HTTP_200_OK)

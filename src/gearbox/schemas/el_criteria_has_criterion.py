@@ -9,7 +9,6 @@ class ElCriteriaHasCriterionBase(BaseModel):
     eligibility_criteria_id: Optional[int]
     create_date: Optional[datetime]
     active: Optional[bool]
-    value_id: int
     class Config:
         orm_mode = True
 
@@ -20,10 +19,11 @@ class ElCriteriaHasCriterions(BaseModel):
     echcs: Sequence[ElCriteriaHasCriterion]
 
 class ElCriteriaHasCriterionCreate(ElCriteriaHasCriterionBase):
-    pass
+    value_id: int
 
 class ElCriteriaHasCriterionPublish(ElCriteriaHasCriterionBase):
     criterion_staging_id: int
+    value_ids: List[int]
 
 class ElCriteriaHasCriterions(BaseModel):
     echcs: Sequence[ElCriteriaHasCriterion]
