@@ -28,4 +28,5 @@ class CriterionStaging(Base):
     text = Column(String, nullable=True)
     criterion_id = Column(Integer, ForeignKey('criterion.id'), nullable=True)
 
-    values = Column(ARRAY(Integer), nullable=True)
+    criterion_value_ids = Column(ARRAY(Integer), nullable=True)
+    echc_value_ids= Column(ARRAY(Integer), nullable=True)

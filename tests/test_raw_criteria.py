@@ -119,7 +119,7 @@ def test_create_raw_criteria_reupload(setup_database, client, connection):
 def test_create_raw_criteria_reupload_exact_dup(setup_database, client, connection):
     """
     This test simulates a re-upload of raw criteria from doccano for
-    a study_version that currently exists in "IN_PROCESS" or "NEW" status.
+    a study_version that currently exists in "NEW" status.
 
     """
     errors = []   
@@ -142,7 +142,7 @@ def test_create_raw_criteria_reupload_exact_dup(setup_database, client, connecti
         """
         stmt = select(StudyVersion).join(StudyVersion.study).join(StudyExternalId).where(
             StudyExternalId.ext_id == 'TESTRAWCRIT_EXACT_DUP').where(
-                StudyVersion.status == StudyVersionStatus.IN_PROCESS)
+                StudyVersion.status == StudyVersionStatus.NEW)
         svs = db_session.execute(stmt).unique()
         sv_rows_returned = len(svs.all())
 

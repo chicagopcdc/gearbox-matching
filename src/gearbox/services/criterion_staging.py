@@ -1,11 +1,12 @@
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from gearbox.util import status
-from gearbox.schemas import CriterionStaging as CriterionStagingSchema, CriterionStagingCreate, CriterionPublish, CriterionCreate, CriterionStagingUpdate, CriterionHasValueCreate, CriterionStagingSearchResult
-from gearbox.crud import criterion_staging_crud , study_version_crud, value_crud, criterion_has_value_crud, input_type_crud
+from gearbox.schemas import CriterionStaging as CriterionStagingSchema, CriterionStagingCreate, CriterionPublish, CriterionCreate, CriterionStagingUpdate, CriterionHasValueCreate, CriterionStagingSearchResult, ElCriteriaHasCriterionPublish, ElCriteriaHasCriterionCreate, CriterionStagingUpdateIn
+from gearbox.crud import criterion_staging_crud , value_crud, criterion_has_value_crud, input_type_crud
 from typing import List
-from gearbox.util.types import StudyVersionStatus, AdjudicationStatus
-from gearbox.services import criterion as criterion_service, value as value_service
+from gearbox.util.types import AdjudicationStatus
+from gearbox.services import criterion as criterion_service, value as value_service, el_criteria_has_criterion as el_criteria_has_criterion_service
+
 from . import logger
 from gearbox import config
 
@@ -25,10 +26,10 @@ async def get_criterion_staging_by_ec_id(session: Session, eligibility_criteria_
         criterion_staging = CriterionStagingSearchResult(**c.__dict__)
         # only call get if values exist, because we are calling it with the ids parameter
         # and if ids are None, then value service will return all values in the table
-        if c.values:
-            values = await value_service.get_values(session=session, ids=c.values)
+        if c.criterion_value_ids:
+            values = await value_service.get_values(session=session, ids=c.criterion_value_ids)
             if values: 
-                criterion_staging.value_list = values 
+                criterion_staging.criterion_value_list = values 
 
         criterion_staging_ret.append(criterion_staging)
 
@@ -74,15 +75,37 @@ async def publish_criterion(session: Session, criterion: CriterionPublish, user_
             await criterion_has_value_crud.create(db=session,obj_in=chv)
 
     # Call update method below - set criterion_staging criteria adjudication status to active
-    stage_upd = CriterionStagingUpdate(id=criterion.criterion_staging_id, criterion_id=new_criterion.id, criterion_adjudication_status=AdjudicationStatus.ACTIVE)
+    stage_upd = CriterionStagingUpdate(id=criterion.criterion_staging_id, criterion_id=new_criterion.id, criterion_adjudication_status=AdjudicationStatus.ACTIVE, last_updated_by_user_id=user_id)
     await update(session=session, criterion=stage_upd, user_id=user_id)
+    logger.info(f"User: {user_id} published criterion: {new_criterion.id} code: {new_criterion.code}")
 
-async def update(session: Session, criterion: CriterionStagingUpdate, user_id: int) -> CriterionStagingSchema:
+async def update(session: Session, criterion: CriterionStagingUpdateIn, user_id: int) -> CriterionStagingSchema:
 
     criterion_to_upd = await criterion_staging_crud.get(db=session, id=criterion.id)
     criterion_in_dict = dict(criterion)
+
     to_upd_dict = criterion_to_upd.__dict__
     updates=[]
+
+    # create an update object that only includes set fields
+    criterion_obj = CriterionStagingUpdate(**criterion.dict(exclude_unset=True))
+    criterion_obj.last_updated_by_user_id = user_id
+
+    # validate value ids if they exist in the staging row
+    id_error_msg = []
+    check_echc_id_errors = []
+    if criterion.echc_value_ids:
+        check_echc_id_errors.append(await value_crud.check_key(db=session, ids_to_check=criterion.echc_value_ids))
+        if not all(i is None for i in check_echc_id_errors):
+                id_error_msg.append(f"ERROR UPDATING CRITERION_STAGING: invalid echc_value_ids: {[error for error in check_echc_id_errors if error]}")
+
+    check_criterion_id_errors = []
+    if criterion.criterion_value_ids:
+        check_criterion_id_errors.append(await value_crud.check_key(db=session, ids_to_check=criterion.criterion_value_ids))
+        if not all(i is None for i in check_criterion_id_errors):
+                id_error_msg.append(f"ERROR UPDATING CRITERION_STAGING: invalid criterion_value_ids: {[error for error in check_criterion_id_errors if error]}")
+    if id_error_msg:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, id_error_msg)
 
     # Log any updates besides status updates 
     for key in criterion_in_dict:
@@ -90,7 +113,7 @@ async def update(session: Session, criterion: CriterionStagingUpdate, user_id: i
             updates.append(f'criterion_staging update:  {key} changed from {to_upd_dict.get(key)} to {criterion_in_dict.get(key)}')
 
     if criterion_to_upd:
-        upd_criterion = await criterion_staging_crud.update(db=session, db_obj=criterion_to_upd, obj_in=criterion)
+        upd_criterion = await criterion_staging_crud.update(db=session, db_obj=criterion_to_upd, obj_in=criterion_obj)
     else:
         logger.error(f"Criterion id: {criterion.id} not found for update.") 
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Criterion id: {criterion.id} not found for update.") 
@@ -98,12 +121,7 @@ async def update(session: Session, criterion: CriterionStagingUpdate, user_id: i
     if updates:
         logger.info(f"Criterion staging id: {criterion_to_upd.id} updated by user_id: {user_id} updates include: {updates}")
 
-    # update the study version status to "IN_PROCESS"
-    study_version_to_upd = await study_version_crud.get_study_version_ec_id(current_session=session, eligibility_criteria_id = criterion_to_upd.eligibility_criteria_id )
-    await study_version_crud.update(db=session, db_obj=study_version_to_upd, obj_in={"status": StudyVersionStatus.IN_PROCESS})
-
     return upd_criterion
-
 
 async def accept_criterion_staging(session: Session, id: int, user_id: int):
     """
@@ -119,5 +137,5 @@ async def accept_criterion_staging(session: Session, id: int, user_id: int):
 
     criterion_staging.last_updated_by_user_id = user_id 
     criterion_staging.criterion_adjudication_status = AdjudicationStatus.ACTIVE
-    criterion_upd = CriterionStagingUpdate(**criterion_staging.__dict__)
+    criterion_upd = CriterionStagingUpdateIn(**criterion_staging.__dict__)
     await update(session=session, criterion=criterion_upd, user_id = user_id)
