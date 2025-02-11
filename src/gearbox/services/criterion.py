@@ -18,7 +18,7 @@ async def get_criteria(session: Session) -> CriterionSearchResults:
     return aes
 
 
-async def create_new_criterion(session: Session, input_criterion_info: CriterionCreateIn):
+async def create_new_criterion(session: Session, input_criterion_info: CriterionCreateIn, user_id: int):
 
     # keep track of any non-existent fks
     check_id_errors = []
@@ -79,7 +79,7 @@ async def create_new_criterion(session: Session, input_criterion_info: Criterion
             "criterion_id": new_criterion.id
         } 
         csu = CriterionStagingUpdate(**criterion_staging_update)
-        csu_update = await criterion_staging.update(session, criterion=csu)
+        csu_update = await criterion_staging.update(session, criterion=csu, user_id=user_id)
 
     # commit if no exceptions encountered 
     await session.commit()

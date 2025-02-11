@@ -46,7 +46,7 @@ async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish, us
             f"Criterion staging id: {echc.criterion_staging_id} status must be active in order to publish el_criteria_has_criterion. The current status is: {existing_staging.criterion_adjudication_status} - finalize criterion adjudication before publishing.")
 
     # Check ids exist for value, eligibility_criteria, criterion
-    check_id_errors.append(await value_crud.check_key(db=session, ids_to_check=echc.value_id))
+    check_id_errors.append(await value_crud.check_key(db=session, ids_to_check=echc.value_ids))
     check_id_errors.append(await eligibility_criteria_crud.check_key(db=session, ids_to_check=echc.eligibility_criteria_id))
     check_id_errors.append(await criterion_crud.check_key(db=session, ids_to_check=echc.criterion_id))
     check_id_errors.append(await criterion_staging_crud.check_key(db=session, ids_to_check=echc.criterion_staging_id))
@@ -54,16 +54,22 @@ async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish, us
     if not all(i is None for i in check_id_errors):
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: missing FKs for el_criteria_has_criterion publication: {[error for error in check_id_errors if error]}")
 
-    # Convert criterion to CriterionCreate
-    echc_save=ElCriteriaHasCriterionCreate(**echc.dict())
-    new_echc = await create_el_criteria_has_criterion(session=session, el_criteria_has_criterion=echc_save)
+    new_echc_list = []
+    # Save echc for each value in publish object
+    for val in echc.value_ids:
+        echc_create = echc.dict()
+        echc_create['value_id'] = val
+        echc_save=ElCriteriaHasCriterionCreate(**echc_create)
+        new_echc = await create_el_criteria_has_criterion(session=session, el_criteria_has_criterion=echc_save)
+        new_echc_list.append(new_echc)
 
-    # Call update method below - set criterion_staging criteria adjudication status to active
+    # Call update method below - set criterion_staging echc criteria adjudication status to active
     stage_upd = CriterionStagingUpdate(id=echc.criterion_staging_id, el_criteria_has_criterion_id=new_echc.id, echc_adjudication_status=EchcAdjudicationStatus.ACTIVE)
 
-    await criterion_staging_service.update(session=session, criterion=stage_upd)
+    await criterion_staging_service.update(session=session, criterion=stage_upd, user_id=user_id)
     # update the study version status to "IN_PROCESS"
     study_version_to_upd = await study_version_crud.get_study_version_ec_id(current_session=session, eligibility_criteria_id = existing_staging.eligibility_criteria_id )
     await study_version_crud.update(db=session, db_obj=study_version_to_upd, obj_in={"status": StudyVersionStatus.IN_PROCESS})
 
-    logger.info(f"User: {user_id} published el_criteria_has_criterion {new_echc.id} criterion_id: {new_echc.criterion_id} value_id: {new_echc.value_id} for study version {study_version_to_upd.id}")
+    for echc in new_echc_list:
+        logger.info(f"User: {user_id} published el_criteria_has_criterion {echc.id} criterion_id: {echc.criterion_id} value_id: {echc.value_id} for study version {study_version_to_upd.id}")

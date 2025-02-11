@@ -69,7 +69,7 @@ async def update_object(
     upd_el_criteria_has_criterion = await el_criteria_has_criterion_service.update_el_criteria_has_criterion(session=session, el_criteria_has_criterion=body, el_criteria_has_criterion_id=el_criteria_has_criterion_id)
     return upd_el_criteria_has_criterion
 
-@mod.post("/publish-el-criteria-has-criterion", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.post("/publish-el-criteria-has-criterion", response_model=ElCriteriaHasCriterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def publish(
     body: ElCriteriaHasCriterionPublish,
     request: Request,
