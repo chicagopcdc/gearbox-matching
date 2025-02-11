@@ -1,15 +1,11 @@
-import json
-import requests
 from gearbox import config
 from gearbox.util import status, bucket_utils
 from fastapi import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import date
 from fastapi import Request, Depends
 from fastapi import APIRouter 
 from . import logger
 from starlette.responses import JSONResponse 
-from typing import List
 
 from gearbox import auth
 from gearbox.admin_login import admin_required
@@ -18,10 +14,6 @@ from gearbox.schemas import Study, StudyCreate, StudyUpdates, StudyResults
 from gearbox import deps
 from gearbox.services import study as study_service
 from fastapi.encoders import jsonable_encoder
-
-## TEMP FOR DEBUG ##
-from sqlalchemy.ext.asyncio import AsyncSession as Session
-from gearbox.crud import study_crud
 
 mod = APIRouter()
 

@@ -6,9 +6,6 @@ from gearbox.schemas import StudyCreate, StudySearchResults, Study as StudySchem
 from gearbox.util import status
 from gearbox.crud import study_crud, site_crud, site_has_study_crud, study_link_crud, site_has_study_crud, study_external_id_crud, source_crud
 from gearbox.models import Study, Site, StudyLink, SiteHasStudy, StudyExternalId
-from gearbox.services import study_version
-
-import json
 from operator import itemgetter
 
 async def get_study_info(session: Session, id: int) -> StudySchema:
