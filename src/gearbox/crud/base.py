@@ -108,7 +108,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         try:
             db_obj = self.model(**obj_in_data)
             db.add(db_obj)
-            await db.flush()
             await db.commit()
             return db_obj
         except IntegrityError as e:
@@ -142,7 +141,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"id: {id} does not exist in {self.model.__tablename__}")        
 
         upd_obj.active = active
-        db.flush()
         await db.commit()
 
     async def update( self, db: Session, *, db_obj: ModelType, obj_in: Union[UpdateSchemaType, Dict[str, Any]]

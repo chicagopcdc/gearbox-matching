@@ -1,15 +1,11 @@
-import json
-import requests
 from gearbox import config
 from gearbox.util import status, bucket_utils
 from fastapi import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import date
 from fastapi import Request, Depends
 from fastapi import APIRouter 
 from . import logger
 from starlette.responses import JSONResponse 
-from typing import List
 
 from gearbox import auth
 from gearbox.admin_login import admin_required
@@ -100,7 +96,8 @@ async def update_studies(
         the 'active' flag is set to false for all studies that do not exist in the
         studyupdates json document.
     """
-    res = await study_service.update_studies(session=session, updates=body)
+    await study_service.update_studies(session=session, updates=body)
+
     return JSONResponse(status.HTTP_200_OK)
 
 def init_app(app):

@@ -11,7 +11,7 @@ from gearbox.models import raw_criteria
 raw_criteria_schema = {
     "type":"object",
     "properties": {
-        "id": {"type":"number"},
+        "id": {"type":"number"}, 
         "text": {"type":"string"},
         "nct": {"type":"string"},
         "pre_annotated": {"type":"array",
