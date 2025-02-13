@@ -1,12 +1,11 @@
 from sqlalchemy.ext.asyncio import AsyncSession as Session
-import json
 from . import logger
 from fastapi import HTTPException
 from gearbox.models import RawCriteria
-from gearbox.schemas import RawCriteriaCreate, RawCriteria as RawCriteriaSchema, StudyVersionCreate, RawCriteriaIn, CriterionStagingCreate, CriterionStagingUpdate
+from gearbox.schemas import RawCriteriaCreate, RawCriteria as RawCriteriaSchema, StudyVersionCreate, RawCriteriaIn, CriterionStagingCreate, PreAnnotatedCriterionCreate, PreAnnotatedCriterionModelCreate
 from gearbox.util import status 
 from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus
-from gearbox.crud import raw_criteria_crud, criterion_crud, study_version_crud
+from gearbox.crud import raw_criteria_crud, criterion_crud, study_version_crud, pre_annotated_criterion_crud, pre_annotated_criterion_model_crud
 from gearbox.services import study as study_service, study_version as study_version_service, eligibility_criteria as eligibility_criteria_service, criterion_staging as criterion_staging_service
 from typing import List
 
@@ -39,7 +38,7 @@ async def create_staging_criterion(session: Session, input_id: int, eligibility_
             criterion_id = criterion_id
         )
 
-        res = await criterion_staging_service.create(session, csc)
+        res = await criterion_staging_service.create(session=session, staging_criterion=csc)
 
 
 async def stage_criteria(session: Session, raw_criteria: RawCriteria):
@@ -75,7 +74,38 @@ def get_incoming_raw_criteria(raw_criteria: RawCriteriaIn)-> dict:
         extracted_crit.update({(code,text):(start_span,end_span)})
     return extracted_crit
 
-async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, user_id: int):
+async def create_pre_annotated(session: Session, raw_criteria: RawCriteria):
+
+    # clear pre_annotated in case this is a re-submit from doccano
+    pre_annotated_criterion_crud.clear_pre_annotated_by_id(current_session=session, raw_criteria_id=raw_criteria.id)
+
+    text = raw_criteria.data.get('text')
+    for pa in raw_criteria.data.get('pre_annotated'):
+        start_offset = pa.get("span")[0]
+        end_offset = pa.get("span")[1]
+        label = pa.get("span")[2]
+        matched_models = pa.get("matched_models")
+        is_standard_gb_var = pa.get("is_standard_gb_var")
+        pa_text = text[start_offset:end_offset]    
+
+        pa_create = PreAnnotatedCriterionCreate(
+                raw_criteria_id = raw_criteria.id,
+                text = pa_text,
+                label = label,
+                is_standard_gb_var = is_standard_gb_var
+            )
+
+        new_pa = await pre_annotated_criterion_crud.create(db=session, obj_in=pa_create)
+
+        for pa_model in matched_models:
+            pam_create = PreAnnotatedCriterionModelCreate(
+                pre_annotated_criterion_id = new_pa.id,
+                model=pa_model
+            )
+            await pre_annotated_criterion_model_crud.create(db=session, obj_in=pam_create)
+
+
+async def create_raw_criteria(session: Session, raw_criteria_in: RawCriteriaIn, user_id: int):
 
     """
     This function will create a new raw_criteria for adjudication along with associated
@@ -88,13 +118,13 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
     criteria that have not yet been staged. 
     """
     # Get the study_id for the study based on the id in the raw criteria json
-    ext_id = raw_criteria.data.get("nct")
+    ext_id = raw_criteria_in.data.get("nct")
     study_id = await study_service.get_study_id_by_ext_id(session, ext_id)
     if not study_id:
          logger.error(f"Study for id: {ext_id} not found for update.") 
          raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study for id: {ext_id} not found for update.") 
     
-    # Get existing study_version if existsA
+    # Get existing study_version if exists
     latest_study_version = await study_version_crud.get_latest_study_version(current_session=session, study_id=study_id)
 
     if not latest_study_version or latest_study_version.status in (StudyVersionStatus.ACTIVE, StudyVersionStatus.INACTIVE):
@@ -102,17 +132,17 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
         If the study version does not exist or is currently active or inactive 
         create a new study version and associated relationships.
         """
-    
+
         # Create a new eligibility criteria
-        eligibility_criteria = await eligibility_criteria_service.create_eligibility_criteria(session)
+        eligibility_criteria = await eligibility_criteria_service.create_eligibility_criteria(session=session)
         
         # Create a new study_version
-        comments = ''.join(raw_criteria.data.get("Comments"))
+        comments = ''.join(raw_criteria_in.data.get("Comments"))
         new_study_version = StudyVersionCreate(study_id=study_id, status=StudyVersionStatus.NEW, comments=comments, eligibility_criteria_id=eligibility_criteria.id)
-        study_version = await study_version_service.create_study_version(session,new_study_version)
+        study_version = await study_version_service.create_study_version(session=session,study_version=new_study_version)
 
         # Save the new raw criteria to the db
-        new_raw_criteria = RawCriteriaCreate(data=raw_criteria.data, eligibility_criteria_id=eligibility_criteria.id)
+        new_raw_criteria = RawCriteriaCreate(data=raw_criteria_in.data, eligibility_criteria_id=eligibility_criteria.id)
         raw_criteria = await raw_criteria_crud.create(db=session, obj_in=new_raw_criteria)
 
         # Create criterion_staging rows from the raw criteria json
@@ -126,7 +156,7 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
         criteiron_staging table
         """
         criterion_staging = await criterion_staging_service.get_criterion_staging_by_ec_id(session=session , eligibility_criteria_id=latest_study_version.eligibility_criteria_id )
-        incoming_raw_criteria = get_incoming_raw_criteria(raw_criteria)
+        incoming_raw_criteria = get_incoming_raw_criteria(raw_criteria_in)
 
         existing_staging = [(crit.code, crit.text) for crit in criterion_staging]        
 
@@ -137,12 +167,12 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
         new_to_add_dict = {k:v for k,v in incoming_raw_criteria.items() if k in new_to_add}
 
         # get list of new_to_add raw_criteria objs and pass to stage func
-        incoming_text = raw_criteria.data.get('text')
-        for incoming in raw_criteria.data.get('entities'):
+        incoming_text = raw_criteria_in.data.get('text')
+        for incoming in raw_criteria_in.data.get('entities'):
 
             if new_to_add_dict.get((incoming.get('label'),incoming_text[incoming.get('start_offset'):incoming.get('end_offset')])):
                 await create_staging_criterion(session=session,
-                    input_id=raw_criteria.data.get('id'),
+                    input_id=raw_criteria_in.data.get('id'),
                     eligibility_criteria_id=latest_study_version.eligibility_criteria_id,
                     code=incoming.get("label"),
                     start_span=incoming.get("start_offset"),
@@ -152,6 +182,7 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
                     
         # set of criteria that do not exist in incoming - set to INACTIVE
         old_to_set_inactive = set(existing_staging) - set(incoming_raw_criteria.keys())
+
         # set of criteria that did not change (text) - update start/end char only
         # in case the raw text has changed
         existing_no_change = set(existing_staging).union(set(incoming_raw_criteria.keys()))
@@ -170,15 +201,18 @@ async def create_raw_criteria(session: Session, raw_criteria: RawCriteriaIn, use
 
         row = {
             'eligibility_criteria_id':latest_study_version.eligibility_criteria_id,
-            'data':raw_criteria.data
+            'data':raw_criteria_in.data
         }
 
-        await raw_criteria_crud.upsert(
+        raw_criteria_res = await raw_criteria_crud.upsert(
             db=session,
             model=RawCriteria,
             row=row,
             constraint_cols=[RawCriteria.eligibility_criteria_id]
         )
+        raw_criteria=RawCriteria(**raw_criteria_res)
+    # persist pre_annotated info
+    await create_pre_annotated(session=session, raw_criteria=raw_criteria)
 
 async def update_raw_criteria(session: Session, raw_criteria: RawCriteriaCreate, raw_criteria_id: int):
     raw_criteria_in = await raw_criteria_crud.get(db=session, id=raw_criteria_id)

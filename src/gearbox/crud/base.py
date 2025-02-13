@@ -194,23 +194,21 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
                     index_elements=constraint_cols,
                     set_={k: getattr(stmt.excluded, k) for k in update_cols},
                     index_where=(getattr(model, as_of_date_col) < getattr(stmt.excluded, as_of_date_col))
-                ).returning(table.c['id'])
+                ).returning(model)
             else:
                 # if no constraint columns specified use primary key cols
                 on_conflict_stmt = stmt.on_conflict_do_update(
                     index_elements=table.primary_key.columns,
                     set_={k: getattr(stmt.excluded, k) for k in update_cols},
                     index_where=(getattr(model, as_of_date_col) < getattr(stmt.excluded, as_of_date_col))
-                ).returning(None)
+                ).returning(model)
 
             # Print the query for debugging
             # print(f"HERE IS THE UPSERT QUERY: {self.compile_query(on_conflict_stmt)}")
             retval = await db.execute(on_conflict_stmt)
-
-            # convert id returned to an int
-            updated_id = retval.scalar()
+            updated = retval.first()
             await db.commit()
-            return updated_id
+            return updated
         
         except exc.SQLAlchemyError as e:
             logger.error(f"SQL ERROR IN UPSERT {type(e)} {e}")

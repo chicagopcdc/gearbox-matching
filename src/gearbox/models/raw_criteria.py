@@ -16,3 +16,4 @@ class RawCriteria(Base):
     UniqueConstraint(eligibility_criteria_id, name='raw_criteria_uix')
 
     eligibility_criteria = relationship("EligibilityCriteria", back_populates="raw_criteria")
+    pre_annotated_criteria = relationship("PreAnnotatedCriterion", back_populates="raw_criteria")

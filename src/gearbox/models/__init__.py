@@ -13,6 +13,8 @@ from .input_type import InputType
 from .note import Note
 from .ontology_code import OntologyCode
 from .raw_criteria import RawCriteria
+from .pre_annotated_criterion import PreAnnotatedCriterion
+from .pre_annotated_criterion_model import PreAnnotatedCriterionModel
 from .source import Source
 from .site_has_study import SiteHasStudy
 from .site import Site

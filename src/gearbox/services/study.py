@@ -170,7 +170,7 @@ async def update_studies(session: Session, updates: StudyUpdates):
             }
             no_update_cols = ['create_date']
             constraint_cols = [Study.code]
-            new_or_updated_study_id = await study_crud.upsert(
+            new_or_updated_study = await study_crud.upsert(
                 db=session, 
                 model=Study, 
                 row=row, 
@@ -193,7 +193,7 @@ async def update_studies(session: Session, updates: StudyUpdates):
                 # name / zipcode are unique to site
                 constraint_cols = [Site.name, Site.zip]
                 no_update_cols=['create_date']
-                new_or_updated_site_id = await site_crud.upsert(
+                new_or_updated_site = await site_crud.upsert(
                     db=session, 
                     model=Site, 
                     row=row, 
@@ -203,14 +203,14 @@ async def update_studies(session: Session, updates: StudyUpdates):
                 )
 
                 row = {
-                    'study_id': new_or_updated_study_id,
-                    'site_id': new_or_updated_site_id,
+                    'study_id': new_or_updated_study.id,
+                    'site_id': new_or_updated_site.id,
                     'create_date': datetime.now(),
                     'active': study.active
                 }
                 no_update_cols = ['create_date']
                 constraint_cols = [Site.id, Study.id]
-                new_or_updated_site_has_study_id = await site_has_study_crud.upsert(
+                new_or_updated_site_has_study = await site_has_study_crud.upsert(
                     db=session, 
                     model=SiteHasStudy, 
                     row=row, 
@@ -222,13 +222,13 @@ async def update_studies(session: Session, updates: StudyUpdates):
                 row = {
                     'name': link.name,
                     'href': link.href,
-                    'study_id' : new_or_updated_study_id,
+                    'study_id' : new_or_updated_study.id,
                     'active': study.active,
                     'create_date': datetime.now()
                 }
                 no_update_cols = ['create_date']
                 constraint_cols = [StudyLink.study_id, StudyLink.href]
-                new_or_updated_link_id = await study_link_crud.upsert(
+                new_or_updated_link = await study_link_crud.upsert(
                     db=session, 
                     model=StudyLink, 
                     row=row, 
@@ -238,7 +238,7 @@ async def update_studies(session: Session, updates: StudyUpdates):
 
             for ext_id in study.ext_ids:
                 row = {
-                    'study_id' : new_or_updated_study_id,
+                    'study_id' : new_or_updated_study.id,
                     'ext_id': ext_id.ext_id,
                     'source': ext_id.source,
                     'source_url': ext_id.source_url,
