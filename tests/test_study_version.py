@@ -101,3 +101,14 @@ def test_update_study_version(setup_database, client, connection):
         errors.append(f"Invalid https status code returned from test_create_study_version: {resp.status_code} ")
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))
+
+@pytest.mark.asyncio
+def test_publish_study_version(setup_database, client, connection):
+#    """
+    # Comments: test to validate update study_version active to false
+#    """
+    fake_jwt = "1.2.3"
+    errors = []
+
+    resp = client.post(f"/publish-study-version/3", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp.raise_for_status()

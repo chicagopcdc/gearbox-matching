@@ -8,7 +8,8 @@ from sqlalchemy.sql.functions import func
 from gearbox.util import status
 from gearbox.crud import study_version_crud
 from typing import List
-from gearbox.util.types import StudyVersionStatus
+from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus
+from gearbox.services import criterion_staging as criterion_staging_service
 
 async def get_latest_study_version(session: Session, study_id: int) -> int:
     try:
@@ -77,3 +78,33 @@ async def update_study_version(session: Session, study_version: StudyVersionUpda
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study version for id: {study_version.id} not found for update.") 
     await session.commit() 
     return upd_study_version
+
+
+async def publish_study_version(session: Session, study_version_id: int):
+    # get eligibility_criteria_id
+    study_version = await study_version_crud.get(db=session, id=study_version_id)
+    if not study_version:
+        logger.error(f"Study version for id: {study_version_id} not found for publishing.") 
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study version for id: {study_version.id} not found for update.") 
+
+    # check all rows in criterion_staging are 'ACTIVE' or 'INACTIVE' criterion_adjudication_status
+    invalid_criterion_adjudication = await criterion_staging_service.get_criterion_staging_by_criterion_adjudication_status(
+        session=session, 
+        eligibility_criteria_id=study_version.eligibility_criteria_id, 
+        adjudication_status = [AdjudicationStatus.EXISTING, AdjudicationStatus.NEW, AdjudicationStatus.IN_PROCESS]
+    )
+
+    # check criterion_id exists for all the above
+    staging_missing_criterion = await criterion_staging_service.get_criterion_staging_missing_criterion_id(session=session, eligibility_criteria_id=study_version.eligibility_criteria_id)
+
+    # check all rows in criterion_staging are 'ACTIVE' or 'INACTIVE' echc_adjudication_status
+    invalid_echc_adjudication = await criterion_staging_service.get_criterion_staging_by_echc_criterion_adjudication_status(
+        session=session, 
+        eligibility_criteria_id=study_version.eligibility_criteria_id,
+        echc_adjudication_status=[EchcAdjudicationStatus.NEW, EchcAdjudicationStatus.IN_PROCESS] 
+    )
+    # check value row exists for each of the above
+    # TO DO: check study_alogrithm_logic exists and all echc exist in the logic json
+    # modify study_version.status to ACTIVE - and modify study.active to 'True'
+
+    
