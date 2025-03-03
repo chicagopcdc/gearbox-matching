@@ -17,6 +17,7 @@ class CriterionStaging(Base):
     create_date = Column(DateTime, nullable=True)
     criterion_adjudication_status = Column(ENUM(AdjudicationStatus), unique=False, nullable=False)
     echc_adjudication_status= Column(ENUM(EchcAdjudicationStatus), unique=False, nullable=False)
+    
     last_updated_by_user_id=Column(Integer, nullable=True)
 
     ontology_code_id = Column(Integer, ForeignKey('ontology_code.id'), nullable=True)
@@ -26,8 +27,6 @@ class CriterionStaging(Base):
     end_char = Column(Integer)
     text = Column(String, nullable=True)
     criterion_id = Column(Integer, ForeignKey('criterion.id'), nullable=True)
-    el_criteria_has_criterion_id = Column(Integer, ForeignKey('el_criteria_has_criterion.id'), nullable=True)
-    
 
-    values = Column(ARRAY(Integer), nullable=True)
-    echc_value_id = Column(Integer, ForeignKey('value.id'), nullable=True)
+    criterion_value_ids = Column(ARRAY(Integer), nullable=True)
+    echc_value_ids= Column(ARRAY(Integer), nullable=True)

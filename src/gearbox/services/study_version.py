@@ -12,17 +12,10 @@ from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjud
 from gearbox.services import criterion_staging as criterion_staging_service
 
 async def get_latest_study_version(session: Session, study_id: int) -> int:
-    try:
-        result = await session.execute(select(func.max(StudyVersion.study_version_num))
-            .where(StudyVersion.study_id == study_id)
-        )
-        latest_study_version = result.scalar_one()
-    except exc.SQLAlchemyError as e:
-        logger.error(f"SQL ERROR IN get_latest_study_version method: {e}")
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
 
+    latest_study_version = await study_version_crud.get_latest_study_version(current_session=session, study_id=study_id)
     if latest_study_version:
-        return latest_study_version
+        return latest_study_version.study_version_num
     else:
         return 0
 
@@ -81,21 +74,39 @@ async def update_study_version(session: Session, study_version: StudyVersionUpda
 
 
 async def publish_study_version(session: Session, study_version_id: int):
+    # check if study_version is valid for publishing? is there 
+    # an existing 'ACTIVE' study_version for the given study?
+
     # get eligibility_criteria_id
     study_version = await study_version_crud.get(db=session, id=study_version_id)
     if not study_version:
         logger.error(f"Study version for id: {study_version_id} not found for publishing.") 
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study version for id: {study_version.id} not found for update.") 
 
+    # Check for existing ACTIVE study_versions for the study
+    existing_active_svs = await study_version_crud.get_multi(session, 
+        where=[f"{StudyVersion.__table__.name}.study_id = {study_version.study_id} and {StudyVersion.__table__.name}.status = '{StudyVersionStatus.ACTIVE.value}'"])
+    qc_errors = []
+    if existing_active_svs:
+        qc_errors.append(f"Existing ACTIVE study_versions found ids: {[x.id for x in existing_active_svs]}")
+
+    # ===> CAN ALL OF THE FOLLOWING QCs BE DONE TOGETHER BEFORE THROWING EXCEPTION? 
     # check all rows in criterion_staging are 'ACTIVE' or 'INACTIVE' criterion_adjudication_status
+    invalid_status = list(set([x for x in AdjudicationStatus]) - set([AdjudicationStatus.ACTIVE, AdjudicationStatus.INACTIVE]))
     invalid_criterion_adjudication = await criterion_staging_service.get_criterion_staging_by_criterion_adjudication_status(
         session=session, 
         eligibility_criteria_id=study_version.eligibility_criteria_id, 
-        adjudication_status = [AdjudicationStatus.EXISTING, AdjudicationStatus.NEW, AdjudicationStatus.IN_PROCESS]
+        adjudication_status = invalid_status
     )
+    if invalid_criterion_adjudication:
+        qc_errors.append(f"The following criteria require final adjudication: {[x.id for x in invalid_criterion_adjudication ]}")
 
     # check criterion_id exists for all the above
     staging_missing_criterion = await criterion_staging_service.get_criterion_staging_missing_criterion_id(session=session, eligibility_criteria_id=study_version.eligibility_criteria_id)
+    qc_errors.append(f"The following criterion_staging ids are missing criterion ids: {[x.id for x in staging_missing_criterion]}")
+
+    # TO DO: check all criterion_ids in criterion_staging are for ACTIVE criterions...
+    staging_inactive_criterion = await criterion_staging_service.get_criterion_staging_inactive_criterion(session=session, eligibility_criteria_id=study_version.eligibility_criteria_id)
 
     # check all rows in criterion_staging are 'ACTIVE' or 'INACTIVE' echc_adjudication_status
     invalid_echc_adjudication = await criterion_staging_service.get_criterion_staging_by_echc_criterion_adjudication_status(
@@ -107,4 +118,7 @@ async def publish_study_version(session: Session, study_version_id: int):
     # TO DO: check study_alogrithm_logic exists and all echc exist in the logic json
     # modify study_version.status to ACTIVE - and modify study.active to 'True'
 
-    
+    # if any errors found
+    if qc_errors:
+        logger.error(f"{qc_errors}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{qc_errors}")

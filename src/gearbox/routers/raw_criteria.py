@@ -1,7 +1,6 @@
-from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter
-from fastapi import Request, Depends
+from fastapi import APIRouter, Request, Depends, UploadFile, File
+import io, fnmatch
 
 from . import logger
 from gearbox.util import status
@@ -9,10 +8,10 @@ from gearbox.services import raw_criteria as raw_criteria_service
 from gearbox.admin_login import admin_required
 
 from gearbox.schemas import RawCriteriaIn, RawCriteria
-from gearbox.crud import raw_criteria_crud
 from gearbox import deps
 from gearbox import auth 
 from starlette.responses import JSONResponse 
+import zipfile
 
 mod = APIRouter()
 
@@ -39,17 +38,26 @@ async def get_criteria_by_eligibility_criteria_id(
     return raw_criteria
 
 
-@mod.post("/raw-criteria", response_model=RawCriteria, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
-async def save_object(
-    body: dict,
-    request: Request,
+@mod.post("/raw-criteria", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+async def save_object(file: UploadFile = File(...),
     session: AsyncSession = Depends(deps.get_session),
+    user_id: int = Depends(auth.authenticate_user)
 ):
     """
     Comments: Save raw_criteria 
     """
-    raw_criteria = RawCriteriaIn(data=body)
-    new_raw_criteria = await raw_criteria_service.create_raw_criteria(session, raw_criteria)
+
+    with zipfile.ZipFile(io.BytesIO(await file.read()),'r') as zip_ref:
+        namelist = zip_ref.namelist()
+        for filename in namelist:
+            if fnmatch.fnmatch(filename, '*.jsonl'):
+                # Create raw_criteria for all jsonl files in zipfile from doccano
+                with zip_ref.open(filename) as file:
+                    contents = file.read()
+                    raw_criteria = RawCriteriaIn(data=contents)
+                    await raw_criteria_service.create_raw_criteria(session, raw_criteria_in=raw_criteria, user_id=user_id)
+
+    
     return JSONResponse(status.HTTP_200_OK)
 
 def init_app(app):

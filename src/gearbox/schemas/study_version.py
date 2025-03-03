@@ -25,6 +25,7 @@ class StudyVersion(StudyVersionBase):
 class StudyVersionCreate(BaseModel):
     study_id: int
     create_date: Optional[datetime]
+    eligibility_criteria_id: Optional[int]
     study_version_num: Optional[int]
     status: Optional[StudyVersionStatus]
     comments: Optional[str]

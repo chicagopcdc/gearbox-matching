@@ -23,7 +23,7 @@ def upgrade():
     op.alter_column('study_version', 'status',
                existing_type=postgresql.ENUM('NEW', 'ACTIVE', 'IN_PROCESS', 'INACTIVE', name='study_version_status'),
                type_=postgresql.ENUM('NEW', 'ACTIVE', 'IN_PROCESS', 'INACTIVE', name='study_version_status'),
-               existing_nullable=False)
+               existing_nullable=True)
     # ### end Alembic commands ###
 
 
@@ -32,7 +32,7 @@ def downgrade():
     op.alter_column('study_version', 'status',
                existing_type=postgresql.ENUM('NEW', 'ACTIVE', 'IN_PROCESS', 'INACTIVE', name='study_version_status'),
                type_=postgresql.ENUM('NEW', 'ACTIVE', 'IN_PROCESS', 'INACTIVE', name='study_version_status'),
-               existing_nullable=False)
+               existing_nullable=True)
     op.drop_column('study_version', 'comments')
     op.add_column('study_algorithm_engine', sa.Column('algorithm_version', sa.INTEGER(), autoincrement=False, nullable=True))
     # ### end Alembic commands ###

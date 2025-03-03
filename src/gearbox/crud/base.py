@@ -40,11 +40,11 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """
         error_msg = None
         if isinstance(ids_to_check, list):
-            errors = '.'.join([str(id) for id in ids_to_check if not await self.get(db, id=id)])
+            errors = ','.join([str(id) for id in ids_to_check if not await self.get(db, id=id)])
         else:
             errors = ids_to_check if not await self.get(db, id=ids_to_check) else None
         if errors:
-            error_msg = f"ids: {errors} do not exist in {self.model}."
+            error_msg = f"ids: {errors} do not exist in {self.model.__name__}."
         return error_msg
 
     async def get( self, db: Session, id: int, active: bool = None ) -> ModelType:
@@ -108,7 +108,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         try:
             db_obj = self.model(**obj_in_data)
             db.add(db_obj)
-            await db.flush()
             await db.commit()
             return db_obj
         except IntegrityError as e:
@@ -142,7 +141,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"id: {id} does not exist in {self.model.__tablename__}")        
 
         upd_obj.active = active
-        db.flush()
         await db.commit()
 
     async def update( self, db: Session, *, db_obj: ModelType, obj_in: Union[UpdateSchemaType, Dict[str, Any]]
@@ -196,23 +194,21 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
                     index_elements=constraint_cols,
                     set_={k: getattr(stmt.excluded, k) for k in update_cols},
                     index_where=(getattr(model, as_of_date_col) < getattr(stmt.excluded, as_of_date_col))
-                ).returning(table.c['id'])
+                ).returning(model)
             else:
                 # if no constraint columns specified use primary key cols
                 on_conflict_stmt = stmt.on_conflict_do_update(
                     index_elements=table.primary_key.columns,
                     set_={k: getattr(stmt.excluded, k) for k in update_cols},
                     index_where=(getattr(model, as_of_date_col) < getattr(stmt.excluded, as_of_date_col))
-                ).returning(None)
+                ).returning(model)
 
             # Print the query for debugging
             # print(f"HERE IS THE UPSERT QUERY: {self.compile_query(on_conflict_stmt)}")
             retval = await db.execute(on_conflict_stmt)
-
-            # convert id returned to an int
-            updated_id = retval.scalar()
+            updated = retval.first()
             await db.commit()
-            return updated_id
+            return updated
         
         except exc.SQLAlchemyError as e:
             logger.error(f"SQL ERROR IN UPSERT {type(e)} {e}")

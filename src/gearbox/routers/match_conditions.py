@@ -1,4 +1,3 @@
-from .. import config
 from re import I
 from fastapi import APIRouter
 from fastapi.encoders import jsonable_encoder
@@ -6,7 +5,7 @@ from fastapi import APIRouter, Security
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
 from fastapi import Request, Depends 
-from . import config, logger
+from gearbox import config
 from starlette.responses import JSONResponse
 from typing import List
 from gearbox import auth

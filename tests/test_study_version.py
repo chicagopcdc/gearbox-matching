@@ -105,10 +105,21 @@ def test_update_study_version(setup_database, client, connection):
 @pytest.mark.asyncio
 def test_publish_study_version(setup_database, client, connection):
 #    """
-    # Comments: test to validate update study_version active to false
+    # Comments: test to publish a study version
 #    """
     fake_jwt = "1.2.3"
     errors = []
 
     resp = client.post(f"/publish-study-version/3", headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
+
+@pytest.mark.asyncio
+def test_publish_study_version_existing_active_fail(setup_database, client, connection):
+#    """
+    # Comments: test to publish a study version
+#    """
+    fake_jwt = "1.2.3"
+    errors = []
+
+    resp = client.post(f"/publish-study-version/1", headers={"Authorization": f"bearer {fake_jwt}"})
+    assert str(resp.status_code).startswith("50")

@@ -1,5 +1,5 @@
 from .base import CRUDBase
-from gearbox.models import CriterionStaging as CriterionStagingModel
+from gearbox.models import CriterionStaging as CriterionStagingModel, Criterion as CriterionModel
 from gearbox.schemas import CriterionStaging as CriterionStagingSchema, CriterionStagingCreate 
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, update, select, exc
@@ -30,5 +30,12 @@ class CRUDCriterionStaging(CRUDBase [CriterionStagingModel, CriterionStagingSche
         result = await db.execute(stmt)
         cs = result.unique().scalars().all()
         return cs 
+    
+    # Get all criterion_staging rows where criterion 'active' is false
+    async def get_criterion_staging_inactive_criterion(self, db:Session, eligibility_criteria_id: int):
+        stmt = select(CriterionStagingModel).join(CriterionModel).where(CriterionModel.active == False)
+        result = await db.execute(stmt)
+        cs = result.unique().scalars().all()
+        return cs
 
 criterion_staging_crud = CRUDCriterionStaging(CriterionStagingModel)

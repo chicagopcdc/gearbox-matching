@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, Column, Integer, UniqueConstraint
+from sqlalchemy import ForeignKey, Column, Integer, UniqueConstraint, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSON
 
@@ -11,7 +11,9 @@ class RawCriteria(Base):
     id = Column(Integer, primary_key=True)
     eligibility_criteria_id = Column(Integer, ForeignKey('eligibility_criteria.id'))
     data = Column(JSON)
+    create_date = Column(DateTime, nullable=True)
 
     UniqueConstraint(eligibility_criteria_id, name='raw_criteria_uix')
 
     eligibility_criteria = relationship("EligibilityCriteria", back_populates="raw_criteria")
+    pre_annotated_criteria = relationship("PreAnnotatedCriterion", back_populates="raw_criteria")
