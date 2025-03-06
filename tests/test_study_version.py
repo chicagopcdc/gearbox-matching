@@ -24,7 +24,6 @@ def test_get_study_versions_for_adjudication(setup_database, client):
     fake_jwt = "1.2.3"
     resp = client.get("/study-versions-adjudication", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
-    print(f'STUDIES FOR ADJUDICATION FULL RES: {full_res}')
     assert str(resp.status_code).startswith("20")
 
 @pytest.mark.asyncio

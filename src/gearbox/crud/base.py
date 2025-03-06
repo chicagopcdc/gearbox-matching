@@ -47,13 +47,20 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             error_msg = f"ids: {errors} do not exist in {self.model.__name__}."
         return error_msg
 
-    async def get( self, db: Session, id: int, active: bool = None ) -> ModelType:
+    async def get( self, db: Session, id: int, active: bool = None, noload_rel: List[ModelType] = None ) -> ModelType:
 
         stmt = select(self.model).where(self.model.id == id)
+
         if active != None: 
             if 'active' not in self.model.__fields__.keys():
                 raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{self.model.__tablename__} does not inlude 'active' attribute")        
             stmt = stmt.where(self.model.active == active)
+
+        # exclude relationships from query
+        if noload_rel:
+            for noload_relationship in noload_rel:
+                stmt = stmt.options(noload(noload_relationship))
+            #stmt = stmt.options(noload(noload_rel))
 
         try:
             result_db = await db.execute(stmt)

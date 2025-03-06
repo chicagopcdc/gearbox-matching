@@ -1,15 +1,14 @@
 from . import logger
 from sqlalchemy.ext.asyncio import AsyncSession as Session
-from sqlalchemy import exc, select
 from fastapi import HTTPException
-from gearbox.models import StudyVersion
-from gearbox.schemas import StudyVersionCreate, StudyVersionSearchResults, StudyVersion as StudyVersionSchema, StudyVersionInfo, StudyVersionUpdate
+from gearbox.models import StudyVersion, StudyVersion, Study
+from gearbox.schemas import StudyVersionCreate, StudyVersionSearchResults, StudyVersion as StudyVersionSchema, StudyVersionInfo, StudyVersionUpdate, StudyCreate, EligibilityCriteriaCreate
 from sqlalchemy.sql.functions import func
 from gearbox.util import status
-from gearbox.crud import study_version_crud
+from gearbox.crud import study_version_crud 
 from typing import List
-from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus
-from gearbox.services import criterion_staging as criterion_staging_service
+from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus, EligibilityCriteriaStatus
+from gearbox.services import criterion_staging as criterion_staging_service, study_algorithm_engine as study_algorithm_engine_service, study as study_service, eligibility_criteria as eligiblity_criteria_service
 
 async def get_latest_study_version(session: Session, study_id: int) -> int:
 
@@ -74,8 +73,6 @@ async def update_study_version(session: Session, study_version: StudyVersionUpda
 
 
 async def publish_study_version(session: Session, study_version_id: int):
-    # check if study_version is valid for publishing? is there 
-    # an existing 'ACTIVE' study_version for the given study?
 
     # get eligibility_criteria_id
     study_version = await study_version_crud.get(db=session, id=study_version_id)
@@ -90,7 +87,6 @@ async def publish_study_version(session: Session, study_version_id: int):
     if existing_active_svs:
         qc_errors.append(f"Existing ACTIVE study_versions found ids: {[x.id for x in existing_active_svs]}")
 
-    # ===> CAN ALL OF THE FOLLOWING QCs BE DONE TOGETHER BEFORE THROWING EXCEPTION? 
     # check all rows in criterion_staging are 'ACTIVE' or 'INACTIVE' criterion_adjudication_status
     invalid_status = list(set([x for x in AdjudicationStatus]) - set([AdjudicationStatus.ACTIVE, AdjudicationStatus.INACTIVE]))
     invalid_criterion_adjudication = await criterion_staging_service.get_criterion_staging_by_criterion_adjudication_status(
@@ -99,14 +95,17 @@ async def publish_study_version(session: Session, study_version_id: int):
         adjudication_status = invalid_status
     )
     if invalid_criterion_adjudication:
-        qc_errors.append(f"The following criteria require final adjudication: {[x.id for x in invalid_criterion_adjudication ]}")
+        qc_errors.append(f"The following staged criteria require final adjudication: {[x.id for x in invalid_criterion_adjudication ]}")
 
-    # check criterion_id exists for all the above
+    # check criterion_id exists for all rows in the criterion_staging table for the study_version
     staging_missing_criterion = await criterion_staging_service.get_criterion_staging_missing_criterion_id(session=session, eligibility_criteria_id=study_version.eligibility_criteria_id)
-    qc_errors.append(f"The following criterion_staging ids are missing criterion ids: {[x.id for x in staging_missing_criterion]}")
+    if staging_missing_criterion:
+        qc_errors.append(f"The following criterion_staging ids are missing criterion ids: {[x.id for x in staging_missing_criterion]}")
 
-    # TO DO: check all criterion_ids in criterion_staging are for ACTIVE criterions...
+    # check all criterion_ids in criterion_staging are for ACTIVE criteria
     staging_inactive_criterion = await criterion_staging_service.get_criterion_staging_inactive_criterion(session=session, eligibility_criteria_id=study_version.eligibility_criteria_id)
+    if staging_inactive_criterion:
+        qc_errors.append(f"The following criterion_staging ids are used in the study but are inactive: {[x.criterion_id for x in staging_missing_criterion]}")
 
     # check all rows in criterion_staging are 'ACTIVE' or 'INACTIVE' echc_adjudication_status
     invalid_echc_adjudication = await criterion_staging_service.get_criterion_staging_by_echc_criterion_adjudication_status(
@@ -114,11 +113,45 @@ async def publish_study_version(session: Session, study_version_id: int):
         eligibility_criteria_id=study_version.eligibility_criteria_id,
         echc_adjudication_status=[EchcAdjudicationStatus.NEW, EchcAdjudicationStatus.IN_PROCESS] 
     )
-    # check value row exists for each of the above
-    # TO DO: check study_alogrithm_logic exists and all echc exist in the logic json
-    # modify study_version.status to ACTIVE - and modify study.active to 'True'
+    if invalid_echc_adjudication:
+        qc_errors.append(f"The following criterion_staging ids are used in the study but are inactive: {[x.id for x in invalid_echc_adjudication]}")
 
-    # if any errors found
+    # check if study_algoritm_engine (study_version logic) exists for study_version
+    if not study_version.study_algorithm_engine:
+        qc_errors.append(f"Study algorithm (study logic) does not exist for study version.")
+
+    # validate all echc ids in the study_algoritm_engine logic
+    invalid_echc_ids_in_logic = await study_algorithm_engine_service.validate_eligibility_criteria_ids(
+        session=session, 
+        algorithm_logic=study_version.study_algorithm_engine.algorithm_logic, 
+        eligibility_criteria_id=study_version.eligibility_criteria_id)
+    if invalid_echc_ids_in_logic:
+        qc_errors.append(f"Study algorithm (study logic) contains the following invalid el_criteria_has_criterion.ids: {invalid_echc_ids_in_logic}.")
+
+    # Check that all study criteria (questions) have display rules defined (i.e. exist in the match_form)
+    staged_criteria = await criterion_staging_service.get_staged_criteria_by_ec_id(session=session, eligibility_criteria_id=study_version.eligibility_criteria_id)
+    criteria_not_in_match_form = []
+    for sc in staged_criteria:
+        if not sc.display_rules:
+            criteria_not_in_match_form.append(sc.id)
+    if criteria_not_in_match_form:
+        qc_errors.append(f"The following criteria do not appear in the match form: {criteria_not_in_match_form}")
+
+    # log and raise exception for any qc errors 
     if qc_errors:
-        logger.error(f"{qc_errors}")
+        logger.error(f"Errors found in study_version publish process: {qc_errors}")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{qc_errors}")
+
+    # ---- STEPS TO PUBLISH ---
+    # update study to active
+    study = StudyCreate(active=True)
+    noload_rel=[Study.study_versions]
+    await study_service.update_study(session=session, study=study, study_id=study_version.study_id, noload_rel=noload_rel)
+
+    # update study version to active
+    study_version_upd=StudyVersionUpdate(id=study_version.id, status=StudyVersionStatus.ACTIVE)
+    await update_study_version(session=session, study_version=study_version_upd)
+
+    # update eligibility_criteria to active
+    ec_upd = EligibilityCriteriaCreate(status=EligibilityCriteriaStatus.ACTIVE)
+    await eligiblity_criteria_service.update_eligibility_criteria(session=session,eligibility_criteria=ec_upd, eligibility_criteria_id=study_version.eligibility_criteria_id)

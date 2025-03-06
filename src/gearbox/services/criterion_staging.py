@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession as Session
 from gearbox.util import status
 from gearbox.schemas import CriterionStaging as CriterionStagingSchema, CriterionStagingCreate, CriterionPublish, CriterionCreate, CriterionStagingUpdate, CriterionHasValueCreate, CriterionStagingSearchResult, ElCriteriaHasCriterionPublish, ElCriteriaHasCriterionCreate, CriterionStagingUpdateIn
 from gearbox.crud import criterion_staging_crud , study_version_crud, value_crud, criterion_has_value_crud, input_type_crud
+from gearbox.models import Criterion
 from typing import List
 from gearbox.util.types import AdjudicationStatus, EchcAdjudicationStatus
 from gearbox.services import criterion as criterion_service, value as value_service, el_criteria_has_criterion as el_criteria_has_criterion_service
@@ -152,3 +153,6 @@ async def get_criterion_staging_missing_criterion_id(session: Session, eligibili
 
 async def get_criterion_staging_inactive_criterion(session: Session, eligibility_criteria_id: int) -> List[CriterionStagingSearchResult]:
     return await criterion_staging_crud.get_criterion_staging_inactive_criterion(session, eligibility_criteria_id)
+
+async def get_staged_criteria_by_ec_id(session:Session, eligibility_criteria_id: int) -> List[Criterion]:
+    return await criterion_staging_crud.get_staged_criteria_by_ec_id(session, eligibility_criteria_id)
