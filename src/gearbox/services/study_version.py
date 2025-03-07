@@ -8,7 +8,7 @@ from gearbox.util import status
 from gearbox.crud import study_version_crud 
 from typing import List
 from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus, EligibilityCriteriaStatus
-from gearbox.services import criterion_staging as criterion_staging_service, study_algorithm_engine as study_algorithm_engine_service, study as study_service, eligibility_criteria as eligiblity_criteria_service
+from gearbox.services import criterion_staging as criterion_staging_service, study_algorithm_engine as study_algorithm_engine_service, study as study_service, eligibility_criteria as eligiblity_criteria_service, el_criteria_has_criterion as echc_service, value as value_service
 
 async def get_latest_study_version(session: Session, study_id: int) -> int:
 
@@ -129,13 +129,63 @@ async def publish_study_version(session: Session, study_version_id: int):
         qc_errors.append(f"Study algorithm (study logic) contains the following invalid el_criteria_has_criterion.ids: {invalid_echc_ids_in_logic}.")
 
     # Check that all study criteria (questions) have display rules defined (i.e. exist in the match_form)
-    staged_criteria = await criterion_staging_service.get_staged_criteria_by_ec_id(session=session, eligibility_criteria_id=study_version.eligibility_criteria_id)
+    staged_criteria_criterion_t = await criterion_staging_service.get_staged_criteria_by_ec_id(session=session, eligibility_criteria_id=study_version.eligibility_criteria_id)
     criteria_not_in_match_form = []
-    for sc in staged_criteria:
+    for sc in staged_criteria_criterion_t:
         if not sc.display_rules:
             criteria_not_in_match_form.append(sc.id)
     if criteria_not_in_match_form:
         qc_errors.append(f"The following criteria do not appear in the match form: {criteria_not_in_match_form}")
+    
+    # check for valid echc_ids in criterion_staging - each row in the criterion_staging
+    # table should have at least one valid el_criteria_has_criterion id
+    invalid_echc_ids=[]
+    criterion_staging_ids_missing_echc=[]
+    staged_criteria = await criterion_staging_service.get_criterion_staging_by_ec_id(session=session, eligibility_criteria_id=study_version.eligibility_criteria_id)
+    echcs = await echc_service.get_el_criteria_has_criterions_by_ecid(session=session, ecid=study_version.eligibility_criteria_id)
+    valid_echc_ids = [x.id for x in echcs]
+    for sc in staged_criteria:
+        if not sc.echc_ids:
+            criterion_staging_ids_missing_echc.append(sc.id)
+        else:
+            for staged_echc_id in sc.echc_ids:
+                if staged_echc_id not in valid_echc_ids:
+                    invalid_echc_ids.append(staged_echc_id)
+    if invalid_echc_ids:
+        qc_errors.append(f"The following invalid el_criteria_has_criterion_ids found: {invalid_echc_ids} ")
+    if criterion_staging_ids_missing_echc:
+        qc_errors.append(f"The following criterion_staging records are missing el_criteria_has_criterion ids: {criterion_staging_ids_missing_echc} ")
+
+    # QC for valid echc and criterion value ids    
+    valid_values = await value_service.get_values(session=session)
+    valid_value_ids = [x.id for x in valid_values]
+    invalid_echc_value_ids=[]
+    invalid_criterion_value_ids=[]
+    criterion_staging_missing_echc_value_ids=[]
+    for sc in staged_criteria:
+
+        if not sc.echc_value_ids:
+            criterion_staging_missing_echc_value_ids.append(sc.id)
+        else:
+            for staged_value_id in sc.echc_value_ids:
+                if staged_value_id not in valid_value_ids:
+                    invalid_echc_value_ids.append(staged_value_id)
+
+        if sc.criterion_value_ids:
+            for staged_criterion_value_id in sc.criterion_value_ids:
+                if staged_criterion_value_id not in valid_value_ids:
+                    invalid_criterion_value_ids.append(staged_criterion_value_id)
+
+    if invalid_echc_value_ids:
+        qc_errors.append(f"The following invalid criterion_staging.echc_value_ids found: {invalid_echc_value_ids} ")
+    if invalid_criterion_value_ids:
+        qc_errors.append(f"The following invalid criterion_staging.criterion_value_ids found: {invalid_criterion_value_ids} ")
+    if criterion_staging_missing_echc_value_ids:
+        qc_errors.append(f"The following criterion_staging missing echc_value_ids: {criterion_staging_missing_echc_value_ids} ")
+
+
+
+
 
     # log and raise exception for any qc errors 
     if qc_errors:
