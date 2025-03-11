@@ -105,7 +105,7 @@ async def publish_study_version(session: Session, study_version_id: int):
     # check all criterion_ids in criterion_staging are for ACTIVE criteria
     staging_inactive_criterion = await criterion_staging_service.get_criterion_staging_inactive_criterion(session=session, eligibility_criteria_id=study_version.eligibility_criteria_id)
     if staging_inactive_criterion:
-        qc_errors.append(f"The following criterion_staging ids are used in the study but are inactive: {[x.criterion_id for x in staging_missing_criterion]}")
+        qc_errors.append(f"The following criterion ids are used in the study but are inactive: {[x.criterion_id for x in staging_inactive_criterion]}")
 
     # check all rows in criterion_staging are 'ACTIVE' or 'INACTIVE' echc_adjudication_status
     invalid_echc_adjudication = await criterion_staging_service.get_criterion_staging_by_echc_criterion_adjudication_status(
@@ -114,7 +114,7 @@ async def publish_study_version(session: Session, study_version_id: int):
         echc_adjudication_status=[EchcAdjudicationStatus.NEW, EchcAdjudicationStatus.IN_PROCESS] 
     )
     if invalid_echc_adjudication:
-        qc_errors.append(f"The following criterion_staging ids are used in the study but are inactive: {[x.id for x in invalid_echc_adjudication]}")
+        qc_errors.append(f"The following criterion_staging ids are used in the study but el_criteria_has_criterion adjudication is not finalized: {[x.id for x in invalid_echc_adjudication]}")
 
     # check if study_algoritm_engine (study_version logic) exists for study_version
     if not study_version.study_algorithm_engine:
