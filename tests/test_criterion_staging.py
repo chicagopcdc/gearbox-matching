@@ -316,5 +316,3 @@ def test_publish_criterion_staging_code_not_set(setup_database, client, data, co
         errors.append(f"Error: Expecting status_code 500 got code: {resp.status_code}")
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors)) 
-
-# add test for criterion-staging-publish-echc endpoint

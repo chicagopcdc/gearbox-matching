@@ -33,7 +33,7 @@ class CRUDCriterionStaging(CRUDBase [CriterionStagingModel, CriterionStagingSche
     
     # Get all criterion_staging rows where criterion 'active' is false
     async def get_criterion_staging_inactive_criterion(self, db:Session, eligibility_criteria_id: int):
-        stmt = select(CriterionStagingModel).join(CriterionModel).where(CriterionModel.active == False)
+        stmt = select(CriterionStagingModel).join(CriterionModel).where(CriterionModel.active == False).where(CriterionStagingModel.eligibility_criteria_id==eligibility_criteria_id)
         result = await db.execute(stmt)
         cs = result.unique().scalars().all()
         return cs
@@ -43,5 +43,6 @@ class CRUDCriterionStaging(CRUDBase [CriterionStagingModel, CriterionStagingSche
         result = await db.execute(stmt)
         cs = result.unique().scalars().all()
         return cs
+    
 
 criterion_staging_crud = CRUDCriterionStaging(CriterionStagingModel)
