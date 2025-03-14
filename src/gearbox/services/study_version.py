@@ -74,7 +74,7 @@ async def update_study_version(session: Session, study_version: StudyVersionUpda
 
 async def publish_study_version(session: Session, study_version_id: int):
 
-    # get eligibility_criteria_id
+    # get study_version
     study_version = await study_version_crud.get(db=session, id=study_version_id)
     if not study_version:
         logger.error(f"Study version for id: {study_version_id} not found for publishing.") 
@@ -156,7 +156,7 @@ async def publish_study_version(session: Session, study_version_id: int):
     if criterion_staging_ids_missing_echc:
         qc_errors.append(f"The following criterion_staging records are missing el_criteria_has_criterion ids: {criterion_staging_ids_missing_echc} ")
 
-    # QC for valid echc and criterion value ids    
+    # QC echc_value_ids and criterion_value_ids    
     valid_values = await value_service.get_values(session=session)
     valid_value_ids = [x.id for x in valid_values]
     invalid_echc_value_ids=[]
@@ -182,10 +182,6 @@ async def publish_study_version(session: Session, study_version_id: int):
         qc_errors.append(f"The following invalid criterion_staging.criterion_value_ids found: {invalid_criterion_value_ids} ")
     if criterion_staging_missing_echc_value_ids:
         qc_errors.append(f"The following criterion_staging missing echc_value_ids: {criterion_staging_missing_echc_value_ids} ")
-
-
-
-
 
     # log and raise exception for any qc errors 
     if qc_errors:
