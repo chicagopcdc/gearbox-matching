@@ -30,3 +30,4 @@ class CriterionStaging(Base):
 
     criterion_value_ids = Column(ARRAY(Integer), nullable=True)
     echc_value_ids= Column(ARRAY(Integer), nullable=True)
+    echc_ids= Column(ARRAY(Integer), nullable=True)

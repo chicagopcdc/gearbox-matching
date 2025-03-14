@@ -63,8 +63,10 @@ async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish, us
         new_echc = await create_el_criteria_has_criterion(session=session, el_criteria_has_criterion=echc_save)
         new_echc_list.append(new_echc)
 
+
+    new_echc_ids = [x.id for x in new_echc_list]
     # Call update method below - set criterion_staging echc criteria adjudication status to active
-    stage_upd = CriterionStagingUpdate(id=echc.criterion_staging_id, el_criteria_has_criterion_id=new_echc.id, echc_adjudication_status=EchcAdjudicationStatus.ACTIVE)
+    stage_upd = CriterionStagingUpdate(id=echc.criterion_staging_id, el_criteria_has_criterion_id=new_echc.id, echc_adjudication_status=EchcAdjudicationStatus.ACTIVE, echc_ids=new_echc_ids)
 
     await criterion_staging_service.update(session=session, criterion=stage_upd, user_id=user_id)
     # update the study version status to "IN_PROCESS"

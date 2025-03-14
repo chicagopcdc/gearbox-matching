@@ -250,6 +250,12 @@ def test_accept_criterion_staging(setup_database, client, connection):
     resp.raise_for_status()
     assert str(resp.status_code).startswith("20")
 
+def test_accept_criterion_staging_not_found(setup_database, client, connection):
+
+    fake_jwt = "1.2.3"
+    resp = client.post(f"/accept-criterion-staging/98777928374932", headers={"Authorization": f"bearer {fake_jwt}"})
+    assert str(resp.status_code).startswith("50")
+
 @pytest.mark.parametrize(
     "data", [ 
         {
@@ -310,5 +316,3 @@ def test_publish_criterion_staging_code_not_set(setup_database, client, data, co
         errors.append(f"Error: Expecting status_code 500 got code: {resp.status_code}")
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors)) 
-
-# add test for criterion-staging-publish-echc endpoint

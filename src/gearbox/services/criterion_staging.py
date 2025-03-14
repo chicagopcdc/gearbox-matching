@@ -2,9 +2,10 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from gearbox.util import status
 from gearbox.schemas import CriterionStaging as CriterionStagingSchema, CriterionStagingCreate, CriterionPublish, CriterionCreate, CriterionStagingUpdate, CriterionHasValueCreate, CriterionStagingSearchResult, ElCriteriaHasCriterionPublish, ElCriteriaHasCriterionCreate, CriterionStagingUpdateIn
-from gearbox.crud import criterion_staging_crud , value_crud, criterion_has_value_crud, input_type_crud
+from gearbox.crud import criterion_staging_crud , study_version_crud, value_crud, criterion_has_value_crud, input_type_crud
+from gearbox.models import Criterion
 from typing import List
-from gearbox.util.types import AdjudicationStatus
+from gearbox.util.types import AdjudicationStatus, EchcAdjudicationStatus
 from gearbox.services import criterion as criterion_service, value as value_service, el_criteria_has_criterion as el_criteria_has_criterion_service
 
 from . import logger
@@ -129,9 +130,10 @@ async def accept_criterion_staging(session: Session, id: int, user_id: int):
     to 'ACTIVE' if the row is in 'EXISTING' status indicating that the adjudication
     process confirmed that the criterion already exists
     """
-
     # GET THE criterion_staging ROW
     criterion_staging = await get_criterion_staging(session=session, id=id)
+    if not criterion_staging:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: criterion_staging id:{id} not found.")
     if criterion_staging.criterion_adjudication_status != AdjudicationStatus.EXISTING:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: cannot accept criterion staging {id} because status is {criterion_staging.criterion_adjudication_status} needs to be {AdjudicationStatus.EXISTING}.")
 
@@ -139,3 +141,18 @@ async def accept_criterion_staging(session: Session, id: int, user_id: int):
     criterion_staging.criterion_adjudication_status = AdjudicationStatus.ACTIVE
     criterion_upd = CriterionStagingUpdateIn(**criterion_staging.__dict__)
     await update(session=session, criterion=criterion_upd, user_id = user_id)
+
+async def get_criterion_staging_by_criterion_adjudication_status(session: Session, eligibility_criteria_id: int, adjudication_status: List[AdjudicationStatus]) -> List[CriterionStagingSearchResult]:
+    return await criterion_staging_crud.get_criterion_staging_by_criterion_adjudication_status(session, eligibility_criteria_id=eligibility_criteria_id, adjudication_status=adjudication_status)
+
+async def get_criterion_staging_by_echc_criterion_adjudication_status(session: Session, eligibility_criteria_id: int, echc_adjudication_status: List[EchcAdjudicationStatus]) -> List[CriterionStagingSearchResult]:
+    return await criterion_staging_crud.get_criterion_staging_by_echc_adjudication_status(session, eligibility_criteria_id=eligibility_criteria_id, echc_adjudication_status=echc_adjudication_status)
+
+async def get_criterion_staging_missing_criterion_id(session: Session, eligibility_criteria_id: int) -> List[CriterionStagingSearchResult]:
+    return await criterion_staging_crud.get_criterion_staging_missing_criterion_id(session, eligibility_criteria_id)
+
+async def get_criterion_staging_inactive_criterion(session: Session, eligibility_criteria_id: int) -> List[CriterionStagingSearchResult]:
+    return await criterion_staging_crud.get_criterion_staging_inactive_criterion(session, eligibility_criteria_id)
+
+async def get_staged_criteria_by_ec_id(session:Session, eligibility_criteria_id: int) -> List[Criterion]:
+    return await criterion_staging_crud.get_staged_criteria_by_ec_id(session, eligibility_criteria_id)

@@ -152,7 +152,7 @@ def test_get_el_criteria_has_criterion(setup_database, client):
 )
 def test_publish_echc(setup_database, client, data, connection):
     """
-    Comments: test create a new site and validates row created in db
+    Comments: test publish el_criteria_has_criterion
     """
     fake_jwt = "1.2.3"
     resp = client.post("/publish-el-criteria-has-criterion", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
@@ -171,7 +171,7 @@ def test_publish_echc(setup_database, client, data, connection):
 )
 def test_publish_echc_invalid_value_ids(setup_database, client, data, connection):
     """
-    Comments: test create a new site and validates row created in db
+    Comments: test publish el_criteria_has_criterion invalid value
     """
     fake_jwt = "1.2.3"
     resp = client.post("/publish-el-criteria-has-criterion", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
@@ -190,7 +190,7 @@ def test_publish_echc_invalid_value_ids(setup_database, client, data, connection
 )
 def test_publish_echc_invalid_criterion_id(setup_database, client, data, connection):
     """
-    Comments: test create a new site and validates row created in db
+    Comments: test publish el_criteria_has_criterion invalid criterion
     """
     fake_jwt = "1.2.3"
     resp = client.post("/publish-el-criteria-has-criterion", json=data, headers={"Authorization": f"bearer {fake_jwt}"})

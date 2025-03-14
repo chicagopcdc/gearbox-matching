@@ -97,8 +97,7 @@ async def validate_eligibility_criteria_ids(session: Session, algorithm_logic: s
 
         # items that exist in input_el_criteria_has_criterion_ids but not in db_el_criteria_has_criterion_ids
         invalid_ids = list(set(input_el_criteria_has_criterion_ids).difference(db_el_criteria_has_criterion_ids))
-        if invalid_ids:
-            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study algorithm logic contains the following invalid ids: {invalid_ids}.")
+        return invalid_ids
 
     except exc.SQLAlchemyError as e:
         logger.error(f"SQL ERROR IN validate_eligibility_criteria_ids method: {e}")
@@ -140,7 +139,9 @@ async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineC
     study_version = await study_version_crud.get(session, study_algorithm_engine.study_version_id)
 
     # Check el_criteria_has_criterion ids in incoming algoritm engine exist in the db
-    await validate_eligibility_criteria_ids(session, study_algorithm_engine.algorithm_logic, study_version.eligibility_criteria_id) 
+    invalid_ids = await validate_eligibility_criteria_ids(session, study_algorithm_engine.algorithm_logic, study_version.eligibility_criteria_id) 
+    if invalid_ids:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study algorithm logic contains the following invalid ids: {invalid_ids}.")
 
     # Search for any existing exact duplicate algorithm logic for the study 
     dup_study_algorithm_engine = await get_existing_algorithm_logic_duplicate(session, study_algorithm_engine.algorithm_logic, study_version.study_id)
@@ -164,7 +165,9 @@ async def update(session: Session, study_algorithm_engine: StudyAlgorithmEngineU
     eligibility_criteria_id = await get_eligibility_criteria_id(session=session, study_version_id=study_algorithm_engine.study_version_id)
 
     # Check el_criteria_has_criterion ids in incoming algoritm engine exist in the db
-    await validate_eligibility_criteria_ids(session, study_algorithm_engine.algorithm_logic, eligibility_criteria_id) 
+    invalid_ids = await validate_eligibility_criteria_ids(session, study_algorithm_engine.algorithm_logic, eligibility_criteria_id) 
+    if invalid_ids:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study algorithm logic contains the following invalid ids: {invalid_ids}.")
 
     # QUERY FOR db_obj
     sae_to_upd = await study_algorithm_engine_crud.get(session, study_algorithm_engine.id)

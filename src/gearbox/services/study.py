@@ -1,5 +1,6 @@
 from . import logger
 from datetime import datetime
+from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import HTTPException
 from gearbox.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate, StudyUpdates
@@ -53,8 +54,8 @@ async def create_study(session: Session, study: StudyCreate) -> StudySchema:
     await session.commit()
     return new_study
 
-async def update_study(session: Session, study: StudyCreate, study_id: int) -> StudySchema:
-    study_in = await study_crud.get(db=session, id=study_id)
+async def update_study(session: Session, study: StudyCreate, study_id: int, noload_rel:List=None) -> StudySchema:
+    study_in = await study_crud.get(db=session, id=study_id, noload_rel=noload_rel)
     if study_in:
         upd_study = await study_crud.update(db=session, db_obj=study_in, obj_in=study)
     else:
