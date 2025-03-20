@@ -7,7 +7,6 @@ from gearbox.schemas import Value
 
 class CriterionStagingBase(BaseModel):
     eligibility_criteria_id: int
-    input_id: Optional[str] = ""
     code: Optional[str] = ""
     display_name: Optional[str] = ""
     description: Optional[str] = ""
@@ -38,7 +37,6 @@ class CriterionStagingSearchResult(BaseModel):
     criterion_value_list: Optional[List[Value]]
 
     eligibility_criteria_id: int
-    input_id: Optional[str] = ""
     code: Optional[str] = ""
     display_name: Optional[str] = ""
     description: Optional[str] = ""
