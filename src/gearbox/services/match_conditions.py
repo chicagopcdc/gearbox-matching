@@ -1,17 +1,14 @@
-import json
 from typing import List
-from fastapi.encoders import jsonable_encoder
 from fastapi import HTTPException
 from gearbox.util import status
 import re
 from collections import deque
 from gearbox.routers import logger
 from gearbox.models import StudyVersion
-from gearbox.crud import study_algorithm_engine_crud, match_conditions, study_version_crud
+from gearbox.crud import study_version_crud
 from gearbox.schemas import AlgorithmResponse
 from gearbox.util.types import StudyVersionStatus
 from sqlalchemy.ext.asyncio import AsyncSession as Session
-from . import study_algorithm_engine
 
 def expand_paths(paths):
     """
