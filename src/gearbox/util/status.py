@@ -9,6 +9,7 @@ from starlette.status import (
     HTTP_404_NOT_FOUND,
     HTTP_422_UNPROCESSABLE_ENTITY,
     HTTP_500_INTERNAL_SERVER_ERROR,
+    HTTP_503_SERVICE_UNAVAILABLE
 )
 
 def get_starlette_status(status):
@@ -23,4 +24,5 @@ def get_starlette_status(status):
         404: HTTP_404_NOT_FOUND,
         422: HTTP_422_UNPROCESSABLE_ENTITY,
         500: HTTP_500_INTERNAL_SERVER_ERROR,
+        503: HTTP_503_SERVICE_UNAVAILABLE,
     }.get(status,HTTP_500_INTERNAL_SERVER_ERROR)
