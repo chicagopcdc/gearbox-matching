@@ -37,13 +37,24 @@ async def get_form_info(current_session: Session):
     sites = result.unique().scalars().all()
     return sites
 
-async def clear_display_rules_and_triggered_by(current_session: Session):
+async def clear_dr_tb_tags(current_session: Session):
     try:
         await current_session.execute('DELETE FROM triggered_by')
+        await current_session.commit()
+    except exc.SQLAlchemyError as e:
+        logger.error(f"Error clearing triggered_by table: {type(e)}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")
+    try:
         await current_session.execute('DELETE FROM display_rules')
         await current_session.commit()
     except exc.SQLAlchemyError as e:
-        logger.error(f"Error clearing triggered_by and display_rules tables: {type(e)}")
+        logger.error(f"Error clearing display_rules table: {type(e)}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")
+    try:
+        await current_session.execute('DELETE FROM criterion_has_tag')
+        await current_session.commit()
+    except exc.SQLAlchemyError as e:
+        logger.error(f"Error clearing criterion_has_tag table: {type(e)}")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")
 
 
@@ -82,6 +93,22 @@ async def insert_triggered_by(current_session: Session, triggered_by_rows: list)
         )
     except exc.SQLAlchemyError as e:
         logger.error(f"Error inserting triggered_by: {e}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")
+
+    await current_session.commit()
+
+async def insert_tags(current_session: Session, tag_rows: list):
+    rows = [{
+        "criterion_id": i.get('criterion_id'), 
+        "tag_id": i.get('tag_id'),
+        } for i in tag_rows
+    ]
+    try:
+        await current_session.execute(
+            CriterionHasTag.__table__.insert(), rows
+        )
+    except exc.SQLAlchemyError as e:
+        logger.error(f"Error inserting criterion_has_tag: {e}")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")
 
     await current_session.commit()
