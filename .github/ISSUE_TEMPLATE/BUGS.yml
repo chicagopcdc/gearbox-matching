@@ -1,0 +1,97 @@
+name: "🐛 Bug Report"
+description: "Report a bug to help improve the project"
+title: "[BUG] <title>"
+labels: ["bug"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🐛 Bug Report  
+        Thank you for taking the time to report a bug! Please provide the details below.
+
+  - type: input
+    id: bug-summary
+    attributes:
+      label: "🔹 Summary"
+      description: "Briefly describe the bug."
+      placeholder: "E.g., The login button is not working"
+    validations:
+      required: true
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: "📌 Description"
+      description: "Provide a clear and concise description of the bug."
+      placeholder: "Describe what the bug is and how it affects functionality."
+    validations:
+      required: true
+
+  - type: textarea
+    id: bug-steps
+    attributes:
+      label: "⚡ Steps to Reproduce"
+      description: "Provide the steps to reproduce the bug."
+      placeholder: |
+        1. Go to '...'
+        2. Click on '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: "✅ Expected Behavior"
+      description: "What did you expect to happen instead?"
+      placeholder: "E.g., The login button should redirect to the dashboard."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: "❌ Actual Behavior"
+      description: "What actually happened?"
+      placeholder: "E.g., Clicking the login button does nothing."
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "📸 Screenshots (if applicable)"
+      description: "Attach screenshots or GIFs that show the issue."
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: "🖥️ Environment"
+      description: "Select the environment where the bug occurred."
+      options:
+        - "Web (Chrome/Firefox/Safari)"
+        - "Mobile (Android/iOS)"
+        - "Backend"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-info
+    attributes:
+      label: "📌 Additional Information"
+      description: "Any extra details that might help in debugging."
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: "✔️ Checklist"
+      description: "Please confirm the following:"
+      options:
+        - label: "I have searched for existing issues to avoid duplicates."
+          required: true
+        - label: "I have provided all necessary details."
+          required: true
+        - label: "I am willing to work on this issue (optional)."
