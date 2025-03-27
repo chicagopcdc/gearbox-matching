@@ -12,7 +12,7 @@ from gearbox.admin_login import admin_required
 
 mod = APIRouter()
 
-@mod.get("/unit/{unit_id}", response_model=UnitSchema, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)] )
+@mod.get("/unit/{unit_id}", response_model=UnitSchema, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate), Depends(admin_required)] )
 async def get_unit(
     request: Request,
     unit_id: int,
@@ -21,7 +21,7 @@ async def get_unit(
     ret_unit = await unit_service.get_single_unit(session, unit_id)
     return ret_unit
 
-@mod.get("/units", response_model=UnitSearchResults, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate)])
+@mod.get("/units", response_model=UnitSearchResults, status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate), Depends(admin_required)])
 async def get_all_units(
     request: Request,
     session: AsyncSession = Depends(deps.get_session)

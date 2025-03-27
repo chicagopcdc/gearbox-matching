@@ -8,11 +8,7 @@ from fastapi import HTTPException
 from gearbox.util import status
 from typing import List
 from gearbox.services.criterion import get_criteria
-import asyncio
-import time
-from aiocache import cached, Cache, caches
-from aiocache.serializers import JsonSerializer
-import json
+from aiocache import cached, caches
 
 
 async def reset_user_validation_data():

@@ -1,11 +1,13 @@
 from . import logger
-from gearbox.crud import el_criteria_has_criterion_crud
-from gearbox.schemas import ElCriteriaHasCriterionCreate, ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterion as ElCriteriaHasCriterionSchema, ElCriteriaHasCriterions
+from gearbox.crud import el_criteria_has_criterion_crud, study_version_crud, eligibility_criteria_crud, value_crud, criterion_crud, criterion_staging_crud
+from gearbox.schemas import ElCriteriaHasCriterionCreate, ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterion as ElCriteriaHasCriterionSchema, ElCriteriaHasCriterionPublish, CriterionStagingUpdate
 from sqlalchemy.ext.asyncio import AsyncSession as Session
-from sqlalchemy import select
 from fastapi import HTTPException
 from gearbox.util import status
 from gearbox.models import ElCriteriaHasCriterion
+from gearbox.services import criterion_staging as criterion_staging_service
+from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus
+from gearbox import auth
 
 async def get_el_criteria_has_criterion(session: Session, id: int) -> ElCriteriaHasCriterionSchema:
     ec = await el_criteria_has_criterion_crud.get(session, id)
@@ -14,58 +16,14 @@ async def get_el_criteria_has_criterion(session: Session, id: int) -> ElCriteria
 async def get_el_criteria_has_criterions(session: Session) -> ElCriteriaHasCriterionSearchResults: 
     ecs = await el_criteria_has_criterion_crud.get_multi(session)
     return ecs
-    pass
 
-# TO DO: add endpoint to fetch all el_criteria_has_criterions for a particular eligibility_criteria_id
-# get_multi with the where parameter
+async def get_el_criteria_has_criterions_by_ecid(session: Session, ecid: int) -> ElCriteriaHasCriterionSearchResults: 
+    ecs = await el_criteria_has_criterion_crud.get_multi(session, where=[f"eligibility_criteria_id = {ecid}"])
+    return ecs
 
-async def find_duplicates_exist_in_db(session: Session, el_criteria_has_criterion: ElCriteriaHasCriterionCreate):
-
-    echcs_in = el_criteria_has_criterion.echcs
-    echc_ids = set([x.eligibility_criteria_id for x in el_criteria_has_criterion.echcs])
-
-    echcs_db = []
-    for eid in echc_ids:
-        result = await session.execute(
-                select(ElCriteriaHasCriterion).
-                    where(ElCriteriaHasCriterion.eligibility_criteria_id == eid)
-                )
-        for echc in result.unique().scalars().all():
-            echcs_db.append(echc)
-
-    incoming_echcs = [
-        {
-            "criterion_id": x.criterion_id,
-            "eligibility_criteria_id": x.eligibility_criteria_id,
-            "value_id": x.value_id
-         } for x in echcs_in 
-    ]
-
-    db_echcs = [
-        {
-            "criterion_id": x.criterion_id,
-            "eligibility_criteria_id": x.eligibility_criteria_id,
-            "value_id": x.value_id
-         } for x in echcs_db
-    ]
-
-    echc_in_set = set(tuple(sorted(d.items())) for d in incoming_echcs)
-    echc_db_set = set(tuple(sorted(d.items())) for d in db_echcs)
-    duplicates = [dict(item) for item in (echc_in_set & echc_db_set)]
-
-    if duplicates:
-        logger.error(f"Following duplicate key values violate unique constraint on table EL_CRITERIA_HAS_CRITERION: {duplicates}")
-        raise HTTPException(status.HTTP_409_CONFLICT, f"Following duplicate key values violate unique constraint on table EL_CRITERIA_HAS_CRITERION: {duplicates}")
-
-# async def create_el_criteria_has_criterion(session: Session, el_criteria_has_criterion: ElCriteriaHasCriterionCreate) -> ElCriteriaHasCriterionSearchResults:
-async def create_el_criteria_has_criterion(session: Session, el_criteria_has_criterion: ElCriteriaHasCriterionCreate) -> ElCriteriaHasCriterions:
-    dupes = await find_duplicates_exist_in_db(session, el_criteria_has_criterion)
-    echc_returned = []
-    for echc in el_criteria_has_criterion.echcs:
-        new_el_criteria_has_criterion = await el_criteria_has_criterion_crud.create(db=session, obj_in=echc)
-        echc_returned.append(new_el_criteria_has_criterion)
-    await session.commit() 
-    return echc_returned
+async def create_el_criteria_has_criterion(session: Session, el_criteria_has_criterion: ElCriteriaHasCriterionCreate) -> ElCriteriaHasCriterion:
+    new_echc = await el_criteria_has_criterion_crud.create(db=session, obj_in=el_criteria_has_criterion)
+    return new_echc
 
 async def update_el_criteria_has_criterion(session: Session, el_criteria_has_criterion: ElCriteriaHasCriterionCreate, el_criteria_has_criterion_id: int) -> ElCriteriaHasCriterionSchema:
     el_criteria_has_criterion_in = await el_criteria_has_criterion_crud.get(db=session, id=el_criteria_has_criterion_id)
@@ -75,3 +33,45 @@ async def update_el_criteria_has_criterion(session: Session, el_criteria_has_cri
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"el_criteria_has_criterion id: {el_criteria_has_criterion_id} not found for update.") 
     await session.commit() 
     return upd_el_criteria_has_criterion
+
+async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish, user_id: int):
+
+    check_id_errors = []
+
+    existing_staging = await criterion_staging_service.get_criterion_staging(session=session, id=echc.criterion_staging_id)
+
+    # criterion (question) must be in ACTIVE or EXISTING status before we can assign a value to the study criteria
+    if existing_staging.criterion_adjudication_status not in (AdjudicationStatus.ACTIVE, AdjudicationStatus.EXISTING):
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            f"Criterion staging id: {echc.criterion_staging_id} status must be active in order to publish el_criteria_has_criterion. The current status is: {existing_staging.criterion_adjudication_status} - finalize criterion adjudication before publishing.")
+
+    # Check ids exist for value, eligibility_criteria, criterion
+    check_id_errors.append(await value_crud.check_key(db=session, ids_to_check=echc.value_ids))
+    check_id_errors.append(await eligibility_criteria_crud.check_key(db=session, ids_to_check=echc.eligibility_criteria_id))
+    check_id_errors.append(await criterion_crud.check_key(db=session, ids_to_check=echc.criterion_id))
+    check_id_errors.append(await criterion_staging_crud.check_key(db=session, ids_to_check=echc.criterion_staging_id))
+
+    if not all(i is None for i in check_id_errors):
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: missing FKs for el_criteria_has_criterion publication: {[error for error in check_id_errors if error]}")
+
+    new_echc_list = []
+    # Save echc for each value in publish object
+    for val in echc.value_ids:
+        echc_create = echc.dict()
+        echc_create['value_id'] = val
+        echc_save=ElCriteriaHasCriterionCreate(**echc_create)
+        new_echc = await create_el_criteria_has_criterion(session=session, el_criteria_has_criterion=echc_save)
+        new_echc_list.append(new_echc)
+
+
+    new_echc_ids = [x.id for x in new_echc_list]
+    # Call update method below - set criterion_staging echc criteria adjudication status to active
+    stage_upd = CriterionStagingUpdate(id=echc.criterion_staging_id, el_criteria_has_criterion_id=new_echc.id, echc_adjudication_status=EchcAdjudicationStatus.ACTIVE, echc_ids=new_echc_ids)
+
+    await criterion_staging_service.update(session=session, criterion=stage_upd, user_id=user_id)
+    # update the study version status to "IN_PROCESS"
+    study_version_to_upd = await study_version_crud.get_study_version_ec_id(current_session=session, eligibility_criteria_id = existing_staging.eligibility_criteria_id )
+    await study_version_crud.update(db=session, db_obj=study_version_to_upd, obj_in={"status": StudyVersionStatus.IN_PROCESS})
+
+    for echc in new_echc_list:
+        logger.info(f"User: {user_id} published el_criteria_has_criterion {echc.id} criterion_id: {echc.criterion_id} value_id: {echc.value_id} for study version {study_version_to_upd.id}")

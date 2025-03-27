@@ -9,6 +9,7 @@ from . import logger
 from starlette.responses import JSONResponse
 from gearbox import auth
 from gearbox.schemas import MatchForm
+from gearbox.schemas.match_form import showif_logic_schema
 from gearbox import deps
 from gearbox.util import status, bucket_utils
 from gearbox.admin_login import admin_required
@@ -40,9 +41,25 @@ async def get_match_form(
     request: Request,
     session: Session = Depends(deps.get_session)
 ):
+    """
+    Comments: This endpoint is called by the front-end to return the presigned_url to the S3
+    bucket that the match form file.
+    """
     params = []
     presigned_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_MATCH_FORM_KEY_NAME, params, "get_object")
     return JSONResponse(presigned_url, status.HTTP_200_OK)
+
+@mod.get("/important-questions", dependencies=[ Depends(auth.authenticate)], status_code=status.HTTP_200_OK)
+async def get_important_questions(
+    request: Request,
+    session: Session = Depends(deps.get_session)
+):
+    if not config.BYPASS_IMPORTANT_QUESTIONS:
+        params = []
+        presigned_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_IMPORTANT_QUESTIONS_KEY_NAME, params, "get_object")
+        return JSONResponse(presigned_url, status.HTTP_200_OK)
+    else:
+        return JSONResponse(status.HTTP_503_SERVICE_UNAVAILABLE)
 
 @mod.post("/update-match-form", dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def update_sae(

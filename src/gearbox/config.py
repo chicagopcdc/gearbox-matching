@@ -20,6 +20,7 @@ URL_PREFIX = config("URL_PREFIX", default="/" if DEBUG else "/gearbox")
 BYPASS_FENCE = config("BYPASS_FENCE", cast=bool, default=False)
 
 #S3
+BYPASS_IMPORTANT_QUESTIONS = config("BYPASS_IMPORTANT_QUESTIONS", cast=bool, default=False)
 BYPASS_S3 = config("BYPASS_S3", cast=bool, default=False)
 # DUMMY_S3 - use a public dummy S3 bucket for docker compose testing presigned urls
 DUMMY_S3 = config("DUMMY_S3", cast=bool, default=False)
@@ -28,6 +29,7 @@ S3_TEST_COMPOSE_BUCKET_NAME = config("S3_TEST_COMPOSE_BUCKET_NAME", default='tes
 S3_TEST_BUCKET_NAME = config("S3_TEST_BUCKET_NAME", default='test-gearbox-data-bucket-with-versioning')
 S3_BUCKET_MATCH_CONDITIONS_KEY_NAME = config("S3_BUCKET_MATCH_CONDITIONS_KEY_NAME", default='match_conditions.json')
 S3_BUCKET_MATCH_FORM_KEY_NAME = config("S3_BUCKET_MATCH_FORM_KEY_NAME", default='match_form.json')
+S3_BUCKET_IMPORTANT_QUESTIONS_KEY_NAME = config("S3_BUCKET_IMPORTANT_QUESTIONS_KEY_NAME", default='important_questions.json')
 S3_BUCKET_STUDIES_KEY_NAME = config("S3_BUCKET_STUDIES_KEY_NAME", default='gearbox_studies.json')
 S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME = config("S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME", default='eligibility_criteria.json')
 S3_PRESIGNED_URL_EXPIRES=config("S3_PRESIGNED_URL_EXPIRES", default="1800")
@@ -63,18 +65,11 @@ if TESTING:
     print(f"DB DATABASE: {DB_DATABASE}")
     print(f"BYPASS FENCE: {BYPASS_FENCE}")
     print(f"BYPASS S3: {BYPASS_S3}")
+    print(f"BYPASS IMPORTANT_QUESTIONS: {BYPASS_IMPORTANT_QUESTIONS}")
     print(f"DEBUG: {DEBUG}")
 
 DB_STRING = DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST + ":" + str(DB_PORT) + "/" + DB_DATABASE
 ALEMBIC_DB_STRING = ALEMBIC_DB_DRIVER + "://" + DB_USER + ":" + str(DB_PASSWORD) + "@" + DB_HOST + ":" + str(DB_PORT) + "/" + DB_DATABASE
-
-# host_server = os.environ.get('host_server', 'localhost')
-# db_server_port = urllib.parse.quote_plus(str(os.environ.get('db_server_port', '5432')))
-# database_name = os.environ.get('database_name', 'fastapi')
-# db_username = urllib.parse.quote_plus(str(os.environ.get('db_username', 'postgres')))
-# db_password = urllib.parse.quote_plus(str(os.environ.get('db_password', 'secret')))
-# ssl_mode = urllib.parse.quote_plus(str(os.environ.get('ssl_mode','prefer')))
-# DATABASE_URL = 'postgresql://{}:{}@{}:{}/{}?sslmode={}'.format(db_username, db_password, host_server, db_server_port, database_name, ssl_mode)
 
 DB_DSN = config(
     "DB_DSN",
@@ -88,7 +83,6 @@ DB_DSN = config(
         database=DB_DATABASE,
     ),
 )
-
 
 DB_MIN_SIZE = config("DB_MIN_SIZE", cast=int, default=1)  # deprecated
 DB_POOL_MIN_SIZE = config("DB_POOL_MIN_SIZE", cast=int, default=DB_MIN_SIZE)
@@ -133,3 +127,6 @@ ENABLE_PHI = config("ENABLE_PHI", default=False)
 GEARBOX_MIDDLEWARE_PUBLIC_KEY_Path = config("GEARBOX_MIDDLEWARE_PUBLIC_KEY_PATH", default='src/gearbox/keys/jwt_public_key.pem')
 
 GEARBOX_KEY_CONFIG = {}
+
+# DOCCANO placeholder for new criterion
+DOCCANO_MISSING_VALUE_PLACEHOLDER = config("DOCCANO_MISSING_VALUE_PLACEHOLDER", default="new_variable")

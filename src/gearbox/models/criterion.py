@@ -1,6 +1,6 @@
 from sqlalchemy import ForeignKey, Column, Integer, String, DateTime, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
-
+from sqlalchemy.dialects.postgresql import ENUM
 from .base_class import Base
 
 

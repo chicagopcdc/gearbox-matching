@@ -26,8 +26,18 @@ class Criterion(CriterionBase):
 #    el_criteria_has_criterions: List[ElCriteriaHasCriterionBase]
 
 class CriterionCreate(CriterionBase):
+    pass
+
+class CriterionPublish(CriterionBase):
+    criterion_staging_id: int
     code: str
     display_name: str
+    description: str
+    create_date: Optional[datetime]
+    active: Optional[bool]
+    ontology_code_id: Optional[int]
+    input_type_id: int
+    values: Optional[List[int]]
 
 class CriterionCreateIn(CriterionBase):
     code: str
@@ -38,6 +48,7 @@ class CriterionCreateIn(CriterionBase):
     triggered_by_criterion_id: Optional[int]
     triggered_by_value_id: Optional[int]
     triggered_by_path: Optional[str]
+    criterion_staging_id: Optional[int]
 
 
 class CriterionSearchResults(BaseModel):
