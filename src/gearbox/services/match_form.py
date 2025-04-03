@@ -1,3 +1,4 @@
+from gearbox import config
 import json
 from ..util.bounds import bounds
 from . import logger
@@ -5,12 +6,25 @@ from gearbox.crud.match_form import get_form_info, clear_dr_tb_tags, insert_disp
 from .match_conditions import get_tree
 from gearbox.schemas import MatchForm 
 from gearbox.services import value as value_service
+from fastapi import HTTPException, Request
+from gearbox.util import status, bucket_utils
+from sqlalchemy.ext.asyncio import AsyncSession as Session
 from gearbox.services import unit as unit_service
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from gearbox.util import status
 
 import re
+
+async def build_match_form(session: Session, request: Request, save: bool):
+
+    match_form = await get_match_form(session)
+    if save:
+        if not config.BYPASS_S3:
+            params = [{'Content-Type':'application/json'}]
+            bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_MATCH_FORM_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, match_form)
+
+    return match_form
 
 def update_dict(d, critlookup):
     for key in d:

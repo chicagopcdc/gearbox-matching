@@ -18,7 +18,7 @@ mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
 
 @mod.post("/build-match-form/", response_model=MatchForm, response_model_exclude_none=True, dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
-async def build_match_info(
+async def build_match_form(
     request: Request,
     session: Session = Depends(deps.get_session),
     save: bool = True
@@ -28,13 +28,7 @@ async def build_match_info(
     is set to true, it will save the match for to S3, if 'save' is false it will just return
     the match form without uploading to S3. 
     """
-    match_form = await match_form_service.get_match_form(session)
-    if save:
-        if not config.BYPASS_S3:
-            params = [{'Content-Type':'application/json'}]
-            bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_MATCH_FORM_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, match_form)
-
-    return match_form
+    return await match_form_service.build_match_form(session=session, request=request, save=save)
 
 @mod.get("/match-form", dependencies=[ Depends(auth.authenticate)], status_code=status.HTTP_200_OK)
 async def get_match_form(
