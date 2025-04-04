@@ -10,7 +10,6 @@ class CriterionStaging(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     eligibility_criteria_id = Column(Integer, ForeignKey('eligibility_criteria.id'), nullable=False)
-    input_id = Column(String, nullable=True)
     code = Column(String, nullable=True)
     display_name = Column(String, nullable=True)
     description = Column(String, nullable=True)

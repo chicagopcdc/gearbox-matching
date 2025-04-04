@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, Column, Integer, UniqueConstraint, DateTime
+from sqlalchemy import ForeignKey, Column, Integer, UniqueConstraint, DateTime, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSON
 
@@ -10,6 +10,7 @@ class RawCriteria(Base):
 
     id = Column(Integer, primary_key=True)
     eligibility_criteria_id = Column(Integer, ForeignKey('eligibility_criteria.id'))
+    input_id = Column(String, nullable=True)
     data = Column(JSON)
     create_date = Column(DateTime, nullable=True)
 

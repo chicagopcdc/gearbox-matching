@@ -21,13 +21,12 @@ async def get_raw_criterias(session: Session) -> List[RawCriteria]:
     raw_crit = await raw_criteria_crud.get_multi(session)
     return raw_crit
 
-async def create_staging_criterion(session: Session, input_id: int, eligibility_criteria_id: int,
+async def create_staging_criterion(session: Session, eligibility_criteria_id: int,
         code: str, start_span: int, end_span:int, text: str):
 
         criterion_id = await criterion_crud.get_criterion_id_by_code(db=session, code=code)
 
         csc = CriterionStagingCreate(
-            input_id = input_id,
             eligibility_criteria_id = eligibility_criteria_id,
             code = code,
             criterion_adjudication_status = AdjudicationStatus.NEW.value if criterion_id == None else AdjudicationStatus.EXISTING.value,
@@ -44,7 +43,6 @@ async def create_staging_criterion(session: Session, input_id: int, eligibility_
 async def stage_criteria(session: Session, raw_criteria: RawCriteria):
 
     raw_text = raw_criteria.data.get('text')
-    input_id = raw_criteria.data.get('id')
     for entity in raw_criteria.data.get('entities'):
 
         ## get criterion_id from code
@@ -55,7 +53,6 @@ async def stage_criteria(session: Session, raw_criteria: RawCriteria):
         end_span = entity.get("end_offset")
 
         await create_staging_criterion(session=session,
-            input_id=input_id,
             eligibility_criteria_id=raw_criteria.eligibility_criteria_id,
             code=code,
             start_span=start_span,
@@ -119,6 +116,7 @@ async def create_raw_criteria(session: Session, raw_criteria_in: RawCriteriaIn, 
     """
     # Get the study_id for the study based on the id in the raw criteria json
     ext_id = raw_criteria_in.data.get("nct")
+    input_id = raw_criteria_in.data.get('id')
     study_id = await study_service.get_study_id_by_ext_id(session, ext_id)
     if not study_id:
          logger.error(f"Study for id: {ext_id} not found for update.") 
@@ -142,7 +140,7 @@ async def create_raw_criteria(session: Session, raw_criteria_in: RawCriteriaIn, 
         study_version = await study_version_service.create_study_version(session=session,study_version=new_study_version)
 
         # Save the new raw criteria to the db
-        new_raw_criteria = RawCriteriaCreate(data=raw_criteria_in.data, eligibility_criteria_id=eligibility_criteria.id)
+        new_raw_criteria = RawCriteriaCreate(data=raw_criteria_in.data, eligibility_criteria_id=eligibility_criteria.id, input_id=input_id)
         raw_criteria = await raw_criteria_crud.create(db=session, obj_in=new_raw_criteria)
 
         # Create criterion_staging rows from the raw criteria json
@@ -172,7 +170,6 @@ async def create_raw_criteria(session: Session, raw_criteria_in: RawCriteriaIn, 
 
             if new_to_add_dict.get((incoming.get('label'),incoming_text[incoming.get('start_offset'):incoming.get('end_offset')])):
                 await create_staging_criterion(session=session,
-                    input_id=raw_criteria_in.data.get('id'),
                     eligibility_criteria_id=latest_study_version.eligibility_criteria_id,
                     code=incoming.get("label"),
                     start_span=incoming.get("start_offset"),
