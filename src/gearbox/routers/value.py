@@ -2,8 +2,7 @@ from fastapi import Depends
 
 from collections.abc import Iterable
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter
-from fastapi import Request, Depends
+from fastapi import Request, Depends, APIRouter, HTTPException
 from . import logger
 from gearbox.util import status
 from gearbox.admin_login import admin_required
@@ -30,7 +29,11 @@ async def get_value(
     session: AsyncSession = Depends(deps.get_session),
 ):
     ret_value = await value_service.get_value(session=session, id=value_id)
-    return ret_value
+    if not ret_value:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, 
+            f"value not found for id: {value_id}")
+    else:
+        return ret_value
 
 @mod.post("/value", response_model=Value, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(

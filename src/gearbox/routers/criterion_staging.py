@@ -77,7 +77,7 @@ async def save_object(
     upd_value = await criterion_staging_service.update(session=session, criterion=body, user_id = int(user_id))
     return upd_value
 
-@mod.post("/accept-criterion-staging/{criterion_staging_id}", response_model=CriterionStaging, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.post("/accept-criterion-staging/{criterion_staging_id}", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def accept_object(
     criterion_staging_id: int,
     request: Request,
