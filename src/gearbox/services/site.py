@@ -26,9 +26,8 @@ async def get_sites(session: Session) -> SiteSearchResults:
     aes = await site_crud.get_multi(session)
     return aes
 
-async def create_site(session: Session, site: SiteCreate) -> SiteSchema:
+async def create_site(session: Session, site: SiteCreate):
     aes = await site_crud.create(db=session, obj_in=site)
-    pass
 
 async def update_site(session: Session, site: SiteCreate, site_id: int) -> SiteSchema:
     site_in = await site_crud.get(db=session, id=site_id)

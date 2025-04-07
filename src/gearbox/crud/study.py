@@ -40,7 +40,7 @@ class CRUDStudy(CRUDBase [Study, StudyCreate, StudySearchResults]):
             ), joinedload(Study.links)
         ).where(Study.id == study_id)
         result = await current_session.execute(stmt)
-        study = result.unique().scalars().all()
+        study = result.unique().scalars().first()
         return study
     
     async def get_study_ids_for_source(self, db: Session, source: str) -> List[int]: 

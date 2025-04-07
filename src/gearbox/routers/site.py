@@ -32,15 +32,13 @@ async def get_all_sites(
     sites = await site_service.get_sites(session)
     return { "results": list(sites)}
 
-@mod.post("/site", response_model=SiteSchema,status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.post("/site", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
     body: SiteCreate,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    new_site = await site_service.create_site(session, body)
-    await session.commit()
-    return new_site
+    await site_service.create_site(session, body)
 
 @mod.post("/update-site/{site_id}", response_model=SiteSchema, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def update_object(
