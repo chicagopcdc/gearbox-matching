@@ -41,7 +41,7 @@ async def save_unit(
     await session.commit()
     return new_unit
 
-@mod.post("/update-unit/{unit_id}", response_model=UnitSchema, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.post("/update-unit/{unit_id}", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def update_unit(
     unit_id: int,
     body: dict,
@@ -51,8 +51,7 @@ async def update_unit(
     """
     Comments:
     """
-    upd_unit = await unit_service.update_unit(session=session, unit=body, unit_id=unit_id)
-    return upd_unit
+    await unit_service.update_unit(session=session, unit=body, unit_id=unit_id)
 
 def init_app(app):
     app.include_router(mod, tags=["unit"])

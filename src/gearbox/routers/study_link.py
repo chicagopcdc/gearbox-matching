@@ -43,7 +43,7 @@ async def save_object(
     await session.commit()
     return new_study_link
 
-@mod.post("/update-study-link/{study_link_id}", response_model=StudyLinkSchema, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.post("/update-study-link/{study_link_id}", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def update_object(
     study_link_id: int,
     body: dict,
@@ -54,7 +54,6 @@ async def update_object(
     Comments:
     """
     upd_study_link = await study_link_service.update_study_link(session=session, study_link=body, study_link_id=study_link_id)
-    return upd_study_link
 
 def init_app(app):
     app.include_router(mod, tags=["study-link"])
