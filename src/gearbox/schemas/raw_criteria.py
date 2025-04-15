@@ -67,13 +67,14 @@ class RawCriteriaBase(BaseModel):
 class RawCriteria(RawCriteriaBase):
     id: int
     eligibility_criteria_id: int
+    input_id: Optional[str]
 
 class RawCriteriaIn(RawCriteriaBase):
     pass 
 
 class RawCriteriaCreate(RawCriteriaBase):
     eligibility_criteria_id: int
-    pass 
+    input_id: Optional[str]
 
 class RawCriteriaUpdate(RawCriteriaBase):
     pass 
