@@ -23,7 +23,6 @@ def test_get_raw_criteria_by_id(setup_database, client):
     """
     fake_jwt = "1.2.3"
     resp = client.get("/raw-criteria/1", headers={"Authorization": f"bearer {fake_jwt}"})
-    print(f"--------> RESPONSE CODE: {str(resp.status_code)}")
     assert str(resp.status_code).startswith("20")
 
 @pytest.mark.asyncio
