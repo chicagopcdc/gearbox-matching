@@ -111,12 +111,12 @@ def test_create_raw_criteria_reupload(setup_database, client, connection):
             errors.append("Obsolete criterion code not found in criterion_staging")
 
         # confirm pre_annotated_criterion and pre_annotated_criterion_model rows created    
-        stmt = "SELECT count(*) from pre_annotated_criterion where raw_criteria_id=1"
+        stmt = "SELECT count(*) from pre_annotated_criterion where raw_criteria_id=2"
         pac_ct = db_session.execute(stmt).scalar_one()
         if pac_ct != 184:
             errors.append(f"Error creating pre_annotated_criterion rows expected 184 found {pac_ct}.")
 
-        stmt = "select count(*) from pre_annotated_criterion a, pre_annotated_criterion_model b where a.id = b.pre_annotated_criterion_id and a.raw_criteria_id = 1"
+        stmt = "select count(*) from pre_annotated_criterion a, pre_annotated_criterion_model b where a.id = b.pre_annotated_criterion_id and a.raw_criteria_id = 2"
         pacm_ct = db_session.execute(stmt).scalar_one()
         if pacm_ct != 208:
             errors.append(f"Error creating pre_annotated_criterion_model rows expected 208 found {pacm_ct}.")

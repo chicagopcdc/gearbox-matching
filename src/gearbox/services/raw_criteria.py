@@ -24,17 +24,19 @@ async def get_raw_criterias(session: Session) -> List[RawCriteria]:
 async def create_staging_criterion(session: Session, eligibility_criteria_id: int,
         code: str, start_span: int, end_span:int, text: str):
 
-        criterion_id = await criterion_crud.get_criterion_id_by_code(db=session, code=code)
+        criterion = await criterion_crud.get_criterion_by_code(db=session, code=code)
 
         csc = CriterionStagingCreate(
             eligibility_criteria_id = eligibility_criteria_id,
             code = code,
-            criterion_adjudication_status = AdjudicationStatus.NEW.value if criterion_id == None else AdjudicationStatus.EXISTING.value,
+            criterion_adjudication_status = AdjudicationStatus.NEW.value if criterion == None else AdjudicationStatus.EXISTING.value,
             echc_adjudication_status = EchcAdjudicationStatus.NEW.value,
             start_char = start_span,
             end_char = end_span,
             text = text,
-            criterion_id = criterion_id
+            criterion_id = criterion.id if criterion is not None else None,
+            display_name = criterion.display_name if criterion is not None else None,
+            description = criterion.description if criterion is not None else None
         )
 
         res = await criterion_staging_service.create(session=session, staging_criterion=csc)
@@ -47,8 +49,6 @@ async def stage_criteria(session: Session, raw_criteria: RawCriteria):
 
         ## get criterion_id from code
         code = entity.get("label")
-        criterion_id = await criterion_crud.get_criterion_id_by_code(db=session, code=code)
-
         start_span = entity.get("start_offset")
         end_span = entity.get("end_offset")
 

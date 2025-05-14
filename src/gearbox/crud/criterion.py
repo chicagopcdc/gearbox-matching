@@ -7,8 +7,8 @@ from typing import List
 
 class CRUDCriterion(CRUDBase [Criterion, CriterionCreate, CriterionSchema]):
 
-    async def get_criterion_id_by_code(self, db: Session, code: str) -> int:
-        stmt = select(Criterion.id).where(Criterion.code == code)
+    async def get_criterion_by_code(self, db: Session, code: str) -> CriterionSchema:
+        stmt = select(Criterion).where(Criterion.code == code)
         result = await db.execute(stmt)
         criterion_id = result.unique().scalars().first()
         return criterion_id
