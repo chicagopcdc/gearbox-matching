@@ -53,7 +53,6 @@ postgresql_my_proc = factories.postgresql_proc(
 )
 
 postgresql_my = factories.postgresql('postgresql_my_proc')
-print(f"POSTGRESQL_MY TYPE: {type(postgresql_my)}")
 """
 
 @pytest.fixture(scope="session")
@@ -80,12 +79,12 @@ def setup_database(connection) -> Engine:
     cursor = session.connection().connection.cursor()
     conn = session.connection().connection
 
+    main(["--raiseerr","downgrade","base"])
+    main(["--raiseerr","upgrade","head"])
+
     # cleanup criterion_staging prior to alembic setup
     cursor.execute("DELETE FROM criterion_staging;")
     conn.commit()
-
-    main(["--raiseerr","downgrade","base"])
-    main(["--raiseerr","upgrade","head"])
 
 
     # COPY DATA INTO TABLES

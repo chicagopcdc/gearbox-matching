@@ -74,7 +74,7 @@ def get_incoming_raw_criteria(raw_criteria: RawCriteriaIn)-> dict:
 async def create_pre_annotated(session: Session, raw_criteria: RawCriteria):
 
     # clear pre_annotated in case this is a re-submit from doccano
-    pre_annotated_criterion_crud.clear_pre_annotated_by_id(current_session=session, raw_criteria_id=raw_criteria.id)
+    await pre_annotated_criterion_crud.clear_pre_annotated_by_id(current_session=session, raw_criteria_id=raw_criteria.id)
 
     text = raw_criteria.data.get('text')
     for pa in raw_criteria.data.get('pre_annotated'):

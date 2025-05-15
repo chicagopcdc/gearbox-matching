@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import Request, Depends
-from fastapi import APIRouter
+from fastapi import Request, Depends, APIRouter, HTTPException
 from . import logger
 from ..util import status
 from gearbox import auth
@@ -19,7 +18,11 @@ async def get_site(
     session: AsyncSession = Depends(deps.get_session)
 ):
     ret_site = await site_service.get_site(session, site_id)
-    return ret_site
+    if not ret_site:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, 
+            f"site not found for id: {site_id}")
+    else:
+        return ret_site
 
 @mod.get("/sites", response_model=SiteSearchResults, status_code = status.HTTP_200_OK, dependencies=[Depends(auth.authenticate), Depends(admin_required)])
 async def get_all_sites(
@@ -29,15 +32,13 @@ async def get_all_sites(
     sites = await site_service.get_sites(session)
     return { "results": list(sites)}
 
-@mod.post("/site", response_model=SiteSchema,status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.post("/site", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
     body: SiteCreate,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    new_site = await site_service.create_site(session, body)
-    await session.commit()
-    return new_site
+    await site_service.create_site(session, body)
 
 @mod.post("/update-site/{site_id}", response_model=SiteSchema, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def update_object(

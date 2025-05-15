@@ -2,11 +2,9 @@ from fastapi import Depends
 
 from collections.abc import Iterable
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter
-from fastapi import Request, Depends
+from fastapi import Request, Depends, APIRouter, HTTPException
 from . import logger
 from gearbox.util import status
-from gearbox.util.types import EchcAdjudicationStatus
 from gearbox.admin_login import admin_required
 
 from gearbox.schemas import ElCriteriaHasCriterionCreate, ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterion, ElCriteriaHasCriterions, CriterionStagingUpdate, ElCriteriaHasCriterionPublish
@@ -42,8 +40,12 @@ async def get_el_criteria_has_criterion(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    ret_el_criteria_has_criterion = await el_criteria_has_criterion_service.get_el_criteria_has_criterion(session=session, id=el_criteria_has_criterion_id)
-    return ret_el_criteria_has_criterion
+    el_criteria_has_criterion = await el_criteria_has_criterion_service.get_el_criteria_has_criterion(session=session, id=el_criteria_has_criterion_id)
+    if not el_criteria_has_criterion:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, 
+            f"el_criteria_has_criterion not found for id: {el_criteria_has_criterion_id}")
+    else:
+        return el_criteria_has_criterion
 
 @mod.post("/el-criteria-has-criterion", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
@@ -69,7 +71,7 @@ async def update_object(
     upd_el_criteria_has_criterion = await el_criteria_has_criterion_service.update_el_criteria_has_criterion(session=session, el_criteria_has_criterion=body, el_criteria_has_criterion_id=el_criteria_has_criterion_id)
     return upd_el_criteria_has_criterion
 
-@mod.post("/publish-el-criteria-has-criterion", response_model=ElCriteriaHasCriterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.post("/publish-el-criteria-has-criterion", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def publish(
     body: ElCriteriaHasCriterionPublish,
     request: Request,
