@@ -1,7 +1,6 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter 
-from fastapi import Request, Depends
+from fastapi import Request, Depends, APIRouter, HTTPException
 from . import logger
 from gearbox.util import status
 from gearbox.admin_login import admin_required
@@ -28,6 +27,11 @@ async def get_sae(
     session: AsyncSession = Depends(deps.get_session),
 ):
     sae = await study_algorithm_engine.get_study_algorithm_engine(session=session, id=algorithm_engine_id)
+    if not sae:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, 
+            f"study_algorithm_engine not found for id: {algorithm_engine_id}")
+    else:
+        return sae
     return sae
 
 @mod.post("/study-algorithm-engine", response_model=StudyAlgorithmEngine,dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
