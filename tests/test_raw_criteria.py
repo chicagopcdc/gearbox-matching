@@ -116,7 +116,7 @@ def test_create_raw_criteria_reupload(setup_database, client, connection):
         if pac_ct != 180:
             errors.append(f"Error creating pre_annotated_criterion rows expected 180 found {pac_ct}.")
 
-        stmt = "select count(*) from pre_annotated_criterion a, pre_annotated_criterion_model b where a.id = b.pre_annotated_criterion_id and a.raw_criteria_id = 3"
+        stmt = "select count(*) from pre_annotated_criterion a, pre_annotated_criterion_model b where a.id = b.pre_annotated_criterion_id and a.raw_criteria_id = 2"
         pacm_ct = db_session.execute(stmt).scalar_one()
         if pacm_ct != 202:
             errors.append(f"Error creating pre_annotated_criterion_model rows expected 202 found {pacm_ct}.")
