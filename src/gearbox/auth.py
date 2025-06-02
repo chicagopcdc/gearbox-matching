@@ -22,50 +22,44 @@ security = HTTPBasic(auto_error=False)
 bearer = HTTPBearer(auto_error=False)
 
 
+class SignaturePayload:
+    def __init__(self, method, path, headers=None):
+        self.method = method.upper()
+        self.path = path
+        self.headers = headers or {}
+
+    def get_data(self, as_text=True):
+        header_str = "\n".join(f"{k}: {v}" for k, v in sorted(self.headers.items()))
+        payload_str = f"{self.method} {self.path}\n{header_str}"
+        return payload_str if as_text else payload_str.encode("utf-8")
+
+
 async def authenticate(
     request: Request, token: HTTPAuthorizationCredentials = Security(bearer)
 ):
     if not config.BYPASS_FENCE:
         g3rm = Gen3RequestManager(headers=request.headers)
         if g3rm.is_gen3_signed():
-            service_name = request.headers.get("Gen3-Service", "").upper()
-
-            # Resolve public key using fallback logic
-            public_key = config.GEARBOX_KEY_CONFIG.get(f"{service_name}_PUBLIC_KEY")
-            if not public_key:
-                logger.warning(
-                    f"{service_name}_PUBLIC_KEY not found. Falling back to RSA_PUBLIC_KEY."
-                )
-                public_key = config.GEARBOX_KEY_CONFIG.get("RSA_PUBLIC_KEY")
-
-            if not public_key:
-                logger.error("No valid public key found for signature validation.")
+            if "GEARBOX_MIDDLEWARE_PUBLIC_KEY" not in config.GEARBOX_KEY_CONFIG:
+                logger.error("no public key found")
                 raise HTTPException(
-                    HTTP_500_INTERNAL_SERVER_ERROR,
-                    "Missing public key for signature verification",
+                    HTTP_500_INTERNAL_SERVER_ERROR, "missing public key"
+                )
+            else:
+                # Create signature payload:
+                payload = SignaturePayload(
+                    method=request.method,
+                    path=request.url.path,  # must match signer exactly
+                    headers={"Gen3-Service": request.headers.get("Gen3-Service")},
                 )
 
-            # Gearbox-matching uses FastAPI, we have to use 'await' to get the body of the request
-            body = await request.body()
-
-            # Build the standardized payload
-            standardized_payload = {
-                "method": request.method,
-                "path": request.url.path,
-                "service": request.headers.get("Gen3-Service"),
-                "body": body.decode(),  # decode from bytes to string
-            }
-            payload = json.dumps(standardized_payload, sort_keys=True)
-
-            # Inject resolved public key into a patched key config for signature validation
-            key_config = config.GEARBOX_KEY_CONFIG.copy()
-            key_config[f"{service_name}_PUBLIC_KEY"] = public_key
-
-            if not g3rm.valid_gen3_signature(payload, config=key_config):
-                raise HTTPException(
-                    HTTP_401_UNAUTHORIZED, "Gen3 signed request is invalid"
-                )
-
+                if not g3rm.valid_gen3_signature(
+                    payload,
+                    config=config.GEARBOX_KEY_CONFIG,
+                ):
+                    raise HTTPException(
+                        HTTP_401_UNAUTHORIZED, "Gen3 signed request is invalid"
+                    )
         else:
             token_claims = await get_token_claims(token)
 
