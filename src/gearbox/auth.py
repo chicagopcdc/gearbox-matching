@@ -40,26 +40,29 @@ async def authenticate(
     if not config.BYPASS_FENCE:
         g3rm = Gen3RequestManager(headers=request.headers)
         if g3rm.is_gen3_signed():
-            if "GEARBOX_MIDDLEWARE_PUBLIC_KEY" not in config.GEARBOX_KEY_CONFIG:
-                logger.error("no public key found")
+            public_key = config.GEARBOX_KEY_CONFIG.get("GEARBOX_MIDDLEWARE_PUBLIC_KEY")
+            if not public_key:
+                logger.error(
+                    "No GEARBOX_MIDDLEWARE_PUBLIC_KEY configured — cannot validate signature"
+                )
                 raise HTTPException(
                     HTTP_500_INTERNAL_SERVER_ERROR, "missing public key"
                 )
-            else:
-                # Create signature payload:
-                payload = SignaturePayload(
-                    method=request.method,
-                    path=request.url.path,  # must match signer exactly
-                    headers={"Gen3-Service": request.headers.get("Gen3-Service")},
-                )
 
-                if not g3rm.valid_gen3_signature(
-                    payload,
-                    config=config.GEARBOX_KEY_CONFIG,
-                ):
-                    raise HTTPException(
-                        HTTP_401_UNAUTHORIZED, "Gen3 signed request is invalid"
-                    )
+            # Create signature payload:
+            payload = SignaturePayload(
+                method=request.method,
+                path=request.url.path,  # must match signer exactly
+                headers={"Gen3-Service": request.headers.get("Gen3-Service")},
+            )
+
+            if not g3rm.valid_gen3_signature(
+                payload,
+                config=config.GEARBOX_KEY_CONFIG,
+            ):
+                raise HTTPException(
+                    HTTP_401_UNAUTHORIZED, "Gen3 signed request is invalid"
+                )
         else:
             token_claims = await get_token_claims(token)
 
