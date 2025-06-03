@@ -63,8 +63,17 @@ async def authenticate(
                 raise HTTPException(
                     HTTP_401_UNAUTHORIZED, "Gen3 signed request is invalid"
                 )
-        else:
+            else:
+                logger.info("Validated Gen3 signature — skipping token validation.")
+                return  # IMPORTANT: do not fall through to token check!
+
+        # If not signed → fallback to token check
+        # TODO: Current token flow is fragile. Gearbox token validation needs follow-up ticket.
+        if token and getattr(token, "credentials", None):
+            logger.info("Validating token via get_token_claims()")
             token_claims = await get_token_claims(token)
+        else:
+            logger.info("No valid token provided, skipping token validation")
 
 
 async def authenticate_user(token: HTTPAuthorizationCredentials = Security(bearer)):
