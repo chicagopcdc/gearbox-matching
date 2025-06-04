@@ -36,7 +36,8 @@ async def create_staging_criterion(session: Session, eligibility_criteria_id: in
             text = text,
             criterion_id = criterion.id if criterion is not None else None,
             display_name = criterion.display_name if criterion is not None else None,
-            description = criterion.description if criterion is not None else None
+            description = criterion.description if criterion is not None else None,
+            input_type_id = criterion.input_type_id if criterion is not None else None
         )
 
         res = await criterion_staging_service.create(session=session, staging_criterion=csc)

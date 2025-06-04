@@ -79,12 +79,12 @@ def setup_database(connection) -> Engine:
     cursor = session.connection().connection.cursor()
     conn = session.connection().connection
 
-    main(["--raiseerr","downgrade","base"])
-    main(["--raiseerr","upgrade","head"])
-
     # cleanup criterion_staging prior to alembic setup
     cursor.execute("DELETE FROM criterion_staging;")
     conn.commit()
+
+    main(["--raiseerr","downgrade","base"])
+    main(["--raiseerr","upgrade","head"])
 
 
     # COPY DATA INTO TABLES
