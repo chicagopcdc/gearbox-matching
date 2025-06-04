@@ -8,8 +8,7 @@ from fastapi.security import (
     HTTPBasicCredentials,
     HTTPBearer,
 )
-from . import config
-from pcdcutils.gen3 import Gen3RequestManager
+from pcdcutils.gen3 import Gen3RequestManager, SignaturePayload
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_500_INTERNAL_SERVER_ERROR
 from cdislogging import get_logger
 
@@ -20,18 +19,6 @@ logger = get_logger("gb-auth", log_level="info")
 # not recieve valid credentials
 security = HTTPBasic(auto_error=False)
 bearer = HTTPBearer(auto_error=False)
-
-
-class SignaturePayload:
-    def __init__(self, method, path, headers=None):
-        self.method = method.upper()
-        self.path = path
-        self.headers = headers or {}
-
-    def get_data(self, as_text=True):
-        header_str = "\n".join(f"{k}: {v}" for k, v in sorted(self.headers.items()))
-        payload_str = f"{self.method} {self.path}\n{header_str}"
-        return payload_str if as_text else payload_str.encode("utf-8")
 
 
 async def authenticate(
@@ -49,13 +36,25 @@ async def authenticate(
                     HTTP_500_INTERNAL_SERVER_ERROR, "missing public key"
                 )
 
-            # Create signature payload:
+            # Prepare body for signature — match Fence behavior!
+            body = None
+            if request.method in ["POST", "PUT", "PATCH"]:
+                try:
+                    body_json = await request.json()
+                    body = json.dumps(body_json, separators=(",", ":"))
+                except Exception as e:
+                    logger.warning(f"Could not read JSON body for signing: {e}")
+                    body = None
+
+            # Build signature payload
             payload = SignaturePayload(
                 method=request.method,
-                path=request.url.path,  # must match signer exactly
+                path=request.url.path,
                 headers={"Gen3-Service": request.headers.get("Gen3-Service")},
+                body=body,
             )
 
+            # Validate signature
             if not g3rm.valid_gen3_signature(
                 payload,
                 config=config.GEARBOX_KEY_CONFIG,
@@ -67,8 +66,7 @@ async def authenticate(
                 logger.info("Validated Gen3 signature — skipping token validation.")
                 return  # IMPORTANT: do not fall through to token check!
 
-        # If not signed → fallback to token check
-        # TODO: Current token flow is fragile. Gearbox token validation needs follow-up ticket.
+        # Fallback: token check
         if token and getattr(token, "credentials", None):
             logger.info("Validating token via get_token_claims()")
             token_claims = await get_token_claims(token)
