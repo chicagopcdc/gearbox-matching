@@ -10,6 +10,7 @@ from fastapi.security import (
 )
 from pcdcutils.gen3 import Gen3RequestManager, SignaturePayload
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_500_INTERNAL_SERVER_ERROR
+from gearbox.errors import Forbidden, Unauthorized, NotFound
 from cdislogging import get_logger
 
 logger = get_logger("gb-auth", log_level="info")
@@ -21,57 +22,71 @@ security = HTTPBasic(auto_error=False)
 bearer = HTTPBearer(auto_error=False)
 
 
+# Authenticate incoming request
+# This runs as a FastAPI dependency on protected routes
+# It will validate if the request has a proper Gen3 signed signature
+# If signature is missing or invalid → raise HTTP 403 (forbidden)
 async def authenticate(
     request: Request, token: HTTPAuthorizationCredentials = Security(bearer)
 ):
+    # Skip validation if BYPASS_FENCE is enabled (dev/testing mode)
     if not config.BYPASS_FENCE:
-        g3rm = Gen3RequestManager(headers=request.headers)
-        if g3rm.is_gen3_signed():
-            public_key = config.GEARBOX_KEY_CONFIG.get("GEARBOX_MIDDLEWARE_PUBLIC_KEY")
-            if not public_key:
-                logger.error(
-                    "No GEARBOX_MIDDLEWARE_PUBLIC_KEY configured — cannot validate signature"
-                )
-                raise HTTPException(
-                    HTTP_500_INTERNAL_SERVER_ERROR, "missing public key"
-                )
 
-            # Prepare body for signature — match Fence behavior!
+        # Read incoming request headers
+        headers = dict(request.headers)
+
+        # Get request method and path
+        method_s = request.method
+        path = request.url.path
+
+        # Read request body only for POST/PUT/PATCH — otherwise leave as None
+        body = None
+        if method_s in ["POST", "PUT", "PATCH"]:
+            body = await request.json()
+        else:
             body = None
-            if request.method in ["POST", "PUT", "PATCH"]:
-                try:
-                    body_json = await request.json()
-                    body = json.dumps(body_json, separators=(",", ":"))
-                except Exception as e:
-                    logger.warning(f"Could not read JSON body for signing: {e}")
-                    body = None
 
-            # Build signature payload
+        # Initialize Gen3RequestManager — will help us check for signature
+        g3rm = Gen3RequestManager(headers=headers)
+
+        # Check if request has Gen3 signature
+        if g3rm.is_gen3_signed():
+
+            # PUBLIC_KEY is required to validate signature — check if present
+            public_key = config.get("GEARBOX_MIDDLEWARE_PUBLIC_KEY")
+            if not public_key:
+                logger.error("No PUBLIC_KEY configured — cannot validate signature")
+                raise HTTPException(
+                    status_code=403,
+                    detail="Missing PUBLIC_KEY — cannot validate signature",
+                )
+
+            # Prepare SignaturePayload for validation — this must match exactly what was signed
+            logger.info(
+                f"Signature validation starting — method: {method_s}, path: {path}"
+            )
+            logger.info(f"Headers: {headers}")
+            logger.info(f"Body: {body}")
+
             payload = SignaturePayload(
-                method=request.method,
-                path=request.url.path,
-                headers={"Gen3-Service": request.headers.get("Gen3-Service")},
-                body=body,
+                method=method_s,
+                path=path,
+                headers={"Gen3-Service": headers.get("Gen3-Service")},
+                body=json.dumps(body, separators=(",", ":")),
             )
 
-            # Validate signature
-            if not g3rm.valid_gen3_signature(
-                payload,
-                config=config.GEARBOX_KEY_CONFIG,
-            ):
+            # Validate the signature
+            if not g3rm.valid_gen3_signature(payload, config):
                 raise HTTPException(
-                    HTTP_401_UNAUTHORIZED, "Gen3 signed request is invalid"
+                    status_code=403, detail="Gen3 signed request is invalid"
                 )
-            else:
-                logger.info("Validated Gen3 signature — skipping token validation.")
-                return  # IMPORTANT: do not fall through to token check!
 
-        # Fallback: token check
-        if token and getattr(token, "credentials", None):
-            logger.info("Validating token via get_token_claims()")
-            token_claims = await get_token_claims(token)
+        # If no signature is present — reject with HTTP 403
         else:
-            logger.info("No valid token provided, skipping token validation")
+            raise HTTPException(
+                status_code=403,
+                detail="user does not have privileges to access this endpoint and the signature is not present.",
+            )
 
 
 async def authenticate_user(token: HTTPAuthorizationCredentials = Security(bearer)):
