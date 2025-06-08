@@ -10,7 +10,6 @@ from fastapi.security import (
 )
 from pcdcutils.gen3 import Gen3RequestManager, SignaturePayload
 from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_500_INTERNAL_SERVER_ERROR
-from gearbox.errors import Forbidden, Unauthorized, NotFound
 from cdislogging import get_logger
 
 logger = get_logger("gb-auth", log_level="info")
