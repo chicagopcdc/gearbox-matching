@@ -32,8 +32,7 @@ async def authenticate(
     if not config.BYPASS_FENCE:
 
         # Read incoming request headers
-        # headers = dict(request.headers) - TODO: Need to update PCDCUTILS __init__py to receive case-insensitive
-        headers = request.headers
+        headers = dict(request.headers)
 
         # Get request method and path
         method_s = request.method
@@ -50,9 +49,9 @@ async def authenticate(
         g3rm = Gen3RequestManager(headers=headers)
         is_signed = g3rm.is_gen3_signed()
 
-        logger.info(f"Signature headers: {headers}")
-        logger.info(f"Signature is_gen3_signed: {is_signed}")
-        logger.info(f"Signature header value: {headers.get('Signature')}")
+        # logger.debug(f"Signature headers: {headers}")
+        # logger.debug(f"Signature is_gen3_signed: {is_signed}")
+        # logger.debug(f"Signature header value: {headers.get('Signature')}")
 
         # Check if request has Gen3 signature
         if is_signed:
@@ -65,11 +64,7 @@ async def authenticate(
                 )
 
             # Prepare SignaturePayload for validation — this must match exactly what was signed
-            logger.info(
-                f"Signature validation starting — method: {method_s}, path: {path}"
-            )
-            logger.info(f"Headers: {headers}")
-            logger.info(f"Body: {body}")
+            # logger.debug(f"Signature validation starting — method: {method_s}, path: {path}")
 
             payload = SignaturePayload(
                 method=method_s,
@@ -85,9 +80,7 @@ async def authenticate(
                 )
 
             # Signature validated!
-            logger.info(
-                f"Signature validated successfully — method: {method_s}, path: {path}"
-            )
+            logger.info(f"Signature validated successfully")
 
         else:
             token_claims = await get_token_claims(token)
