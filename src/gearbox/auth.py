@@ -32,7 +32,8 @@ async def authenticate(
     if not config.BYPASS_FENCE:
 
         # Read incoming request headers
-        headers = dict(request.headers)
+        # headers = dict(request.headers) - TODO: Need to update PCDCUTILS __init__py to receive case-insensitive
+        headers = request.headers
 
         # Get request method and path
         method_s = request.method
@@ -47,13 +48,16 @@ async def authenticate(
 
         # Initialize Gen3RequestManager — will help us check for signature
         g3rm = Gen3RequestManager(headers=headers)
+        is_signed = g3rm.is_gen3_signed()
+
+        logger.info(f"Signature headers: {headers}")
+        logger.info(f"Signature is_gen3_signed: {is_signed}")
+        logger.info(f"Signature header value: {headers.get('Signature')}")
 
         # Check if request has Gen3 signature
-        if g3rm.is_gen3_signed():
-
-            # PUBLIC_KEY is required to validate signature — check if present
-            public_key = config.get("GEARBOX_MIDDLEWARE_PUBLIC_KEY")
-            if not public_key:
+        if is_signed:
+            # Check for public key
+            if "GEARBOX_MIDDLEWARE_PUBLIC_KEY" not in config.GEARBOX_KEY_CONFIG:
                 logger.error("No PUBLIC_KEY configured — cannot validate signature")
                 raise HTTPException(
                     status_code=403,
@@ -75,17 +79,18 @@ async def authenticate(
             )
 
             # Validate the signature
-            if not g3rm.valid_gen3_signature(payload, config):
+            if not g3rm.valid_gen3_signature(payload, config.GEARBOX_KEY_CONFIG):
                 raise HTTPException(
                     status_code=403, detail="Gen3 signed request is invalid"
                 )
 
-        # If no signature is present — reject with HTTP 403
-        else:
-            raise HTTPException(
-                status_code=403,
-                detail="user does not have privileges to access this endpoint and the signature is not present.",
+            # Signature validated!
+            logger.info(
+                f"Signature validated successfully — method: {method_s}, path: {path}"
             )
+
+        else:
+            token_claims = await get_token_claims(token)
 
 
 async def authenticate_user(token: HTTPAuthorizationCredentials = Security(bearer)):
