@@ -32,7 +32,8 @@ async def authenticate(
     if not config.BYPASS_FENCE:
 
         # Read incoming request headers
-        headers = dict(request.headers)
+        # headers = dict(request.headers) - TODO: PEDS-1441
+        headers = request.headers
 
         # Get request method and path
         method_s = request.method
