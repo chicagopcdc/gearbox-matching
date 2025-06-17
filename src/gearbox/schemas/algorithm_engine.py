@@ -11,7 +11,7 @@ class AlgorithmResponse(BaseModel):
     criteria: int
     algorithm: List[AlgorithmResponse]
 
-class AlgorithmEngine(BaseModel):
-    pass
+#class AlgorithmEngine(BaseModel):
+#    pass
 
-AlgorithmResponse.update_forward_refs()
+#AlgorithmResponse.update_forward_refs()

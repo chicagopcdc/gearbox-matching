@@ -63,7 +63,7 @@ async def get_study_algorithm_engines(session: Session) -> StudyAlgorithmEngineS
 async def save_study_algorithm_engine(session: Session, study_algorithm_engine: StudyAlgorithmEngineSave) -> StudyAlgorithmEngineSchema:
 
     sae_input_conv = jsonable_encoder(study_algorithm_engine)
-    sae_create = {key:value for key,value in sae_input_conv.items() if key in StudyAlgorithmEngineSave.__fields__.keys() }
+    sae_create = {key:value for key,value in sae_input_conv.items() if key in StudyAlgorithmEngineSave.model_fields.keys() }
 
     new_ae = await study_algorithm_engine_crud.create(db=session, obj_in=sae_create)
     await session.commit()    
@@ -93,7 +93,7 @@ async def validate_eligibility_criteria_ids(session: Session, algorithm_logic: s
             .where(ElCriteriaHasCriterion.active == True)
         )
         db_el_criteria_has_criterion_ids = result.unique().scalars().all()
-        input_el_criteria_has_criterion_ids = json_utils.json_extract_ints(algorithm_logic, 'criteria')
+        input_el_criteria_has_criterion_ids = json_utils.json_extract_ints(algorithm_logic.get_dict(), 'criteria')
 
         # items that exist in input_el_criteria_has_criterion_ids but not in db_el_criteria_has_criterion_ids
         invalid_ids = list(set(input_el_criteria_has_criterion_ids).difference(db_el_criteria_has_criterion_ids))
@@ -126,14 +126,13 @@ async def get_existing_algorithm_logic_duplicate(session: Session, algorithm_log
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
     except Exception as e:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: {type(e)}: {e}")        
-    
     if existing_algorithms:
         for ex in existing_algorithms:
             a, b = json.dumps(ex.algorithm_logic), json.dumps(algorithm_logic)
             if a == b:
                 return ex
 
-async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineCreate) -> StudyAlgorithmEngine:
+async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineCreate) -> StudyAlgorithmEngineSchema:
 
     # Get the study_version
     study_version = await study_version_crud.get(session, study_algorithm_engine.study_version_id)
@@ -144,7 +143,7 @@ async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineC
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study algorithm logic contains the following invalid ids: {invalid_ids}.")
 
     # Search for any existing exact duplicate algorithm logic for the study 
-    dup_study_algorithm_engine = await get_existing_algorithm_logic_duplicate(session, study_algorithm_engine.algorithm_logic, study_version.study_id)
+    dup_study_algorithm_engine = await get_existing_algorithm_logic_duplicate(session, study_algorithm_engine.algorithm_logic.model_dump_json(), study_version.study_id)
 
     # if no duplicate is found, determine version and insert new study algorithm engine
     if not dup_study_algorithm_engine:

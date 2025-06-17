@@ -35,11 +35,11 @@ class StudyVersionCreate(BaseModel):
 
 class StudyVersionUpdate(BaseModel):
     id: int
-    create_date: Optional[datetime]
-    study_version_num: Optional[int]
-    status: Optional[StudyVersionStatus]
-    eligibility_criteria_id: Optional[int]
-    study_algorithm_engine_id: Optional[int]
+    create_date: datetime | None = None
+    study_version_num: int | None = None
+    status: StudyVersionStatus | None = None
+    eligibility_criteria_id: int | None = None
+    study_algorithm_engine_id: int | None = None
 
 class StudyVersionInfo(StudyVersion):
     study: StudyBaseInfo

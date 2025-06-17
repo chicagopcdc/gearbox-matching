@@ -20,12 +20,11 @@ async def reset_user_validation_data():
         await cache.delete('update_user_validation_data')
         
     except Exception as e:
-        logger.error(e)
+        logger.error(f"Error in resetting user validation data: {e}")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "something went wrong when clearing validation data check logs")
 
 @cached(key='update_user_validation_data')
 async def update_user_validation_data(session: Session) -> dict:
-    logger.info("User input validation data update STARTING")
     valid_criterion_format = {}
     try:
         #valid_criterion_format = {} #{id: {"display_name": "input_type": "values": "constraints":}}
@@ -39,10 +38,8 @@ async def update_user_validation_data(session: Session) -> dict:
                 "constraints": None 
             }
     except Exception as e:
-        logger.error(f"User input validation ran into an ERROR: {e}")
-        logger.error(f"Maintaining previous validation Data")
+        logger.error(f"User input validation ran into an ERROR: {e} - maintaining previous validation data.")
 
-    logger.info("User input validation update COMPLETED")
     return valid_criterion_format
 
 
@@ -140,6 +137,7 @@ async def get_all_user_input(session: Session, user_id: int) -> List[SavedInputS
 async def create_saved_input(session: Session, user_input: SavedInputCreate, user_id: int) -> SavedInputSearchResults:
     uid = dict(user_input)
     uid['user_id'] = user_id
+    user_input_post = SavedInputPost(**uid)
     user_input_post = SavedInputPost(**uid)
     if not user_input_post.id:
         si = await saved_input_crud.create(db=session,  obj_in=user_input_post)

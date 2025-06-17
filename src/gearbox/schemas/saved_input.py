@@ -1,16 +1,16 @@
 from pydantic import BaseModel
-from datetime import date, datetime, time, timedelta
-from typing import Sequence, List, Optional
+from datetime import datetime
+from typing import List, Optional
 
 
 
 class SavedInputBase(BaseModel):
     user_id: int
-    name: Optional[str]
-    patient_id: Optional[int]
+    name: str | None = ''
+    patient_id: int | None = None
     data: List[dict]
-    create_date: Optional[datetime]
-    update_date: Optional[datetime]
+    create_date: datetime | None = None
+    update_date: datetime | None = None
 
 
 # properties in DB
@@ -34,9 +34,9 @@ class SavedInputSearchResults(BaseModel):
 
 class SavedInputCreate(BaseModel):
     data: List[dict]
-    id: Optional[int]
-    name: Optional[str]
+    id: int | None = None
+    name: str | None = ''
 
 class SavedInputPost(SavedInputBase):
-    id: Optional[int]
+    id: int | None = None
     pass
