@@ -16,7 +16,8 @@ TEST_CREATE_LIST = [
             "test": "create_new_study_algorithm_engine",
             "logic_file": "./tests/data/new_algorithm_logic.json",
             "study_version_id": 7
-        },
+        }
+        ,
         {
                 "study_algorithm_engine": {
             "algorithm_logic": None,
@@ -34,7 +35,8 @@ TEST_CREATE_LIST = [
             "study_version_id": 1,
             "logic_file": "./tests/data/new_algorithm_logic.json",
             "test": "invalid_study_version"
-        },
+        }
+        ,
         {
                 "study_algorithm_engine": {
             "algorithm_logic": None

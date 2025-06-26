@@ -7,7 +7,7 @@ license = "Apache-2.0"
 
 [tool.poetry.dependencies]
 python = ">=3.9.2,<4.0.0"
-fastapi = "^0.65.2"
+fastapi = "^0.115.12"
 uvicorn = {extras = ["standard"], version="^0.34.2"}
 gunicorn = "^20.0.4"
 gino = {version = "^1.0.0", extras = ["starlette"]}
@@ -27,7 +27,7 @@ jsonpath-ng = "^1.5.3"
 elasticsearch = "<7.0"
 bleach = ">=3.3.1"
 tenacity = ">=8.0.0"
-pydantic = {extras = ["email"], version = "~1.8.1"}
+pydantic = {version = "^2.11"}
 SQLAlchemy = "^1.4.22"
 pytest-postgresql = "^4.1.1"
 psycopg = "^3.0.11"
@@ -44,7 +44,7 @@ werkzeug = "2.2.2"
 pcdcutils = {git = "https://github.com/chicagopcdc/pcdcutils.git", rev = "0.1.2"}
 aiocache = "0.11.1"
 python-multipart = "^0.0.12"
-authutils = {version = "^6.2.7", extras = ["fastapi"]}
+authutils = { git = "https://github.com/chicagopcdc/authutils", branch="fastapi-upgrade", extras = ["fastapi"]}
 
 
 [tool.poetry.group.dev.dependencies]

@@ -43,6 +43,11 @@ def update_dict(d, critlookup):
 
 async def get_match_form(session:Session)-> MatchForm:
 
+    """
+    This function fetches the match form information from the database and then
+    builds and returns the match form json. 
+    """
+
     form_info = await get_form_info(session)
 
     G = []
@@ -77,12 +82,12 @@ async def get_match_form(session:Session)-> MatchForm:
                 if display_rules.criterion.input_type.data_type.upper() == 'INTEGER':
                     criterion_dict.update({'min' : 0})
                 if display_rules.criterion.input_type.data_type.upper() == 'FLOAT':
-                    criterion_dict.update({'min' : 0})
-                    criterion_dict.update({'step' : 0.1})
+                    criterion_dict.update({'min' : float(0.0)})
+                    criterion_dict.update({'step' : float(0.1)})
                 if display_rules.criterion.input_type.data_type.upper() == 'PERCENTAGE':
-                    criterion_dict.update({'min' : 0})
-                    criterion_dict.update({'max' : 100})
-                    criterion_dict.update({'step' : 0.1})
+                    criterion_dict.update({'min' : float(0.0)})
+                    criterion_dict.update({'max' : float(100.0)})
+                    criterion_dict.update({'step' : float(0.1)})
 
                 options = []
                 if len(display_rules.criterion.values) > 1:

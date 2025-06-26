@@ -25,7 +25,7 @@ async def create_staging_criterion(session: Session, eligibility_criteria_id: in
         code: str, start_span: int, end_span:int, text: str):
 
         criterion_id = await criterion_crud.get_criterion_id_by_code(db=session, code=code)
-
+        
         csc = CriterionStagingCreate(
             eligibility_criteria_id = eligibility_criteria_id,
             code = code,

@@ -9,7 +9,6 @@ from . import logger
 from starlette.responses import JSONResponse
 from gearbox import auth
 from gearbox.schemas import MatchForm
-from gearbox.schemas.match_form import showif_logic_schema
 from gearbox import deps
 from gearbox.util import status, bucket_utils
 from gearbox.admin_login import admin_required
