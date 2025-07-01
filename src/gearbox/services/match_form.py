@@ -1,15 +1,14 @@
 from gearbox import config
-import json
 from ..util.bounds import bounds
 from . import logger
 from gearbox.crud.match_form import get_form_info, clear_dr_tb_tags, insert_display_rules, insert_triggered_by, insert_tags
+from gearbox.crud import value_crud
 from .match_conditions import get_tree
-from gearbox.schemas import MatchForm 
+from gearbox.schemas import MatchForm, MatchFormUpdate
 from gearbox.services import value as value_service
 from fastapi import HTTPException, Request
 from gearbox.util import status, bucket_utils
 from sqlalchemy.ext.asyncio import AsyncSession as Session
-from gearbox.services import unit as unit_service
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from gearbox.util import status
@@ -176,13 +175,14 @@ async def get_match_form(session:Session)-> MatchForm:
 
     return match_form
 
-async def update(match_form:MatchForm, session:Session):
+async def update(match_form:MatchFormUpdate, session:Session):
     priority = 0
     display_rules_id = 0
     triggered_by_id = 0
     dr_rows = []
     tb_rows = []
     tag_rows = []
+    valid_value_ids = await value_crud.get_value_ids(db=session)
     for field in match_form.fields:
         dr_row = {}
         tb_row = {}
@@ -202,7 +202,7 @@ async def update(match_form:MatchForm, session:Session):
         dr_row['version'] = 1
         dr_rows.append(dr_row)
         if field.showIf:
-            show_if_criteria = field.showIf.get('criteria')
+            show_if_criteria = field.showIf.criteria
             path_ids = []
             show_if_path_count = 0
             for show_if_criterion in show_if_criteria:
@@ -211,18 +211,26 @@ async def update(match_form:MatchForm, session:Session):
                 path_ids.append(triggered_by_id)
                 tb_row['id'] = triggered_by_id
                 tb_row['display_rules_id'] = display_rules_id   
-                tb_row['criterion_id'] = show_if_criterion.get('id')
-                value_id = show_if_criterion.get('valueId')
+                tb_row['criterion_id'] = show_if_criterion.id
+                value_id = show_if_criterion.valueId
 
                 if value_id:
+                    if value_id not in valid_value_ids:
+                        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, 
+                            f"Error: match form value id {value_id} does not exist in the database.")
+
                     tb_row['value_id'] = value_id
                 else:
-                    operator = show_if_criterion.get('operator')
-                    value = show_if_criterion.get('value')
-                    unit_name = show_if_criterion.get('unit')
+                    operator = show_if_criterion.operator
+                    value = show_if_criterion.value
+                    unit_name = show_if_criterion.unit
                     if not unit_name:
                         unit_name = 'none'
-                    is_numeric = show_if_criterion.get('is_numeric')
+                    is_numeric = show_if_criterion.is_numeric
+
+                    if is_numeric is None:
+                        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, 
+                            f"ERROR: is_numeric must be set for new value {value}. ")
 
                     if is_numeric:
                         try:
@@ -234,7 +242,7 @@ async def update(match_form:MatchForm, session:Session):
                     # get value_id from existing or new value
                     value_id = await value_service.get_value_id(
                         session=session,
-                        value_str=value, 
+                        value_str=str(value), 
                         operator=operator,
                         unit=unit_name,
                         is_numeric=is_numeric
@@ -246,6 +254,7 @@ async def update(match_form:MatchForm, session:Session):
                     tb_row['path'] ='.'.join(map(str,path_ids))
                 tb_rows.append(tb_row)
                 tb_row = {}
+
     await clear_dr_tb_tags(current_session=session) 
     await insert_tags(current_session=session, tag_rows=tag_rows)
     await insert_display_rules(current_session=session, display_rules_rows=dr_rows)

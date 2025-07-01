@@ -101,9 +101,7 @@ def test_update_match_form(setup_database, client):
     resp = client.post("/update-match-form", json=match_form_for_update, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
     assert str(resp.status_code).startswith("20")
-    # -- NEED TO SEND A MATCH-FORM WITH THE TEST! --
-    # -- USE THE ONE IN THE DATA DIR --
-    # url_str =  url.content.decode('ascii').strip('\"')
+
     resp = client.post("/build-match-form/", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
 
@@ -148,7 +146,6 @@ def test_update_match_form_new_value(setup_database, client, connection):
     matchformdata_file = './tests/data/match_form_update_compare_dat_new_value_input.json'
     with open(matchformdata_file, 'r') as comp_file:
         match_form_for_update = json.load(comp_file)
-
     resp = client.post("/update-match-form", json=match_form_for_update, headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
     assert str(resp.status_code).startswith("20")
@@ -252,7 +249,7 @@ def test_update_match_form_new_value_existing_unit(setup_database, client, conne
         # Validate new db rows for value and unit
         Session = sessionmaker(bind=connection)
         db_session = Session()
-        newval = db_session.query(Value).filter(Value.value_string=='89999999').first()
+        newval = db_session.query(Value).filter(Value.value_string=='89999999.0').first()
         if not newval: errors.append("Value: '89999999' not created")
         newunit = db_session.query(Unit).filter(Unit.name=='years').first()
         if not newunit: errors.append("Unit: 'some_new_unit' not created")
@@ -287,11 +284,11 @@ def test_update_match_form_new_field(setup_database, client):
     resp.raise_for_status()
     full_res = resp.json()
 
-    """ SERIALIZE STUDIES TO COMPARE AGAINST - UNCOMMENT TO WRITE NEW COMPARE DATA
-        MANUALLY VALIDATE MATCH FORM BEFORE UNCOMMENTING 
-    with open(matchformdata_file,'w') as comp_file:
-        json.dump(full_res, comp_file)
-    """
+    #""" SERIALIZE STUDIES TO COMPARE AGAINST - UNCOMMENT TO WRITE NEW COMPARE DATA
+    #    MANUALLY VALIDATE MATCH FORM BEFORE UNCOMMENTING 
+    #with open(matchformdata_file,'w') as comp_file:
+    #    json.dump(full_res, comp_file)
+    #"""
 
     with open(matchformdata_file, 'r') as comp_file:
         match_form_compare = json.load(comp_file)

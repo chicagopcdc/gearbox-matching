@@ -6,11 +6,11 @@ from typing import List, Optional
 
 class SavedInputBase(BaseModel):
     user_id: int
-    name: str | None = ''
-    patient_id: int | None = None
+    name: Optional[str] = None
+    patient_id: Optional[int] = None
     data: List[dict]
-    create_date: datetime | None = None
-    update_date: datetime | None = None
+    create_date: Optional[datetime] = None
+    update_date: Optional[datetime] = None
 
 
 # properties in DB
@@ -30,13 +30,13 @@ class SavedInput(SavedInputDB):
 class SavedInputSearchResults(BaseModel):
     results: List[dict]
     id: int
-    name: Optional[str]
+    name: Optional[str] = None
 
 class SavedInputCreate(BaseModel):
     data: List[dict]
-    id: int | None = None
-    name: str | None = ''
+    id: Optional[int] = None
+    name: Optional[str] = None
 
 class SavedInputPost(SavedInputBase):
-    id: int | None = None
+    id: Optional[int] = None
     pass

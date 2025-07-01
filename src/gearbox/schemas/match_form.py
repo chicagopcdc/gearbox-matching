@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Json
-from typing import List, Union
+from pydantic import BaseModel
+from typing import List, Union, Optional
 
 from enum import Enum
 
@@ -22,6 +22,18 @@ class ShowIfLogic(BaseModel):
     operator: OperatorEnum
     criteria: Union[List[ShowIfCriterion], 'ShowIfLogic']
 
+class ShowIfCriterionUpdate(BaseModel):
+    id: int
+    value: Union[int, float, str]
+    valueId: Optional[int] = None
+    operator: OperatorEnum
+    unit: Optional[str] = None
+    is_numeric: Optional[bool] = None
+
+class ShowIfLogicUpdate(BaseModel):
+    operator: OperatorEnum
+    criteria: Union[List[ShowIfCriterionUpdate], 'ShowIfLogicUpdate']
+
 class MatchFormGroup(BaseModel):
     id: int
     name: str
@@ -29,24 +41,32 @@ class MatchFormGroup(BaseModel):
 class MatchFormOption(BaseModel):
     value: Union[float, int]
     label: str
-    description: str | None = None
+    description: Optional[str] = None
 
-class MatchFormField(BaseModel):
+class MatchFormFieldBase(BaseModel):
     id: int
     groupId: int
     name: str
-    min: Union[float,int] | None = None
-    max: Union[float,int] | None = None
-    step: Union[float,int] | None = None
-    placeholder: str | None = None
+    min: Optional[Union[float,int]] = None
+    max: Optional[Union[float,int]] = None
+    step: Optional[Union[float,int]]  = None
+    placeholder: Optional[str] = None
     label: str
     type: str
-    options: List[MatchFormOption] | None = None
-    showIf: ShowIfLogic | None = None
+    options: Optional[List[MatchFormOption]] = None
+
+class MatchFormField(MatchFormFieldBase):
+    showIf: Optional[ShowIfLogic] = None
+
+class MatchFormFieldUpdate(MatchFormFieldBase):
+    showIf: Optional[ShowIfLogicUpdate] = None
 
 class MatchFormBase(BaseModel):
     groups: List[MatchFormGroup]
     fields: List[MatchFormField]
 
 class MatchForm(MatchFormBase):
-    pass
+    fields: List[MatchFormField]
+
+class MatchFormUpdate(MatchFormBase):
+    fields: List[MatchFormFieldUpdate]

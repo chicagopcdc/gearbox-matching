@@ -25,7 +25,7 @@ from .study import StudySearchResults, StudyCreate, Study, StudyUpdates, StudyRe
 from .study_link import StudyLinkSearchResults, StudyLinkCreate, StudyLink
 from .study_version import StudyVersionSearchResults, StudyVersionCreate, StudyVersion, StudyVersionInfo , StudyVersionUpdate
 from .eligibility_criteria_response import EligibilityCriteriaResponseResults
-from .match_form import MatchForm
+from .match_form import MatchForm, MatchFormUpdate
 from .study_has_patient import StudyHasPatient, StudyHasPatientCreate, StudyHasPatientSearchResults
 from .study_external_id import StudyExternalIdCreate, StudyExternalIdSearchResults
 from .unit import Unit, UnitCreate, UnitSearchResults

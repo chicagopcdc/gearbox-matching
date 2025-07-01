@@ -1,6 +1,5 @@
 from pydantic import BaseModel
-from datetime import datetime
-from typing import Sequence, List, Any, Optional
+from typing import Sequence, Any, Optional
 from pydantic.utils import GetterDict
 
 class CriterionTagGetter(GetterDict):
@@ -11,9 +10,9 @@ class CriterionTagGetter(GetterDict):
             return super(CriterionTagGetter, self).get(key, default)
 
 class CriterionTag(BaseModel):
-    id: Optional[int]
-    code: Optional[str]
-    type: Optional[str]
+    id: Optional[int] = None
+    code: Optional[str] = None
+    type: Optional[str] = None
 
     class Config:
         orm_mode = True
