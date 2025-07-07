@@ -25,6 +25,7 @@ async def create_staging_criterion(session: Session, eligibility_criteria_id: in
         code: str, start_span: int, end_span:int, text: str):
 
         criterion = await criterion_crud.get_criterion_by_code(db=session, code=code)
+        criterion_values = [v.value_id for v in criterion.values] if criterion is not None  else None
 
         csc = CriterionStagingCreate(
             eligibility_criteria_id = eligibility_criteria_id,
@@ -37,7 +38,8 @@ async def create_staging_criterion(session: Session, eligibility_criteria_id: in
             criterion_id = criterion.id if criterion is not None else None,
             display_name = criterion.display_name if criterion is not None else None,
             description = criterion.description if criterion is not None else None,
-            input_type_id = criterion.input_type_id if criterion is not None else None
+            input_type_id = criterion.input_type_id if criterion is not None else None,
+            criterion_value_ids = criterion_values
         )
 
         res = await criterion_staging_service.create(session=session, staging_criterion=csc)
@@ -48,7 +50,6 @@ async def stage_criteria(session: Session, raw_criteria: RawCriteria):
     raw_text = raw_criteria.data.get('text')
     for entity in raw_criteria.data.get('entities'):
 
-        ## get criterion_id from code
         code = entity.get("label")
         start_span = entity.get("start_offset")
         end_span = entity.get("end_offset")

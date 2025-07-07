@@ -10,8 +10,8 @@ class CRUDCriterion(CRUDBase [Criterion, CriterionCreate, CriterionSchema]):
     async def get_criterion_by_code(self, db: Session, code: str) -> CriterionSchema:
         stmt = select(Criterion).where(Criterion.code == code)
         result = await db.execute(stmt)
-        criterion_id = result.unique().scalars().first()
-        return criterion_id
+        criterion = result.unique().scalars().first()
+        return criterion
     
     async def get_criteria_not_exist_in_match_form(self, db: Session) -> List[CriterionSchema]:
         subq = (select(DisplayRules.criterion_id).where(Criterion.id == DisplayRules.criterion_id)).exists()
