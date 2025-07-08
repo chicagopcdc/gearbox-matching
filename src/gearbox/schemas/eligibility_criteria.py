@@ -1,12 +1,12 @@
 from re import I
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional, Sequence
 from gearbox.util.types import EligibilityCriteriaStatus
 
 class EligibilityCriteriaBase(BaseModel):
-    create_date: Optional[datetime]
-    status: Optional[EligibilityCriteriaStatus]
+    create_date: Optional[datetime] = None
+    status: Optional[EligibilityCriteriaStatus] = None
 
     class Config:
         orm_mode = True   

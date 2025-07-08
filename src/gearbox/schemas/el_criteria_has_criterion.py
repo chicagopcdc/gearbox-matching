@@ -6,9 +6,9 @@ from .input_type import InputType
 
 class ElCriteriaHasCriterionBase(BaseModel):
     criterion_id: int
-    eligibility_criteria_id: Optional[int]
-    create_date: Optional[datetime]
-    active: Optional[bool]
+    eligibility_criteria_id: Optional[int] = None
+    create_date: Optional[datetime] = None
+    active: Optional[bool] = None
     class Config:
         orm_mode = True
 
