@@ -63,11 +63,11 @@ async def stage_criteria(session: Session, raw_criteria: RawCriteria):
 
 def get_incoming_raw_criteria(raw_criteria: RawCriteriaIn)-> dict:
     extracted_crit = {}
-    raw_text = raw_criteria.data.get('text')
-    for labelinfo in raw_criteria.data.get('entities'):
-        code=labelinfo.get("label")
-        start_span=labelinfo.get("start_offset")
-        end_span=labelinfo.get("end_offset")
+    raw_text = raw_criteria.text
+    for labelinfo in raw_criteria.entities:
+        code=labelinfo.label
+        start_span=labelinfo.start_offset
+        end_span=labelinfo.end_offset
         text = raw_text[start_span:end_span]
         extracted_crit.update({(code,text):(start_span,end_span)})
     return extracted_crit
@@ -76,15 +76,15 @@ async def create_pre_annotated(session: Session, raw_criteria: RawCriteria):
 
     # clear pre_annotated in case this is a re-submit from doccano
     raw_criteria_id = raw_criteria.id
-    pre_annotated_criterion_crud.clear_pre_annotated_by_id(current_session=session, raw_criteria_id=raw_criteria.id)
+    await pre_annotated_criterion_crud.clear_pre_annotated_by_id(current_session=session, raw_criteria_id=raw_criteria.id)
     text = raw_criteria.data.get('text')
 
     for pa in raw_criteria.data.get('pre_annotated'):
-        start_offset = pa.get("span")[0]
-        end_offset = pa.get("span")[1]
-        label = pa.get("span")[2]
-        matched_models = pa.get("matched_models")
-        is_standard_gb_var = pa.get("is_standard_gb_var")
+        start_offset = pa.get('span')[0]
+        end_offset = pa.get('span')[1]
+        label = pa.get('span')[2]
+        matched_models = pa.get('matched_models')
+        is_standard_gb_var = pa.get('is_standard_gb_var')
         pa_text = text[start_offset:end_offset]    
 
         pa_create = PreAnnotatedCriterionCreate(
@@ -169,16 +169,16 @@ async def create_raw_criteria(session: Session, raw_criteria_str: str, user_id: 
         new_to_add_dict = {k:v for k,v in incoming_raw_criteria.items() if k in new_to_add}
 
         # get list of new_to_add raw_criteria objs and pass to stage func
-        incoming_text = raw_criteria_mod.data
+        incoming_text = raw_criteria_mod.text
         for incoming in raw_criteria_mod.entities:
 
-            if new_to_add_dict.get((incoming.get('label'),incoming_text[incoming.get('start_offset'):incoming.get('end_offset')])):
+            if new_to_add_dict.get((incoming.label,incoming_text[incoming.start_offset:incoming.end_offset])):
                 await create_staging_criterion(session=session,
                     eligibility_criteria_id=latest_study_version.eligibility_criteria_id,
-                    code=incoming.get("label"),
-                    start_span=incoming.get("start_offset"),
-                    end_span=incoming.get("end_offset"),
-                    text = incoming_text[incoming.get("start_offset"):incoming.get("end_offset")]
+                    code=incoming.label,
+                    start_span=incoming.start_offset,
+                    end_span=incoming.end_offset,
+                    text = incoming_text[incoming.start_offset:incoming.end_offset]
                 )
                     
         # set of criteria that do not exist in incoming - set to INACTIVE
@@ -202,7 +202,7 @@ async def create_raw_criteria(session: Session, raw_criteria_str: str, user_id: 
 
         row = {
             'eligibility_criteria_id':latest_study_version.eligibility_criteria_id,
-            'data':raw_criteria_mod
+            'data':json.loads(raw_criteria_str)
         }
 
         raw_criteria_res = await raw_criteria_crud.upsert(
@@ -210,7 +210,7 @@ async def create_raw_criteria(session: Session, raw_criteria_str: str, user_id: 
             model=RawCriteria,
             row=row,
             constraint_cols=[RawCriteria.eligibility_criteria_id]
-        )
+        )                        
         raw_criteria=RawCriteria(**raw_criteria_res)
     # persist pre_annotated info
     await create_pre_annotated(session=session, raw_criteria=raw_criteria)

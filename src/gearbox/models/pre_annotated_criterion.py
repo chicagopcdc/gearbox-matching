@@ -1,5 +1,5 @@
 from sqlalchemy import ForeignKey, Column, Integer, Boolean, String
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship 
 
 from .base_class import Base
 
@@ -14,4 +14,6 @@ class PreAnnotatedCriterion(Base):
     is_standard_gb_var = Column(Boolean, nullable=True)
 
     raw_criteria = relationship("RawCriteria", back_populates="pre_annotated_criteria")
-    pre_annotated_criterion_models = relationship("PreAnnotatedCriterionModel", back_populates="pre_annotated_criterion", cascade="all,delete")
+    pre_annotated_criterion_models = relationship("PreAnnotatedCriterionModel", 
+        back_populates="pre_annotated_criterion", 
+        cascade="all, delete-orphan, delete")

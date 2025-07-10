@@ -11,4 +11,5 @@ class PreAnnotatedCriterionModel(Base):
     pre_annotated_criterion_id = Column(Integer, ForeignKey('pre_annotated_criterion.id'))
     model = Column(String)
     
-    pre_annotated_criterion = relationship("PreAnnotatedCriterion", back_populates="pre_annotated_criterion_models")
+    pre_annotated_criterion = relationship("PreAnnotatedCriterion", 
+        back_populates="pre_annotated_criterion_models")

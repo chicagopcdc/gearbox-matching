@@ -1,6 +1,7 @@
 from __future__ import annotations
 from pydantic import BaseModel, Json
 from typing import Optional, List, Union, Dict, Any
+from datetime import datetime
 
 class PreAnnotated(BaseModel):
     span: Optional[List[Union[str, int]]] = None
@@ -15,23 +16,18 @@ class Entity(BaseModel):
     meta: Optional[Union[Json[Any],Dict]] 
 
 class RawCriteriaBase(BaseModel):
+    #text: Optional[str] = None
     text: str
     id: Optional[int] = None
     uuid: Optional[str] = None
     nct: Optional[str] = None
     pre_annotated: Optional[List[PreAnnotated]] = None
-    entities: Optional[List[Entity]] = None
+    entities: List[Entity]
     Comments: Optional[Union[List[str],List[Dict]]] = None
     relations: Optional[Union[List[str],List[Dict]]] = None
 
     class Config:
         orm_mode = True    
-
-
-class RawCriteria(RawCriteriaBase):
-    id: int
-    eligibility_criteria_id: int
-    input_id: Optional[str] = None
 
 class RawCriteriaIn(RawCriteriaBase):
     pass 
@@ -39,7 +35,11 @@ class RawCriteriaIn(RawCriteriaBase):
 class RawCriteriaCreate(BaseModel):
     eligibility_criteria_id: int
     input_id: Optional[Union[str,int]] = None
-    data:  Union[Json[Any],Dict]
+    data:  RawCriteriaBase
+
+class RawCriteria(RawCriteriaCreate):
+    id: int
+    create_date: Optional[datetime] = None
 
 class RawCriteriaUpdate(RawCriteriaBase):
     pass 
