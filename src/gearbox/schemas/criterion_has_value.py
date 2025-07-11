@@ -6,7 +6,7 @@ from pydantic.utils import GetterDict
 class CriterionHasValueBase(BaseModel):
     criterion_id: int
     value_id: int
-    assoc_create_date: Optional[datetime]
+    create_date: Optional[datetime] = None
 
     class Config:
         orm_mode = True

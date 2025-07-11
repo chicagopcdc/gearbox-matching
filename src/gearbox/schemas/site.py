@@ -13,13 +13,13 @@ class SiteStudyGetter(GetterDict):
 
 class SiteStudy(BaseModel):
     id: int
-    name: Optional[str]
-    code: Optional[str]
-    description: Optional[str]
-    create_date: Optional[datetime]
-    active: Optional[bool]
-    create_date: Optional[datetime]
-    active: Optional[bool]
+    name: Optional[str] = None
+    code: Optional[str] = None
+    description: Optional[str] = None
+    create_date: Optional[datetime] = None
+    active: Optional[bool] = None
+    create_date: Optional[datetime] = None
+    active: Optional[bool] = None
 
     class Config:
         orm_mode = True
@@ -27,11 +27,11 @@ class SiteStudy(BaseModel):
 
 class SiteBase(BaseModel):
     name: str
-    country: Optional[str]
-    city: Optional[str]
-    state: Optional[str]
-    zip: Optional[str]
-    create_date: Optional[datetime]
+    country: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    zip: Optional[str] = None
+    create_date: Optional[datetime] = None
 
     class Config:
         orm_mode = True
