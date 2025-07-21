@@ -1,26 +1,52 @@
-FROM quay.io/cdis/python:python3.9-buster-2.0.0 AS base
+ARG AZLINUX_BASE_VERSION=master
 
+# Base stage with python-build-base
+FROM quay.io/cdis/python-nginx-al:${AZLINUX_BASE_VERSION} AS base
+
+ENV appname=gearbox
+
+COPY --chown=gen3:gen3 /src/${appname} /${appname}
+
+WORKDIR /${appname}
+
+# Builder stage
 FROM base AS builder
-RUN pip install --upgrade pip
 
-RUN pip install poetry
+# # Install ALL necessary build dependencies for Amazon Linux 2023
+RUN dnf update -y \
+    && dnf install -y \
+    gcc \
+    gcc-c++ \
+    make \
+    python3-devel \
+    libffi-devel \
+    openssl-devel \
+    postgresql-devel \
+    git \
+    bash
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    build-essential gcc make musl-dev libffi-dev libssl-dev git curl bash
-COPY . /src/
-WORKDIR /src
+USER gen3
 
-RUN mkdir src/gearbox/keys/
+COPY poetry.lock pyproject.toml /${appname}/
 
-RUN poetry lock
 
-RUN python -m venv /env && . /env/bin/activate && poetry install --no-interaction --without dev
-# OR RUN python -m venv /env && . /env/bin/activate && poetry install --only main --no-interaction
+# RUN python3 -m venv /env && . /env/bin/activate &&
+RUN poetry install -vv --no-interaction --without dev
 
+COPY --chown=gen3:gen3 . /${appname}
+COPY --chown=gen3:gen3 ./deployment/wsgi/wsgi.py /${appname}/wsgi.py
+
+RUN poetry install -vv --no-interaction --without dev
+
+ENV  PATH="$(poetry env info --path)/bin:$PATH"
+
+# Final stage
 FROM base
-COPY --from=builder /env /env
-COPY --from=builder /src /src
-ENV PATH="/env/bin/:${PATH}"
-WORKDIR /src
-CMD ["/env/bin/gunicorn", "gearbox.asgi:app", "-b", "0.0.0.0:80", "-k", "uvicorn.workers.UvicornWorker", "-c", "gunicorn.conf.py"]
+
+COPY --from=builder /${appname} /${appname}
+
+# Switch to non-root user 'gen3' for the serving process
+
+USER gen3
+
+CMD ["/bin/bash", "-c", "/${appname}/dockerrun.bash"]
