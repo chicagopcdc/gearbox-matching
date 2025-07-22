@@ -142,6 +142,28 @@ async def accept_criterion_staging(session: Session, id: int, user_id: int):
     criterion_upd = CriterionStagingUpdateIn(**criterion_staging.__dict__)
     await update(session=session, criterion=criterion_upd, user_id = user_id)
 
+async def save_criterion_staging(session: Session, criterion: CriterionStagingUpdateIn, user_id: int) -> CriterionStagingSchema:
+
+    # If the incoming criterion exists and contains a valid code for the id 
+    # then set the status to 'EXISTING' before update
+    if criterion.criterion_id:
+        existing_criterion = await criterion_service.get_criterion(session=session, id=criterion.criterion_id)
+        if existing_criterion:
+            if existing_criterion.code == criterion.code:
+                criterion.criterion_adjudication_status = AdjudicationStatus.EXISTING
+            else:
+                raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR SAVING CRITERION criterion_id {criterion.criterion_id} is not associated with {criterion.code}.") 
+        else:
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR SAVING CRITERION criterion_id {criterion.criterion_id} does not exist.") 
+
+    # If this is a new criterion set status to IN_PROCESS then update
+    else:
+        criterion.criterion_adjudication_status = AdjudicationStatus.IN_PROCESS
+
+    upd_value = await update(session=session, criterion=criterion, user_id = int(user_id))
+
+    return upd_value
+
 async def get_criterion_staging_by_criterion_adjudication_status(session: Session, eligibility_criteria_id: int, adjudication_status: List[AdjudicationStatus]) -> List[CriterionStagingSearchResult]:
     return await criterion_staging_crud.get_criterion_staging_by_criterion_adjudication_status(session, eligibility_criteria_id=eligibility_criteria_id, adjudication_status=adjudication_status)
 
