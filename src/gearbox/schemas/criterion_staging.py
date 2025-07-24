@@ -26,7 +26,7 @@ class CriterionStagingBase(BaseModel):
     last_updated_by_user_id: Optional[int] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 class CriterionStaging(CriterionStagingBase):
     id: int

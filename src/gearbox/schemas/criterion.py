@@ -1,8 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, model_serializer
 from datetime import datetime
 from typing import Sequence, List, Optional
-from .criterion_tag import CriterionTag
-from .criterion_value import CriterionValue
+from .criterion_has_tag import CriterionHasTagTag
+from .criterion_has_value import CriterionHasValueValue
 
 class CriterionBase(BaseModel):
     code: Optional[str] = None
@@ -14,12 +14,32 @@ class CriterionBase(BaseModel):
     input_type_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 class Criterion(CriterionBase):
     id: int
-    tags: Optional[List[CriterionTag]] = None
-    values: Optional[List[CriterionValue]] = None
+    tags: Optional[List[CriterionHasTagTag]] = None
+    values: Optional[List[CriterionHasValueValue]] = None
+
+    # The purpose of this function is to flatten
+    # sites into the format expected for the studies extract
+    @model_serializer
+    def serialize_model(self):
+
+        return {
+            'code': self.code,
+            'display_name': self.display_name,
+            'description': self.description,
+            'create_date': self.create_date,
+            'active': self.active,
+            'ontology_code_id': self.ontology_code_id,
+            'input_type_id': self.input_type_id,
+            'tags': self.tags,
+            'values': self.values
+        }
+
+    class Config:
+        from_attributes = True 
 
 class CriterionCreate(CriterionBase):
     pass

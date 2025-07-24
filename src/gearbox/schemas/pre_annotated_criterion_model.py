@@ -9,7 +9,7 @@ class PreAnnotatedCriterionModelBase(BaseModel):
     model: Optional[str]
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 class PreAnnotatedCriterionModel(PreAnnotatedCriterionModelBase):
     pass

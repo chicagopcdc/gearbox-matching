@@ -27,7 +27,7 @@ class RawCriteriaBase(BaseModel):
     relations: Optional[Union[List[str],List[Dict]]] = None
 
     class Config:
-        orm_mode = True    
+        from_attributes = True 
 
 class RawCriteriaIn(RawCriteriaBase):
     pass 

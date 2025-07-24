@@ -14,12 +14,12 @@ class StudyVersionBase(BaseModel):
     comments: Optional[str] = None
 
     class Config:
-        orm_mode = True    
+        from_attributes = True 
 
 class StudyVersion(StudyVersionBase):
     id: int
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 class StudyVersionCreate(BaseModel):
     study_id: int
@@ -30,7 +30,7 @@ class StudyVersionCreate(BaseModel):
     comments: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 class StudyVersionUpdate(BaseModel):
     id: int
@@ -44,7 +44,7 @@ class StudyVersionInfo(StudyVersion):
     study: StudyBaseInfo
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 class StudyVersionSearchResults(BaseModel):
     results: Sequence[StudyVersion]

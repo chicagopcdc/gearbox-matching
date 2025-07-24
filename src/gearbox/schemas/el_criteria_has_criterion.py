@@ -10,7 +10,7 @@ class ElCriteriaHasCriterionBase(BaseModel):
     create_date: Optional[datetime] = None
     active: Optional[bool] = None
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 class ElCriteriaHasCriterion(ElCriteriaHasCriterionBase):
     id: int

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, model_serializer
 from datetime import datetime
 from typing import Sequence, List, Optional
-from gearbox.schemas import SiteCreate, SiteHasStudy, Site, SiteHasStudySite
+from gearbox.schemas import SiteCreate, Site, SiteHasStudySite
 from .study_link import StudyLinkCreate, StudyLink
 from .study_external_id import StudyExternalIdCreate
 

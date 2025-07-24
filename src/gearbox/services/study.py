@@ -11,7 +11,10 @@ from operator import itemgetter
 
 async def get_study_info(session: Session, id: int) -> StudySchema:
     study_info = await study_crud.get_single_study_info(session, id)
-    return study_info
+    if study_info:
+        return study_info
+    else:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Study for id: {id} not found.") 
 
 async def get_studies_info(session: Session) -> StudySearchResults:
     studies = await study_crud.get_studies_info(session)
@@ -24,7 +27,10 @@ async def get_study_id_by_ext_id(session: Session, ext_id: str) -> int:
 
 async def get_study(session: Session, id: int) -> StudySchema:
     study = await study_crud.get(session, id)
-    return study
+    if study:
+        return study
+    else:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Study for id: {study_id} not found.") 
 
 async def get_studies(session: Session) -> StudySearchResults:
     studies = await study_crud.get_multi(session)

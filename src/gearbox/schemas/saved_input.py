@@ -20,7 +20,7 @@ class SavedInputDB(SavedInputBase):
     update_date: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 # properties to return to client
 class SavedInput(SavedInputDB):

@@ -9,7 +9,7 @@ class EligibilityCriteriaBase(BaseModel):
     status: Optional[EligibilityCriteriaStatus] = None
 
     class Config:
-        orm_mode = True   
+        from_attributes = True 
 
 class EligibilityCriteria(EligibilityCriteriaBase):
     id: int
