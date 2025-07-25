@@ -93,7 +93,7 @@ async def validate_eligibility_criteria_ids(session: Session, algorithm_logic: s
             .where(ElCriteriaHasCriterion.active == True)
         )
         db_el_criteria_has_criterion_ids = result.unique().scalars().all()
-        input_el_criteria_has_criterion_ids = json_utils.json_extract_ints(algorithm_logic.get_dict(), 'criteria')
+        input_el_criteria_has_criterion_ids = json_utils.json_extract_ints(algorithm_logic, 'criteria')
 
         # items that exist in input_el_criteria_has_criterion_ids but not in db_el_criteria_has_criterion_ids
         invalid_ids = list(set(input_el_criteria_has_criterion_ids).difference(db_el_criteria_has_criterion_ids))
