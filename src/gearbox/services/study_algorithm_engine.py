@@ -138,7 +138,7 @@ async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineC
     study_version = await study_version_crud.get(session, study_algorithm_engine.study_version_id)
 
     # Check el_criteria_has_criterion ids in incoming algoritm engine exist in the db
-    invalid_ids = await validate_eligibility_criteria_ids(session, study_algorithm_engine.algorithm_logic, study_version.eligibility_criteria_id) 
+    invalid_ids = await validate_eligibility_criteria_ids(session, study_algorithm_engine.algorithm_logic.get_dict(), study_version.eligibility_criteria_id) 
     if invalid_ids:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study algorithm logic contains the following invalid ids: {invalid_ids}.")
 

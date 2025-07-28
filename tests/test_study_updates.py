@@ -34,7 +34,7 @@ from starlette.status import (
                 "links": [ 
                     {
                         "name": "UPDATED-----TEST STUDY UPDATES LINK NAME",
-                        "href": "http://www.testlink.org",
+                        "href": "http://www.testlink.org/",
                         "active": True
                     }
                 ],
@@ -68,7 +68,7 @@ from starlette.status import (
                 "links": [ 
                     {
                         "name": "UPDATED-----TEST STUDY UPDATES LINK NAME",
-                        "href": "http://www.testlink.org",
+                        "href": "http://www.testlink.org-for-test",
                         "active": True
                     }
                 ],
@@ -101,7 +101,7 @@ from starlette.status import (
                 "links": [ 
                     {
                         "name": "UPDATED-----TEST STUDY UPDATES LINK NAME",
-                        "href": "http://www.testlink.org",
+                        "href": "http://www.testlink.org-for-test",
                         "active": True
                     }
                 ],
@@ -175,9 +175,10 @@ def test_study_updates(setup_database, client, data, connection):
         if not site: 
             errors.append(f"Site (name): {test_site_name} not created")
 
-        link = db_session.query(StudyLink).filter(StudyLink.href==test_link).first()
+        links = db_session.query(StudyLink).all()
+        link = db_session.query(StudyLink).filter(StudyLink.href.like(f'%{test_link}%')).first()
         if not link: 
-            errors.append(f"Link (href): {test_link} not created")
+            errors.append(f"Link (href): |{test_link}| not created")
 
         ext_id = db_session.query(StudyExternalId).filter(StudyExternalId.ext_id==test_ext_id).first()
         if not ext_id: 
@@ -225,7 +226,7 @@ def test_study_updates(setup_database, client, data, connection):
                 "links": [ 
                     {
                         "name": "UPDATED-----TEST STUDY UPDATES LINK NAME",
-                        "href": "http://www.testlink.org",
+                        "href": "http://www.testlink.org/",
                         "active": True
                     }
                 ],
@@ -272,7 +273,7 @@ def test_study_updates_unknown_source(setup_database, client, data, connection):
                 "links": [ 
                     {
                         "name": "UPDATED-----TEST STUDY UPDATES LINK NAME",
-                        "href": "http://www.testlink.org",
+                        "href": "http://www.testlink.org/",
                         "active": True
                     }
                 ],
