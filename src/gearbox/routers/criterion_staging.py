@@ -70,12 +70,9 @@ async def save_object(
     """
     Comments: this endpoint updates the criterion_staging row and sets the status to "IN_PROCESS"
     in order to allow the adjudicator to save changes before publishing the criterion to
-    the match-form
+    the match-form. For criteria that already exist, it will set the status to 'EXISTING'
     """
-
-    body.criterion_adjudication_status = AdjudicationStatus.IN_PROCESS
-    upd_value = await criterion_staging_service.update(session=session, criterion=body, user_id = int(user_id))
-    return upd_value
+    return await criterion_staging_service.save_criterion_staging(session=session, criterion=body , user_id=user_id)
 
 @mod.post("/accept-criterion-staging/{criterion_staging_id}", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def accept_object(

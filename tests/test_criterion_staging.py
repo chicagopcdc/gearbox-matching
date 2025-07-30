@@ -174,7 +174,7 @@ def test_post_criterion_staging(setup_database, client, data, connection):
             "id": 29,
             "eligibility_criteria_id": 3,
             "input_id": None,
-            "code": "save_test_criterion",
+            "code": "age",
             "display_name": "save test ",
             "description": "description",
             "create_date": "2024-07-22T12:26:36",
@@ -199,7 +199,30 @@ def test_save_criterion_staging(setup_database, client, data, connection):
             "id": 29,
             "eligibility_criteria_id": 3,
             "input_id": None,
-            "code": "save_test_criterion",
+            "code": "INVALID_CRITERION_CODE_FOR_ID_1",
+            "display_name": "save test ",
+            "description": "description",
+            "create_date": "2024-07-22T12:26:36",
+            "ontology_code_id": None,
+            "input_type_id": 3,
+            "criterion_id": 1,
+            "criterion_value_ids": [1,2,3]
+        }
+    ]
+)
+def test_save_criterion_staging_invalid_existing_criterion(setup_database, client, data, connection):
+
+    fake_jwt = "1.2.3"
+    resp = client.post(f"/save-criterion-staging", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    assert str(resp.status_code).startswith("50")
+
+@pytest.mark.parametrize(
+    "data", [ 
+        {
+            "id": 29,
+            "eligibility_criteria_id": 3,
+            "input_id": None,
+            "code": "age",
             "display_name": "save test ",
             "description": "description",
             "create_date": "2024-07-22T12:26:36",
