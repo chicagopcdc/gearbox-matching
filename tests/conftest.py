@@ -53,7 +53,6 @@ postgresql_my_proc = factories.postgresql_proc(
 )
 
 postgresql_my = factories.postgresql('postgresql_my_proc')
-print(f"POSTGRESQL_MY TYPE: {type(postgresql_my)}")
 """
 
 @pytest.fixture(scope="session")

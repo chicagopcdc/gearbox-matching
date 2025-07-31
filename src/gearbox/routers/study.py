@@ -1,9 +1,7 @@
 from gearbox import config
 from gearbox.util import status, bucket_utils
-from fastapi import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import Request, Depends
-from fastapi import APIRouter 
+from fastapi import Request, Depends, APIRouter, HTTPException
 from . import logger
 from starlette.responses import JSONResponse 
 
@@ -23,8 +21,12 @@ async def get_study(
     study_id: int,
     session: AsyncSession = Depends(deps.get_session)
 ):
-    results = await study_service.get_study_info(session, study_id)
-    return results
+    study = await study_service.get_study_info(session, study_id)
+    if not study:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, 
+            f"study not found for study id: {study_id}")
+    else:
+        return study 
 
 @mod.post("/build-studies", response_model=StudyResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
 async def build_all_studies(

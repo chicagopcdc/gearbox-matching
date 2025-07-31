@@ -23,6 +23,9 @@ async def get_raw_criteria(
 ):
 
     raw_criteria = await raw_criteria_service.get_raw_criteria(session=session, id=raw_criteria_id)
+
+    if not raw_criteria:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, f"raw-criterion not found for id: {raw_criteria_id}")
     return raw_criteria
 
 @mod.get("/raw-criteria-ec/{eligibility_criteria_id}", status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate), Depends(admin_required)])
@@ -35,7 +38,11 @@ async def get_criteria_by_eligibility_criteria_id(
     Comments: Get raw criteria (text only) by eligibility criteria id
     """
     raw_criteria = await raw_criteria_service.get_raw_criteria_by_eligibility_criteria_id(session, eligibility_criteria_id=eligibility_criteria_id)
-    return raw_criteria
+    if not raw_criteria:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, 
+            f"raw_criteria not found for eligibility_criteria_id: {eligibility_criteria_id}")
+    else:
+        return raw_criteria
 
 
 @mod.post("/raw-criteria", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])

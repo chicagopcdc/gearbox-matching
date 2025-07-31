@@ -48,8 +48,6 @@ async def stage_criteria(session: Session, raw_criteria: RawCriteria):
     for entity in raw_criteria.data.get('entities'):
         ## get criterion_id from code
         code = entity.get("label")
-        criterion_id = await criterion_crud.get_criterion_id_by_code(db=session, code=code)
-
         start_span = entity.get("start_offset")
         end_span = entity.get("end_offset")
 

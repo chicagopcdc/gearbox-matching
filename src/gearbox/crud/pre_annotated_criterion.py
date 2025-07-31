@@ -1,8 +1,8 @@
 from .base import CRUDBase
-from gearbox.models import PreAnnotatedCriterion
+from gearbox.models import PreAnnotatedCriterion, PreAnnotatedCriterionModel
 from gearbox.schemas import PreAnnotatedCriterionCreate, PreAnnotatedCriterionSearchResults
 from sqlalchemy.orm import Session
-from sqlalchemy import delete, exc
+from sqlalchemy import delete, exc, select
 from fastapi import HTTPException
 from gearbox.util import status
 
@@ -12,6 +12,7 @@ logger = get_logger(__name__)
 class CRUDPreAnnotatedCriterion(CRUDBase [PreAnnotatedCriterion, PreAnnotatedCriterionCreate, PreAnnotatedCriterionSearchResults]):
 
         async def clear_pre_annotated_by_id(self, current_session: Session, raw_criteria_id: int):
+
             try:
                 stmt = delete(PreAnnotatedCriterion).where(PreAnnotatedCriterion.raw_criteria_id==raw_criteria_id)
                 await current_session.execute(stmt)
