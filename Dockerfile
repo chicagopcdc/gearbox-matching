@@ -1,4 +1,4 @@
-FROM quay.io/cdis/python:python3.9-buster-2.0.0 AS base
+FROM quay.io/cdis/python:python3.10-buster-2025.06 AS base
 
 FROM base AS builder
 
