@@ -57,7 +57,7 @@ async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish, us
     new_echc_list = []
     # Save echc for each value in publish object
     for val in echc.value_ids:
-        echc_create = echc.dict()
+        echc_create = echc.model_dump()
         echc_create['value_id'] = val
         echc_save=ElCriteriaHasCriterionCreate(**echc_create)
         new_echc = await create_el_criteria_has_criterion(session=session, el_criteria_has_criterion=echc_save)

@@ -22,13 +22,7 @@ logger = cdislogging.get_logger(logger_name, log_level="debug" if config.DEBUG e
 
 
 
-#try:
-    # importlib.metadata works locally but not in Docker
-    # trying importlib_metadata
-    # from importlib.metadata import entry_points
 from importlib_metadata import entry_points
-#except ImportError:
-#    from importlib_metadata import entry_points
 
 def get_app():
     app = FastAPI(
@@ -111,7 +105,7 @@ class ClientDisconnectMiddleware:
 
 def load_modules(app=None):
     logger.info("Start to load modules.")
-    for ep in entry_points()["gearbox.modules"]:
+    for ep in entry_points().select(group="gearbox.modules"):
         mod = ep.load()
         if app and hasattr(mod, "init_app"):
             mod.init_app(app)

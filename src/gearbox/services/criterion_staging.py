@@ -66,7 +66,7 @@ async def publish_criterion(session: Session, criterion: CriterionPublish, user_
 
 
     # Convert criterion to CriterionCreate
-    criterion_save=CriterionCreate(**criterion.dict())
+    criterion_save=CriterionCreate(**criterion.model_dump())
     new_criterion = await criterion_service.save_criterion(session=session, criterion=criterion_save)
 
     # Create criterion has values here
