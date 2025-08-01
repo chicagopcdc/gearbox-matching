@@ -1,8 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Sequence, List, Any, Optional
-from pydantic.utils import GetterDict
-# import json
 from sqlalchemy import JSON
 
 class StudyHasPatientBase(BaseModel):
