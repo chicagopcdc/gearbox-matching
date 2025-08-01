@@ -29,7 +29,6 @@ class CRUDValue(CRUDBase [Value, ValueCreate, ValueSearchResults]):
             value = result.unique().scalars().first()
             return value
         except exc.SQLAlchemyError as e:
-            print(f"ERROR------> SQL ERROR: {type(e)}: {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")
     
     async def get_value_by_value_string(self, db: Session, value_str: str):

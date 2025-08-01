@@ -1,4 +1,3 @@
-#import sre_compile
 from pydantic import BaseModel
 from typing import Sequence, Optional
 

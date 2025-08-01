@@ -8,7 +8,7 @@ from starlette.responses import JSONResponse
 from gearbox import auth
 from gearbox.admin_login import admin_required
 
-from gearbox.schemas import Study, StudyCreate, StudyUpdates, StudyResults, StudyLink
+from gearbox.schemas import Study, StudyCreate, StudyUpdates, StudyResults 
 from gearbox import deps
 from gearbox.services import study as study_service
 from fastapi.encoders import jsonable_encoder

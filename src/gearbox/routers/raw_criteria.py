@@ -63,7 +63,7 @@ async def save_object(file: UploadFile = File(...),
                     try:
                         contents = file.read()
                     except Exception as e:
-                        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{filename} contains mal-formed data.")
+                        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Error reading file: {filename} error: {e}.")
                     await raw_criteria_service.create_raw_criteria(session, raw_criteria_str=contents, user_id=user_id)
 
 
