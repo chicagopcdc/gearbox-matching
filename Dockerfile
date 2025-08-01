@@ -34,6 +34,7 @@ COPY poetry.lock pyproject.toml /${appname}/
 RUN poetry install -vv --no-interaction --without dev
 
 COPY --chown=gen3:gen3 . /${appname}
+RUN chmod +x /${appname}/dockerrun.bash
 COPY --chown=gen3:gen3 ./deployment/wsgi/wsgi.py /${appname}/wsgi.py
 
 RUN poetry install -vv --no-interaction --without dev
@@ -42,6 +43,9 @@ ENV  PATH="$(poetry env info --path)/bin:$PATH"
 
 # Final stage
 FROM base
+
+# Install PostgreSQL runtime libraries needed by psycopg2
+RUN dnf update -y && dnf install -y postgresql-libs
 
 COPY --from=builder /${appname} /${appname}
 
