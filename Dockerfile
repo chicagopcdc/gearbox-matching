@@ -12,19 +12,6 @@ WORKDIR /${appname}
 # Builder stage
 FROM base AS builder
 
-# # Install ALL necessary build dependencies for Amazon Linux 2023
-RUN dnf update -y \
-    && dnf install -y \
-    gcc \
-    gcc-c++ \
-    make \
-    python3-devel \
-    libffi-devel \
-    openssl-devel \
-    postgresql-devel \
-    git \
-    bash
-
 USER gen3
 
 COPY poetry.lock pyproject.toml /${appname}/
@@ -44,8 +31,19 @@ ENV  PATH="$(poetry env info --path)/bin:$PATH"
 # Final stage
 FROM base
 
-# Install PostgreSQL runtime libraries needed by psycopg2
-RUN dnf update -y && dnf install -y postgresql-libs
+# Install ccrypt to decrypt dbgap telmetry files
+RUN echo "Upgrading dnf"; \
+    dnf upgrade -y; \
+    echo "Installing Packages"; \
+    dnf install -y \
+        libxcrypt-compat-4.4.33 \
+        libpq-15.0 \
+        gcc \
+        tar xz; \
+    echo "Installing RPM"; \
+    rpm -i https://ccrypt.sourceforge.net/download/1.11/ccrypt-1.11-1.src.rpm && \
+    cd /root/rpmbuild/SOURCES/ && \
+    tar -zxf ccrypt-1.11.tar.gz && cd ccrypt-1.11 && ./configure --disable-libcrypt && make install && make check;
 
 COPY --from=builder /${appname} /${appname}
 

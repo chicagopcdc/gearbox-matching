@@ -26,9 +26,6 @@ bleach = ">=3.3.1"
 tenacity = ">=8.0.0"
 pydantic = {extras = ["email"], version = "~1.8.1"}
 SQLAlchemy = "^1.4.22"
-pytest-postgresql = "^4.1.1"
-psycopg = "^3.0.11"
-psycopg2 = "^2.9.3"
 deepdiff = "^5.8.0"
 importlib-metadata = "=4.11.4"
 certifi = "2024.7.4"
@@ -42,10 +39,12 @@ pcdcutils = {git = "https://github.com/chicagopcdc/pcdcutils.git", rev = "0.1.2"
 aiocache = "0.11.1"
 python-multipart = "^0.0.20"
 asyncpg = "^0.30.0"
+psycopg2-binary = "<3"
 
 
 [tool.poetry.group.dev.dependencies]
 pytest = "7.0.0"
+pytest-postgresql = "^4.1.1"
 pytest-cov = "^2.8"
 pyyaml = ">6.0"
 requests = "^2.22"
