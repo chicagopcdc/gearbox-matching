@@ -11,7 +11,10 @@ from operator import itemgetter
 
 async def get_study_info(session: Session, id: int) -> StudySchema:
     study_info = await study_crud.get_single_study_info(session, id)
-    return study_info
+    if study_info:
+        return study_info
+    else:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Study for id: {id} not found.") 
 
 async def get_studies_info(session: Session) -> StudySearchResults:
     studies = await study_crud.get_studies_info(session)
@@ -24,7 +27,10 @@ async def get_study_id_by_ext_id(session: Session, ext_id: str) -> int:
 
 async def get_study(session: Session, id: int) -> StudySchema:
     study = await study_crud.get(session, id)
-    return study
+    if study:
+        return study
+    else:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Study for id: {study_id} not found.") 
 
 async def get_studies(session: Session) -> StudySearchResults:
     studies = await study_crud.get_multi(session)
@@ -124,7 +130,6 @@ async def update_studies(session: Session, updates: StudyUpdates):
         logger.error(f"ERROR: refresh study info source: {source} does not exist in source table.")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Error: refresh study info source: {source} does not exist")
 
-
     # Get study ids of all studies that exist in the db for the source
     source_study_ids = await study_crud.get_study_ids_for_source(db=session, source=source)
 
@@ -222,7 +227,7 @@ async def update_studies(session: Session, updates: StudyUpdates):
             for link in study.links:
                 row = {
                     'name': link.name,
-                    'href': link.href,
+                    'href': str(link.href),
                     'study_id' : new_or_updated_study.id,
                     'active': study.active,
                     'create_date': datetime.now()
@@ -242,7 +247,7 @@ async def update_studies(session: Session, updates: StudyUpdates):
                     'study_id' : new_or_updated_study.id,
                     'ext_id': ext_id.ext_id,
                     'source': ext_id.source,
-                    'source_url': ext_id.source_url,
+                    'source_url': str(ext_id.source_url),
                     'active': ext_id.active,
                     'create_date': datetime.now()
                 }

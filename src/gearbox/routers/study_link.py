@@ -53,7 +53,7 @@ async def update_object(
     """
     Comments:
     """
-    upd_study_link = await study_link_service.update_study_link(session=session, study_link=body, study_link_id=study_link_id)
+    await study_link_service.update_study_link(session=session, study_link=body, study_link_id=study_link_id)
 
 def init_app(app):
     app.include_router(mod, tags=["study-link"])

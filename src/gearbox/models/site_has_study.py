@@ -12,6 +12,6 @@ class SiteHasStudy(Base):
     active = Column("active", Boolean, nullable=True)
 
     study = relationship("Study", back_populates="sites", lazy='joined')
-    site = relationship("Site", back_populates="studies", lazy='joined')
+    site = relationship("Site", back_populates="studies", lazy='joined',cascade="save-update, merge, delete, delete-orphan", single_parent=True)
 
 

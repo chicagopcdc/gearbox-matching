@@ -77,5 +77,4 @@ def test_update_study_link(setup_database, client, connection):
 
     if not str(resp.status_code).startswith("20"):
         errors.append(f"Invalid https status code returned from test_create_study_link: {resp.status_code} ")
-
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))

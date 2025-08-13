@@ -1,16 +1,16 @@
 from pydantic import BaseModel
-from datetime import date, datetime, time, timedelta
-from typing import Sequence, List, Optional
+from datetime import datetime
+from typing import List, Optional
 
 
 
 class SavedInputBase(BaseModel):
     user_id: int
-    name: Optional[str]
-    patient_id: Optional[int]
+    name: Optional[str] = None
+    patient_id: Optional[int] = None
     data: List[dict]
-    create_date: Optional[datetime]
-    update_date: Optional[datetime]
+    create_date: Optional[datetime] = None
+    update_date: Optional[datetime] = None
 
 
 # properties in DB
@@ -20,7 +20,7 @@ class SavedInputDB(SavedInputBase):
     update_date: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 # properties to return to client
 class SavedInput(SavedInputDB):
@@ -30,13 +30,13 @@ class SavedInput(SavedInputDB):
 class SavedInputSearchResults(BaseModel):
     results: List[dict]
     id: int
-    name: Optional[str]
+    name: Optional[str] = None
 
 class SavedInputCreate(BaseModel):
     data: List[dict]
-    id: Optional[int]
-    name: Optional[str]
+    id: Optional[int] = None
+    name: Optional[str] = None
 
 class SavedInputPost(SavedInputBase):
-    id: Optional[int]
+    id: Optional[int] = None
     pass

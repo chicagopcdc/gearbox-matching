@@ -10,7 +10,7 @@ class OntologyCodeBase(BaseModel):
     version: Optional[bool]
 
     class Config:
-        orm_mode = True    
+        from_attributes = True 
 
 
 class OntologyCode(OntologyCodeBase):

@@ -1,16 +1,23 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Sequence, List, Any, Optional
-from pydantic.utils import GetterDict
+from gearbox.schemas import Site
 
 class SiteHasStudyBase(BaseModel):
     study_id: int
     site_id: int
-    active: Optional[bool]
-    create_date: Optional[datetime]
+    active: Optional[bool] = None
+    create_date: Optional[datetime] = None
+    site: Optional[Site] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
+
+class SiteHasStudySite(BaseModel):
+    site: Optional[Site] = None
+
+    class Config:
+        from_attributes = True 
 
 class SiteHasStudy(SiteHasStudyBase):
     pass

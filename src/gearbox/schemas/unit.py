@@ -7,7 +7,7 @@ class UnitBase(BaseModel):
     name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 class Unit(UnitBase):
     id: int

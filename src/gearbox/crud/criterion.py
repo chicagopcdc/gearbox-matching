@@ -7,12 +7,12 @@ from typing import List
 
 class CRUDCriterion(CRUDBase [Criterion, CriterionCreate, CriterionSchema]):
 
-    async def get_criterion_by_code(self, db: Session, code: str) -> CriterionSchema:
-        stmt = select(Criterion).where(Criterion.code == code)
+    async def get_criterion_id_by_code(self, db: Session, code: str) -> CriterionSchema:
+        stmt = select(Criterion.id).where(Criterion.code == code)
         result = await db.execute(stmt)
-        criterion = result.unique().scalars().first()
-        return criterion
-    
+        criterion_id = result.unique().scalars().first()
+        return criterion_id
+
     async def get_criteria_not_exist_in_match_form(self, db: Session) -> List[CriterionSchema]:
         subq = (select(DisplayRules.criterion_id).where(Criterion.id == DisplayRules.criterion_id)).exists()
         stmt = select(Criterion).where(Criterion.active == True).where(~subq)

@@ -11,7 +11,7 @@ class PreAnnotatedCriterionBase(BaseModel):
     is_standard_gb_var: Optional[bool]
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 class PreAnnotatedCriterion(PreAnnotatedCriterionBase):
     pass

@@ -8,8 +8,7 @@ from gearbox.services import match_form as match_form_service
 from . import logger
 from starlette.responses import JSONResponse
 from gearbox import auth
-from gearbox.schemas import MatchForm
-from gearbox.schemas.match_form import showif_logic_schema
+from gearbox.schemas import MatchForm, MatchFormUpdate
 from gearbox import deps
 from gearbox.util import status, bucket_utils
 from gearbox.admin_login import admin_required
@@ -56,8 +55,8 @@ async def get_important_questions(
         return JSONResponse(status.HTTP_503_SERVICE_UNAVAILABLE)
 
 @mod.post("/update-match-form", dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
-async def update_sae(
-    body: MatchForm,
+async def update_match_form(
+    body: MatchFormUpdate,
     request: Request,
     session: Session = Depends(deps.get_session),
 ):

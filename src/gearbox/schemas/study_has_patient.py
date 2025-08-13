@@ -1,8 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Sequence, List, Any, Optional
-from pydantic.utils import GetterDict
-# import json
 from sqlalchemy import JSON
 
 class StudyHasPatientBase(BaseModel):
@@ -12,7 +10,7 @@ class StudyHasPatientBase(BaseModel):
     source_id: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 class StudyHasPatient(StudyHasPatientBase):
     pass
