@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, Request, Depends, UploadFile, File, HTTPException
-import io, fnmatch
+import io, fnmatch, json
 
 from . import logger
 from gearbox.util import status
@@ -60,11 +60,13 @@ async def save_object(file: UploadFile = File(...),
             if fnmatch.fnmatch(filename, '*.jsonl'):
                 # Create raw_criteria for all jsonl files in zipfile from doccano
                 with zip_ref.open(filename) as file:
-                    contents = file.read()
-                    raw_criteria = RawCriteriaIn(data=contents)
-                    await raw_criteria_service.create_raw_criteria(session, raw_criteria_in=raw_criteria, user_id=user_id)
+                    try:
+                        contents = file.read()
+                    except Exception as e:
+                        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Error reading file: {filename} error: {e}.")
+                    await raw_criteria_service.create_raw_criteria(session, raw_criteria_str=contents, user_id=user_id)
 
-    
+
     return JSONResponse(status.HTTP_200_OK)
 
 def init_app(app):

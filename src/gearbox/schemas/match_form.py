@@ -1,28 +1,38 @@
-from xml.dom.minidom import Identified
-from pydantic import BaseModel, Extra, Json, validator
-from datetime import datetime
-from typing import Optional, Sequence, List, Union, Dict, Any
+from pydantic import BaseModel
+from typing import List, Union, Optional
 
-from jsonschema import validate
-from jsonschema.exceptions import ValidationError
-from jsonschema.exceptions import SchemaError 
+from enum import Enum
 
-# define the expected jsonschema schema for the showif logic
-showif_logic_schema = {
-    "type":"object",
-    "properties": {
-        "operator": {"type":"string", "enum":["AND","OR","eq","gt","gte","eq","lte","lt"] },
-        "criteria": {"type":"array",
-            "items": {
-                "anyOf": [
-                    {"type":"number"},
-                    {"$ref":"#"}
-                ]       
-            }       
-        }       
-    },       
-    "required": ["operator"]
-}       
+class OperatorEnum(str, Enum):
+    op_and = "AND"
+    op_or = "OR"
+    op_eq = "eq"
+    op_gt = "gt"
+    op_gte = "gte"
+    op_lte = "lte"
+    op_lt = "lt"
+
+class ShowIfCriterion(BaseModel):
+    id: int
+    value: Union[int, float, str]
+    valueId: int
+    operator: OperatorEnum
+
+class ShowIfLogic(BaseModel):
+    operator: OperatorEnum
+    criteria: Union[List[ShowIfCriterion], 'ShowIfLogic']
+
+class ShowIfCriterionUpdate(BaseModel):
+    id: int
+    value: Union[int, float, str]
+    valueId: Optional[int] = None
+    operator: OperatorEnum
+    unit: Optional[str] = None
+    is_numeric: Optional[bool] = None
+
+class ShowIfLogicUpdate(BaseModel):
+    operator: OperatorEnum
+    criteria: Union[List[ShowIfCriterionUpdate], 'ShowIfLogicUpdate']
 
 class MatchFormGroup(BaseModel):
     id: int
@@ -31,40 +41,32 @@ class MatchFormGroup(BaseModel):
 class MatchFormOption(BaseModel):
     value: Union[float, int]
     label: str
-    description: Optional[str]
+    description: Optional[str] = None
 
-class MatchFormField(BaseModel):
+class MatchFormFieldBase(BaseModel):
     id: int
     groupId: int
     name: str
     min: Optional[Union[float,int]] = None
     max: Optional[Union[float,int]] = None
-    step: Optional[Union[float,int]] = None
+    step: Optional[Union[float,int]]  = None
     placeholder: Optional[str] = None
     label: str
     type: str
     options: Optional[List[MatchFormOption]] = None
-    showIf: Optional[Union[Json[Any],Dict]]
 
-    @validator('showIf')
-    def check_valid_vs_logic_schema(cls, v):
-        
-        try:
-            # The validate method will throw a jsonschema.exceptions.ValidationError
-            # if showif_logic field fails to validate against the showif_logic_schema
-            validate(v, showif_logic_schema)
-        except ValidationError as e:
-            # ValueError will be caught and handled by the app (in main.py)
-            raise ValueError(f"ERROR VALIDATING showIf logic: {e}")
-        except Exception as e:
-            # ValueError will be caught and handled by the app (in main.py)
-            raise ValueError(f"ERROR VALIDATING showIf logic: {e}")
+class MatchFormField(MatchFormFieldBase):
+    showIf: Optional[ShowIfLogic] = None
 
-        return v    
+class MatchFormFieldUpdate(MatchFormFieldBase):
+    showIf: Optional[ShowIfLogicUpdate] = None
 
 class MatchFormBase(BaseModel):
     groups: List[MatchFormGroup]
     fields: List[MatchFormField]
 
 class MatchForm(MatchFormBase):
-    pass
+    fields: List[MatchFormField]
+
+class MatchFormUpdate(MatchFormBase):
+    fields: List[MatchFormFieldUpdate]

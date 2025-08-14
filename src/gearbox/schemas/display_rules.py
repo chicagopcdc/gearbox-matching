@@ -15,7 +15,7 @@ class DisplayRulesBase(BaseModel):
     criterion: Criterion
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
     
 class DisplayRules(DisplayRulesBase):
     pass

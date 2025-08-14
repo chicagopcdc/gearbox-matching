@@ -22,7 +22,7 @@ class TriggeredByBase(BaseModel):
     criterion: Criterion
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 class TriggeredBy(TriggeredByBase):
     id: int

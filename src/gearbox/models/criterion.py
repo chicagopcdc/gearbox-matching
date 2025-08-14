@@ -19,7 +19,7 @@ class Criterion(Base):
     UniqueConstraint(code, name='criterion_code_uix')
     UniqueConstraint(display_name, name='criterion_display_name_uix')
 
-    tags = relationship("CriterionHasTag", back_populates="criterion", lazy="joined")
+    tags = relationship("CriterionHasTag", back_populates="criterion", lazy="joined",cascade="save-update, merge, delete,delete-orphan")
     el_criteria_has_criterions = relationship("ElCriteriaHasCriterion", back_populates="criterion", lazy="joined")
     values = relationship("CriterionHasValue", back_populates="criterion", lazy="joined")
     input_type = relationship("InputType", back_populates="criterions", lazy="joined")

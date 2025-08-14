@@ -64,13 +64,13 @@ async def get_token_claims(token):
         # NOTE: token can be None if no Authorization header was provided, we expect
         #       this to cause a downstream exception since it is invalid
         # access_token returns a getter function which is then called with 'token'
-        token_claims = await access_token("user", "openid", issuer=issuer, allowed_issuers=allowed_issuers, purpose="access")(token)
+        token_claims = await access_token("openid", "user", audience="openid", issuer=issuer, allowed_issuers=allowed_issuers, purpose="access", force_issuer=config.FORCE_ISSUER)(token)
 
     except Exception as exc:
         logger.error(exc, exc_info=True)
         raise HTTPException(
             HTTP_401_UNAUTHORIZED,
-            f"Could not verify, parse, and/or validate scope from provided access token.",
+            f"Could not verify, parse, and/or validate scope from provided access token: {exc}.",
         )
 
     return token_claims

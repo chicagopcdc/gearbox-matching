@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Sequence, List, Any, Optional
-from pydantic.utils import GetterDict
 
 class Link(BaseModel):
     name: Optional[str]

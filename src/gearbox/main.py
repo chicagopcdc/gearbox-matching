@@ -16,19 +16,26 @@ import uvicorn
 from pcdcutils.signature import SignatureManager
 from pcdcutils.errors import KeyPathInvalidError, NoKeyError
 
+from contextlib import asynccontextmanager
+
 
 logger_name = 'gb-logger'
 logger = cdislogging.get_logger(logger_name, log_level="debug" if config.DEBUG else "info")
 
 
 
-#try:
-    # importlib.metadata works locally but not in Docker
-    # trying importlib_metadata
-    # from importlib.metadata import entry_points
 from importlib_metadata import entry_points
-#except ImportError:
-#    from importlib_metadata import entry_points
+
+async def lifespan(app: FastAPI):
+
+    # Startup logic / tasks
+
+    yield
+
+    # Shutdown logic / tasks
+    logger.info("Closing async client.")
+    await app.async_client.aclose()
+
 
 def get_app():
     app = FastAPI(
@@ -65,10 +72,10 @@ def get_app():
         content = {'status_code': 10422,'message': 'PYDANTIC ValidationError' + exc_str , 'data':None}
         return JSONResponse(content=content, status_code = status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-    @app.on_event("shutdown")
-    async def shutdown_event():
-        logger.info("Closing async client.")
-        await app.async_client.aclose()
+#    @app.on_event("shutdown")
+#    async def shutdown_event():
+#        logger.info("Closing async client.")
+#        await app.async_client.aclose()
 
     return app
 
@@ -111,7 +118,7 @@ class ClientDisconnectMiddleware:
 
 def load_modules(app=None):
     logger.info("Start to load modules.")
-    for ep in entry_points()["gearbox.modules"]:
+    for ep in entry_points().select(group="gearbox.modules"):
         mod = ep.load()
         if app and hasattr(mod, "init_app"):
             mod.init_app(app)

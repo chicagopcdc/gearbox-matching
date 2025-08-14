@@ -190,7 +190,7 @@ def valid_upload_file_patcher(client, guid_mock, signed_url_mock):
         patched_function.stop()
 
 
-@pytest.yield_fixture(scope="session")
+@pytest.fixture(scope="session")
 def event_loop(request):
     # Create an instance of the default event loop for each test
     loop = asyncio.get_event_loop_policy().new_event_loop()

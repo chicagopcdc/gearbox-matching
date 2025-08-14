@@ -8,7 +8,7 @@ from starlette.responses import JSONResponse
 from gearbox import auth
 from gearbox.admin_login import admin_required
 
-from gearbox.schemas import Study, StudyCreate, StudyUpdates, StudyResults
+from gearbox.schemas import Study, StudyCreate, StudyUpdates, StudyResults 
 from gearbox import deps
 from gearbox.services import study as study_service
 from fastapi.encoders import jsonable_encoder
@@ -34,11 +34,11 @@ async def build_all_studies(
     session: AsyncSession = Depends(deps.get_session)
 ):
     results = await study_service.get_studies_info(session)
-
     bucket_name = bucket_utils.get_bucket_name()
     existing_studies = bucket_utils.get_object(request=request, bucket_name=bucket_name, key_name=config.S3_BUCKET_STUDIES_KEY_NAME, expires=300, method="get_object")
     version = study_service.get_new_version(existing_studies)
-    new_studies = StudyResults(version=version, studies=results)
+    studies = [Study.model_validate(obj=study_obj, from_attributes=True) for study_obj in results]
+    new_studies = StudyResults(version=version, studies=studies)
 
     if not config.BYPASS_S3:
         json_studies = jsonable_encoder(new_studies)

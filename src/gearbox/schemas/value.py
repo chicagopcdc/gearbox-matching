@@ -4,23 +4,23 @@ from typing import Optional, Sequence, List
 from .unit import Unit
 
 class ValueBase(BaseModel):
-    description: Optional[str]
+    description: Optional[str] = None
     is_numeric: bool
     value_string: str
-    unit_id: Optional[int]
+    unit_id: Optional[int] = None
     operator: str
-    create_date: Optional[datetime]
-    active: Optional[bool]
+    create_date: Optional[datetime] = None
+    active: Optional[bool] = None
 
     class Config:
-        orm_mode = True    
+        from_attributes = True 
 
 
 class Value(ValueBase):
     id: int
 
 class ValueCreate(ValueBase):
-    unit_name: Optional[str]
+    unit_name: Optional[str] = None
     pass
 
 class ValueSave(ValueBase):

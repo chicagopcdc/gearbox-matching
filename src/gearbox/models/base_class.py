@@ -1,6 +1,7 @@
 import typing as t
 
-from sqlalchemy.ext.declarative import as_declarative, declared_attr, declarative_base
+from sqlalchemy.ext.declarative import declared_attr, declarative_base
+from sqlalchemy.orm import as_declarative
 
 # Base = declarative_base()
 

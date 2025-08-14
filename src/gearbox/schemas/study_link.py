@@ -3,14 +3,14 @@ from typing import Sequence, Optional
 from datetime import datetime
 
 class StudyLinkBase(BaseModel):
-    name: Optional[str]
-    href: Optional[HttpUrl]
-    study_id: Optional[int]
-    active: Optional[bool]
-    create_date: Optional[datetime]
+    study_id: Optional[int] = None
+    name: Optional[str] = None
+    href: Optional[HttpUrl] = None
+    active: Optional[bool] = None
+    create_date: Optional[datetime] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class StudyLink(StudyLinkBase):
     id: int

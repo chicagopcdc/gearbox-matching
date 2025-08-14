@@ -66,7 +66,7 @@ async def publish_criterion(session: Session, criterion: CriterionPublish, user_
 
 
     # Convert criterion to CriterionCreate
-    criterion_save=CriterionCreate(**criterion.dict())
+    criterion_save=CriterionCreate(**criterion.model_dump())
     new_criterion = await criterion_service.save_criterion(session=session, criterion=criterion_save)
 
     # Create criterion has values here
@@ -74,7 +74,6 @@ async def publish_criterion(session: Session, criterion: CriterionPublish, user_
         for v_id in criterion.values:
             chv = CriterionHasValueCreate(criterion_id=new_criterion.id, value_id=v_id)
             await criterion_has_value_crud.create(db=session,obj_in=chv)
-
     # Call update method below - set criterion_staging criteria adjudication status to active
     stage_upd = CriterionStagingUpdate(id=criterion.criterion_staging_id, criterion_id=new_criterion.id, criterion_adjudication_status=AdjudicationStatus.ACTIVE, last_updated_by_user_id=user_id)
     await update(session=session, criterion=stage_upd, user_id=user_id)
@@ -89,7 +88,7 @@ async def update(session: Session, criterion: CriterionStagingUpdateIn, user_id:
     updates=[]
 
     # create an update object that only includes set fields
-    criterion_obj = CriterionStagingUpdate(**criterion.dict(exclude_unset=True))
+    criterion_obj = CriterionStagingUpdate(**criterion.model_dump(exclude_unset=True))
     criterion_obj.last_updated_by_user_id = user_id
 
     # validate value ids if they exist in the staging row

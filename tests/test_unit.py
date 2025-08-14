@@ -11,7 +11,6 @@ def test_get_units(setup_database, client):
     fake_jwt = "1.2.3"
     resp = client.get("/units", headers={"Authorization": f"bearer {fake_jwt}"})
     full_res = resp.json()
-    print(f"RESP: {full_res}")
 
     assert str(resp.status_code).startswith("20")
 

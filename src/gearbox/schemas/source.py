@@ -8,7 +8,7 @@ class SourceBase(BaseModel):
     priority: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 class Source(SourceBase):
     id: int
