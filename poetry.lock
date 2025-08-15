@@ -186,45 +186,48 @@ tests-mypy = ["mypy (>=1.11.1) ; platform_python_implementation == \"CPython\" a
 
 [[package]]
 name = "authlib"
-version = "0.15.6"
-description = "The ultimate Python library in building OAuth and OpenID Connect servers."
+version = "1.6.1"
+description = "The ultimate Python library in building OAuth and OpenID Connect servers and clients."
 optional = false
-python-versions = "*"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "Authlib-0.15.6-py2.py3-none-any.whl", hash = "sha256:6de4508ba8125e438a35bcd910d55df7087dccd3dd8517095c2bd9853c372ec1"},
-    {file = "Authlib-0.15.6.tar.gz", hash = "sha256:2988fdf7d0a5c416f5a37ca4b1e7cee360094940229bc97909aed25880326c72"},
+    {file = "authlib-1.6.1-py2.py3-none-any.whl", hash = "sha256:e9d2031c34c6309373ab845afc24168fe9e93dc52d252631f52642f21f5ed06e"},
+    {file = "authlib-1.6.1.tar.gz", hash = "sha256:4dffdbb1460ba6ec8c17981a4c67af7d8af131231b5a36a88a1e8c80c111cdfd"},
 ]
 
 [package.dependencies]
 cryptography = "*"
 
-[package.extras]
-client = ["requests"]
-
 [[package]]
 name = "authutils"
-version = "5.0.5"
+version = "6.2.7"
 description = "Gen3 auth utility functions"
 optional = false
-python-versions = ">=3.6,<4.0"
+python-versions = ">=3.9.2, <4.0"
 groups = ["main"]
-files = [
-    {file = "authutils-5.0.5-py3-none-any.whl", hash = "sha256:91e81838b8ba419d5fd92550747f8f60a1f5e91fee4146109e35728bea140034"},
-    {file = "authutils-5.0.5.tar.gz", hash = "sha256:ffe8f0425f065353106f5fbe8eb2d38284d34406724e175c3aa2f1806723f361"},
-]
+files = []
+develop = false
 
 [package.dependencies]
-authlib = ">=0.11,<1.0"
-cached-property = ">=1.4,<2.0"
+authlib = ">=1.1.0"
+cached-property = "~=1.4"
 cdiserrors = "<2.0.0"
-httpx = ">=0.12.1,<1.0.0"
-pyjwt = {version = ">=1.5,<2.0", extras = ["crypto"]}
-xmltodict = ">=0.9,<1.0"
+cryptography = "^44.0.1"
+fastapi = {version = "^0.115.12", optional = true}
+httpx = ">=0.23.0,<1.0.0"
+pyjwt = {version = ">=2.4.0,<3.0", extras = ["crypto"]}
+xmltodict = "~=0.9"
 
 [package.extras]
-fastapi = ["fastapi (>=0.54.1,<0.55.0)"]
-flask = ["Flask (>=0.10.1)"]
+fastapi = ["fastapi (>=0.115.12,<0.116.0)"]
+flask = ["Flask (<=2.3.3)"]
+
+[package.source]
+type = "git"
+url = "https://github.com/chicagopcdc/authutils"
+reference = "fastapi-upgrade"
+resolved_reference = "8166636b027eb18d1e4fd1919d1ee7a2ab8158b8"
 
 [[package]]
 name = "backoff"
@@ -1908,23 +1911,24 @@ typing-extensions = ">=4.6.0,<4.7.0 || >4.7.0"
 
 [[package]]
 name = "pyjwt"
-version = "1.7.1"
+version = "2.10.1"
 description = "JSON Web Token implementation in Python"
 optional = false
-python-versions = "*"
+python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "PyJWT-1.7.1-py2.py3-none-any.whl", hash = "sha256:5c6eca3c2940464d106b99ba83b00c6add741c9becaec087fb7ccdefea71350e"},
-    {file = "PyJWT-1.7.1.tar.gz", hash = "sha256:8d59a976fb773f3e6a39c85636357c4f0e242707394cadadd9814f5cbaa20e96"},
+    {file = "PyJWT-2.10.1-py3-none-any.whl", hash = "sha256:dcdd193e30abefd5debf142f9adfcdd2b58004e644f25406ffaebd50bd98dacb"},
+    {file = "pyjwt-2.10.1.tar.gz", hash = "sha256:3cc5772eb20009233caf06e9d8a0577824723b44e6648ee0a2aedb6cf9381953"},
 ]
 
 [package.dependencies]
-cryptography = {version = ">=1.4", optional = true, markers = "extra == \"crypto\""}
+cryptography = {version = ">=3.4.0", optional = true, markers = "extra == \"crypto\""}
 
 [package.extras]
-crypto = ["cryptography (>=1.4)"]
-flake8 = ["flake8", "flake8-import-order", "pep8-naming"]
-test = ["pytest (>=4.0.1,<5.0.0)", "pytest-cov (>=2.6.0,<3.0.0)", "pytest-runner (>=4.2,<5.0.0)"]
+crypto = ["cryptography (>=3.4.0)"]
+dev = ["coverage[toml] (==5.0.4)", "cryptography (>=3.4.0)", "pre-commit", "pytest (>=6.0.0,<7.0.0)", "sphinx", "sphinx-rtd-theme", "zope.interface"]
+docs = ["sphinx", "sphinx-rtd-theme", "zope.interface"]
+tests = ["coverage[toml] (==5.0.4)", "pytest (>=6.0.0,<7.0.0)"]
 
 [[package]]
 name = "pytest"
@@ -2983,4 +2987,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9.2,<4.0.0"
-content-hash = "850fabfe11a460a34ff27a8e25a34c2938f8c5566c80278d1ad69d976a062b8e"
+content-hash = "cb1e8d0f099cb302b4eaeb1711ccf808af774c22c7c68a554e0b67977d1d3507"

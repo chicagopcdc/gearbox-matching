@@ -44,7 +44,7 @@ python-multipart = "^0.0.20"
 asyncpg = "^0.30.0"
 typing-extensions = "^4.14.1"
 eval-type-backport = "^0.2.2"
-authutils = "^5.0.4"
+authutils = { git = "https://github.com/chicagopcdc/authutils", branch="fastapi-upgrade", extras = ["fastapi"]}
 psycopg2-binary = "<3"
 
 [tool.poetry.group.dev.dependencies]
