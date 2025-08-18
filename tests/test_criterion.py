@@ -16,6 +16,13 @@ def test_get_criterion(setup_database, client):
     resp.raise_for_status()
     assert str(resp.status_code).startswith("20")
 
+def test_get_criteria(setup_database, client):
+
+    fake_jwt = "1.2.3"
+    resp = client.get(f"/criteria", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp.raise_for_status()
+    assert str(resp.status_code).startswith("20")
+
 def test_get_criteria_not_exist_in_match_form(setup_database, client):
 
     fake_jwt = "1.2.3"
