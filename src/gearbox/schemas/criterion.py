@@ -27,6 +27,7 @@ class Criterion(CriterionBase):
     def serialize_model(self):
 
         return {
+            'id': self.id,
             'code': self.code,
             'display_name': self.display_name,
             'description': self.description,

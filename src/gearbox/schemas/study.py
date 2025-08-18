@@ -27,6 +27,7 @@ class Study(StudyBase):
     def serialize_model(self):
 
         return {
+            'id': self.id,
             'name': self.name,
             'code': self.code,
             'description': self.description,
