@@ -21,8 +21,8 @@ class Criterion(CriterionBase):
     tags: Optional[List[CriterionHasTagTag]] = None
     values: Optional[List[CriterionHasValueValue]] = None
 
-    # The purpose of this function is to flatten
-    # sites into the format expected for the studies extract
+    # The purpose of this function is to flatten the
+    # criterion model
     @model_serializer
     def serialize_model(self):
 
@@ -35,8 +35,8 @@ class Criterion(CriterionBase):
             'active': self.active,
             'ontology_code_id': self.ontology_code_id,
             'input_type_id': self.input_type_id,
-            'tags': self.tags,
-            'values': self.values
+            'tags': [t.tag for t in self.tags],
+            'values': [v.value for v in self.values]
         }
 
     class Config:
