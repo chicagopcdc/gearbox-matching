@@ -5,8 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import HTTPException
 from gearbox.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate, StudyUpdates
 from gearbox.util import status
-from gearbox.crud import study_crud, site_crud, site_has_study_crud, study_link_crud, site_has_study_crud, study_external_id_crud, source_crud
-from gearbox.models import Study, Site, StudyLink, SiteHasStudy, StudyExternalId
+from gearbox.util.types import StudyVersionStatus
+from gearbox.crud import study_crud, site_crud, site_has_study_crud, study_link_crud, site_has_study_crud, study_external_id_crud, source_crud, study_version_crud
+from gearbox.models import Study, Site, StudyLink, SiteHasStudy, StudyExternalId, StudyVersion
 from operator import itemgetter
 
 async def get_study_info(session: Session, id: int) -> StudySchema:
@@ -266,6 +267,20 @@ async def update_studies(session: Session, updates: StudyUpdates):
     await study_crud.set_active_all_rows(db=session, active_upd=True, ids=study_ids_reset_to_active)
     await site_has_study_crud.set_active_all_rows(db=session, active_upd=True, ids=study_ids_reset_to_active)
     await study_link_crud.set_active_all_rows(db=session, active_upd=True, ids=study_ids_reset_to_active)
+
+    ## Set any 'ACTIVE' study versions to 'INACTIVE' for all inactive studies
+    noload = [Study.patients, Study.sites, Study.links, Study.ext_ids, Study.study_versions, Study.study_source] 
+    noload_sv = [StudyVersion.eligibility_criteria, StudyVersion.study_algorithm_engine, StudyVersion.study]
+    inactive_studies = await study_crud.get_multi(db=session, active=False, noload_rel=noload)
+    for inactive_study in inactive_studies:
+
+        where_clause=[f"study_id = {inactive_study.id}", f"status = '{StudyVersionStatus.ACTIVE.value}'"]
+        svs = await study_version_crud.get_multi(session, 
+            noload_rel = noload_sv,
+            where=where_clause)
+
+        for sv in svs:
+            await study_version_crud.update(db=session, db_obj=sv, obj_in={"status":StudyVersionStatus.INACTIVE.value})
 
     return True
 
