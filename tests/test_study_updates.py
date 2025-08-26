@@ -2,7 +2,8 @@ import pytest
 import random
 
 from sqlalchemy.orm import sessionmaker
-from gearbox.models import Study, StudyLink, Site, StudyExternalId, SiteHasStudy
+from gearbox.models import Study, StudyLink, Site, StudyExternalId, SiteHasStudy, StudyVersion
+from gearbox.util.types import StudyVersionStatus
 from .test_utils import is_aws_url
 
 from starlette.status import (
@@ -200,7 +201,13 @@ def test_study_updates(setup_database, client, data, connection):
         active_study_sites = db_session.query(SiteHasStudy).filter(SiteHasStudy.active==True).all()
         if not len(active_study_sites) == 4:
             errors.append(f"ERROR: should be 2 active study sites, found: {len(active_study_sites)} active study sites in site_has_study table.")
-        
+
+        # confirm that study_version for inactive study was set to status = INACTIVE
+        #inactive_study_version = db_session.query(StudyVersion).filter(StudyVersion.study_id==8).filter(StudyVersion.status=StudyVersionStatus.INACTIVE.value)
+        inactive_study_version = db_session.query(StudyVersion).filter(StudyVersion.study_id==8).filter(StudyVersion.status==StudyVersionStatus.INACTIVE.value).all()
+        if not len(inactive_study_version) == 1:
+            errors.append(f"ERROR: study_version for study_id = 8 should be inactive")
+
     except Exception as e:
         errors.append(f"Test study unexpected exception: {str(e)}")
     if not str(resp.status_code).startswith("20"):
