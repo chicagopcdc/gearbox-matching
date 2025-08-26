@@ -8,14 +8,11 @@ from fastapi.security import (
     HTTPBasicCredentials,
     HTTPBearer,
 )
-from . import config
-from pcdcutils.gen3 import Gen3RequestManager
-from starlette.status import (
-    HTTP_401_UNAUTHORIZED,
-    HTTP_500_INTERNAL_SERVER_ERROR
-)
+from pcdcutils.gen3 import Gen3RequestManager, SignaturePayload
+from starlette.status import HTTP_401_UNAUTHORIZED, HTTP_500_INTERNAL_SERVER_ERROR
 from cdislogging import get_logger
-logger = get_logger('gb-auth', log_level='info')
+
+logger = get_logger("gb-auth", log_level="info")
 
 # auto_error=False prevents FastAPI from raises a 403 when the request is missing
 # an Authorization header. Instead, we want to return a 401 to signify that we did
@@ -23,26 +20,75 @@ logger = get_logger('gb-auth', log_level='info')
 security = HTTPBasic(auto_error=False)
 bearer = HTTPBearer(auto_error=False)
 
+
+# Authenticate incoming request
+# This runs as a FastAPI dependency on protected routes
+# It will validate if the request has a proper Gen3 signed signature
+# If signature is missing or invalid → raise HTTP 403 (forbidden)
 async def authenticate(
-    request: Request,
-    token: HTTPAuthorizationCredentials = Security(bearer)
+    request: Request, token: HTTPAuthorizationCredentials = Security(bearer)
 ):
+    # Skip validation if BYPASS_FENCE is enabled (dev/testing mode)
     if not config.BYPASS_FENCE:
-        g3rm = Gen3RequestManager(headers=request.headers)
-        if g3rm.is_gen3_signed():
-            if 'GEARBOX_MIDDLEWARE_PUBLIC_KEY' not in config.GEARBOX_KEY_CONFIG:
-                logger.error("no public key found")
-                raise HTTPException(HTTP_500_INTERNAL_SERVER_ERROR, "missing public key")
-            else:
-                data = await request.json()
-                if not g3rm.valid_gen3_signature(json.dumps(data, separators=(',', ':')), config=config.GEARBOX_KEY_CONFIG):
-                    raise HTTPException(HTTP_401_UNAUTHORIZED, "Gen3 signed request is invalid")
+
+        # Read incoming request headers
+        # In FastAPI, request.headers is already a case-insensitive dict-like object.
+        # Unlike Flask, we don’t need to wrap it with dict(), and doing so would lowercase all keys.
+        headers = request.headers
+
+        # Get request method and path
+        method_s = request.method
+        path = request.url.path
+
+        # Read request body only for POST/PUT/PATCH — otherwise leave as None
+        body = None
+        if method_s in ["POST", "PUT", "PATCH"]:
+            body = await request.json()
+        else:
+            body = None
+
+        # Initialize Gen3RequestManager — will help us check for signature
+        g3rm = Gen3RequestManager(headers=headers)
+        is_signed = g3rm.is_gen3_signed()
+
+        # logger.debug(f"Signature headers: {headers}")
+        # logger.debug(f"Signature is_gen3_signed: {is_signed}")
+        # logger.debug(f"Signature header value: {headers.get('Signature')}")
+
+        # Check if request has Gen3 signature
+        if is_signed:
+            # Check for public key
+            if "GEARBOX_MIDDLEWARE_PUBLIC_KEY" not in config.GEARBOX_KEY_CONFIG:
+                logger.error("No PUBLIC_KEY configured — cannot validate signature")
+                raise HTTPException(
+                    status_code=403,
+                    detail="Missing PUBLIC_KEY — cannot validate signature",
+                )
+
+            # Prepare SignaturePayload for validation — this must match exactly what was signed
+            # logger.debug(f"Signature validation starting — method: {method_s}, path: {path}")
+
+            payload = SignaturePayload(
+                method=method_s,
+                path=path,
+                headers={"Gen3-Service": headers.get("Gen3-Service")},
+                body=json.dumps(body, separators=(",", ":")),
+            )
+
+            # Validate the signature
+            if not g3rm.valid_gen3_signature(payload, config.GEARBOX_KEY_CONFIG):
+                raise HTTPException(
+                    status_code=403, detail="Gen3 signed request is invalid"
+                )
+
+            # Signature validated!
+            logger.info(f"Signature validated successfully")
+
         else:
             token_claims = await get_token_claims(token)
 
-async def authenticate_user(
-    token: HTTPAuthorizationCredentials = Security(bearer)
-):
+
+async def authenticate_user(token: HTTPAuthorizationCredentials = Security(bearer)):
     if not config.BYPASS_FENCE:
         token_claims = await get_token_claims(token)
         user_id = token_claims.get("sub")
@@ -50,27 +96,34 @@ async def authenticate_user(
         user_id = config.BYPASS_FENCE_DUMMY_USER_ID
     return user_id
 
+
 async def get_token_claims(token):
 
     try:
         issuer = None
         allowed_issuers = None
 
-        # override token iss 
+        # override token iss
         if config.FORCE_ISSUER:
             issuer = config.USER_API
-            allowed_issuers =  list(config.ALLOWED_ISSUERS)
+            allowed_issuers = list(config.ALLOWED_ISSUERS)
 
         # NOTE: token can be None if no Authorization header was provided, we expect
         #       this to cause a downstream exception since it is invalid
         # access_token returns a getter function which is then called with 'token'
-        token_claims = await access_token("openid", "user", audience="openid", issuer=issuer, allowed_issuers=allowed_issuers, purpose="access", force_issuer=config.FORCE_ISSUER)(token)
+        token_claims = await access_token(
+            "user",
+            "openid",
+            issuer=issuer,
+            allowed_issuers=allowed_issuers,
+            purpose="access",
+        )(token)
 
     except Exception as exc:
         logger.error(exc, exc_info=True)
         raise HTTPException(
             HTTP_401_UNAUTHORIZED,
-            f"Could not verify, parse, and/or validate scope from provided access token: {exc}.",
+            f"Could not verify, parse, and/or validate scope from provided access token.",
         )
 
     return token_claims
