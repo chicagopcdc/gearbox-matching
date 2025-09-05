@@ -75,7 +75,7 @@ async def publish_criterion(session: Session, criterion: CriterionPublish, user_
             chv = CriterionHasValueCreate(criterion_id=new_criterion.id, value_id=v_id)
             await criterion_has_value_crud.create(db=session,obj_in=chv)
     # Call update method below - set criterion_staging criteria adjudication status to active
-    stage_upd = CriterionStagingUpdate(id=criterion.criterion_staging_id, criterion_id=new_criterion.id, criterion_adjudication_status=AdjudicationStatus.ACTIVE, last_updated_by_user_id=user_id)
+    stage_upd = CriterionStagingUpdate(id=criterion.criterion_staging_id, criterion_id=new_criterion.id, criterion_adjudication_status="ACTIVE", last_updated_by_user_id=user_id)
     await update(session=session, criterion=stage_upd, user_id=user_id)
     logger.info(f"User: {user_id} published criterion: {new_criterion.id} code: {new_criterion.code}")
 
@@ -83,7 +83,6 @@ async def update(session: Session, criterion: CriterionStagingUpdateIn, user_id:
 
     criterion_to_upd = await criterion_staging_crud.get(db=session, id=criterion.id)
     criterion_in_dict = dict(criterion)
-
     to_upd_dict = criterion_to_upd.__dict__
     updates=[]
 

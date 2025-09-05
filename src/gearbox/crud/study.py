@@ -1,6 +1,6 @@
 from re import I
 from .base import CRUDBase
-from sqlalchemy import update, select, exc, subquery
+from sqlalchemy import update, select, exc
 from sqlalchemy.orm import Session, joinedload
 from typing import  List 
 from gearbox.models import Study, SiteHasStudy, Source, StudyVersion
@@ -22,7 +22,7 @@ class CRUDStudy(CRUDBase [Study, StudyCreate, StudySearchResults]):
 
     # Returns study information for ACTIVE studies
     async def get_studies_info(self, current_session: Session):
-        sv_subq = select(StudyVersion).where(StudyVersion.status==StudyVersionStatus.ACTIVE).subquery()
+        sv_subq = select(StudyVersion).where(StudyVersion.status==StudyVersionStatus.ACTIVE.value).subquery()
         stmt = select(Study).options(
             joinedload(Study.sites).options(
                 joinedload(SiteHasStudy.site)
@@ -31,6 +31,7 @@ class CRUDStudy(CRUDBase [Study, StudyCreate, StudySearchResults]):
 
         result = await current_session.execute(stmt)
         studies = result.unique().scalars().all()
+
         return studies
 
     async def get_single_study_info(self, current_session: Session, study_id: int):

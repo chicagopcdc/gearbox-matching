@@ -2,7 +2,8 @@ from .base import CRUDBase
 from gearbox.models import Value, Unit
 from gearbox.schemas import ValueSearchResults, ValueCreate
 from sqlalchemy.orm import Session
-from sqlalchemy import func, update, select, exc, subquery
+from sqlalchemy import func, update, select, exc
+#from sqlalchemy.sql import subquery
 
 from fastapi import HTTPException
 from gearbox.util import status
