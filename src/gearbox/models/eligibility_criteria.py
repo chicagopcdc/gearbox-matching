@@ -1,16 +1,16 @@
 from sqlalchemy import Column, Integer, DateTime
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, mapped_column, Mapped
 from gearbox.util.types import EligibilityCriteriaStatus 
-from sqlalchemy.dialects.postgresql import ENUM
+from sqlalchemy.types import Enum as SQLEnum
 
 from .base_class import Base
 
 
 class EligibilityCriteria(Base):
     __tablename__ = 'eligibility_criteria'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    create_date = Column(DateTime, nullable=True)
-    status = Column(ENUM(EligibilityCriteriaStatus), unique=False, nullable=False)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    create_date = mapped_column(DateTime, nullable=True)
+    status : Mapped[EligibilityCriteriaStatus] = mapped_column(SQLEnum(EligibilityCriteriaStatus), unique=False, nullable=False)
 
     notes = relationship("EligibilityCriteriaHasNote", back_populates="eligibility_criteria")
     el_criteria_has_criterions = relationship("ElCriteriaHasCriterion", back_populates="eligibility_criteria")

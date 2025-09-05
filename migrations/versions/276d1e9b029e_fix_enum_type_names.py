@@ -21,6 +21,8 @@ def upgrade():
     op.execute("ALTER TYPE adjudication_status RENAME TO adjudicationstatus")
     op.execute("ALTER TYPE echc_adjudication_status RENAME TO echcadjudicationstatus")
     op.execute("ALTER TYPE study_version_status RENAME TO studyversionstatus")
+    op.execute('ALTER TYPE "eligibilityCriteriaStatus" RENAME TO eligibilitycriteriastatus')
+
     op.alter_column('criterion_staging', 'criterion_adjudication_status',
                existing_type=postgresql.ENUM('NEW', 'EXISTING', 'ACTIVE', 'IN_PROCESS', 'INACTIVE', name='adjudicationstatus'),
                type_=sa.Enum('NEW', 'EXISTING', 'ACTIVE', 'IN_PROCESS', 'INACTIVE', name='adjudicationstatus'),
@@ -35,6 +37,11 @@ def upgrade():
                existing_type=postgresql.ENUM('NEW', 'ACTIVE', 'IN_PROCESS', 'INACTIVE', name='studyversionstatus'),
                type_=postgresql.ENUM('NEW', 'ACTIVE', 'IN_PROCESS', 'INACTIVE', name='studyversionstatus'),
                existing_nullable=False)
+
+    op.alter_column('eligibility_criteria', 'status',
+               existing_type=postgresql.ENUM('NEW', 'ACTIVE', 'IN_PROCESS', 'INACTIVE', name='eligibilitycriteriastatus'),
+               type_=postgresql.ENUM('NEW', 'ACTIVE', 'IN_PROCESS', 'INACTIVE', name='eligibilitycriteriastatus'),
+               existing_nullable=False)
     # ### end Alembic commands ###
 
 
@@ -43,11 +50,18 @@ def downgrade():
     op.execute("ALTER TYPE adjudicationstatus RENAME TO adjudication_status")
     op.execute("ALTER TYPE echcadjudicationstatus RENAME TO echc_adjudication_status")
     op.execute("ALTER TYPE studyversionstatus RENAME TO study_version_status")
+    op.execute('ALTER TYPE eligibilitycriteriastatus RENAME TO "eligibilityCriteriaStatus"')
 
     op.alter_column('study_version', 'status',
                existing_type=postgresql.ENUM('NEW', 'ACTIVE', 'IN_PROCESS', 'INACTIVE', name='studyversionstatus'),
                type_=postgresql.ENUM('NEW', 'ACTIVE', 'IN_PROCESS', 'INACTIVE', name='study_version_status'),
                existing_nullable=False)
+
+    op.alter_column('eligibility_criteria', 'status',
+               existing_type=postgresql.ENUM('NEW', 'ACTIVE', 'IN_PROCESS', 'INACTIVE', name='eligibilitycriteriastatus'),
+               type_=postgresql.ENUM('NEW', 'ACTIVE', 'IN_PROCESS', 'INACTIVE', name='eligibilityCriteriaStatus'),
+               existing_nullable=False)
+
     op.drop_constraint('pre_annotated_criterion_model_pre_annotated_criterion_id_fkey', 'pre_annotated_criterion_model', type_='foreignkey')
     op.create_foreign_key(op.f('pre_annotated_criterion_model_pre_annotated_criterion_id_fkey'), 'pre_annotated_criterion_model', 'pre_annotated_criterion', ['pre_annotated_criterion_id'], ['id'], ondelete='CASCADE')
     op.alter_column('criterion_staging', 'echc_adjudication_status',
