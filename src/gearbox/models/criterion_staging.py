@@ -16,8 +16,6 @@ class CriterionStaging(Base):
     create_date = mapped_column(DateTime, nullable=True)
     criterion_adjudication_status : Mapped[AdjudicationStatus] = mapped_column(SQLEnum(AdjudicationStatus))
     echc_adjudication_status : Mapped[EchcAdjudicationStatus] = mapped_column(SQLEnum(EchcAdjudicationStatus))
-    #criterion_adjudication_status = Mapped[AdjudicationStatus] 
-    #echc_adjudication_status= Mapped[EchcAdjudicationStatus]
     
     last_updated_by_user_id=mapped_column(Integer, nullable=True)
 

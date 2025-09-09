@@ -8,7 +8,7 @@ class PreAnnotatedCriterionModel(Base):
     __tablename__ = "pre_annotated_criterion_model"
 
     id = Column(Integer, primary_key=True)
-    pre_annotated_criterion_id = Column(Integer, ForeignKey('pre_annotated_criterion.id'))
+    pre_annotated_criterion_id = Column(Integer, ForeignKey('pre_annotated_criterion.id', ondelete="CASCADE"))
     model = Column(String)
     
     pre_annotated_criterion = relationship("PreAnnotatedCriterion", 

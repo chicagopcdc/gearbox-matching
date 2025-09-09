@@ -211,6 +211,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
                 ).returning(model)
 
             # Print the query for debugging
+            # print(f"HERE IS THE UPSERT QUERY: {self.compile_query(on_conflict_stmt)}")
             retval = await db.execute(on_conflict_stmt)
             updated = retval.first()
             await db.commit()

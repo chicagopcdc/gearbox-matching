@@ -1,9 +1,9 @@
 import pytest
 import json
-from sqlalchemy.orm import sessionmaker 
+from sqlalchemy.orm import sessionmaker
 from gearbox.models import CriterionStaging, StudyVersion, StudyExternalId, EligibilityCriteria
 from .test_utils import is_aws_url
-from sqlalchemy import select, func
+from sqlalchemy import select, func, text
 from gearbox.util.types import AdjudicationStatus, StudyVersionStatus
 
 @pytest.mark.asyncio
@@ -110,21 +110,22 @@ def test_create_raw_criteria_reupload(setup_database, client, connection):
             errors.append("Obsolete criterion code not found in criterion_staging")
         
         # get the raw criteria id
-        stmt = "select rc.id from raw_criteria rc, study_version sv, study_external_id sei where\
+        stmt = "select rc.id from raw_criteria rc, study_version sv, study_external_id sei where \
             sei.ext_id = 'TESTRAWCRIT_RELOAD' and \
-            sei.study_id = sv.study_id\
+            sei.study_id = sv.study_id \
             and sv.eligibility_criteria_id = rc.eligibility_criteria_id;"
-        rc_id = db_session.execute(stmt).scalar_one()
+
+        rc_id = db_session.execute(text(stmt)).scalar_one()
 
 
         # confirm pre_annotated_criterion and pre_annotated_criterion_model rows created    
         stmt = f"SELECT count(*) from pre_annotated_criterion where raw_criteria_id={rc_id}"
-        pac_ct = db_session.execute(stmt).scalar_one()
+        pac_ct = db_session.execute(text(stmt)).scalar_one()
         if pac_ct != 180:
             errors.append(f"Error creating pre_annotated_criterion rows expected 180 found {pac_ct}.")
 
         stmt = f"select count(*) from pre_annotated_criterion a, pre_annotated_criterion_model b where a.id = b.pre_annotated_criterion_id and a.raw_criteria_id = {rc_id}"
-        pacm_ct = db_session.execute(stmt).scalar_one()
+        pacm_ct = db_session.execute(text(stmt)).scalar_one()
         if pacm_ct != 202:
             errors.append(f"Error creating pre_annotated_criterion_model rows expected 208 found {pacm_ct}.")
 
