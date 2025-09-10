@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Integer, Text, DateTime
-from sqlalchemy.orm import relationship
+from sqlalchemy import Integer, Text, DateTime
+from sqlalchemy.orm import relationship, mapped_column
 
 from .base_class import Base
 
@@ -8,8 +8,8 @@ class Login(Base):
     """ Login User Model for storing login-related details """
     __tablename__ = "logins"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    sub_id = Column(Text, primary_key=True)
-    refresh_token = Column(Text, nullable=False)
-    iat = Column(DateTime, nullable=True)
-    exp = Column(DateTime, nullable=True)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    sub_id = mapped_column(Text, primary_key=True)
+    refresh_token = mapped_column(Text, nullable=False)
+    iat = mapped_column(DateTime, nullable=True)
+    exp = mapped_column(DateTime, nullable=True)

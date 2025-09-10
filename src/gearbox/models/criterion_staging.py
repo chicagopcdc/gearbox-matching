@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, Column, Integer, String, DateTime, Boolean, UniqueConstraint
+from sqlalchemy import ForeignKey, Integer, String, DateTime, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.types import ARRAY, Enum as SQLEnum

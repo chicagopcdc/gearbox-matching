@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, DateTime
+from sqlalchemy import Integer, DateTime
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 from gearbox.util.types import EligibilityCriteriaStatus 
 from sqlalchemy.types import Enum as SQLEnum
