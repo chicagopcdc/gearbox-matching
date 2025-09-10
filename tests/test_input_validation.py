@@ -43,7 +43,7 @@ def id(client):
     full_res = resp.json()
     yield full_res["id"]
 
-@pytest.mark.run(order=1)
+@pytest.mark.order(1)
 def test_admin_load_data(client):
     """
     Test get /user-input/validation-update response for a valid admin with authorization, 
@@ -58,7 +58,7 @@ def test_admin_load_data(client):
     assert str(resp.status_code).startswith("20")
     assert resp.json() == "user_validation data cleared"
 
-@pytest.mark.run(order=2)
+@pytest.mark.order(2)
 def test_send_first_input_request(send_validation_request_function):
 
     status_code, json_data = send_validation_request_function({"data": [{"id": 1, "value": "2"}]})

@@ -59,7 +59,7 @@ async def save_object(
 
     new_criterion = await criterion_service.create_new_criterion(session, body, user_id=int(user_id))
     await session.commit()
-    reset_user_validation_data()
+    await reset_user_validation_data()
     return new_criterion
 
 def init_app(app):

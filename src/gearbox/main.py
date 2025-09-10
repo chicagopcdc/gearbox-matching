@@ -133,9 +133,9 @@ def load_keys():
     try:
         config.GEARBOX_KEY_CONFIG['GEARBOX_MIDDLEWARE_PUBLIC_KEY'] = SignatureManager(key_path=config.GEARBOX_MIDDLEWARE_PUBLIC_KEY_Path).key
     except NoKeyError:
-        logger.warn("GEARBOX_PUBLIC_KEY not found")
+        logger.warning("GEARBOX_PUBLIC_KEY not found")
     except KeyPathInvalidError:
-        logger.warn("GEARBOX_PUBLIC_KEY_PATH invalid")
+        logger.warning("GEARBOX_PUBLIC_KEY_PATH invalid")
 
 router = APIRouter()
 
