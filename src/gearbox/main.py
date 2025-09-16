@@ -8,6 +8,7 @@ from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
 import httpx
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from gearbox import deps, config
 from gearbox.util import status
 import cdislogging
@@ -147,5 +148,5 @@ def get_version():
 
 @router.get("/_status")
 async def get_status(db: Session = Depends(deps.get_session)):
-    now = await db.execute("SELECT now()")
+    now = await db.execute(text("SELECT now()"))
     return dict( status="OK", timestamp=now.scalars().first())
