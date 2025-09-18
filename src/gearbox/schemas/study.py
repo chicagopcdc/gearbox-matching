@@ -27,6 +27,7 @@ class Study(StudyBase):
     def serialize_model(self):
 
         return {
+            'id': self.id,
             'name': self.name,
             'code': self.code,
             'description': self.description,
@@ -34,7 +35,7 @@ class Study(StudyBase):
             'active': self.active,
             'follow_up_info': self.follow_up_info,
             'id': self.id, 
-            'links': self.links, 
+            'links': [s.href for s in self.links], 
             'sites':[s.site for s in self.sites]
         }
 

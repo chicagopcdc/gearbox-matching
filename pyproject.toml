@@ -47,10 +47,11 @@ pcdcutils = {git = "https://github.com/chicagopcdc/pcdcutils.git", rev = "0.1.2"
 aiocache = "0.11.1"
 python-multipart = "^0.0.20"
 authutils = { git = "https://github.com/chicagopcdc/authutils", branch="fastapi-upgrade", extras = ["fastapi"]}
-
+psycopg2-binary = "<3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "7.0.0"
+pytest-postgresql = "^4.1.1"
 pytest-cov = "^2.8"
 pyyaml = ">6.0"
 requests = "^2.22"

@@ -18,7 +18,7 @@ async def get_criteria(session: Session) -> CriterionSearchResults:
     return aes
 
 
-async def create_new_criterion(session: Session, input_criterion_info: CriterionCreateIn, user_id: int):
+async def create_new_criterion(session: Session, input_criterion_info: CriterionCreateIn, user_id: int) ->CriterionSchema:
 
     # keep track of any non-existent fks
     check_id_errors = []
@@ -82,7 +82,9 @@ async def create_new_criterion(session: Session, input_criterion_info: Criterion
 
     # commit if no exceptions encountered 
     await session.commit()
-    return jsonable_encoder(new_criterion)
+
+    new_crit = await criterion_crud.get(session, id=new_criterion.id)
+    return new_crit
 
 async def update_criterion(session: Session, criterion: CriterionCreateIn, criterion_id: int) -> CriterionSchema:
     criterion_to_upd = await criterion_crud.get(db=session, id=criterion_id)

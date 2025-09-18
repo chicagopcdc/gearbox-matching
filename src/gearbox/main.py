@@ -4,7 +4,7 @@ from fastapi.responses import PlainTextResponse, JSONResponse
 import click
 import pkg_resources
 from fastapi import FastAPI, APIRouter, Depends, Request
-from fastapi.exceptions import RequestValidationError
+from fastapi.exceptions import RequestValidationError, ResponseValidationError
 from pydantic import ValidationError
 import httpx
 from sqlalchemy.orm import Session
@@ -59,6 +59,13 @@ def get_app():
         logger)
     load_keys()
 
+    @app.exception_handler(ResponseValidationError)
+    async def validation_exception_handler(request:Request, exc:ValueError):
+        exc_str = f'{exc}.'.replace('\n', '').replace(' ',' ')
+        logger.error(f"PYDANTIC RESPONSE VALIDATION ERROR: {request.url}: {exc_str}")
+        content = {'status_code': 10422,'message': exc_str, 'data':None}
+        return JSONResponse(content=content, status_code = status.HTTP_422_UNPROCESSABLE_ENTITY)
+
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request:Request, exc:ValueError):
         exc_str = f'{exc}.'.replace('\n', '').replace(' ',' ')
@@ -72,11 +79,6 @@ def get_app():
         logger.error(f"PYDANTIC VALIDATION ERROR: {request.url}: {exc_str}")
         content = {'status_code': 10422,'message': 'PYDANTIC ValidationError' + exc_str , 'data':None}
         return JSONResponse(content=content, status_code = status.HTTP_422_UNPROCESSABLE_ENTITY)
-
-#    @app.on_event("shutdown")
-#    async def shutdown_event():
-#        logger.info("Closing async client.")
-#        await app.async_client.aclose()
 
     return app
 
