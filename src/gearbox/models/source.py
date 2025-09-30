@@ -1,14 +1,14 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, UniqueConstraint, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Integer, String, DateTime, Boolean, UniqueConstraint, ForeignKey
+from sqlalchemy.orm import relationship, mapped_column
 
 from .base_class import Base
 
 
 class Source(Base):
     __tablename__ = 'source'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    source = Column(String, nullable=True)
-    priority = Column(Integer, nullable=False)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    source = mapped_column(String, nullable=True)
+    priority = mapped_column(Integer, nullable=False)
 
     UniqueConstraint(source, name='source_uix')
     UniqueConstraint(priority, name='priority_uix')

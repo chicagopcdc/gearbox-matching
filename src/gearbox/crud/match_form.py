@@ -1,12 +1,11 @@
 from re import I
 from telnetlib import EL
-from sqlalchemy import func, update, select, exc
+from sqlalchemy import select, exc, delete
 from fastapi import HTTPException
 from gearbox.util import status
 
 from gearbox.models.criterion_has_tag import CriterionHasTag
-from sqlalchemy.orm import Session, joinedload, join, noload
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
+from sqlalchemy.orm import Session, joinedload, noload
 from gearbox.models import DisplayRules, TriggeredBy, Criterion, CriterionHasTag, Value
 
 from cdislogging import get_logger
@@ -29,30 +28,36 @@ async def get_form_info(current_session: Session):
                 joinedload(CriterionHasTag.tag)
             ),
             joinedload(Criterion.input_type),
-            noload('el_criteria_has_criterions')
+            noload(Criterion.el_criteria_has_criterions)
         )
     ).order_by(DisplayRules.priority)
 
-    result = await current_session.execute(stmt)
-    sites = result.unique().scalars().all()
+    try:
+        result = await current_session.execute(stmt)
+        sites = result.unique().scalars().all()
+    except exc.SQLAlchemyError as e:
+        logger.error(f"Error in get_form_info: {type(e)}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")
     return sites
 
 async def clear_dr_tb_tags(current_session: Session):
     try:
-        await current_session.execute('DELETE FROM triggered_by')
-        await current_session.commit()
+        stmt = delete(TriggeredBy)
+        await current_session.execute(stmt)
     except exc.SQLAlchemyError as e:
         logger.error(f"Error clearing triggered_by table: {type(e)}")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")
+
     try:
-        await current_session.execute('DELETE FROM display_rules')
-        await current_session.commit()
+        stmt = delete(DisplayRules)
+        await current_session.execute(stmt)
     except exc.SQLAlchemyError as e:
         logger.error(f"Error clearing display_rules table: {type(e)}")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")
+
     try:
-        await current_session.execute('DELETE FROM criterion_has_tag')
-        await current_session.commit()
+        stmt = delete(CriterionHasTag)
+        await current_session.execute(stmt)
     except exc.SQLAlchemyError as e:
         logger.error(f"Error clearing criterion_has_tag table: {type(e)}")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")

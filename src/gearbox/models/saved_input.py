@@ -1,4 +1,5 @@
-from sqlalchemy import ForeignKey, Column, Integer, DateTime, Text, String
+from sqlalchemy import ForeignKey, Integer, DateTime, Text, String
+from sqlalchemy.orm import mapped_column
 from sqlalchemy.dialects.postgresql import JSONB
 
 from .base_class import Base
@@ -7,12 +8,12 @@ from .base_class import Base
 class SavedInput(Base):
     __tablename__ = 'saved_input'
     
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, nullable=False)
-    name = Column(String)
-    patient_id = Column(Integer, nullable=True)
-    create_date = Column(DateTime, nullable=False)
-    update_date = Column(DateTime, nullable=False)
-    data = Column(JSONB(astext_type=Text()), nullable=False)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id = mapped_column(Integer, nullable=False)
+    name = mapped_column(String)
+    patient_id = mapped_column(Integer, nullable=True)
+    create_date = mapped_column(DateTime, nullable=False)
+    update_date = mapped_column(DateTime, nullable=False)
+    data = mapped_column(JSONB(astext_type=Text()), nullable=False)
     
 

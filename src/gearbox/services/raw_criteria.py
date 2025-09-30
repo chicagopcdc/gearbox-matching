@@ -76,6 +76,7 @@ async def create_pre_annotated(session: Session, raw_criteria: RawCriteria):
     raw_criteria_id = raw_criteria.id
     await pre_annotated_criterion_crud.clear_pre_annotated_by_id(current_session=session, raw_criteria_id=raw_criteria.id)
     text = raw_criteria.data.get('text')
+    # clear pre_annotated in case this is a re-submit from doccano
 
     for pa in raw_criteria.data.get('pre_annotated'):
         start_offset = pa.get('span')[0]
@@ -148,7 +149,6 @@ async def create_raw_criteria(session: Session, raw_criteria_str: str, user_id: 
         # Create criterion_staging rows from the raw criteria json
         await stage_criteria(session, raw_criteria=raw_criteria)
         logger.info(f"Raw criteria for study {ext_id} successfully staged.")
-
     else: 
         """
         This logic is for situations when the user re-uploads from doccano and the process
@@ -202,14 +202,19 @@ async def create_raw_criteria(session: Session, raw_criteria_str: str, user_id: 
             'eligibility_criteria_id':latest_study_version.eligibility_criteria_id,
             'data':json.loads(raw_criteria_str)
         }
-
         raw_criteria_res = await raw_criteria_crud.upsert(
             db=session,
             model=RawCriteria,
             row=row,
             constraint_cols=[RawCriteria.eligibility_criteria_id]
         )                        
-        raw_criteria=RawCriteria(**raw_criteria_res)
+        raw_criteria=RawCriteria(
+            id=raw_criteria_res.id,
+            eligibility_criteria_id=raw_criteria_res.eligibility_criteria_id,
+            input_id=raw_criteria_res.input_id,
+            data=raw_criteria_res.data,
+            create_date=raw_criteria_res.create_date
+        )
     # persist pre_annotated info
     await create_pre_annotated(session=session, raw_criteria=raw_criteria)
 

@@ -1,6 +1,6 @@
 import datetime
 from re import I
-from sqlalchemy import select, exc, subquery
+from sqlalchemy import select
 from typing import Generic, List, Optional, Type, TypeVar, Union
 
 from sqlalchemy.orm import Session 

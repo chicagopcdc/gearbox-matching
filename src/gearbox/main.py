@@ -4,10 +4,11 @@ from fastapi.responses import PlainTextResponse, JSONResponse
 import click
 import pkg_resources
 from fastapi import FastAPI, APIRouter, Depends, Request
-from fastapi.exceptions import RequestValidationError
+from fastapi.exceptions import RequestValidationError, ResponseValidationError
 from pydantic import ValidationError
 import httpx
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from gearbox import deps, config
 from gearbox.util import status
 import cdislogging
@@ -58,6 +59,13 @@ def get_app():
         logger)
     load_keys()
 
+    @app.exception_handler(ResponseValidationError)
+    async def validation_exception_handler(request:Request, exc:ValueError):
+        exc_str = f'{exc}.'.replace('\n', '').replace(' ',' ')
+        logger.error(f"PYDANTIC RESPONSE VALIDATION ERROR: {request.url}: {exc_str}")
+        content = {'status_code': 10422,'message': exc_str, 'data':None}
+        return JSONResponse(content=content, status_code = status.HTTP_422_UNPROCESSABLE_ENTITY)
+
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request:Request, exc:ValueError):
         exc_str = f'{exc}.'.replace('\n', '').replace(' ',' ')
@@ -71,11 +79,6 @@ def get_app():
         logger.error(f"PYDANTIC VALIDATION ERROR: {request.url}: {exc_str}")
         content = {'status_code': 10422,'message': 'PYDANTIC ValidationError' + exc_str , 'data':None}
         return JSONResponse(content=content, status_code = status.HTTP_422_UNPROCESSABLE_ENTITY)
-
-#    @app.on_event("shutdown")
-#    async def shutdown_event():
-#        logger.info("Closing async client.")
-#        await app.async_client.aclose()
 
     return app
 
@@ -133,9 +136,9 @@ def load_keys():
     try:
         config.GEARBOX_KEY_CONFIG['GEARBOX_MIDDLEWARE_PUBLIC_KEY'] = SignatureManager(key_path=config.GEARBOX_MIDDLEWARE_PUBLIC_KEY_Path).key
     except NoKeyError:
-        logger.warn("GEARBOX_PUBLIC_KEY not found")
+        logger.warning("GEARBOX_PUBLIC_KEY not found")
     except KeyPathInvalidError:
-        logger.warn("GEARBOX_PUBLIC_KEY_PATH invalid")
+        logger.warning("GEARBOX_PUBLIC_KEY_PATH invalid")
 
 router = APIRouter()
 
@@ -147,5 +150,5 @@ def get_version():
 
 @router.get("/_status")
 async def get_status(db: Session = Depends(deps.get_session)):
-    now = await db.execute("SELECT now()")
+    now = await db.execute(text("SELECT now()"))
     return dict( status="OK", timestamp=now.scalars().first())

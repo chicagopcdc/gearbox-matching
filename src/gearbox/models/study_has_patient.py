@@ -1,15 +1,15 @@
-from sqlalchemy import ForeignKey, Column, Integer, DateTime, Boolean, JSON, String
-from sqlalchemy.orm import relationship
+from sqlalchemy import ForeignKey, Integer, DateTime, Boolean, JSON, String
+from sqlalchemy.orm import relationship, mapped_column
 
 from .base_class import Base
 
 
 class StudyHasPatient(Base):
     __tablename__ = 'study_has_patient'
-    study_id = Column(Integer, ForeignKey('study.id'), primary_key=True)
-    patient_id = Column(String, primary_key=True)
-    data = Column(JSON, nullable=False)
-    source_id = Column(String, nullable=False, primary_key=True)
+    study_id = mapped_column(Integer, ForeignKey('study.id'), primary_key=True)
+    patient_id = mapped_column(String, primary_key=True)
+    data = mapped_column(JSON, nullable=False)
+    source_id = mapped_column(String, nullable=False, primary_key=True)
     study = relationship("Study", back_populates="patients")
 
     def __str__(self):

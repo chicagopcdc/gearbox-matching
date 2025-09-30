@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, UniqueConstraint, Text, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Integer, String, DateTime, Boolean, UniqueConstraint, Text, ForeignKey
+from sqlalchemy.orm import relationship, mapped_column
 
 from .base_class import Base 
 
@@ -7,14 +7,14 @@ from .base_class import Base
 class Study(Base):
     __tablename__ = "study"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String, nullable=False)
-    code = Column(String, nullable=False)
-    description = Column(String, nullable=True)
-    create_date = Column(DateTime, nullable=True)
-    active = Column(Boolean, nullable=True)
-    follow_up_info = Column(Text, nullable=True)
-    source_id = Column(Integer, ForeignKey('source.id', name='fk_study_source_id'))
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    name = mapped_column(String, nullable=False)
+    code = mapped_column(String, nullable=False)
+    description = mapped_column(String, nullable=True)
+    create_date = mapped_column(DateTime, nullable=True)
+    active = mapped_column(Boolean, nullable=True)
+    follow_up_info = mapped_column(Text, nullable=True)
+    source_id = mapped_column(Integer, ForeignKey('source.id', name='fk_study_source_id'))
 
     UniqueConstraint(code, name='study_code_uix')
 

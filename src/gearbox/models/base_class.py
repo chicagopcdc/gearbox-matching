@@ -1,15 +1,9 @@
 import typing as t
 
 from sqlalchemy.ext.declarative import declared_attr, declarative_base
-from sqlalchemy.orm import as_declarative
+from sqlalchemy.orm import DeclarativeBase
 
-# Base = declarative_base()
-
-class_registry: t.Dict = {}
-
-
-@as_declarative(class_registry=class_registry)
-class Base:
+class Base(DeclarativeBase):
     id: t.Any
     __name__: str
 
