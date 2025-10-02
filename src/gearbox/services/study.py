@@ -1,14 +1,17 @@
 from . import logger
 from datetime import datetime
+from gearbox import config
+from fastapi.encoders import jsonable_encoder
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession as Session
-from fastapi import HTTPException
-from gearbox.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate, StudyUpdates
-from gearbox.util import status
+from fastapi import HTTPException, Request
+from gearbox.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate, StudyUpdates, StudyResults
+from gearbox.util import status, bucket_utils
 from gearbox.util.types import StudyVersionStatus
 from gearbox.crud import study_crud, site_crud, site_has_study_crud, study_link_crud, site_has_study_crud, study_external_id_crud, source_crud, study_version_crud
 from gearbox.models import Study, Site, StudyLink, SiteHasStudy, StudyExternalId, StudyVersion
 from operator import itemgetter
+from gearbox.services import match_conditions as mc, match_form as mf, eligibility_criteria as ec
 
 async def get_study_info(session: Session, id: int) -> StudySchema:
     study_info = await study_crud.get_single_study_info(session, id)
@@ -122,7 +125,14 @@ async def get_studies_to_update(existing_studies: list[Study], refresh_studies: 
 
     return studies_to_update
 
-async def update_studies(session: Session, updates: StudyUpdates):
+async def update_studies(session: Session, request:Request, updates: StudyUpdates, update_fe: bool=True):
+    """
+    Comments: This function does a refresh of the study, study_links, study_external_ids,
+        site_has_study, and site tables. Rather than delete the existing information,
+        the 'active' flag is set to false for all studies that do not exist in the
+        studyupdates json document. The function will also update the json files used
+        by the frontend if update_files. 
+    """
 
     # Get / validate the updates source
     source = updates.source
@@ -282,6 +292,9 @@ async def update_studies(session: Session, updates: StudyUpdates):
         for sv in svs:
             await study_version_crud.update(db=session, db_obj=sv, obj_in={"status":StudyVersionStatus.INACTIVE.value})
 
+    if update_fe:
+        await refresh_study_fe_files(session=session, request=request)
+
     return True
 
 def get_new_version(study_info: dict) -> str:
@@ -293,3 +306,26 @@ def get_new_version(study_info: dict) -> str:
             version = int(current_version.split(":")[0]) + 1
     return str(version) + ':' + ts
 
+
+async def build_studies(session: Session, request: Request) -> StudySchema:
+
+    results = await get_studies_info(session)
+    bucket_name = bucket_utils.get_bucket_name()
+    existing_studies = bucket_utils.get_object(request=request, bucket_name=bucket_name, key_name=config.S3_BUCKET_STUDIES_KEY_NAME, expires=300, method="get_object")
+    version = get_new_version(existing_studies)
+    studies = [StudySchema.model_validate(obj=study_obj, from_attributes=True) for study_obj in results]
+    new_studies = StudyResults(version=version, studies=studies)
+
+    if not config.BYPASS_S3:
+        json_studies = jsonable_encoder(new_studies)
+        params = [{'Content-Type':'application/json'}]
+        bucket_utils.put_object(request, bucket_name, config.S3_BUCKET_STUDIES_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, json_studies)
+
+    return new_studies
+
+async def refresh_study_fe_files(session: Session, request: Request):
+
+    await build_studies(session=session, request=request)
+    await mc.build_match_conditions(session=session, request=request)
+    await mf.build_match_form(session=session, request=request, save=True)
+    await ec.build_eligibility_criteria(session=session, request=request)

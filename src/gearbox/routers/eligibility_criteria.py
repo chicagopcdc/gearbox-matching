@@ -46,12 +46,7 @@ async def build_eligibility_criteria(
     request: Request,
     session: Session = Depends(deps.get_session),
 ):
-    eligibility_criteria = await ec.get_eligibility_criteria_set(session)
-
-    if not config.BYPASS_S3:
-        params = [{'Content-Type':'application/json'}]
-        bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, eligibility_criteria)
-
+    eligibility_criteria = await ec.build_eligibility_criteria(session=session, request=request)
     return eligibility_criteria
 
 @mod.post("/eligibility-criteria", response_model=EligibilityCriteria, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
