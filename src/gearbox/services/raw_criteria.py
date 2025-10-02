@@ -78,7 +78,7 @@ async def create_pre_annotated(session: Session, raw_criteria: RawCriteria):
     text = raw_criteria.data.get('text')
     # clear pre_annotated in case this is a re-submit from doccano
 
-    for pa in raw_criteria.data.get('pre_annotated'):
+    for pa in raw_criteria.data.get('pre_annotated') or []:
         start_offset = pa.get('span')[0]
         end_offset = pa.get('span')[1]
         label = pa.get('span')[2]
