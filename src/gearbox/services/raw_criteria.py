@@ -95,7 +95,7 @@ async def create_pre_annotated(session: Session, raw_criteria: RawCriteria):
 
         new_pa = await pre_annotated_criterion_crud.create(db=session, obj_in=pa_create)
 
-        for pa_model in matched_models:
+        for pa_model in matched_models or []:
             pam_create = PreAnnotatedCriterionModelCreate(
                 pre_annotated_criterion_id = new_pa.id,
                 model=pa_model
