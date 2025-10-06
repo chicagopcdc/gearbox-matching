@@ -33,18 +33,7 @@ async def build_all_studies(
     request: Request,
     session: AsyncSession = Depends(deps.get_session)
 ):
-    results = await study_service.get_studies_info(session)
-    bucket_name = bucket_utils.get_bucket_name()
-    existing_studies = bucket_utils.get_object(request=request, bucket_name=bucket_name, key_name=config.S3_BUCKET_STUDIES_KEY_NAME, expires=300, method="get_object")
-    version = study_service.get_new_version(existing_studies)
-    studies = [Study.model_validate(obj=study_obj, from_attributes=True) for study_obj in results]
-    new_studies = StudyResults(version=version, studies=studies)
-
-    if not config.BYPASS_S3:
-        json_studies = jsonable_encoder(new_studies)
-        params = [{'Content-Type':'application/json'}]
-        bucket_utils.put_object(request, bucket_name, config.S3_BUCKET_STUDIES_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, json_studies)
-
+    new_studies = await study_service.build_studies(session=session, request=request)
     return new_studies
 
 @mod.get("/studies", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)] )
@@ -95,7 +84,7 @@ async def update_studies(
         the 'active' flag is set to false for all studies that do not exist in the
         studyupdates json document.
     """
-    await study_service.update_studies(session=session, updates=body)
+    await study_service.update_studies(session=session, request=request, updates=body)
 
     return JSONResponse(status.HTTP_200_OK)
 

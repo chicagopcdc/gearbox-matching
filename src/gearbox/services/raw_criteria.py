@@ -78,7 +78,7 @@ async def create_pre_annotated(session: Session, raw_criteria: RawCriteria):
     text = raw_criteria.data.get('text')
     # clear pre_annotated in case this is a re-submit from doccano
 
-    for pa in raw_criteria.data.get('pre_annotated'):
+    for pa in raw_criteria.data.get('pre_annotated') or []:
         start_offset = pa.get('span')[0]
         end_offset = pa.get('span')[1]
         label = pa.get('span')[2]
@@ -95,7 +95,7 @@ async def create_pre_annotated(session: Session, raw_criteria: RawCriteria):
 
         new_pa = await pre_annotated_criterion_crud.create(db=session, obj_in=pa_create)
 
-        for pa_model in matched_models:
+        for pa_model in matched_models or []:
             pam_create = PreAnnotatedCriterionModelCreate(
                 pre_annotated_criterion_id = new_pa.id,
                 model=pa_model

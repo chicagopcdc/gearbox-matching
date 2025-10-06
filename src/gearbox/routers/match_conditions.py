@@ -37,11 +37,7 @@ async def build_mc(
     session: Session = Depends(deps.get_session)
 ):
 
-    match_conditions = await mc.get_match_conditions(session)
-
-    if not config.BYPASS_S3:
-        params = [{'Content-Type':'application/json'}]
-        bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_MATCH_CONDITIONS_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, match_conditions)
+    match_conditions = await mc.build_match_conditions(session=session, request=request)
     return JSONResponse(jsonable_encoder(match_conditions), status.HTTP_200_OK)
 
 def init_app(app):
