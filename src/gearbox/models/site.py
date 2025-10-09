@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String, DateTime, Boolean, UniqueConstraint, ForeignKey
+from sqlalchemy import Integer, String, DateTime, UniqueConstraint, ForeignKey, DECIMAL
 from sqlalchemy.orm import relationship, mapped_column
 
 from .base_class import Base
@@ -14,6 +14,8 @@ class Site(Base):
     zip = mapped_column(String, nullable=True)
     create_date = mapped_column(DateTime, nullable=True)
     source_id = mapped_column(Integer, ForeignKey('source.id', name='fk_site_source_id'))
+    location_lat = mapped_column(DECIMAL(10,8), nullable=True)
+    location_long = mapped_column(DECIMAL(11,8), nullable=True)
 
     UniqueConstraint(name, zip, name='site_uix')
 
