@@ -83,7 +83,7 @@ def test_create_study_algorithm_engine(setup_database, client, test_create_data,
 
     logic_file = test_create_data['logic_file']
     with open(logic_file, 'r') as comp_file:
-        ae_logic_json = comp_file.read().replace('\n','').replace('\t',' ')
+        ae_logic_json = json.loads(comp_file.read().replace('\n','').replace('\t',' '))
 
     data = {}
     data = {
