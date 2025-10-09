@@ -25,7 +25,7 @@ class StudyAlgorithmEngineBase(BaseModel):
 
 class StudyAlgorithmEngineIn(BaseModel):
     start_date: datetime | None = None
-    algorithm_logic: Json[AlgorithmLogic]
+    algorithm_logic: AlgorithmLogic
 
 class StudyAlgorithmEngineSave(StudyAlgorithmEngineBase):
     pass
