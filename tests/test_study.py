@@ -60,7 +60,7 @@ def test_get_study(setup_database, client):
     """
     errors = []
     fake_jwt = "1.2.3"
-    resp = client.get("/study/1", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.get("/study/2", headers={"Authorization": f"bearer {fake_jwt}"})
     assert str(resp.status_code).startswith("20")
 
 @pytest.mark.asyncio
