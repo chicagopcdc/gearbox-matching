@@ -316,8 +316,12 @@ async def build_studies(session: Session, request: Request) -> StudySchema:
     studies = [StudySchema.model_validate(obj=study_obj, from_attributes=True) for study_obj in results]
     new_studies = StudyResults(version=version, studies=studies)
 
+    #Remove inactive study links
+    for study in new_studies.studies:
+        study.links = [x for x in study.links if x.active]
+
     if not config.BYPASS_S3:
-        json_studies = jsonable_encoder(new_studies)
+        json_studies = jsonable_encoder(new_studies.studies)
         params = [{'Content-Type':'application/json'}]
         bucket_utils.put_object(request, bucket_name, config.S3_BUCKET_STUDIES_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, json_studies)
 
