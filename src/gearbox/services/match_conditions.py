@@ -549,7 +549,7 @@ async def get_match_conditions(session: Session) -> List[AlgorithmResponse]:
     for a in active_match_conds:
         study_logic = {}
         study_logic['studyId'] = a.study_id
-        if a.study_algorithm_engine:
+        if a.study_algorithm_engine and a.study_algorithm_engine.algorithm_logic:
             study_logic['algorithm'] = a.study_algorithm_engine.algorithm_logic
             match_conds.append(study_logic)
         else:
