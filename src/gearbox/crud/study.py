@@ -20,9 +20,13 @@ class CRUDStudy(CRUDBase [Study, StudyCreate, StudySearchResults]):
         study_id = result.unique().scalars().first()
         return study_id
 
-    # Returns study information for ACTIVE studies
+    # Returns study information for ACTIVE studies that have
+    # ACTIVE study versions with non-null eligibility criteria and algorithm logic
     async def get_studies_info(self, current_session: Session):
-        sv_subq = select(StudyVersion).where(StudyVersion.status==StudyVersionStatus.ACTIVE.value).subquery()
+        sv_subq = select(StudyVersion).where(
+            StudyVersion.status==StudyVersionStatus.ACTIVE.value).where(
+            StudyVersion.eligibility_criteria_id.is_not(None)).where(
+            StudyVersion.study_algorithm_engine_id.is_not(None)).subquery()
         stmt = select(Study).options(
             joinedload(Study.sites).options(
                 joinedload(SiteHasStudy.site)
