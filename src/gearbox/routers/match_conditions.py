@@ -13,7 +13,7 @@ from gearbox.schemas import AlgorithmResponse
 from gearbox import deps
 from gearbox.services import match_conditions as mc
 from gearbox.util import status, bucket_utils
-from gearbox.admin_login import admin_required
+from gearbox.admin_login import admin_required, super_admin_required
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)

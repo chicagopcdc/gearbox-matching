@@ -6,7 +6,7 @@ from . import logger
 from starlette.responses import JSONResponse 
 
 from gearbox import auth
-from gearbox.admin_login import admin_required
+from gearbox.admin_login import admin_required, super_admin_required
 
 from gearbox.schemas import Study, StudyCreate, StudyUpdates, StudyResults 
 from gearbox import deps

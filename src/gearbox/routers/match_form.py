@@ -11,7 +11,7 @@ from gearbox import auth
 from gearbox.schemas import MatchForm, MatchFormUpdate
 from gearbox import deps
 from gearbox.util import status, bucket_utils
-from gearbox.admin_login import admin_required
+from gearbox.admin_login import admin_required, super_admin_required
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)

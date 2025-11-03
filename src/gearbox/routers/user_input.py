@@ -12,7 +12,7 @@ from gearbox.schemas import SavedInputSearchResults, SavedInputCreate
 from gearbox.services import user_input as user_input_service
 from gearbox import deps
 from gearbox import auth 
-from gearbox.admin_login import admin_required
+from gearbox.admin_login import admin_required, super_admin_required
 from gearbox import config
 mod = APIRouter()
 

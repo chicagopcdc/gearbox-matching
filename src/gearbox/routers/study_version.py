@@ -7,7 +7,7 @@ from gearbox import auth
 from gearbox.schemas import StudyVersionUpdate, StudyVersion as StudyVersionSchema, StudyVersionCreate, StudyVersionInfo
 from gearbox import deps
 from gearbox.services import study_version  as study_version_service
-from gearbox.admin_login import admin_required
+from gearbox.admin_login import admin_required, super_admin_required
 
 mod = APIRouter()
 
