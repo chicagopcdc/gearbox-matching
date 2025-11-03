@@ -549,8 +549,11 @@ async def get_match_conditions(session: Session) -> List[AlgorithmResponse]:
     for a in active_match_conds:
         study_logic = {}
         study_logic['studyId'] = a.study_id
-        study_logic['algorithm'] = a.study_algorithm_engine.algorithm_logic
-        match_conds.append(study_logic)
+        if a.study_algorithm_engine and a.study_algorithm_engine.algorithm_logic:
+            study_logic['algorithm'] = a.study_algorithm_engine.algorithm_logic
+            match_conds.append(study_logic)
+        else:
+            logger.error(f"STUDY: {a.study_id} is missing algoritm logic and will not be included in the match_conditions file")
 
     # check for duplicate study ids in match conditions list, this can happen if
     # there are more than 1 active entry for a study in the study_version table
