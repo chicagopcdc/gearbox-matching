@@ -31,7 +31,7 @@ async def get_mc(
     presigned_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_MATCH_CONDITIONS_KEY_NAME, params, "get_object")
     return JSONResponse(presigned_url, status.HTTP_200_OK)
 
-@mod.post("/build-match-conditions", response_model=List[AlgorithmResponse], dependencies=[ Depends(auth.authenticate), Depends(admin_required)], status_code=status.HTTP_200_OK)
+@mod.post("/build-match-conditions", response_model=List[AlgorithmResponse], dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)], status_code=status.HTTP_200_OK)
 async def build_mc(
     request: Request,
     session: Session = Depends(deps.get_session)

@@ -17,7 +17,7 @@ from gearbox import config
 mod = APIRouter()
 
 
-@mod.get("/user-input/validation-update", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.get("/user-input/validation-update", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)])
 async def get_object_latest(
     request: Request,
     session: Session = Depends(deps.get_session),

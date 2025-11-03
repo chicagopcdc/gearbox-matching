@@ -79,7 +79,7 @@ async def update_object(
     upd_study_version = await study_version_service.update_study_version(session=session, study_version=body)
     return upd_study_version
 
-@mod.post("/publish-study-version/{study_version_id}", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.post("/publish-study-version/{study_version_id}", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)])
 async def publish_study_version(
     study_version_id: int,
     request: Request,

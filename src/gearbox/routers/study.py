@@ -28,7 +28,7 @@ async def get_study(
     else:
         return study 
 
-@mod.post("/build-studies", response_model=StudyResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
+@mod.post("/build-studies", response_model=StudyResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)] )
 async def build_all_studies(
     request: Request,
     session: AsyncSession = Depends(deps.get_session)
