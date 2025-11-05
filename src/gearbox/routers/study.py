@@ -6,7 +6,7 @@ from . import logger
 from starlette.responses import JSONResponse 
 
 from gearbox import auth
-from gearbox.admin_login import admin_required
+from gearbox.admin_login import admin_required, super_admin_required
 
 from gearbox.schemas import Study, StudyCreate, StudyUpdates, StudyResults 
 from gearbox import deps
@@ -28,7 +28,7 @@ async def get_study(
     else:
         return study 
 
-@mod.post("/build-studies", response_model=StudyResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
+@mod.post("/build-studies", response_model=StudyResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)] )
 async def build_all_studies(
     request: Request,
     session: AsyncSession = Depends(deps.get_session)

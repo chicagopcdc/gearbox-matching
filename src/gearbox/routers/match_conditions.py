@@ -13,7 +13,7 @@ from gearbox.schemas import AlgorithmResponse
 from gearbox import deps
 from gearbox.services import match_conditions as mc
 from gearbox.util import status, bucket_utils
-from gearbox.admin_login import admin_required
+from gearbox.admin_login import admin_required, super_admin_required
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
@@ -31,7 +31,7 @@ async def get_mc(
     presigned_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_MATCH_CONDITIONS_KEY_NAME, params, "get_object")
     return JSONResponse(presigned_url, status.HTTP_200_OK)
 
-@mod.post("/build-match-conditions", response_model=List[AlgorithmResponse], dependencies=[ Depends(auth.authenticate), Depends(admin_required)], status_code=status.HTTP_200_OK)
+@mod.post("/build-match-conditions", response_model=List[AlgorithmResponse], dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)], status_code=status.HTTP_200_OK)
 async def build_mc(
     request: Request,
     session: Session = Depends(deps.get_session)

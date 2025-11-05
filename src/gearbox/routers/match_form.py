@@ -11,12 +11,12 @@ from gearbox import auth
 from gearbox.schemas import MatchForm, MatchFormUpdate
 from gearbox import deps
 from gearbox.util import status, bucket_utils
-from gearbox.admin_login import admin_required
+from gearbox.admin_login import admin_required, super_admin_required
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
 
-@mod.post("/build-match-form/", response_model=MatchForm, response_model_exclude_none=True, dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
+@mod.post("/build-match-form/", response_model=MatchForm, response_model_exclude_none=True, dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)] )
 async def build_match_form(
     request: Request,
     session: Session = Depends(deps.get_session),
@@ -54,7 +54,7 @@ async def get_important_questions(
     else:
         return JSONResponse(status.HTTP_503_SERVICE_UNAVAILABLE)
 
-@mod.post("/update-match-form", dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.post("/update-match-form", dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)])
 async def update_match_form(
     body: MatchFormUpdate,
     request: Request,

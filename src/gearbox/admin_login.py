@@ -29,6 +29,25 @@ async def admin_required(
                 break
         else:
             if not token or not await arborist.auth_request(
-                token.credentials, "gearbox_gateway", "access", "/gearbox_gateway"
+                token.credentials, "gearbox", "*", "/services/gearbox/data-manager"
+            ):
+                raise HTTPException(status_code=HTTP_403_FORBIDDEN)
+
+
+async def super_admin_required(
+    credentials: HTTPBasicCredentials = Depends(security),
+    token: HTTPAuthorizationCredentials = Security(bearer),
+):
+    if not config.DEBUG:
+        for username, password in config.ADMIN_LOGINS:
+            if (
+                credentials
+                and credentials.username == username
+                and credentials.password == password
+            ):
+                break
+        else:
+            if not token or not await arborist.auth_request(
+                token.credentials, "*", "*", "/services/gearbox/data-admin"
             ):
                 raise HTTPException(status_code=HTTP_403_FORBIDDEN)
