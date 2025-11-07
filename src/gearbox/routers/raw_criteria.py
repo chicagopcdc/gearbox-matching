@@ -3,11 +3,11 @@ from fastapi import APIRouter, Request, Depends, UploadFile, File, HTTPException
 import io, fnmatch, json
 
 from . import logger
-from gearbox.util import status
+from gearboxdatamodel.util import status
 from gearbox.services import raw_criteria as raw_criteria_service
 from gearbox.admin_login import admin_required
 
-from gearbox.schemas import RawCriteriaIn, RawCriteria
+from gearboxdatamodel.schemas import RawCriteriaIn, RawCriteria
 from gearbox import deps
 from gearbox import auth 
 from starlette.responses import JSONResponse 

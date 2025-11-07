@@ -3,8 +3,8 @@ import pytest
 from gearbox import config
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select, func
-from gearbox.models import CriterionStaging, Criterion
-from gearbox.util.types import AdjudicationStatus
+from gearboxdatamodel.models import CriterionStaging, Criterion
+from gearboxdatamodel.util.types import AdjudicationStatus
 
 @pytest.mark.asyncio
 def test_get_criterion_staging(setup_database, client):

@@ -1,5 +1,6 @@
 from gearbox import config
-from gearbox.util import status, bucket_utils
+from gearboxdatamodel.util import status
+from gearbox.util import bucket_utils
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Request, Depends, APIRouter, HTTPException
 from . import logger
@@ -8,7 +9,7 @@ from starlette.responses import JSONResponse
 from gearbox import auth
 from gearbox.admin_login import admin_required, super_admin_required
 
-from gearbox.schemas import Study, StudyCreate, StudyUpdates, StudyResults 
+from gearboxdatamodel.schemas import Study, StudyCreate, StudyUpdates, StudyResults 
 from gearbox import deps
 from gearbox.services import study as study_service
 from fastapi.encoders import jsonable_encoder

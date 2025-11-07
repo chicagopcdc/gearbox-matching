@@ -5,11 +5,12 @@ from fastapi.encoders import jsonable_encoder
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import HTTPException, Request
-from gearbox.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate, StudyUpdates, StudyResults
-from gearbox.util import status, bucket_utils
-from gearbox.util.types import StudyVersionStatus
-from gearbox.crud import study_crud, site_crud, site_has_study_crud, study_link_crud, site_has_study_crud, study_external_id_crud, source_crud, study_version_crud
-from gearbox.models import Study, Site, StudyLink, SiteHasStudy, StudyExternalId, StudyVersion
+from gearboxdatamodel.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate, StudyUpdates, StudyResults
+from gearbox.util import bucket_utils
+from gearboxdatamodel.util import status
+from gearboxdatamodel.util.types import StudyVersionStatus
+from gearboxdatamodel.crud import study_crud, site_crud, site_has_study_crud, study_link_crud, site_has_study_crud, study_external_id_crud, source_crud, study_version_crud
+from gearboxdatamodel.models import Study, Site, StudyLink, SiteHasStudy, StudyExternalId, StudyVersion
 from operator import itemgetter
 from gearbox.services import match_conditions as mc, match_form as mf, eligibility_criteria as ec
 

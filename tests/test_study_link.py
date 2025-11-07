@@ -1,7 +1,7 @@
 import pytest
 
 from sqlalchemy.orm import sessionmaker 
-from gearbox.models import StudyLink
+from gearboxdatamodel.models import StudyLink
 
 def test_get_study_links(setup_database, client):
     """

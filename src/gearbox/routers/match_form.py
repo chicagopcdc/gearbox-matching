@@ -8,9 +8,10 @@ from gearbox.services import match_form as match_form_service
 from . import logger
 from starlette.responses import JSONResponse
 from gearbox import auth
-from gearbox.schemas import MatchForm, MatchFormUpdate
+from gearboxdatamodel.schemas import MatchForm, MatchFormUpdate
 from gearbox import deps
-from gearbox.util import status, bucket_utils
+from gearboxdatamodel.util import status
+from gearbox.util import bucket_utils
 from gearbox.admin_login import admin_required, super_admin_required
 
 mod = APIRouter()

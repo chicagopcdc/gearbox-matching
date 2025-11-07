@@ -1,11 +1,11 @@
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from . import logger
 from fastapi import HTTPException
-from gearbox.models import RawCriteria
-from gearbox.schemas import RawCriteriaCreate, RawCriteria as RawCriteriaSchema, StudyVersionCreate, RawCriteriaIn, CriterionStagingCreate, PreAnnotatedCriterionCreate, PreAnnotatedCriterionModelCreate
-from gearbox.util import status 
-from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus
-from gearbox.crud import raw_criteria_crud, criterion_crud, study_version_crud, pre_annotated_criterion_crud, pre_annotated_criterion_model_crud
+from gearboxdatamodel.models import RawCriteria
+from gearboxdatamodel.schemas import RawCriteriaCreate, RawCriteria as RawCriteriaSchema, StudyVersionCreate, RawCriteriaIn, CriterionStagingCreate, PreAnnotatedCriterionCreate, PreAnnotatedCriterionModelCreate
+from gearboxdatamodel.util import status 
+from gearboxdatamodel.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus
+from gearboxdatamodel.crud import raw_criteria_crud, criterion_crud, study_version_crud, pre_annotated_criterion_crud, pre_annotated_criterion_model_crud
 from gearbox.services import study as study_service, study_version as study_version_service, eligibility_criteria as eligibility_criteria_service, criterion_staging as criterion_staging_service
 from typing import List, Dict
 

@@ -3,7 +3,7 @@ from .test_utils import is_aws_url
 import pytest
 
 from sqlalchemy.orm import sessionmaker
-from gearbox.models import Value, Unit
+from gearboxdatamodel.models import Value, Unit
 
 from deepdiff import DeepDiff
 from starlette.config import environ

@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy.orm import sessionmaker 
-from gearbox.models import StudyVersion
-from gearbox.util.types import StudyVersionStatus
+from gearboxdatamodel.models import StudyVersion
+from gearboxdatamodel.util.types import StudyVersionStatus
 
 
 @pytest.mark.asyncio

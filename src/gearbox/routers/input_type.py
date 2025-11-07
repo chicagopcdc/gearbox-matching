@@ -2,10 +2,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter
 from fastapi import Request, Depends
 
-from gearbox.util import status
+from gearboxdatamodel.util import status
 from gearbox.services import input_type as input_type_service
 
-from gearbox.schemas import InputTypeSearchResults
+from gearboxdatamodel.schemas import InputTypeSearchResults
 from gearbox import deps
 from gearbox import auth 
 from gearbox.admin_login import admin_required

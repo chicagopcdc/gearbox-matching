@@ -2,9 +2,9 @@ from fastapi import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Request, Depends, APIRouter, HTTPException
 from . import logger
-from ..util import status
+from gearboxdatamodel.util import status
 from gearbox import auth
-from gearbox.schemas import StudyLinkSearchResults, StudyLink as StudyLinkSchema, StudyLinkCreate
+from gearboxdatamodel.schemas import StudyLinkSearchResults, StudyLink as StudyLinkSchema, StudyLinkCreate
 from gearbox import deps
 from gearbox.services import study_link  as study_link_service
 from gearbox.admin_login import admin_required

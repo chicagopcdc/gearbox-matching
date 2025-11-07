@@ -3,7 +3,7 @@ import random
 
 from sqlalchemy.orm import sessionmaker
 
-from gearbox.models import Criterion, CriterionHasTag, CriterionHasValue, DisplayRules, TriggeredBy
+from gearboxdatamodel.models import Criterion, CriterionHasTag, CriterionHasValue, DisplayRules, TriggeredBy
 
 from starlette.config import environ
 

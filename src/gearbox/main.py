@@ -1,6 +1,5 @@
 import asyncio
-import json
-from fastapi.responses import PlainTextResponse, JSONResponse
+from fastapi.responses import JSONResponse
 import click
 import pkg_resources
 from fastapi import FastAPI, APIRouter, Depends, Request
@@ -10,22 +9,21 @@ import httpx
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from gearbox import deps, config
-from gearbox.util import status
+from gearboxdatamodel.util import status
 import cdislogging
 from pcdc_aws_client.boto import BotoManager
-import uvicorn
 from pcdcutils.signature import SignatureManager
 from pcdcutils.errors import KeyPathInvalidError, NoKeyError
 
-from contextlib import asynccontextmanager
 
-
-logger_name = 'gb-logger'
-logger = cdislogging.get_logger(logger_name, log_level="debug" if config.DEBUG else "info")
-
+logger_name = "gb-logger"
+logger = cdislogging.get_logger(
+    logger_name, log_level="debug" if config.DEBUG else "info"
+)
 
 
 from importlib_metadata import entry_points
+
 
 async def lifespan(app: FastAPI):
 
@@ -43,7 +41,7 @@ def get_app():
         title="Framework Services Object Management Service",
         version=pkg_resources.get_distribution("gearbox").version,
         debug=config.DEBUG,
-        openapi_prefix=config.URL_PREFIX
+        openapi_prefix=config.URL_PREFIX,
     )
     app.include_router(router)
     app.add_middleware(ClientDisconnectMiddleware)
@@ -52,33 +50,44 @@ def get_app():
 
     app.boto_manager = BotoManager(
         {
-            'region_name': config.AWS_REGION,
-            'aws_access_key_id': config.S3_AWS_ACCESS_KEY_ID,
-            'aws_secret_access_key': config.S3_AWS_SECRET_ACCESS_KEY
-        }, 
-        logger)
+            "region_name": config.AWS_REGION,
+            "aws_access_key_id": config.S3_AWS_ACCESS_KEY_ID,
+            "aws_secret_access_key": config.S3_AWS_SECRET_ACCESS_KEY,
+        },
+        logger,
+    )
     load_keys()
 
     @app.exception_handler(ResponseValidationError)
-    async def validation_exception_handler(request:Request, exc:ValueError):
-        exc_str = f'{exc}.'.replace('\n', '').replace(' ',' ')
+    async def validation_exception_handler(request: Request, exc: ValueError):
+        exc_str = f"{exc}.".replace("\n", "").replace(" ", " ")
         logger.error(f"PYDANTIC RESPONSE VALIDATION ERROR: {request.url}: {exc_str}")
-        content = {'status_code': 10422,'message': exc_str, 'data':None}
-        return JSONResponse(content=content, status_code = status.HTTP_422_UNPROCESSABLE_ENTITY)
+        content = {"status_code": 10422, "message": exc_str, "data": None}
+        return JSONResponse(
+            content=content, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
+        )
 
     @app.exception_handler(RequestValidationError)
-    async def validation_exception_handler(request:Request, exc:ValueError):
-        exc_str = f'{exc}.'.replace('\n', '').replace(' ',' ')
+    async def validation_exception_handler(request: Request, exc: ValueError):
+        exc_str = f"{exc}.".replace("\n", "").replace(" ", " ")
         logger.error(f"PYDANTIC REQUEST VALIDATION ERROR: {request.url}: {exc_str}")
-        content = {'status_code': 10422,'message': exc_str, 'data':None}
-        return JSONResponse(content=content, status_code = status.HTTP_422_UNPROCESSABLE_ENTITY)
+        content = {"status_code": 10422, "message": exc_str, "data": None}
+        return JSONResponse(
+            content=content, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
+        )
 
     @app.exception_handler(ValidationError)
-    async def validation_exception_handler(request:Request, exc:ValueError):
-        exc_str = f'{exc}.'.replace('\n', '').replace(' ',' ')
+    async def validation_exception_handler(request: Request, exc: ValueError):
+        exc_str = f"{exc}.".replace("\n", "").replace(" ", " ")
         logger.error(f"PYDANTIC VALIDATION ERROR: {request.url}: {exc_str}")
-        content = {'status_code': 10422,'message': 'PYDANTIC ValidationError' + exc_str , 'data':None}
-        return JSONResponse(content=content, status_code = status.HTTP_422_UNPROCESSABLE_ENTITY)
+        content = {
+            "status_code": 10422,
+            "message": "PYDANTIC ValidationError" + exc_str,
+            "data": None,
+        }
+        return JSONResponse(
+            content=content, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
+        )
 
     return app
 
@@ -132,13 +141,17 @@ def load_modules(app=None):
             extra={"color_message": msg + click.style("%s", fg="cyan")},
         )
 
+
 def load_keys():
     try:
-        config.GEARBOX_KEY_CONFIG['GEARBOX_MIDDLEWARE_PUBLIC_KEY'] = SignatureManager(key_path=config.GEARBOX_MIDDLEWARE_PUBLIC_KEY_Path).key
+        config.GEARBOX_KEY_CONFIG["GEARBOX_MIDDLEWARE_PUBLIC_KEY"] = SignatureManager(
+            key_path=config.GEARBOX_MIDDLEWARE_PUBLIC_KEY_Path
+        ).key
     except NoKeyError:
         logger.warning("GEARBOX_PUBLIC_KEY not found")
     except KeyPathInvalidError:
         logger.warning("GEARBOX_PUBLIC_KEY_PATH invalid")
+
 
 router = APIRouter()
 
@@ -151,4 +164,4 @@ def get_version():
 @router.get("/_status")
 async def get_status(db: Session = Depends(deps.get_session)):
     now = await db.execute(text("SELECT now()"))
-    return dict( status="OK", timestamp=now.scalars().first())
+    return dict(status="OK", timestamp=now.scalars().first())
