@@ -3,11 +3,11 @@ from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy import exc 
 from fastapi import HTTPException
-from gearbox.schemas import ValueCreate, ValueSearchResults, Value as ValueSchema
-from gearbox.util import status
-from gearbox.crud import value_crud, unit_crud
-from gearbox.schemas import ValueCreate, UnitCreate, ValueSave
-from gearbox.models import Value
+from gearboxdatamodel.schemas import ValueCreate, ValueSearchResults, Value as ValueSchema
+from gearboxdatamodel.util import status
+from gearboxdatamodel.crud import value_crud, unit_crud
+from gearboxdatamodel.schemas import ValueCreate, UnitCreate, ValueSave
+from gearboxdatamodel.models import Value
 from typing import List
 
 async def get_value(session: Session, id: int) -> ValueSchema:

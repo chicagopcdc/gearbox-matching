@@ -9,10 +9,11 @@ from gearbox import config
 from starlette.responses import JSONResponse
 from typing import List
 from gearbox import auth
-from gearbox.schemas import AlgorithmResponse
+from gearboxdatamodel.schemas import AlgorithmResponse
 from gearbox import deps
 from gearbox.services import match_conditions as mc
-from gearbox.util import status, bucket_utils
+from gearboxdatamodel.util import status
+from gearbox.util import bucket_utils
 from gearbox.admin_login import admin_required, super_admin_required
 
 mod = APIRouter()

@@ -3,7 +3,7 @@ import json
 
 from fastapi import HTTPException
 from starlette.config import environ
-from gearbox.models import StudyAlgorithmEngine, StudyVersion
+from gearboxdatamodel.models import StudyAlgorithmEngine, StudyVersion
 
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select

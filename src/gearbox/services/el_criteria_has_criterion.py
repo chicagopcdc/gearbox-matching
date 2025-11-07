@@ -1,12 +1,12 @@
 from . import logger
-from gearbox.crud import el_criteria_has_criterion_crud, study_version_crud, eligibility_criteria_crud, value_crud, criterion_crud, criterion_staging_crud
-from gearbox.schemas import ElCriteriaHasCriterionCreate, ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterion as ElCriteriaHasCriterionSchema, ElCriteriaHasCriterionPublish, CriterionStagingUpdate
+from gearboxdatamodel.crud import el_criteria_has_criterion_crud, study_version_crud, eligibility_criteria_crud, value_crud, criterion_crud, criterion_staging_crud
+from gearboxdatamodel.schemas import ElCriteriaHasCriterionCreate, ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterion as ElCriteriaHasCriterionSchema, ElCriteriaHasCriterionPublish, CriterionStagingUpdate
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import HTTPException
-from gearbox.util import status
-from gearbox.models import ElCriteriaHasCriterion
+from gearboxdatamodel.util import status
+from gearboxdatamodel.models import ElCriteriaHasCriterion
 from gearbox.services import criterion_staging as criterion_staging_service
-from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus
+from gearboxdatamodel.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus
 from gearbox import auth
 
 async def get_el_criteria_has_criterion(session: Session, id: int) -> ElCriteriaHasCriterionSchema:

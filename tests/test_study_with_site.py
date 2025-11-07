@@ -2,7 +2,7 @@ import pytest
 import random
 
 from sqlalchemy.orm import sessionmaker
-from gearbox.models import Study, StudyLink, Site
+from gearboxdatamodel.models import Study, StudyLink, Site
 from .test_utils import is_aws_url
 
 @pytest.mark.parametrize(

@@ -172,7 +172,6 @@ def valid_upload_file_patcher(client, guid_mock, signed_url_mock):
 
     access_token_mock = MagicMock()
     patches.append(patch("authutils.token.fastapi.access_token", access_token_mock))
-    patches.append(patch("gearbox.routers.user_input.access_token", access_token_mock))
 
     async def get_access_token(*args, **kwargs):
         return {"sub": "1"}

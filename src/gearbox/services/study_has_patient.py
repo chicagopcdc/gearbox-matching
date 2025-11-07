@@ -1,13 +1,13 @@
 from . import logger
-from gearbox.crud import study_has_patient_crud
-from gearbox.schemas import StudyHasPatientCreate, StudyHasPatientSearchResults
-from gearbox.schemas import StudyHasPatient as StudyHasPatientSchema
+from gearboxdatamodel.crud import study_has_patient_crud
+from gearboxdatamodel.schemas import StudyHasPatientCreate, StudyHasPatientSearchResults
+from gearboxdatamodel.schemas import StudyHasPatient as StudyHasPatientSchema
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy import select
 from fastapi import HTTPException
-from gearbox.util import status
-from gearbox.models import StudyHasPatient
-from gearbox.crud import study_has_patient
+from gearboxdatamodel.util import status
+from gearboxdatamodel.models import StudyHasPatient
+from gearboxdatamodel.crud import study_has_patient
 from typing import List
 from pydantic import ValidationError
 

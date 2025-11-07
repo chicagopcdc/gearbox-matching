@@ -3,7 +3,7 @@ import random
 import json
 
 from sqlalchemy.orm import sessionmaker
-from gearbox.models import Study
+from gearboxdatamodel.models import Study
 from deepdiff import DeepDiff
 
 from .test_utils import is_aws_url

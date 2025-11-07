@@ -2,11 +2,11 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Request, Depends, APIRouter, HTTPException
 from . import logger
-from gearbox.util import status
+from gearboxdatamodel.util import status
 from gearbox.admin_login import admin_required
 from gearbox.services import study_algorithm_engine
 
-from gearbox.schemas import StudyAlgorithmEngineUpdate, StudyAlgorithmEngineSearchResults , StudyAlgorithmEngine, StudyAlgorithmEngineCreate
+from gearboxdatamodel.schemas import StudyAlgorithmEngineUpdate, StudyAlgorithmEngineSearchResults , StudyAlgorithmEngine, StudyAlgorithmEngineCreate
 from gearbox import deps
 from gearbox import auth 
 

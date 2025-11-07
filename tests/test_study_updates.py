@@ -2,8 +2,8 @@ import pytest
 import random
 
 from sqlalchemy.orm import sessionmaker
-from gearbox.models import Study, StudyLink, Site, StudyExternalId, SiteHasStudy, StudyVersion
-from gearbox.util.types import StudyVersionStatus
+from gearboxdatamodel.models import Study, StudyLink, Site, StudyExternalId, SiteHasStudy, StudyVersion
+from gearboxdatamodel.util.types import StudyVersionStatus
 from .test_utils import is_aws_url
 
 from starlette.status import (

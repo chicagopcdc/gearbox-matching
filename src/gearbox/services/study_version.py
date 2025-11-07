@@ -1,13 +1,13 @@
 from . import logger
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import HTTPException, Request
-from gearbox.models import StudyVersion, StudyVersion, Study
-from gearbox.schemas import StudyVersionCreate, StudyVersionSearchResults, StudyVersion as StudyVersionSchema, StudyVersionInfo, StudyVersionUpdate, StudyCreate, EligibilityCriteriaCreate
+from gearboxdatamodel.models import StudyVersion, StudyVersion, Study
+from gearboxdatamodel.schemas import StudyVersionCreate, StudyVersionSearchResults, StudyVersion as StudyVersionSchema, StudyVersionInfo, StudyVersionUpdate, StudyCreate, EligibilityCriteriaCreate
 from sqlalchemy.sql.functions import func
-from gearbox.util import status
-from gearbox.crud import study_version_crud 
+from gearboxdatamodel.util import status
+from gearboxdatamodel.crud import study_version_crud 
 from typing import List
-from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus, EligibilityCriteriaStatus
+from gearboxdatamodel.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus, EligibilityCriteriaStatus
 from gearbox.services import criterion_staging as criterion_staging_service, study_algorithm_engine as study_algorithm_engine_service, study as study_service, eligibility_criteria as eligiblity_criteria_service, el_criteria_has_criterion as echc_service, value as value_service, match_form as match_form_service
 
 async def get_latest_study_version(session: Session, study_id: int) -> int:
