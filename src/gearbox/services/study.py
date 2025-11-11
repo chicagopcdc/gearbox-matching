@@ -1,17 +1,24 @@
 from . import logger
 from datetime import datetime
+from gearbox import config
+from fastapi.encoders import jsonable_encoder
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession as Session
-from fastapi import HTTPException
-from gearbox.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate, StudyUpdates
-from gearbox.util import status
-from gearbox.crud import study_crud, site_crud, site_has_study_crud, study_link_crud, site_has_study_crud, study_external_id_crud, source_crud
-from gearbox.models import Study, Site, StudyLink, SiteHasStudy, StudyExternalId
+from fastapi import HTTPException, Request
+from gearbox.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate, StudyUpdates, StudyResults
+from gearbox.util import status, bucket_utils
+from gearbox.util.types import StudyVersionStatus
+from gearbox.crud import study_crud, site_crud, site_has_study_crud, study_link_crud, site_has_study_crud, study_external_id_crud, source_crud, study_version_crud
+from gearbox.models import Study, Site, StudyLink, SiteHasStudy, StudyExternalId, StudyVersion
 from operator import itemgetter
+from gearbox.services import match_conditions as mc, match_form as mf, eligibility_criteria as ec
 
 async def get_study_info(session: Session, id: int) -> StudySchema:
     study_info = await study_crud.get_single_study_info(session, id)
-    return study_info
+    if study_info:
+        return study_info
+    else:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Study for id: {id} not found.") 
 
 async def get_studies_info(session: Session) -> StudySearchResults:
     studies = await study_crud.get_studies_info(session)
@@ -24,7 +31,10 @@ async def get_study_id_by_ext_id(session: Session, ext_id: str) -> int:
 
 async def get_study(session: Session, id: int) -> StudySchema:
     study = await study_crud.get(session, id)
-    return study
+    if study:
+        return study
+    else:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, f"Study for id: {study_id} not found.") 
 
 async def get_studies(session: Session) -> StudySearchResults:
     studies = await study_crud.get_multi(session)
@@ -82,7 +92,9 @@ async def get_studies_to_update(existing_studies: list[Study], refresh_studies: 
                                           'country':z.site.country,
                                           'city':z.site.city,
                                           'state':z.site.state,
-                                          'zip':z.site.zip
+                                          'zip':z.site.zip,
+                                          'location_lat': z.site.location_lat,
+                                          'location_long': z.site.location_long
                                           } for z in x.sites],
                                 'ext_ids': [{'ext_id':a.ext_id,
                                              'source':a.source,
@@ -96,7 +108,9 @@ async def get_studies_to_update(existing_studies: list[Study], refresh_studies: 
                                'sites': [{'name':z.name, 
                                           'country':z.country, 'city':z.city,
                                           'state':z.state,
-                                          'zip':z.zip
+                                          'zip':z.zip,
+                                          'location_lat': z.location_lat,
+                                          'location_long': z.location_long
                                           } for z in x.sites],
                                 'ext_ids': [{'ext_id':a.ext_id,
                                              'source':a.source,
@@ -115,7 +129,14 @@ async def get_studies_to_update(existing_studies: list[Study], refresh_studies: 
 
     return studies_to_update
 
-async def update_studies(session: Session, updates: StudyUpdates):
+async def update_studies(session: Session, request:Request, updates: StudyUpdates, update_fe: bool=True):
+    """
+    Comments: This function does a refresh of the study, study_links, study_external_ids,
+        site_has_study, and site tables. Rather than delete the existing information,
+        the 'active' flag is set to false for all studies that do not exist in the
+        studyupdates json document. The function will also update the json files used
+        by the frontend if update_files. 
+    """
 
     # Get / validate the updates source
     source = updates.source
@@ -123,7 +144,6 @@ async def update_studies(session: Session, updates: StudyUpdates):
     if not source_id:
         logger.error(f"ERROR: refresh study info source: {source} does not exist in source table.")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Error: refresh study info source: {source} does not exist")
-
 
     # Get study ids of all studies that exist in the db for the source
     source_study_ids = await study_crud.get_study_ids_for_source(db=session, source=source)
@@ -187,6 +207,8 @@ async def update_studies(session: Session, updates: StudyUpdates):
                     'city': site.city,
                     'state': site.state,
                     'zip': site.zip,
+                    'location_lat': site.location_lat,
+                    'location_long': site.location_long,
                     'create_date': datetime.now(),
                     'source_id': source_id
                 }
@@ -222,7 +244,7 @@ async def update_studies(session: Session, updates: StudyUpdates):
             for link in study.links:
                 row = {
                     'name': link.name,
-                    'href': link.href,
+                    'href': str(link.href),
                     'study_id' : new_or_updated_study.id,
                     'active': study.active,
                     'create_date': datetime.now()
@@ -242,7 +264,7 @@ async def update_studies(session: Session, updates: StudyUpdates):
                     'study_id' : new_or_updated_study.id,
                     'ext_id': ext_id.ext_id,
                     'source': ext_id.source,
-                    'source_url': ext_id.source_url,
+                    'source_url': str(ext_id.source_url),
                     'active': ext_id.active,
                     'create_date': datetime.now()
                 }
@@ -262,6 +284,23 @@ async def update_studies(session: Session, updates: StudyUpdates):
     await site_has_study_crud.set_active_all_rows(db=session, active_upd=True, ids=study_ids_reset_to_active)
     await study_link_crud.set_active_all_rows(db=session, active_upd=True, ids=study_ids_reset_to_active)
 
+    ## Set any 'ACTIVE' study versions to 'INACTIVE' for all inactive studies
+    noload = [Study.patients, Study.sites, Study.links, Study.ext_ids, Study.study_versions, Study.study_source] 
+    noload_sv = [StudyVersion.eligibility_criteria, StudyVersion.study_algorithm_engine, StudyVersion.study]
+    inactive_studies = await study_crud.get_multi(db=session, active=False, noload_rel=noload)
+    for inactive_study in inactive_studies:
+
+        where_clause=[f"study_id = {inactive_study.id}", f"status = '{StudyVersionStatus.ACTIVE.value}'"]
+        svs = await study_version_crud.get_multi(session, 
+            noload_rel = noload_sv,
+            where=where_clause)
+
+        for sv in svs:
+            await study_version_crud.update(db=session, db_obj=sv, obj_in={"status":StudyVersionStatus.INACTIVE.value})
+
+    if update_fe:
+        await refresh_study_fe_files(session=session, request=request)
+
     return True
 
 def get_new_version(study_info: dict) -> str:
@@ -273,3 +312,30 @@ def get_new_version(study_info: dict) -> str:
             version = int(current_version.split(":")[0]) + 1
     return str(version) + ':' + ts
 
+
+async def build_studies(session: Session, request: Request) -> StudySchema:
+
+    results = await get_studies_info(session)
+    bucket_name = bucket_utils.get_bucket_name()
+    existing_studies = bucket_utils.get_object(request=request, bucket_name=bucket_name, key_name=config.S3_BUCKET_STUDIES_KEY_NAME, expires=300, method="get_object")
+    version = get_new_version(existing_studies)
+    studies = [StudySchema.model_validate(obj=study_obj, from_attributes=True) for study_obj in results]
+    new_studies = StudyResults(version=version, studies=studies)
+
+    #Remove inactive study links
+    for study in new_studies.studies:
+        study.links = [x for x in study.links if x.active]
+
+    if not config.BYPASS_S3:
+        json_studies = jsonable_encoder(new_studies)
+        params = [{'Content-Type':'application/json'}]
+        bucket_utils.put_object(request, bucket_name, config.S3_BUCKET_STUDIES_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, json_studies)
+
+    return new_studies
+
+async def refresh_study_fe_files(session: Session, request: Request):
+
+    await build_studies(session=session, request=request)
+    await mc.build_match_conditions(session=session, request=request)
+    await mf.build_match_form(session=session, request=request, save=True)
+    await ec.build_eligibility_criteria(session=session, request=request)

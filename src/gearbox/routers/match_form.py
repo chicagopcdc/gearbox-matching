@@ -8,17 +8,16 @@ from gearbox.services import match_form as match_form_service
 from . import logger
 from starlette.responses import JSONResponse
 from gearbox import auth
-from gearbox.schemas import MatchForm
-from gearbox.schemas.match_form import showif_logic_schema
+from gearbox.schemas import MatchForm, MatchFormUpdate
 from gearbox import deps
 from gearbox.util import status, bucket_utils
-from gearbox.admin_login import admin_required
+from gearbox.admin_login import admin_required, super_admin_required
 
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
 
-@mod.post("/build-match-form/", response_model=MatchForm, response_model_exclude_none=True, dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
-async def build_match_info(
+@mod.post("/build-match-form/", response_model=MatchForm, response_model_exclude_none=True, dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)] )
+async def build_match_form(
     request: Request,
     session: Session = Depends(deps.get_session),
     save: bool = True
@@ -28,13 +27,7 @@ async def build_match_info(
     is set to true, it will save the match for to S3, if 'save' is false it will just return
     the match form without uploading to S3. 
     """
-    match_form = await match_form_service.get_match_form(session)
-    if save:
-        if not config.BYPASS_S3:
-            params = [{'Content-Type':'application/json'}]
-            bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_MATCH_FORM_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, match_form)
-
-    return match_form
+    return await match_form_service.build_match_form(session=session, request=request, save=save)
 
 @mod.get("/match-form", dependencies=[ Depends(auth.authenticate)], status_code=status.HTTP_200_OK)
 async def get_match_form(
@@ -61,9 +54,9 @@ async def get_important_questions(
     else:
         return JSONResponse(status.HTTP_503_SERVICE_UNAVAILABLE)
 
-@mod.post("/update-match-form", dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
-async def update_sae(
-    body: MatchForm,
+@mod.post("/update-match-form", dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)])
+async def update_match_form(
+    body: MatchFormUpdate,
     request: Request,
     session: Session = Depends(deps.get_session),
 ):

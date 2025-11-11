@@ -28,10 +28,10 @@ async def create_unit(session: Session, unit: UnitCreate) -> UnitSchema:
     new_unit = await unit_crud.create(db=session, obj_in=unit)
     return new_unit
 
-async def update_unit(session: Session, unit: UnitCreate, unit_id: int) -> UnitSchema:
+async def update_unit(session: Session, unit: UnitCreate, unit_id: int):
     unit_in = await unit_crud.get(db=session, id=unit_id)
     if unit_in:
-        upd_unit = await unit_crud.update(db=session, db_obj=unit_in, obj_in=unit)
+        await unit_crud.update(db=session, db_obj=unit_in, obj_in=unit)
     else:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Unit for id: {unit_id} not found for update.") 
 

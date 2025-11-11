@@ -1,14 +1,12 @@
-import sre_compile
 from pydantic import BaseModel
-from datetime import datetime
-from typing import Sequence, List, Optional
+from typing import Sequence, Optional
 
 class TagBase(BaseModel):
     code: str
-    type: Optional[str]
+    type: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 class Tag(TagBase):
     id: int

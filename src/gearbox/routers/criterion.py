@@ -1,7 +1,6 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import APIRouter
-from fastapi import Request, Depends
+from fastapi import Request, Depends, HTTPException, APIRouter
 
 from . import logger
 from gearbox.util import status
@@ -44,7 +43,11 @@ async def get_criterion(
 ):
 
     criterion = await criterion_service.get_criterion(session=session, id=criterion_id)
-    return criterion
+    if not criterion:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, 
+            f"criterion not found for id: {criterion_id}")
+    else:
+        return criterion
 
 @mod.post("/criterion", response_model=Criterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
@@ -56,7 +59,7 @@ async def save_object(
 
     new_criterion = await criterion_service.create_new_criterion(session, body, user_id=int(user_id))
     await session.commit()
-    reset_user_validation_data()
+    await reset_user_validation_data()
     return new_criterion
 
 def init_app(app):

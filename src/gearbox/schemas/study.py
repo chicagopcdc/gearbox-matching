@@ -1,71 +1,70 @@
-#from urllib.request import HTTPDefaultErrorHandler
-from pydantic import BaseModel #, HttpUrl
+from pydantic import BaseModel, Field, model_serializer
 from datetime import datetime
-from typing import Sequence, List, Optional, Any
-from gearbox.schemas import SiteCreate #, StudyLinkCreate
+from typing import Sequence, List, Optional
+from gearbox.schemas import SiteCreate, Site, SiteHasStudySite
 from .study_link import StudyLinkCreate, StudyLink
-from .site_has_study import SiteHasStudy
-from .site import Site
 from .study_external_id import StudyExternalIdCreate
 
-from pydantic.utils import GetterDict
-
-class StudySiteGetter(GetterDict):
-    # map and reformat study fields
-    def get(self, key: str, default: Any = None) -> Any:
-        if key in ('id','name','create_date','city','state','zip'):
-            return getattr(self._obj.site, key)
-        else:
-            return super(StudySiteGetter, self).get(key, default)
-
-class StudySite(BaseModel):
-    id: int
-    name: Optional[str]
-    country: Optional[str]
-    city: Optional[str]
-    state: Optional[str]
-    zip: Optional[str]
-    create_date: Optional[datetime]
-
-    class Config:
-        orm_mode = True
-        getter_dict = StudySiteGetter
-
 class StudyBase(BaseModel):
-    name: Optional[str]
-    code: Optional[str]
-    description: Optional[str]
-    create_date: Optional[datetime]
-    active: Optional[bool]
-    follow_up_info: Optional[str]
+    name: Optional[str] = None
+    code: Optional[str] = None
+    description: Optional[str] = None
+    create_date: Optional[datetime] = None
+    active: Optional[bool] = None
+    follow_up_info: Optional[str] = None
 
     class Config:
-        orm_mode = True    
+        from_attributes = True    
 
 class Study(StudyBase):
     id: int
-    links: List[StudyLink]
-    sites: List[StudySite]
+    links: Optional[List[StudyLink]] = None
+    sites: Optional[List[SiteHasStudySite]] = None
+
+    # The purpose of this function is to flatten
+    # sites into the format expected for the studies extract
+    @model_serializer()
+    def serialize_model(self):
+
+        return {
+            'id': self.id,
+            'name': self.name,
+            'code': self.code,
+            'description': self.description,
+            'create_date': self.create_date,
+            'active': self.active,
+            'follow_up_info': self.follow_up_info,
+            'id': self.id, 
+            'links': [{'name':s.name, 'href':s.href} for s in self.links], 
+            'sites':[s.site for s in self.sites]
+        }
+
+    class Config:
+        from_attributes = True    
 
 class StudyBaseInfo(BaseModel):
     id: int
-    name: Optional[str]
-    code: Optional[str]
-    description: Optional[str]
-    create_date: Optional[datetime]
-    active: Optional[bool]
+    name: Optional[str] = None
+    code: Optional[str] = None
+    description: Optional[str] = None
+    create_date: Optional[datetime] = None
+    active: Optional[bool] = None
 
     class Config:
-        orm_mode = True    
+        from_attributes = True    
 
 class StudyResults(BaseModel):
-    version: Optional[str]
+    version: Optional[str] = None
     studies: List[Study]
 
+    class Config:
+        from_attributes = True    
+        
+
 class StudyCreate(StudyBase):
-    sites: Optional[List[SiteCreate]]
-    links: Optional[List[StudyLinkCreate]]
-    ext_ids: Optional[List[StudyExternalIdCreate]]
+    sites: Optional[List[SiteCreate]] = None
+    links: Optional[List[StudyLinkCreate]] = None
+    ext_ids: Optional[List[StudyExternalIdCreate]] = None
 
 class StudySearchResults(BaseModel):
     results: Sequence[Study]

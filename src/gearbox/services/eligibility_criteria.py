@@ -1,8 +1,9 @@
+from gearbox import config
 from gearbox.crud import eligibility_criteria_crud
 from gearbox.schemas import EligibilityCriteriaCreate, EligibilityCriteriaSearchResults, EligibilityCriteria as EligibilityCriteriaSchema
 from sqlalchemy.ext.asyncio import AsyncSession as Session
-from fastapi import HTTPException
-from gearbox.util import status
+from fastapi import HTTPException, Request
+from gearbox.util import status, bucket_utils
 from gearbox.util.types import EligibilityCriteriaStatus
 
 async def reset_active_status(session: Session, study_version_id: int) -> bool:
@@ -78,5 +79,15 @@ async def get_eligibility_criteria_set(session, id: int=None):
                 eligibility_criteria.append(f)
     else:
         eligibility_criteria = []
+
+    return eligibility_criteria
+
+async def build_eligibility_criteria(session: Session,request: Request) -> EligibilityCriteriaSearchResults: 
+
+    eligibility_criteria = await get_eligibility_criteria_set(session)
+
+    if not config.BYPASS_S3:
+        params = [{'Content-Type':'application/json'}]
+        bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, eligibility_criteria)
 
     return eligibility_criteria

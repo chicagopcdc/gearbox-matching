@@ -1,17 +1,18 @@
-import json
 from typing import List
+from fastapi import HTTPException, Request
 from fastapi.encoders import jsonable_encoder
-from fastapi import HTTPException
+from starlette.responses import JSONResponse
 from gearbox.util import status
+from gearbox import config
 import re
 from collections import deque
 from gearbox.routers import logger
 from gearbox.models import StudyVersion
-from gearbox.crud import study_algorithm_engine_crud, match_conditions, study_version_crud
+from gearbox.crud import study_version_crud
 from gearbox.schemas import AlgorithmResponse
 from gearbox.util.types import StudyVersionStatus
+from gearbox.util import bucket_utils
 from sqlalchemy.ext.asyncio import AsyncSession as Session
-from . import study_algorithm_engine
 
 def expand_paths(paths):
     """
@@ -548,8 +549,11 @@ async def get_match_conditions(session: Session) -> List[AlgorithmResponse]:
     for a in active_match_conds:
         study_logic = {}
         study_logic['studyId'] = a.study_id
-        study_logic['algorithm'] = a.study_algorithm_engine.algorithm_logic
-        match_conds.append(study_logic)
+        if a.study_algorithm_engine and a.study_algorithm_engine.algorithm_logic:
+            study_logic['algorithm'] = a.study_algorithm_engine.algorithm_logic
+            match_conds.append(study_logic)
+        else:
+            logger.error(f"STUDY: {a.study_id} is missing algoritm logic and will not be included in the match_conditions file")
 
     # check for duplicate study ids in match conditions list, this can happen if
     # there are more than 1 active entry for a study in the study_version table
@@ -565,3 +569,12 @@ async def get_match_conditions(session: Session) -> List[AlgorithmResponse]:
     match_conds = sorted(match_conds, key=lambda k: k['studyId'])
 
     return match_conds
+
+async def build_match_conditions(session: Session, request: Request) -> List[AlgorithmResponse]:
+
+    match_conditions = await get_match_conditions(session)
+
+    if not config.BYPASS_S3:
+        params = [{'Content-Type':'application/json'}]
+        bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_MATCH_CONDITIONS_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, match_conditions)
+    return JSONResponse(jsonable_encoder(match_conditions), status.HTTP_200_OK)

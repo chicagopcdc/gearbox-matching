@@ -1,6 +1,6 @@
 from re import I
 from .base import CRUDBase
-from sqlalchemy import update, select, exc, subquery
+from sqlalchemy import update, select, exc
 from sqlalchemy.orm import Session, joinedload
 from typing import  List 
 from gearbox.models import Study, SiteHasStudy, Source, StudyVersion
@@ -20,9 +20,13 @@ class CRUDStudy(CRUDBase [Study, StudyCreate, StudySearchResults]):
         study_id = result.unique().scalars().first()
         return study_id
 
-    # Returns study information for ACTIVE studies
+    # Returns study information for ACTIVE studies that have
+    # ACTIVE study versions with non-null eligibility criteria and algorithm logic
     async def get_studies_info(self, current_session: Session):
-        sv_subq = select(StudyVersion).where(StudyVersion.status==StudyVersionStatus.ACTIVE).subquery()
+        sv_subq = select(StudyVersion).where(
+            StudyVersion.status==StudyVersionStatus.ACTIVE.value).where(
+            StudyVersion.eligibility_criteria_id.is_not(None)).where(
+            StudyVersion.study_algorithm_engine_id.is_not(None)).subquery()
         stmt = select(Study).options(
             joinedload(Study.sites).options(
                 joinedload(SiteHasStudy.site)
@@ -31,6 +35,7 @@ class CRUDStudy(CRUDBase [Study, StudyCreate, StudySearchResults]):
 
         result = await current_session.execute(stmt)
         studies = result.unique().scalars().all()
+
         return studies
 
     async def get_single_study_info(self, current_session: Session, study_id: int):
@@ -40,7 +45,7 @@ class CRUDStudy(CRUDBase [Study, StudyCreate, StudySearchResults]):
             ), joinedload(Study.links)
         ).where(Study.id == study_id)
         result = await current_session.execute(stmt)
-        study = result.unique().scalars().all()
+        study = result.unique().scalars().first()
         return study
     
     async def get_study_ids_for_source(self, db: Session, source: str) -> List[int]: 

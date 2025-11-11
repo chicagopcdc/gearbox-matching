@@ -50,7 +50,6 @@ def test_get_studies(setup_database, client):
     fake_jwt = "1.2.3"
     url = client.get("/studies", headers={"Authorization": f"bearer {fake_jwt}"})
     url_str =  url.content.decode('ascii').strip('\"')
-    print(f"------> URL STR: {url_str}")
 
     assert is_aws_url(url_str)
 
@@ -61,7 +60,7 @@ def test_get_study(setup_database, client):
     """
     errors = []
     fake_jwt = "1.2.3"
-    resp = client.get("/study/1", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.get("/study/2", headers={"Authorization": f"bearer {fake_jwt}"})
     assert str(resp.status_code).startswith("20")
 
 @pytest.mark.asyncio
@@ -72,7 +71,7 @@ def test_get_study_not_exist(setup_database, client):
     errors = []
     fake_jwt = "1.2.3"
     resp = client.get("/study/9999991", headers={"Authorization": f"bearer {fake_jwt}"})
-    assert resp.json() == None
+    assert str(resp.status_code).startswith("404")
 
 @pytest.mark.parametrize(
     "data", [ 

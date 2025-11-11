@@ -1,18 +1,24 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Sequence, List, Any, Optional
-from pydantic.utils import GetterDict
+from typing import Sequence, Optional
+from gearbox.schemas import Value
 
 class CriterionHasValueBase(BaseModel):
     criterion_id: int
     value_id: int
-    assoc_create_date: Optional[datetime]
+    create_date: Optional[datetime] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 class CriterionHasValue(CriterionHasValueBase):
     pass
+
+class CriterionHasValueValue(BaseModel):
+    value: Optional[Value] = None
+
+    class Config:
+        from_attributes = True 
 
 class CriterionHasValueCreate(CriterionHasValueBase):
     pass

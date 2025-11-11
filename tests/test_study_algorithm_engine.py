@@ -16,7 +16,8 @@ TEST_CREATE_LIST = [
             "test": "create_new_study_algorithm_engine",
             "logic_file": "./tests/data/new_algorithm_logic.json",
             "study_version_id": 7
-        },
+        }
+        ,
         {
                 "study_algorithm_engine": {
             "algorithm_logic": None,
@@ -34,7 +35,8 @@ TEST_CREATE_LIST = [
             "study_version_id": 1,
             "logic_file": "./tests/data/new_algorithm_logic.json",
             "test": "invalid_study_version"
-        },
+        }
+        ,
         {
                 "study_algorithm_engine": {
             "algorithm_logic": None
@@ -81,7 +83,7 @@ def test_create_study_algorithm_engine(setup_database, client, test_create_data,
 
     logic_file = test_create_data['logic_file']
     with open(logic_file, 'r') as comp_file:
-        ae_logic_json = comp_file.read().replace('\n','').replace('\t',' ')
+        ae_logic_json = json.loads(comp_file.read().replace('\n','').replace('\t',' '))
 
     data = {}
     data = {

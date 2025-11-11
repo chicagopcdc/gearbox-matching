@@ -1,0 +1,22 @@
+#emacs backup files
+*~
+
+#compiled code
+*.pyc
+
+.DS_Store
+DOCKER_LOG
+load_tables.sh
+clear_tables.sh
+
+#secrets
+Secrets/*
+doc/gearbox_table_data
+doc/gearbox_table_data.zip
+env
+
+.env
+.DS_Store
+*.pem
+keys/
+postgres-data/

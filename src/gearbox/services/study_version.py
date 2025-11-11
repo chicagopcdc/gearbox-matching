@@ -1,6 +1,6 @@
 from . import logger
 from sqlalchemy.ext.asyncio import AsyncSession as Session
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from gearbox.models import StudyVersion, StudyVersion, Study
 from gearbox.schemas import StudyVersionCreate, StudyVersionSearchResults, StudyVersion as StudyVersionSchema, StudyVersionInfo, StudyVersionUpdate, StudyCreate, EligibilityCriteriaCreate
 from sqlalchemy.sql.functions import func
@@ -8,7 +8,7 @@ from gearbox.util import status
 from gearbox.crud import study_version_crud 
 from typing import List
 from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus, EligibilityCriteriaStatus
-from gearbox.services import criterion_staging as criterion_staging_service, study_algorithm_engine as study_algorithm_engine_service, study as study_service, eligibility_criteria as eligiblity_criteria_service, el_criteria_has_criterion as echc_service, value as value_service
+from gearbox.services import criterion_staging as criterion_staging_service, study_algorithm_engine as study_algorithm_engine_service, study as study_service, eligibility_criteria as eligiblity_criteria_service, el_criteria_has_criterion as echc_service, value as value_service, match_form as match_form_service
 
 async def get_latest_study_version(session: Session, study_id: int) -> int:
 
@@ -72,7 +72,7 @@ async def update_study_version(session: Session, study_version: StudyVersionUpda
     return upd_study_version
 
 
-async def publish_study_version(session: Session, study_version_id: int):
+async def publish_study_version(session: Session, request: Request, study_version_id: int):
 
     # get study_version
     study_version = await study_version_crud.get(db=session, id=study_version_id)
@@ -201,3 +201,6 @@ async def publish_study_version(session: Session, study_version_id: int):
     # update eligibility_criteria to active
     ec_upd = EligibilityCriteriaCreate(status=EligibilityCriteriaStatus.ACTIVE)
     await eligiblity_criteria_service.update_eligibility_criteria(session=session,eligibility_criteria=ec_upd, eligibility_criteria_id=study_version.eligibility_criteria_id)
+
+    # build and save the match_form containing the newly published study version
+    await match_form_service.build_match_form(session=session, request=request, save=True)

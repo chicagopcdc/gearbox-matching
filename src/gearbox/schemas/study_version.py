@@ -1,51 +1,51 @@
-from urllib.request import HTTPDefaultErrorHandler
+from __future__ import annotations
 from pydantic import BaseModel 
 from datetime import datetime
-from typing import Sequence, List, Optional
+from typing import Sequence, Optional
 from gearbox.schemas import StudyBaseInfo
 from gearbox.util.types import StudyVersionStatus
 
 class StudyVersionBase(BaseModel):
     study_id: int
-    create_date: Optional[datetime]
+    create_date: Optional[datetime] = None
     study_version_num: int
-    eligibility_criteria_id: Optional[int]
-    study_algorithm_engine_id: Optional[int]
-    status: Optional[StudyVersionStatus]
-    comments: Optional[str]
+    eligibility_criteria_id: Optional[int] = None
+    study_algorithm_engine_id: Optional[int] = None
+    status: Optional[StudyVersionStatus] = None
+    comments: Optional[str] = None
 
     class Config:
-        orm_mode = True    
+        from_attributes = True 
 
 class StudyVersion(StudyVersionBase):
     id: int
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 class StudyVersionCreate(BaseModel):
     study_id: int
-    create_date: Optional[datetime]
-    eligibility_criteria_id: Optional[int]
-    study_version_num: Optional[int]
-    status: Optional[StudyVersionStatus]
-    comments: Optional[str]
+    create_date: Optional[datetime] = None
+    eligibility_criteria_id: Optional[int] = None
+    study_version_num: Optional[int] = None
+    status: Optional[StudyVersionStatus] = None
+    comments: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 class StudyVersionUpdate(BaseModel):
     id: int
-    create_date: Optional[datetime]
-    study_version_num: Optional[int]
-    status: Optional[StudyVersionStatus]
-    eligibility_criteria_id: Optional[int]
-    study_algorithm_engine_id: Optional[int]
+    create_date: datetime | None = None
+    study_version_num: int | None = None
+    status: StudyVersionStatus | None = None
+    eligibility_criteria_id: int | None = None
+    study_algorithm_engine_id: int | None = None
 
 class StudyVersionInfo(StudyVersion):
     study: StudyBaseInfo
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 class StudyVersionSearchResults(BaseModel):
     results: Sequence[StudyVersion]

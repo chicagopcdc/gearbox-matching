@@ -1,19 +1,19 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, UniqueConstraint
-from sqlalchemy.orm import relationship
+from sqlalchemy import Integer, String, DateTime, Boolean, ForeignKey, UniqueConstraint
+from sqlalchemy.orm import relationship, mapped_column
 
 from .base_class import Base
 
 
 class Value(Base):
     __tablename__ = 'value'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    description = Column(String, nullable=True)
-    is_numeric = Column(Boolean)
-    value_string = Column(String)
-    unit_id = Column(Integer, ForeignKey('unit.id', name='fk_value_unit_id'))
-    operator = Column(String)
-    create_date = Column(DateTime, nullable=True)
-    active = Column(Boolean, nullable=True)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    description = mapped_column(String, nullable=True)
+    is_numeric = mapped_column(Boolean)
+    value_string = mapped_column(String)
+    unit_id = mapped_column(Integer, ForeignKey('unit.id', name='fk_value_unit_id'))
+    operator = mapped_column(String)
+    create_date = mapped_column(DateTime, nullable=True)
+    active = mapped_column(Boolean, nullable=True)
 
     UniqueConstraint(is_numeric, unit_id, value_string, operator, name='value_num_unit_op_uix')
 

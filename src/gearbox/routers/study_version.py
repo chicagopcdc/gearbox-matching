@@ -1,9 +1,5 @@
-from fastapi import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import Request, Depends
-from fastapi import APIRouter 
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from datetime import date
+from fastapi import Request, Depends, APIRouter, HTTPException
 from . import logger
 from ..util import status
 from typing import List
@@ -11,7 +7,7 @@ from gearbox import auth
 from gearbox.schemas import StudyVersionUpdate, StudyVersion as StudyVersionSchema, StudyVersionCreate, StudyVersionInfo
 from gearbox import deps
 from gearbox.services import study_version  as study_version_service
-from gearbox.admin_login import admin_required
+from gearbox.admin_login import admin_required, super_admin_required
 
 mod = APIRouter()
 
@@ -22,7 +18,11 @@ async def get_study_version(
     session: AsyncSession = Depends(deps.get_session),
 ):
     ret_study_version = await study_version_service.get_study_version(session, study_version_id)
-    return ret_study_version
+    if not ret_study_version:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, 
+            f"study_version not found for id: {study_version_id}")
+    else:
+        return ret_study_version
 
 @mod.get("/study-versions", response_model=List[StudyVersionInfo], status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate), Depends(admin_required)])
 async def get_all_study_versions(
@@ -38,7 +38,11 @@ async def get_all_study_versions(
     session: AsyncSession = Depends(deps.get_session)
 ):
     study_versions = await study_version_service.get_study_versions_for_adjudication(session)
-    return study_versions
+    if not study_versions:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, 
+            f"no study_versions found requireing adjudication")
+    else:
+        return study_versions
 
 @mod.get("/study-versions/{study_version_status}", response_model=List[StudyVersionInfo], status_code=status.HTTP_200_OK, dependencies=[Depends(auth.authenticate), Depends(admin_required)])
 async def get_study_versions(
@@ -50,7 +54,11 @@ async def get_study_versions(
     Comments: Get all study versions with a given status
     """
     study_versions = await study_version_service.get_study_versions_by_status(session, study_version_status)
-    return study_versions
+    if not study_versions:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, 
+            f"study_versions not found for status: {study_version_status}")
+    else:
+        return study_versions
 
 @mod.post("/study-version", response_model=StudyVersionSchema, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
@@ -71,13 +79,13 @@ async def update_object(
     upd_study_version = await study_version_service.update_study_version(session=session, study_version=body)
     return upd_study_version
 
-@mod.post("/publish-study-version/{study_version_id}", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.post("/publish-study-version/{study_version_id}", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)])
 async def publish_study_version(
     study_version_id: int,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    await study_version_service.publish_study_version(session=session, study_version_id=study_version_id)
+    await study_version_service.publish_study_version(session=session, study_version_id=study_version_id, request=request)
 
 def init_app(app):
     app.include_router(mod, tags=["study-version"])

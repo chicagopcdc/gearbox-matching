@@ -2,7 +2,8 @@ import pytest
 import random
 
 from sqlalchemy.orm import sessionmaker
-from gearbox.models import Study, StudyLink, Site, StudyExternalId, SiteHasStudy
+from gearbox.models import Study, StudyLink, Site, StudyExternalId, SiteHasStudy, StudyVersion
+from gearbox.util.types import StudyVersionStatus
 from .test_utils import is_aws_url
 
 from starlette.status import (
@@ -34,7 +35,7 @@ from starlette.status import (
                 "links": [ 
                     {
                         "name": "UPDATED-----TEST STUDY UPDATES LINK NAME",
-                        "href": "http://www.testlink.org",
+                        "href": "http://www.testlink.org/",
                         "active": True
                     }
                 ],
@@ -62,13 +63,15 @@ from starlette.status import (
                         "status":"recruiting",
                         "city":"Chicago",
                         "state":"IL",
-                        "zip":"60660"
+                        "zip":"60660",
+                        "location_lat":41.885033,
+                        "location_long":-87.784500
                     }
                 ],
                 "links": [ 
                     {
                         "name": "UPDATED-----TEST STUDY UPDATES LINK NAME",
-                        "href": "http://www.testlink.org",
+                        "href": "http://www.testlink.org-for-test",
                         "active": True
                     }
                 ],
@@ -95,13 +98,15 @@ from starlette.status import (
                         "status":"recruiting",
                         "city":"Chicago",
                         "state":"IL",
-                        "zip":"60660"
+                        "zip":"60660",
+                        "location_lat":41.885033,
+                        "location_long":-87.784500
                     }
                 ],
                 "links": [ 
                     {
                         "name": "UPDATED-----TEST STUDY UPDATES LINK NAME",
-                        "href": "http://www.testlink.org",
+                        "href": "http://www.testlink.org-for-test",
                         "active": True
                     }
                 ],
@@ -175,9 +180,10 @@ def test_study_updates(setup_database, client, data, connection):
         if not site: 
             errors.append(f"Site (name): {test_site_name} not created")
 
-        link = db_session.query(StudyLink).filter(StudyLink.href==test_link).first()
+        links = db_session.query(StudyLink).all()
+        link = db_session.query(StudyLink).filter(StudyLink.href.like(f'%{test_link}%')).first()
         if not link: 
-            errors.append(f"Link (href): {test_link} not created")
+            errors.append(f"Link (href): |{test_link}| not created")
 
         ext_id = db_session.query(StudyExternalId).filter(StudyExternalId.ext_id==test_ext_id).first()
         if not ext_id: 
@@ -199,7 +205,13 @@ def test_study_updates(setup_database, client, data, connection):
         active_study_sites = db_session.query(SiteHasStudy).filter(SiteHasStudy.active==True).all()
         if not len(active_study_sites) == 4:
             errors.append(f"ERROR: should be 2 active study sites, found: {len(active_study_sites)} active study sites in site_has_study table.")
-        
+
+        # confirm that study_version for inactive study was set to status = INACTIVE
+        #inactive_study_version = db_session.query(StudyVersion).filter(StudyVersion.study_id==8).filter(StudyVersion.status=StudyVersionStatus.INACTIVE.value)
+        inactive_study_version = db_session.query(StudyVersion).filter(StudyVersion.study_id==8).filter(StudyVersion.status==StudyVersionStatus.INACTIVE.value).all()
+        if not len(inactive_study_version) == 1:
+            errors.append(f"ERROR: study_version for study_id = 8 should be inactive")
+
     except Exception as e:
         errors.append(f"Test study unexpected exception: {str(e)}")
     if not str(resp.status_code).startswith("20"):
@@ -225,7 +237,7 @@ def test_study_updates(setup_database, client, data, connection):
                 "links": [ 
                     {
                         "name": "UPDATED-----TEST STUDY UPDATES LINK NAME",
-                        "href": "http://www.testlink.org",
+                        "href": "http://www.testlink.org/",
                         "active": True
                     }
                 ],
@@ -272,7 +284,7 @@ def test_study_updates_unknown_source(setup_database, client, data, connection):
                 "links": [ 
                     {
                         "name": "UPDATED-----TEST STUDY UPDATES LINK NAME",
-                        "href": "http://www.testlink.org",
+                        "href": "http://www.testlink.org/",
                         "active": True
                     }
                 ],

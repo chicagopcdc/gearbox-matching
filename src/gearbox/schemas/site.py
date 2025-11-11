@@ -1,40 +1,20 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from decimal import Decimal
 from datetime import datetime
 from typing import Sequence, List, Any, Optional
-from pydantic.utils import GetterDict
-
-class SiteStudyGetter(GetterDict):
-    # map and reformat study fields
-    def get(self, key: str, default: Any = None) -> Any:
-        if key in ('id','name','code','description','create_date','active','links'):
-            return getattr(self._obj.study, key)
-        else:
-            return super(SiteStudyGetter, self).get(key, default)
-
-class SiteStudy(BaseModel):
-    id: int
-    name: Optional[str]
-    code: Optional[str]
-    description: Optional[str]
-    create_date: Optional[datetime]
-    active: Optional[bool]
-    create_date: Optional[datetime]
-    active: Optional[bool]
-
-    class Config:
-        orm_mode = True
-        getter_dict = SiteStudyGetter
 
 class SiteBase(BaseModel):
     name: str
-    country: Optional[str]
-    city: Optional[str]
-    state: Optional[str]
-    zip: Optional[str]
-    create_date: Optional[datetime]
+    country: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    zip: Optional[str] = None
+    create_date: Optional[datetime] = None
+    location_lat:  Optional[Decimal] = Field(default=None, max_digits=10, decimal_places=8)
+    location_long:  Optional[Decimal] = Field(default=None, max_digits=11, decimal_places=8)
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 class Site(SiteBase):
     id: int

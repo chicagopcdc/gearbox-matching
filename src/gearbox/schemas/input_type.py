@@ -10,7 +10,7 @@ class InputTypeBase(BaseModel):
     create_date: Optional[datetime]
 
     class Config:
-        orm_mode = True
+        from_attributes = True 
 
 class InputType(InputTypeBase):
     id: int
