@@ -12,12 +12,12 @@ from gearbox.schemas import SavedInputSearchResults, SavedInputCreate
 from gearbox.services import user_input as user_input_service
 from gearbox import deps
 from gearbox import auth 
-from gearbox.admin_login import admin_required
+from gearbox.admin_login import admin_required, super_admin_required
 from gearbox import config
 mod = APIRouter()
 
 
-@mod.get("/user-input/validation-update", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.get("/user-input/validation-update", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)])
 async def get_object_latest(
     request: Request,
     session: Session = Depends(deps.get_session),

@@ -93,7 +93,9 @@ async def get_studies_to_update(existing_studies: list[Study], refresh_studies: 
                                           'country':z.site.country,
                                           'city':z.site.city,
                                           'state':z.site.state,
-                                          'zip':z.site.zip
+                                          'zip':z.site.zip,
+                                          'location_lat': z.site.location_lat,
+                                          'location_long': z.site.location_long
                                           } for z in x.sites],
                                 'ext_ids': [{'ext_id':a.ext_id,
                                              'source':a.source,
@@ -107,7 +109,9 @@ async def get_studies_to_update(existing_studies: list[Study], refresh_studies: 
                                'sites': [{'name':z.name, 
                                           'country':z.country, 'city':z.city,
                                           'state':z.state,
-                                          'zip':z.zip
+                                          'zip':z.zip,
+                                          'location_lat': z.location_lat,
+                                          'location_long': z.location_long
                                           } for z in x.sites],
                                 'ext_ids': [{'ext_id':a.ext_id,
                                              'source':a.source,
@@ -204,6 +208,8 @@ async def update_studies(session: Session, request:Request, updates: StudyUpdate
                     'city': site.city,
                     'state': site.state,
                     'zip': site.zip,
+                    'location_lat': site.location_lat,
+                    'location_long': site.location_long,
                     'create_date': datetime.now(),
                     'source_id': source_id
                 }
@@ -272,6 +278,10 @@ async def update_studies(session: Session, request:Request, updates: StudyUpdate
                     no_update_cols=no_update_cols, 
                     constraint_cols=constraint_cols
                 )
+
+    # Expire all objects after upserts. This is needed in order to keep the
+    # ORM and db in sync.
+    session.expire_all()
 
     # Reset to active all study_ids that were in the incoming updates 
     # but did not have any changes

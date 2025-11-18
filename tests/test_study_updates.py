@@ -63,7 +63,9 @@ from starlette.status import (
                         "status":"recruiting",
                         "city":"Chicago",
                         "state":"IL",
-                        "zip":"60660"
+                        "zip":"60660",
+                        "location_lat":41.885033,
+                        "location_long":-87.784500
                     }
                 ],
                 "links": [ 
@@ -96,7 +98,9 @@ from starlette.status import (
                         "status":"recruiting",
                         "city":"Chicago",
                         "state":"IL",
-                        "zip":"60660"
+                        "zip":"60660",
+                        "location_lat":41.885033,
+                        "location_long":-87.784500
                     }
                 ],
                 "links": [ 
