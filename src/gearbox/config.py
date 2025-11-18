@@ -17,6 +17,7 @@ config = Config(".env")
 DEBUG = config("DEBUG", cast=bool, default=False)
 TESTING = config("TESTING", cast=bool, default=False)
 URL_PREFIX = config("URL_PREFIX", default="/" if DEBUG else "/gearbox")
+MIDDLEWARE_URL_PREFIX = config("URL_PREFIX", default="/" if DEBUG else "/gearbox-middleware/")
 BYPASS_FENCE = config("BYPASS_FENCE", cast=bool, default=False)
 
 #S3

@@ -1,4 +1,5 @@
 from . import logger
+import requests
 from datetime import datetime
 from gearbox import config
 from fastapi.encoders import jsonable_encoder
@@ -292,6 +293,7 @@ async def update_studies(session: Session, request:Request, updates: StudyUpdate
         for sv in svs:
             await study_version_crud.update(db=session, db_obj=sv, obj_in={"status":StudyVersionStatus.INACTIVE.value})
 
+    # update the front-end json files to reflect study table updates
     if update_fe:
         await refresh_study_fe_files(session=session, request=request)
 
@@ -333,3 +335,10 @@ async def refresh_study_fe_files(session: Session, request: Request):
     await mc.build_match_conditions(session=session, request=request)
     await mf.build_match_form(session=session, request=request, save=True)
     await ec.build_eligibility_criteria(session=session, request=request)
+
+    ## call middleware to reset cached json data
+    headers = {}
+    headers['Authorization'] = request.headers.get("Authorization")
+    middleware_update_json_endpoint =  config.MIDDLEWARE_URL_PREFIX + 'update_json_data'
+    middleware_upd_result = requests.get(middleware_update_json_endpoint, headers=headers).json()
+    

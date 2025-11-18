@@ -8,7 +8,7 @@ from gearbox.util import status
 from gearbox.crud import study_version_crud 
 from typing import List
 from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus, EligibilityCriteriaStatus
-from gearbox.services import criterion_staging as criterion_staging_service, study_algorithm_engine as study_algorithm_engine_service, study as study_service, eligibility_criteria as eligiblity_criteria_service, el_criteria_has_criterion as echc_service, value as value_service, match_form as match_form_service
+from gearbox.services import criterion_staging as criterion_staging_service, study_algorithm_engine as study_algorithm_engine_service, study as study_service, eligibility_criteria as eligiblity_criteria_service, el_criteria_has_criterion as echc_service, value as value_service, match_form as match_form_service, study as study_service
 
 async def get_latest_study_version(session: Session, study_id: int) -> int:
 
@@ -202,5 +202,5 @@ async def publish_study_version(session: Session, request: Request, study_versio
     ec_upd = EligibilityCriteriaCreate(status=EligibilityCriteriaStatus.ACTIVE)
     await eligiblity_criteria_service.update_eligibility_criteria(session=session,eligibility_criteria=ec_upd, eligibility_criteria_id=study_version.eligibility_criteria_id)
 
-    # build and save the match_form containing the newly published study version
-    await match_form_service.build_match_form(session=session, request=request, save=True)
+    # rebuild and save the front end json files to s3
+    await study_service.refresh_study_fe_files(session=session, request=request)
