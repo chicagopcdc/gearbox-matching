@@ -1,13 +1,6 @@
-import json
-from datetime import datetime
-
-from . import logger
 from sqlalchemy.ext.asyncio import AsyncSession as Session
-from sqlalchemy import exc
 from fastapi import HTTPException
-from gearboxdatamodel.models import StudyLink
 from gearboxdatamodel.schemas import StudyLinkCreate, StudyLinkSearchResults, StudyLink as StudyLinkSchema
-from gearbox.util import json_utils
 from gearboxdatamodel.util import status
 from gearboxdatamodel.crud import study_link_crud
 

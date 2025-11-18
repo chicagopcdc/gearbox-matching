@@ -2,11 +2,11 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from gearboxdatamodel.util import status
 from gearboxdatamodel.schemas import CriterionStaging as CriterionStagingSchema, CriterionStagingCreate, CriterionPublish, CriterionCreate, CriterionStagingUpdate, CriterionHasValueCreate, CriterionStagingSearchResult, ElCriteriaHasCriterionPublish, ElCriteriaHasCriterionCreate, CriterionStagingUpdateIn
-from gearboxdatamodel.crud import criterion_staging_crud , study_version_crud, value_crud, criterion_has_value_crud, input_type_crud
+from gearboxdatamodel.crud import criterion_staging_crud , value_crud, criterion_has_value_crud, input_type_crud
 from gearboxdatamodel.models import Criterion
 from typing import List
 from gearboxdatamodel.util.types import AdjudicationStatus, EchcAdjudicationStatus
-from gearbox.services import criterion as criterion_service, value as value_service, el_criteria_has_criterion as el_criteria_has_criterion_service
+from gearbox.services import criterion as criterion_service, value as value_service
 
 from . import logger
 from gearbox import config

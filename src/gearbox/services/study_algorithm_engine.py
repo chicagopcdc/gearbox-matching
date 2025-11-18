@@ -1,7 +1,5 @@
 import json
-from datetime import datetime
 from fastapi.encoders import jsonable_encoder
-
 from gearboxdatamodel.models.study_algorithm_engine import StudyAlgorithmEngine
 from . import logger
 from sqlalchemy.ext.asyncio import AsyncSession as Session
@@ -10,7 +8,6 @@ from fastapi import HTTPException
 from gearboxdatamodel.models import ElCriteriaHasCriterion, EligibilityCriteria, StudyVersion
 from gearboxdatamodel.schemas import StudyAlgorithmEngine as StudyAlgorithmEngineSchema
 from gearboxdatamodel.schemas import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSave, StudyAlgorithmEngineSearchResults, StudyAlgorithmEngineSave, StudyAlgorithmEngineUpdate, StudyVersionUpdate
-from sqlalchemy.sql.functions import func
 from gearbox.util import json_utils
 from gearboxdatamodel.util import status
 from gearboxdatamodel.crud import study_algorithm_engine_crud, study_version_crud

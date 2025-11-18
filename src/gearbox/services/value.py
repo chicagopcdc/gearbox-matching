@@ -1,7 +1,4 @@
-from . import logger
-from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession as Session
-from sqlalchemy import exc 
 from fastapi import HTTPException
 from gearboxdatamodel.schemas import ValueCreate, ValueSearchResults, Value as ValueSchema
 from gearboxdatamodel.util import status

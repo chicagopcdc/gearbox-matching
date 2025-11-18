@@ -70,7 +70,7 @@ def file_to_table_with_cols(conn, cursor, table_name, file_name, ordered_column_
         copy_sql = "COPY " + table_name +  ordered_column_list +  " FROM stdin DELIMITER E'\t' CSV HEADER"
         cursor.copy_expert(sql=copy_sql, file=f)
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def setup_database(connection) -> Engine:
 
     Session = sessionmaker(bind=connection)

@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import HTTPException, Request
 from gearboxdatamodel.models import StudyVersion, StudyVersion, Study
 from gearboxdatamodel.schemas import StudyVersionCreate, StudyVersionSearchResults, StudyVersion as StudyVersionSchema, StudyVersionInfo, StudyVersionUpdate, StudyCreate, EligibilityCriteriaCreate
-from sqlalchemy.sql.functions import func
 from gearboxdatamodel.util import status
 from gearboxdatamodel.crud import study_version_crud 
 from typing import List
