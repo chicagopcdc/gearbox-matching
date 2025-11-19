@@ -45,7 +45,7 @@ aiocache = "0.11.1"
 python-multipart = "^0.0.20"
 authutils = "7.1.1"
 psycopg2-binary = "<3"
-gearboxdatamodel = { git = "https://github.com/chicagopcdc/gearboxDataModel", branch="patch" }
+gearboxdatamodel = { git = "https://github.com/chicagopcdc/gearboxDataModel", rev = "0.1.1" }
 greenlet = "^3.2.4"
 
 [tool.poetry.group.dev.dependencies]
