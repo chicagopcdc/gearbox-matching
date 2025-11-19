@@ -1,7 +1,0 @@
-from .base import CRUDBase
-from gearbox.models import PreAnnotatedCriterionModel
-from gearbox.schemas import PreAnnotatedCriterionModelCreate, PreAnnotatedCriterionModelSearchResults
-
-class CRUDPreAnnotatedCriterionModel(CRUDBase [PreAnnotatedCriterionModel, PreAnnotatedCriterionModelCreate, PreAnnotatedCriterionModelSearchResults]):
-    ...
-pre_annotated_criterion_model_crud = CRUDPreAnnotatedCriterionModel(PreAnnotatedCriterionModel)

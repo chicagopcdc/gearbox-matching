@@ -1,10 +1,11 @@
 from gearbox import config
-from gearbox.crud import eligibility_criteria_crud
-from gearbox.schemas import EligibilityCriteriaCreate, EligibilityCriteriaSearchResults, EligibilityCriteria as EligibilityCriteriaSchema
+from gearboxdatamodel.crud import eligibility_criteria_crud
+from gearboxdatamodel.schemas import EligibilityCriteriaCreate, EligibilityCriteriaSearchResults, EligibilityCriteria as EligibilityCriteriaSchema
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import HTTPException, Request
-from gearbox.util import status, bucket_utils
-from gearbox.util.types import EligibilityCriteriaStatus
+from gearbox.util import bucket_utils
+from gearboxdatamodel.util import status
+from gearboxdatamodel.util.types import EligibilityCriteriaStatus
 
 async def reset_active_status(session: Session, study_version_id: int) -> bool:
     # set all rows related to the study_version to false

@@ -3,14 +3,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Request, Depends, HTTPException, APIRouter
 
 from . import logger
-from gearbox.util import status
+from gearboxdatamodel.util import status
 from gearbox.services import criterion as criterion_service
 from gearbox.admin_login import admin_required
 
-from gearbox.schemas import CriterionSearchResults, CriterionCreateIn, Criterion
+from gearboxdatamodel.schemas import CriterionSearchResults, CriterionCreateIn, Criterion
 from gearbox import deps
-from gearbox import auth 
-from gearbox.services.user_input import reset_user_validation_data
+from gearbox import auth
 
 mod = APIRouter()
 
@@ -59,7 +58,6 @@ async def save_object(
 
     new_criterion = await criterion_service.create_new_criterion(session, body, user_id=int(user_id))
     await session.commit()
-    await reset_user_validation_data()
     return new_criterion
 
 def init_app(app):

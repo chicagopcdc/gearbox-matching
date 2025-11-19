@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 import importlib
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker, Session
-from gearbox.models import StudyHasPatient, Study
+from gearboxdatamodel.models import StudyHasPatient, Study
 
 @pytest.fixture(scope="session")
 def database(setup_database) -> Engine:

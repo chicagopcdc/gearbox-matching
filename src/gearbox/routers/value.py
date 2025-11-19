@@ -4,10 +4,10 @@ from collections.abc import Iterable
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Request, Depends, APIRouter, HTTPException
 from . import logger
-from gearbox.util import status
+from gearboxdatamodel.util import status
 from gearbox.admin_login import admin_required
 
-from gearbox.schemas import ValueCreate, ValueSearchResults, Value
+from gearboxdatamodel.schemas import ValueCreate, ValueSearchResults, Value
 from gearbox.services import value as value_service
 from gearbox import deps
 from gearbox import auth 

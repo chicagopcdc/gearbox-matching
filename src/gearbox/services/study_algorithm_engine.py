@@ -1,20 +1,18 @@
 import json
-from datetime import datetime
 from fastapi.encoders import jsonable_encoder
-
-from gearbox.models.study_algorithm_engine import StudyAlgorithmEngine
+from gearboxdatamodel.models.study_algorithm_engine import StudyAlgorithmEngine
 from . import logger
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy import select, exc
 from fastapi import HTTPException
-from gearbox.models import ElCriteriaHasCriterion, EligibilityCriteria, StudyVersion
-from gearbox.schemas import StudyAlgorithmEngine as StudyAlgorithmEngineSchema
-from gearbox.schemas import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSave, StudyAlgorithmEngineSearchResults, StudyAlgorithmEngineSave, StudyAlgorithmEngineUpdate, StudyVersionUpdate
-from sqlalchemy.sql.functions import func
-from gearbox.util import status, json_utils
-from gearbox.crud import study_algorithm_engine_crud, study_version_crud
+from gearboxdatamodel.models import ElCriteriaHasCriterion, EligibilityCriteria, StudyVersion
+from gearboxdatamodel.schemas import StudyAlgorithmEngine as StudyAlgorithmEngineSchema
+from gearboxdatamodel.schemas import StudyAlgorithmEngineCreate, StudyAlgorithmEngineSave, StudyAlgorithmEngineSearchResults, StudyAlgorithmEngineSave, StudyAlgorithmEngineUpdate, StudyVersionUpdate
+from gearbox.util import json_utils
+from gearboxdatamodel.util import status
+from gearboxdatamodel.crud import study_algorithm_engine_crud, study_version_crud
 from gearbox.services import study_version as study_version_service
-from gearbox.util.types import StudyVersionStatus
+from gearboxdatamodel.util.types import StudyVersionStatus
 
 async def get_study_version(session: Session, study_version_id: int) -> int:
     

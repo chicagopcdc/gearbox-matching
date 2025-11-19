@@ -1,14 +1,8 @@
-import json
-from datetime import datetime
-
-from . import logger
 from sqlalchemy.ext.asyncio import AsyncSession as Session
-from sqlalchemy import exc
 from fastapi import HTTPException
-from gearbox.models import StudyLink
-from gearbox.schemas import StudyLinkCreate, StudyLinkSearchResults, StudyLink as StudyLinkSchema
-from gearbox.util import status, json_utils
-from gearbox.crud import study_link_crud
+from gearboxdatamodel.schemas import StudyLinkCreate, StudyLinkSearchResults, StudyLink as StudyLinkSchema
+from gearboxdatamodel.util import status
+from gearboxdatamodel.crud import study_link_crud
 
 async def get_study_link(session: Session, id: int) -> StudyLinkSchema:
     aes = await study_link_crud.get(session, id)

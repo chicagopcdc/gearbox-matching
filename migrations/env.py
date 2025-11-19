@@ -22,8 +22,8 @@ fileConfig(config.config_file_name)
 from gearbox.main import load_modules
 from gearbox.config import DB_CONNECT_RETRIES
 
-from gearbox.models.base_class import Base
-from gearbox.models.db import SQLALCHEMY_ALEMBIC_DATABASE_URI
+from gearboxdatamodel.models.base_class import Base
+from gearbox.util.db import SQLALCHEMY_ALEMBIC_DATABASE_URI
 
 target_metadata = Base.metadata
 
