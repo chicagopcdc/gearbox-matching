@@ -44,7 +44,7 @@ werkzeug = "2.2.2"
 pcdcutils = {git = "https://github.com/chicagopcdc/pcdcutils.git", rev = "0.1.2"}
 aiocache = "0.11.1"
 python-multipart = "^0.0.20"
-authutils = { git = "https://github.com/chicagopcdc/authutils", branch="fastapi-upgrade", extras = ["fastapi"]}
+authutils = { git = "https://github.com/chicagopcdc/authutils", branch="master"}
 psycopg2-binary = "<3"
 
 [tool.poetry.group.dev.dependencies]
