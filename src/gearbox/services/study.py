@@ -279,6 +279,10 @@ async def update_studies(session: Session, request:Request, updates: StudyUpdate
                     constraint_cols=constraint_cols
                 )
 
+    # Expire all objects after upserts. This is needed in order to keep the
+    # ORM and db in sync.
+    session.expire_all()
+
     # Reset to active all study_ids that were in the incoming updates 
     # but did not have any changes
     await study_crud.set_active_all_rows(db=session, active_upd=True, ids=study_ids_reset_to_active)
