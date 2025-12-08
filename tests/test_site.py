@@ -2,7 +2,7 @@ import pytest
 import random
 
 from sqlalchemy.orm import sessionmaker, Session
-from gearbox.models import Site
+from gearboxdatamodel.models import Site
 
 def test_get_sites(setup_database, client):
     """

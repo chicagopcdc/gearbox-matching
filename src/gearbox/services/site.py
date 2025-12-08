@@ -5,9 +5,9 @@ from . import logger
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy import exc 
 from fastapi import HTTPException
-from gearbox.schemas import SiteCreate, SiteSearchResults, Site as SiteSchema
-from gearbox.util import status
-from gearbox.crud import site_crud
+from gearboxdatamodel.schemas import SiteCreate, SiteSearchResults, Site as SiteSchema
+from gearboxdatamodel.util import status
+from gearboxdatamodel.crud import site_crud
 
 async def get_site_info(session: Session, id: int) -> SiteSchema:
     aes = await site_crud.get_site_info(session, id)
