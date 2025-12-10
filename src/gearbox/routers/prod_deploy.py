@@ -2,6 +2,8 @@ from fastapi import APIRouter
 from fastapi.encoders import jsonable_encoder
 from fastapi import APIRouter
 from fastapi.security import HTTPBearer
+from fastapi import HTTPException, 
+from fastapi import status as fastapi_status
 from sqlalchemy.orm import Session
 from fastapi import Request, Depends 
 from gearbox import config
@@ -26,11 +28,25 @@ async def deploy_prod_data(
     request: Request,
     session: Session = Depends(deps.get_session)
 ):
+    if not config.S3_PROD_BUCKET_NAME or not config.PROD_PROMOTION_ROLE_ARN:
+        raise HTTPException(
+            status_code=fastapi_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Server configuration error: production S3 promotion is not configured",
+        )
+
+    source_keys=[
+        config.S3_BUCKET_MATCH_CONDITIONS_KEY_NAME, 
+        config.S3_BUCKET_MATCH_FORM_KEY_NAME,
+        config.S3_BUCKET_IMPORTANT_QUESTIONS_KEY_NAME,
+        config.S3_BUCKET_STUDIES_KEY_NAME,
+        config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME
+    ]
+
     promote_object_to_prod(
         request=request,
-        source_bucket=config.STAGING_BUCKET,
-        source_keys=["current/state.json"],
-        dest_bucket=config.PROD_BUCKET,
+        source_bucket=config.S3_BUCKET_NAME,
+        source_keys=source_keys,
+        dest_bucket=config.S3_PROD_BUCKET_NAME,
         prod_role_arn=config.PROD_PROMOTION_ROLE_ARN
     )
 
