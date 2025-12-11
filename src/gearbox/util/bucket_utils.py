@@ -175,7 +175,7 @@ def promote_object_to_prod(
         for key in source_keys:
             request.app.boto_manager.delete_s3_objects(
                 dest_bucket, 
-                key, 
+                f"{backup_prefix}/{key}", 
                 config=config
             )
 
