@@ -31,31 +31,19 @@ ENV  PATH="$(poetry env info --path)/bin:$PATH"
 # Final stage
 FROM base
 
-RUN setcap -r /usr/sbin/nginx
-
 # Install ccrypt to decrypt dbgap telmetry files
-RUN set -eux; \
-    echo "Upgrading dnf"; \
+RUN echo "Upgrading dnf"; \
     dnf upgrade -y; \
     echo "Installing Packages"; \
     dnf install -y \
-      libxcrypt-compat-4.4.33 \
-      libpq-15.0 \
-      gcc \
-      tar \
-      xz \
-      make \
-      wget \
-      rpm-build \
-      redhat-rpm-config && \
-    dnf clean all && rm -rf /var/cache/yum; \
-    echo "Building and installing ccrypt from tarball"; \
-    cd /tmp && \
-    wget -q https://ccrypt.sourceforge.net/download/1.11/ccrypt-1.11.tar.gz && \
-    tar -zxf ccrypt-1.11.tar.gz && \
-    cd ccrypt-1.11 && \
-    ./configure --disable-libcrypt && make && make install && \
-    rm -rf /tmp/ccrypt-1.11*;
+        libxcrypt-compat-4.4.33 \
+        libpq-15.0 \
+        gcc \
+        tar xz; \
+    echo "Installing RPM"; \
+    rpm -i https://ccrypt.sourceforge.net/download/1.11/ccrypt-1.11-1.src.rpm && \
+    cd /root/rpmbuild/SOURCES/ && \
+    tar -zxf ccrypt-1.11.tar.gz && cd ccrypt-1.11 && ./configure --disable-libcrypt && make install && make check;
 
 COPY --from=builder /${appname} /${appname}
 
