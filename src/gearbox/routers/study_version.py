@@ -1,13 +1,13 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Request, Depends, APIRouter, HTTPException
 from . import logger
-from ..util import status
+from gearboxdatamodel.util import status
 from typing import List
 from gearbox import auth
-from gearbox.schemas import StudyVersionUpdate, StudyVersion as StudyVersionSchema, StudyVersionCreate, StudyVersionInfo
+from gearboxdatamodel.schemas import StudyVersionUpdate, StudyVersion as StudyVersionSchema, StudyVersionCreate, StudyVersionInfo
 from gearbox import deps
 from gearbox.services import study_version  as study_version_service
-from gearbox.admin_login import admin_required
+from gearbox.admin_login import admin_required, super_admin_required
 
 mod = APIRouter()
 
@@ -79,7 +79,7 @@ async def update_object(
     upd_study_version = await study_version_service.update_study_version(session=session, study_version=body)
     return upd_study_version
 
-@mod.post("/publish-study-version/{study_version_id}", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+@mod.post("/publish-study-version/{study_version_id}", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)])
 async def publish_study_version(
     study_version_id: int,
     request: Request,

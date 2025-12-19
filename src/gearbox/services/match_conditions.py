@@ -2,15 +2,15 @@ from typing import List
 from fastapi import HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from starlette.responses import JSONResponse
-from gearbox.util import status
+from gearboxdatamodel.util import status
 from gearbox import config
 import re
 from collections import deque
 from gearbox.routers import logger
-from gearbox.models import StudyVersion
-from gearbox.crud import study_version_crud
-from gearbox.schemas import AlgorithmResponse
-from gearbox.util.types import StudyVersionStatus
+from gearboxdatamodel.models import StudyVersion
+from gearboxdatamodel.crud import study_version_crud
+from gearboxdatamodel.schemas import AlgorithmResponse
+from gearboxdatamodel.util.types import StudyVersionStatus
 from gearbox.util import bucket_utils
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 
@@ -549,8 +549,11 @@ async def get_match_conditions(session: Session) -> List[AlgorithmResponse]:
     for a in active_match_conds:
         study_logic = {}
         study_logic['studyId'] = a.study_id
-        study_logic['algorithm'] = a.study_algorithm_engine.algorithm_logic
-        match_conds.append(study_logic)
+        if a.study_algorithm_engine and a.study_algorithm_engine.algorithm_logic:
+            study_logic['algorithm'] = a.study_algorithm_engine.algorithm_logic
+            match_conds.append(study_logic)
+        else:
+            logger.error(f"STUDY: {a.study_id} is missing algoritm logic and will not be included in the match_conditions file")
 
     # check for duplicate study ids in match conditions list, this can happen if
     # there are more than 1 active entry for a study in the study_version table

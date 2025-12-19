@@ -1,14 +1,14 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, HTTPException, Request, Depends
 from typing import List
-from gearbox.util import status
+from gearboxdatamodel.util import status
 from gearbox.services import criterion_staging as criterion_staging_service
 from gearbox.admin_login import admin_required
 
-from gearbox.schemas import CriterionStaging, CriterionStagingUpdateIn, CriterionPublish, CriterionStagingCreate, CriterionStagingSearchResult, ElCriteriaHasCriterionPublish
+from gearboxdatamodel.schemas import CriterionStaging, CriterionStagingUpdateIn, CriterionPublish, CriterionStagingCreate, CriterionStagingSearchResult, ElCriteriaHasCriterionPublish
 from gearbox import deps
 from gearbox import auth 
-from gearbox.util.types import AdjudicationStatus
+from gearboxdatamodel.util.types import AdjudicationStatus
 
 mod = APIRouter()
 

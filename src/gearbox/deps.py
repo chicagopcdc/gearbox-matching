@@ -1,8 +1,6 @@
-from typing import Generator
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from gearbox.models.db import async_session
+from gearbox.util.db import async_session
 
 """
 def get_db() -> Generator:
@@ -13,6 +11,7 @@ def get_db() -> Generator:
      finally:
          db.close()
 """
+
 
 async def get_session() -> AsyncSession:
     async with async_session() as session:

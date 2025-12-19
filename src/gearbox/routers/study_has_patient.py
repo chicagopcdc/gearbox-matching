@@ -5,10 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException, APIRouter
 from fastapi import Request, Depends
 from . import logger
-from gearbox.util import status
+from gearboxdatamodel.util import status
 from gearbox.admin_login import admin_required
 
-from gearbox.schemas import StudyHasPatientCreate, StudyHasPatientSearchResults, StudyHasPatient
+from gearboxdatamodel.schemas import StudyHasPatientCreate, StudyHasPatientSearchResults, StudyHasPatient
 from gearbox.services import study_has_patient as study_has_patient_service
 from gearbox import deps
 from gearbox import auth 
