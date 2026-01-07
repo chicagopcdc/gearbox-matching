@@ -86,13 +86,13 @@ async def create_new_criterion(session: Session, input_criterion_info: Criterion
     new_crit = await criterion_crud.get(session, id=new_criterion.id)
     return new_crit
 
-async def update_criterion(session: Session, criterion: CriterionCreateIn, criterion_id: int) -> CriterionSchema:
-    criterion_to_upd = await criterion_crud.get(db=session, id=criterion_id)
+async def update_criterion(session: Session, criterion: CriterionSchema) -> CriterionSchema:
+    criterion_to_upd = await criterion_crud.get(db=session, id=criterion.id)
 
     if criterion_to_upd:
         upd_criterion = await criterion_crud.update(db=session, db_obj=criterion_to_upd, obj_in=criterion)
     else:
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Criterion id: {criterion_id} not found for update.") 
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Criterion id: {criterion.id} not found for update.") 
     await session.commit() 
 
     return upd_criterion
