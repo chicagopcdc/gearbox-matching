@@ -86,9 +86,10 @@ async def get_eligibility_criteria_set(session, id: int=None):
 async def build_eligibility_criteria(session: Session,request: Request) -> EligibilityCriteriaSearchResults: 
 
     eligibility_criteria = await get_eligibility_criteria_set(session)
+    bucket_name = bucket_utils.get_bucket_name()
 
     if not config.BYPASS_S3:
         params = [{'Content-Type':'application/json'}]
-        bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, eligibility_criteria)
+        bucket_utils.put_object(request, bucket_name, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, eligibility_criteria)
 
     return eligibility_criteria

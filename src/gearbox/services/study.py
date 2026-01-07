@@ -1,12 +1,15 @@
 from . import logger
 import requests
+import json
+import urllib3
+from pydantic import ValidationError
 from datetime import datetime
 from gearbox import config
 from fastapi.encoders import jsonable_encoder
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import HTTPException, Request
-from gearboxdatamodel.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate, StudyUpdates, StudyResults
+from gearboxdatamodel.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate, StudyUpdates, StudyResults, MatchingFilesUrls
 from gearbox.util import bucket_utils
 from gearboxdatamodel.util import status
 from gearboxdatamodel.util.types import StudyVersionStatus
@@ -131,7 +134,7 @@ async def get_studies_to_update(existing_studies: list[Study], refresh_studies: 
 
     return studies_to_update
 
-async def update_studies(session: Session, request:Request, updates: StudyUpdates, update_fe: bool=True):
+async def update_studies(session: Session, request:Request, updates: StudyUpdates):
     """
     Comments: This function does a refresh of the study, study_links, study_external_ids,
         site_has_study, and site tables. Rather than delete the existing information,
@@ -305,8 +308,7 @@ async def update_studies(session: Session, request:Request, updates: StudyUpdate
             await study_version_crud.update(db=session, db_obj=sv, obj_in={"status":StudyVersionStatus.INACTIVE.value})
 
     # update the front-end json files to reflect study table updates
-    if update_fe:
-        await refresh_study_fe_files(session=session, request=request)
+    await refresh_study_fe_files(session=session, request=request)
 
     return True
 
@@ -342,14 +344,29 @@ async def build_studies(session: Session, request: Request) -> StudySchema:
 
 async def refresh_study_fe_files(session: Session, request: Request):
 
-    await build_studies(session=session, request=request)
-    await mc.build_match_conditions(session=session, request=request)
-    await mf.build_match_form(session=session, request=request, save=True)
-    await ec.build_eligibility_criteria(session=session, request=request)
+    if not config.BYPASS_MIDDLEWARE_UPDATE:
+        # refresh fe matching files
+        await build_studies(session=session, request=request)
+        await mc.build_match_conditions(session=session, request=request)
+        await mf.build_match_form(session=session, request=request, save=True)
+        await ec.build_eligibility_criteria(session=session, request=request)
 
-    ## call middleware to reset cached json data
-    headers = {}
-    headers['Authorization'] = request.headers.get("Authorization")
-    middleware_update_json_endpoint =  config.MIDDLEWARE_URL_PREFIX + 'update_json_data'
-    middleware_upd_result = requests.get(middleware_update_json_endpoint, headers=headers).json()
-    
+        ## call middleware to reset cached json data
+        headers = {}
+        headers['Authorization'] = request.headers.get("Authorization")
+        middleware_update_json_endpoint =  config.MIDDLEWARE_URL_PREFIX + '/admin/update_json_data'
+
+        params=[]
+        mc_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_MATCH_CONDITIONS_KEY_NAME, params, "get_object")
+        ec_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, params, "get_object")
+        mf_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_MATCH_FORM_KEY_NAME, params, "get_object")
+        p_urls = MatchingFilesUrls(mc_url=mc_url, ec_url=ec_url, mf_url=mf_url)
+        try:
+            middleware_upd_result = requests.post(middleware_update_json_endpoint, headers=headers, json=p_urls.model_dump(mode='json'))
+        except (urllib3.exceptions.NewConnectionError, ValidationError, Exception) as e:
+            logger.error(f"Middleware refresh exception: {e}")
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Middleware refresh exception {e}.")
+
+        logger.info(f"FE study files refreshed successfully.")
+    else:
+        logger.info(f"FE study files update skipped.")

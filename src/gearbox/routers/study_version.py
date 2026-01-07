@@ -76,7 +76,7 @@ async def update_object(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
 ):
-    upd_study_version = await study_version_service.update_study_version(session=session, study_version=body)
+    upd_study_version = await study_version_service.update_study_version(session=session, study_version=body, request=request)
     return upd_study_version
 
 @mod.post("/publish-study-version/{study_version_id}", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)])
