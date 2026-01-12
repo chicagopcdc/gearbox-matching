@@ -72,7 +72,7 @@ async def update_study_version(session: Session, study_version: StudyVersionUpda
 
     #update fe matching files and middleware cache after study version updated
     if update_fe_files:
-        study_service.refresh_study_fe_files(session=session, request=request)
+        await study_service.refresh_study_fe_files(session=session, request=request)
     return upd_study_version
 
 

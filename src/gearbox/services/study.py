@@ -339,7 +339,6 @@ async def build_studies(session: Session, request: Request) -> StudySchema:
         json_studies = jsonable_encoder(new_studies)
         params = [{'Content-Type':'application/json'}]
         bucket_utils.put_object(request, bucket_name, config.S3_BUCKET_STUDIES_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, json_studies)
-
     return new_studies
 
 async def refresh_study_fe_files(session: Session, request: Request):
