@@ -5,7 +5,7 @@ from fastapi import Request, Depends, HTTPException, APIRouter
 from . import logger
 from gearboxdatamodel.util import status
 from gearbox.services import criterion as criterion_service
-from gearbox.admin_login import admin_required
+from gearbox.admin_login import admin_required, super_admin_required
 
 from gearboxdatamodel.schemas import CriterionSearchResults, CriterionCreateIn, Criterion
 from gearbox import deps
@@ -59,6 +59,18 @@ async def save_object(
     new_criterion = await criterion_service.create_new_criterion(session, body, user_id=int(user_id))
     await session.commit()
     return new_criterion
+
+@mod.put("/criterion", response_model=Criterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)])
+async def update_criterion(
+    body: Criterion,
+    request: Request,
+    session: AsyncSession = Depends(deps.get_session),
+    user_id: int = Depends(auth.authenticate_user)
+):
+
+    updated_criterion = await criterion_service.update_criterion(session, body)
+    await session.commit()
+    return updated_criterion
 
 def init_app(app):
     app.include_router(mod, tags=["criterion"])
