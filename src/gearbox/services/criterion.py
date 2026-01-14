@@ -157,16 +157,13 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
         exclude={"tags", "values"}
     )
 
-    upd_criterion = await criterion_crud.update(
-        db=session,
-        db_obj=criterion_to_upd,
-        obj_in=scalar_update
-    )
+    for field, value in scalar_update.items():
+        setattr(criterion_to_upd, field, value)
 
     await session.commit()
-    await session.refresh(upd_criterion)
+    await session.refresh(criterion_to_upd)
 
-    return upd_criterion
+    return criterion_to_upd
 
 
 async def save_criterion(session: Session, criterion: CriterionCreate) -> CriterionSchema:
