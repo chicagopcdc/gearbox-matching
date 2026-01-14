@@ -3,7 +3,7 @@ from gearbox.crud import eligibility_criteria_crud
 from gearbox.schemas import EligibilityCriteriaCreate, EligibilityCriteriaSearchResults, EligibilityCriteria as EligibilityCriteriaSchema
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import HTTPException, Request
-from gearbox.util import status, bucket_utils
+from gearbox.util import status, bucket_utils, qc
 from gearbox.util.types import EligibilityCriteriaStatus
 
 async def reset_active_status(session: Session, study_version_id: int) -> bool:
@@ -59,17 +59,19 @@ async def get_eligibility_criteria_set(session, id: int=None):
                 if render_type in ['radio','select']:
                     fieldValue = value_id
                 elif render_type in ['age']:
-                    unit = the_value.unit.name
-                    if unit in ['years']:
-                        fieldValue = eval(the_value.value_string)
-                    else:
+                    if qc.is_number(the_value.value_string):
+                        unit = the_value.unit.name
                         if unit == 'months':
                             fieldValue = round(eval(the_value.value_string)/12.0)
                         elif unit == 'days':
                             fieldValue = round(eval(the_value.value_string)/365.0)
+                        # default to no conversion (years) for age
+                        else:
+                            fieldValue = eval(the_value.value_string)
+                    else:
+                        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Invalid value for age for echc id: {echc.id} value: {the_value.value_string}")
                 else:
                     fieldValue = eval(the_value.value_string)
-
                 f = {
                     'id': the_id,
                     'fieldId': fieldId,
