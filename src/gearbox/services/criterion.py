@@ -89,13 +89,46 @@ async def create_new_criterion(session: Session, input_criterion_info: Criterion
 async def update_criterion(session: Session, criterion: CriterionSchema) -> CriterionSchema:
     criterion_to_upd = await criterion_crud.get(db=session, id=criterion.id)
 
-    if criterion_to_upd:
-        upd_criterion = await criterion_crud.update(db=session, db_obj=criterion_to_upd, obj_in=criterion)
-    else:
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Criterion id: {criterion.id} not found for update.") 
-    await session.commit() 
+    if not criterion_to_upd:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            f"Criterion id {criterion.id} not found."
+        )
+
+    if criterion.tags is not None:
+        existing_tag_ids = {t.tag_id for t in criterion_to_upd.tags}
+
+        for tag in criterion.tags:
+            if tag.id not in existing_tag_ids:
+                criterion_to_upd.tags.append(
+                    CriterionHasTag(tag_id=tag.id)
+                )
+
+    if criterion.values is not None:
+        existing_value_ids = {v.value_id for v in criterion_to_upd.values}
+
+        for value in criterion.values:
+            if value.id not in existing_value_ids:
+                criterion_to_upd.values.append(
+                    CriterionHasValue(value_id=value.id)
+                )
+
+    scalar_update = criterion.model_dump(
+        exclude_unset=True,
+        exclude={"tags", "values"}
+    )
+
+    upd_criterion = await criterion_crud.update(
+        db=session,
+        db_obj=criterion_to_upd,
+        obj_in=scalar_update
+    )
+
+    await session.commit()
+    await session.refresh(upd_criterion)
 
     return upd_criterion
+
 
 async def save_criterion(session: Session, criterion: CriterionCreate) -> CriterionSchema:
     new_criterion = await criterion_crud.create(db=session, obj_in=criterion)
