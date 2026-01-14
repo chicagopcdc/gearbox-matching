@@ -2,15 +2,15 @@ from typing import List
 from fastapi import HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from starlette.responses import JSONResponse
-from gearbox.util import status
+from gearboxdatamodel.util import status
 from gearbox import config
 import re
 from collections import deque
 from gearbox.routers import logger
-from gearbox.models import StudyVersion
-from gearbox.crud import study_version_crud
-from gearbox.schemas import AlgorithmResponse
-from gearbox.util.types import StudyVersionStatus
+from gearboxdatamodel.models import StudyVersion
+from gearboxdatamodel.crud import study_version_crud
+from gearboxdatamodel.schemas import AlgorithmResponse
+from gearboxdatamodel.util.types import StudyVersionStatus
 from gearbox.util import bucket_utils
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 

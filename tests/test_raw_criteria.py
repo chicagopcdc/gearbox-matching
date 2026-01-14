@@ -1,10 +1,10 @@
 import pytest
 import json
 from sqlalchemy.orm import sessionmaker
-from gearbox.models import CriterionStaging, StudyVersion, StudyExternalId, EligibilityCriteria
+from gearboxdatamodel.models import CriterionStaging, StudyVersion, StudyExternalId, EligibilityCriteria
 from .test_utils import is_aws_url
 from sqlalchemy import select, func, text
-from gearbox.util.types import AdjudicationStatus, StudyVersionStatus
+from gearboxdatamodel.util.types import AdjudicationStatus, StudyVersionStatus
 
 @pytest.mark.asyncio
 def test_get_raw_criteria_by_ec(setup_database, client):

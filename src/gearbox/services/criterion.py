@@ -2,11 +2,12 @@ from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from . import logger
-from gearbox.util import status
-from gearbox.schemas import CriterionSearchResults, CriterionCreateIn, CriterionCreate, CriterionHasValueCreate, CriterionHasTagCreate, DisplayRulesCreate, TriggeredByCreate, Criterion as CriterionSchema, CriterionStagingUpdate 
-from gearbox.crud import criterion_crud, criterion_has_value_crud, criterion_has_tag_crud, display_rules_crud, triggered_by_crud, value_crud, tag_crud
+from gearboxdatamodel.models import Value, Tag, CriterionHasValue, CriterionHasTag
+from gearboxdatamodel.util import status
+from gearboxdatamodel.schemas import CriterionSearchResults, CriterionCreateIn, CriterionCreate, CriterionHasValueCreate, CriterionHasTagCreate, DisplayRulesCreate, TriggeredByCreate, Criterion as CriterionSchema, CriterionStagingUpdate 
+from gearboxdatamodel.crud import criterion_crud, criterion_has_value_crud, criterion_has_tag_crud, display_rules_crud, triggered_by_crud, value_crud, tag_crud
 from gearbox.services import criterion_staging
-from gearbox.util.types import AdjudicationStatus
+from gearboxdatamodel.util.types import AdjudicationStatus
 from typing import List
 
 async def get_criterion(session: Session, id: int) -> CriterionSchema:
@@ -86,16 +87,77 @@ async def create_new_criterion(session: Session, input_criterion_info: Criterion
     new_crit = await criterion_crud.get(session, id=new_criterion.id)
     return new_crit
 
-async def update_criterion(session: Session, criterion: CriterionCreateIn, criterion_id: int) -> CriterionSchema:
-    criterion_to_upd = await criterion_crud.get(db=session, id=criterion_id)
+async def update_criterion(session: Session, criterion: CriterionSchema) -> CriterionSchema:
+    criterion_to_upd = await criterion_crud.get(db=session, id=criterion.id)
 
-    if criterion_to_upd:
-        upd_criterion = await criterion_crud.update(db=session, db_obj=criterion_to_upd, obj_in=criterion)
-    else:
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Criterion id: {criterion_id} not found for update.") 
-    await session.commit() 
+    if not criterion_to_upd:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            f"Criterion id {criterion.id} not found."
+        )
+
+    if criterion.values is not None:
+        existing_value_ids = {v.value_id for v in criterion_to_upd.values}
+
+        for value in criterion.values:
+            if getattr(value, "id", None):
+                if value.id not in existing_value_ids:
+                    criterion_to_upd.values.append(
+                        CriterionHasValue(value_id=value.id)
+                    )
+            else:
+                new_value = Value(
+                    description=value.description,
+                    is_numeric=value.is_numeric,
+                    value_string=value.value_string,
+                    unit_id=value.unit_id,
+                    operator=value.operator,
+                    active=value.active,
+                )
+                session.add(new_value)
+                await session.flush() 
+                criterion_to_upd.values.append(
+                    CriterionHasValue(value_id=new_value.id)
+                )
+
+    if criterion.tags is not None:
+        existing_tag_ids = {t.tag_id for t in criterion_to_upd.tags}
+
+        for tag in criterion.tags:
+            if getattr(tag, "id", None):
+                if tag.id not in existing_tag_ids:
+                    criterion_to_upd.tags.append(
+                        CriterionHasTag(tag_id=tag.id)
+                    )
+            else:
+                new_tag = Tag(
+                    code=tag.code,
+                    type=tag.type
+                )
+                session.add(new_tag)
+                await session.flush()  # ⬅️ assigns new_value.id
+
+                criterion_to_upd.tags.append(
+                    CriterionHasTag(tag_id=new_tag.id)
+                )
+
+
+    scalar_update = criterion.model_dump(
+        exclude_unset=True,
+        exclude={"tags", "values"}
+    )
+
+    upd_criterion = await criterion_crud.update(
+        db=session,
+        db_obj=criterion_to_upd,
+        obj_in=scalar_update
+    )
+
+    await session.commit()
+    await session.refresh(upd_criterion)
 
     return upd_criterion
+
 
 async def save_criterion(session: Session, criterion: CriterionCreate) -> CriterionSchema:
     new_criterion = await criterion_crud.create(db=session, obj_in=criterion)

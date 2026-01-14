@@ -9,10 +9,11 @@ from . import logger
 from starlette.responses import JSONResponse 
 from typing import List
 from gearbox import auth
-from gearbox.schemas import EligibilityCriteriaResponseResults, EligibilityCriteriaSearchResults, EligibilityCriteria, EligibilityCriteriaCreate, EligibilityCriteriaResponse
+from gearboxdatamodel.schemas import EligibilityCriteriaResponseResults, EligibilityCriteriaSearchResults, EligibilityCriteria, EligibilityCriteriaCreate, EligibilityCriteriaResponse
 from gearbox import deps
-from gearbox.util import bucket_utils, status
-from gearbox.admin_login import admin_required
+from gearboxdatamodel.util import status
+from gearbox.util import bucket_utils
+from gearbox.admin_login import admin_required, super_admin_required
 
 mod = APIRouter()
 
@@ -41,7 +42,7 @@ async def get_ec(
     return JSONResponse(presigned_url, status.HTTP_200_OK) 
 
 # build and return eligibility-criteria set for the front end
-@mod.post("/build-eligibility-criteria", status_code=status.HTTP_200_OK, response_model=List[EligibilityCriteriaResponse], dependencies=[ Depends(auth.authenticate), Depends(admin_required)] )
+@mod.post("/build-eligibility-criteria", status_code=status.HTTP_200_OK, response_model=List[EligibilityCriteriaResponse], dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)] )
 async def build_eligibility_criteria(
     request: Request,
     session: Session = Depends(deps.get_session),
