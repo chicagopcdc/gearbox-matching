@@ -88,6 +88,7 @@ async def create_new_criterion(session: Session, input_criterion_info: Criterion
     return new_crit
 
 async def update_criterion(session: Session, criterion: CriterionSchema) -> CriterionSchema:
+    # TODO figure out the orm / DB issues going on with the scalar updates.
     criterion_to_upd = await criterion_crud.get(db=session, id=criterion.id)
 
     if not criterion_to_upd:
@@ -152,13 +153,13 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
                     CriterionHasTag(tag_id=new_tag.id)
                 )
 
-    scalar_update = criterion.model_dump(
-        exclude_unset=True,
-        exclude={"tags", "values"}
-    )
+    # scalar_update = criterion.model_dump(
+    #     exclude_unset=True,
+    #     exclude={"tags", "values"}
+    # )
 
-    for field, value in scalar_update.items():
-        setattr(criterion_to_upd, field, value)
+    # for field, value in scalar_update.items():
+    #     setattr(criterion_to_upd, field, value)
 
     await session.commit()
     await session.refresh(criterion_to_upd)
