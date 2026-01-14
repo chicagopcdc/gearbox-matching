@@ -99,23 +99,29 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
     if criterion.values is not None:
         existing_value_ids = {v.value_id for v in criterion_to_upd.values}
 
-        for value in criterion.values:
-            if getattr(value, "id", None):
-                if value.id not in existing_value_ids:
+        for wrapped in criterion.values:
+            val = wrapped.value
+
+            if not val:
+                continue
+
+            if getattr(val, "id", None):
+                if val.id not in existing_value_ids:
                     criterion_to_upd.values.append(
-                        CriterionHasValue(value_id=value.id)
+                        CriterionHasValue(value_id=val.id)
                     )
             else:
                 new_value = Value(
-                    description=value.description,
-                    is_numeric=value.is_numeric,
-                    value_string=value.value_string,
-                    unit_id=value.unit_id,
-                    operator=value.operator,
-                    active=value.active,
+                    description=val.description,
+                    is_numeric=val.is_numeric,
+                    value_string=val.value_string,
+                    unit_id=val.unit_id,
+                    operator=val.operator,
+                    active=val.active,
                 )
                 session.add(new_value)
-                await session.flush() 
+                await session.flush()
+
                 criterion_to_upd.values.append(
                     CriterionHasValue(value_id=new_value.id)
                 )
@@ -123,7 +129,12 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
     if criterion.tags is not None:
         existing_tag_ids = {t.tag_id for t in criterion_to_upd.tags}
 
-        for tag in criterion.tags:
+        for wrapped in criterion.tags:
+            tag = wrapped.tag
+
+            if not tag:
+                continue
+
             if getattr(tag, "id", None):
                 if tag.id not in existing_tag_ids:
                     criterion_to_upd.tags.append(
@@ -135,12 +146,11 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
                     type=tag.type
                 )
                 session.add(new_tag)
-                await session.flush()  # ⬅️ assigns new_value.id
+                await session.flush()
 
                 criterion_to_upd.tags.append(
                     CriterionHasTag(tag_id=new_tag.id)
                 )
-
 
     scalar_update = criterion.model_dump(
         exclude_unset=True,
