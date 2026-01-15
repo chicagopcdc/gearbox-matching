@@ -73,7 +73,7 @@ class CriterionUpdate(BaseModel):
     input_type_id: Optional[int] = None
 
     tags: Optional[list[Tag]] = None
-    values: Optional[list[ValueSchema]] = None
+    values: Optional[list[Value]] = None
 
 @mod.put("/criterion", response_model=Criterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)])
 async def update_criterion(
