@@ -108,12 +108,8 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
         existing_value_ids = {v.value_id for v in criterion_to_upd.values}
         logger.info(f"Existing value IDs: {existing_value_ids}")
 
-        for idx, wrapped in enumerate(criterion.values):
-            logger.info(wrapped)
-            val = wrapped.value
-            if not val:
-                continue
-
+        for val in criterion.values:
+            logger.info(val)
             try:
                 if getattr(val, "id", None):
                     if val.id not in existing_value_ids:
@@ -181,14 +177,14 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
                         logger.info(f"Value {value_id_to_use} already associated, skipping")
 
             except IntegrityError as e:
-                logger.error(f"IntegrityError on value {idx}: {e}")
+                logger.error(f"IntegrityError on value {val}: {e}")
                 await session.rollback()
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
                     detail=f"Database constraint violation: {str(e)}"
                 )
             except Exception as e:
-                logger.error(f"Unexpected error on value {idx}: {e}", exc_info=True)
+                logger.error(f"Unexpected error on value {val}: {e}", exc_info=True)
                 raise
 
 
