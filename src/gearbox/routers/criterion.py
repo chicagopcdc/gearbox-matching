@@ -7,7 +7,7 @@ from gearboxdatamodel.util import status
 from gearbox.services import criterion as criterion_service
 from gearbox.admin_login import admin_required, super_admin_required
 
-from gearboxdatamodel.schemas import CriterionSearchResults, CriterionCreateIn, Criterion
+from gearboxdatamodel.schemas import CriterionSearchResults, CriterionCreateIn, Criterion, CriterionUpdate
 from gearbox import deps
 from gearbox import auth
 
@@ -60,9 +60,23 @@ async def save_object(
     await session.commit()
     return new_criterion
 
+
+from pydantic import BaseModel
+class CriterionUpdate(BaseModel):
+    id: int
+    code: Optional[str] = None
+    display_name: Optional[str] = None
+    description: Optional[str] = None
+    active: Optional[bool] = None
+    ontology_code_id: Optional[int] = None
+    input_type_id: Optional[int] = None
+
+    tags: Optional[list[Tag]] = None
+    values: Optional[list[ValueSchema]] = None
+
 @mod.put("/criterion", response_model=Criterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)])
 async def update_criterion(
-    body: Criterion,
+    body: CriterionUpdate,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
     user_id: int = Depends(auth.authenticate_user)
