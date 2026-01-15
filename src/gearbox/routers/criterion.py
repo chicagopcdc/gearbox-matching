@@ -7,7 +7,7 @@ from gearboxdatamodel.util import status
 from gearbox.services import criterion as criterion_service
 from gearbox.admin_login import admin_required, super_admin_required
 
-from gearboxdatamodel.schemas import CriterionSearchResults, CriterionCreateIn, Criterion, Tag, Value, ValueBase, TagBase
+from gearboxdatamodel.schemas import CriterionSearchResults, CriterionCreateIn, Criterion, Tag, Value
 from gearbox import deps
 from gearbox import auth
 
@@ -63,6 +63,26 @@ async def save_object(
 
 from pydantic import BaseModel
 from typing import Sequence, List, Optional
+from datetime import datetime
+class TagBase(BaseModel):
+    code: str
+    type: Optional[str] = None
+
+    class Config:
+        from_attributes = True 
+
+class ValueBase(BaseModel):
+    description: Optional[str] = None
+    is_numeric: bool
+    value_string: str
+    unit_id: Optional[int] = None
+    operator: str
+    create_date: Optional[datetime] = None
+    active: Optional[bool] = None
+
+    class Config:
+        from_attributes = True
+
 class ValueUpsert(ValueBase):
     id: Optional[int] = None
 
