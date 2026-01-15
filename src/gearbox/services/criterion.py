@@ -10,6 +10,8 @@ from gearbox.services import criterion_staging
 from gearboxdatamodel.util.types import AdjudicationStatus
 from typing import List
 
+from sqlalchemy import insert
+
 async def get_criterion(session: Session, id: int) -> CriterionSchema:
     crit = await criterion_crud.get(session, id)
     return crit
@@ -110,28 +112,56 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
                 if val.id not in existing_value_ids:
                     existing_value = await session.get(Value, val.id)
 
-                    assoc = CriterionHasValue(
-                        criterion_id=criterion_to_upd.id,
-                        value=existing_value
-                    )
-                    session.add(assoc)
-            else:
-                new_value = Value(
-                    description=val.description,
-                    is_numeric=val.is_numeric,
-                    value_string=val.value_string,
-                    unit_id=val.unit_id,
-                    operator=val.operator,
-                    active=val.active,
-                )
-                session.add(new_value)
-                await session.flush()
+                    # assoc = CriterionHasValue(
+                    #     criterion_id=criterion_to_upd.id,
+                    #     value=existing_value
+                    # )
+                    # session.add(assoc)
 
-                assoc = CriterionHasValue(
-                    criterion_id=criterion_to_upd.id,
-                    value=new_value
+                    await session.execute(
+                        insert(CriterionHasValue).values(
+                            criterion_id=criterion_to_upd.id,
+                            value_id=val.id,
+                        )
+                    )
+            else:
+                result = await session.execute(
+                    insert(Value)
+                    .values(
+                        description=val.description,
+                        is_numeric=val.is_numeric,
+                        value_string=val.value_string,
+                        unit_id=val.unit_id,
+                        operator=val.operator,
+                        active=val.active,
+                    )
+                    .returning(Value.id)
                 )
-                session.add(assoc)
+
+                new_value_id = result.scalar_one()
+
+                await session.execute(
+                    insert(CriterionHasValue).values(
+                        criterion_id=criterion_to_upd.id,
+                        value_id=new_value_id,
+                    )
+                )
+                # new_value = Value(
+                #     description=val.description,
+                #     is_numeric=val.is_numeric,
+                #     value_string=val.value_string,
+                #     unit_id=val.unit_id,
+                #     operator=val.operator,
+                #     active=val.active,
+                # )
+                # session.add(new_value)
+                # await session.flush()
+
+                # assoc = CriterionHasValue(
+                #     criterion_id=criterion_to_upd.id,
+                #     value=new_value
+                # )
+                # session.add(assoc)
 
     if criterion.tags is not None:
         existing_tag_ids = {t.tag_id for t in criterion_to_upd.tags}
