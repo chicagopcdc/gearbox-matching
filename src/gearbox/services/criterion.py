@@ -101,6 +101,9 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
             f"Criterion id {criterion.id} not found."
         )
 
+    logger.info("LUCAAAAAAAAa")
+    logger.info(criterion.values)
+    
     if criterion.values is not None:
         existing_value_ids = {v.value_id for v in criterion_to_upd.values}
         logger.info(f"Existing value IDs: {existing_value_ids}")
