@@ -108,8 +108,9 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
 
             if getattr(val, "id", None):
                 if val.id not in existing_value_ids:
+                    existing_value = await session.get(Value, val.id)
                     criterion_to_upd.values.append(
-                        CriterionHasValue(value_id=val.id)
+                        CriterionHasValue(value=existing_value)
                     )
             else:
                 new_value = Value(
@@ -124,7 +125,7 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
                 await session.flush()
 
                 criterion_to_upd.values.append(
-                    CriterionHasValue(value_id=new_value.id)
+                    CriterionHasValue(value=new_value)
                 )
 
     if criterion.tags is not None:
@@ -138,8 +139,9 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
 
             if getattr(tag, "id", None):
                 if tag.id not in existing_tag_ids:
+                    existing_tag = await session.get(Tag, tag.id)
                     criterion_to_upd.tags.append(
-                        CriterionHasTag(tag_id=tag.id)
+                        CriterionHasTag(tag=existing_tag)
                     )
             else:
                 new_tag = Tag(
@@ -150,7 +152,7 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
                 await session.flush()
 
                 criterion_to_upd.tags.append(
-                    CriterionHasTag(tag_id=new_tag.id)
+                    CriterionHasTag(tag=new_tag)
                 )
 
     # scalar_update = criterion.model_dump(
