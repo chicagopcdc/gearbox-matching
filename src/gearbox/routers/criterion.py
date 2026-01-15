@@ -62,6 +62,7 @@ async def save_object(
 
 
 from pydantic import BaseModel
+from typing import Sequence, List, Optional
 class CriterionUpdate(BaseModel):
     id: int
     code: Optional[str] = None
