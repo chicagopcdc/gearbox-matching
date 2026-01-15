@@ -110,21 +110,23 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
 
             if getattr(val, "id", None):
                 if val.id not in existing_value_ids:
-                    existing_value = await session.get(Value, val.id)
-
-                    # assoc = CriterionHasValue(
-                    #     criterion_id=criterion_to_upd.id,
-                    #     value=existing_value
+                    logger.info("INSIDE exiting ID")
+                   
+                    # await session.execute(
+                    #     insert(CriterionHasValue).values(
+                    #         criterion_id=criterion_to_upd.id,
+                    #         value_id=val.id,
+                    #     )
                     # )
-                    # session.add(assoc)
 
-                    await session.execute(
-                        insert(CriterionHasValue).values(
-                            criterion_id=criterion_to_upd.id,
-                            value_id=val.id,
-                        )
+                    existing_value = await session.get(Value, val.id)
+                    assoc = CriterionHasValue(
+                        criterion_id=criterion_to_upd.id,
+                        value=existing_value
                     )
+                    session.add(assoc)
             else:
+                logger.info(f"adding New value: {val.description}")
                 result = await session.execute(
                     insert(Value)
                     .values(
@@ -139,6 +141,7 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
                 )
 
                 new_value_id = result.scalar_one()
+                logger.info(f"New value created with id {new_value_id}")
 
                 await session.execute(
                     insert(CriterionHasValue).values(
@@ -146,6 +149,8 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
                         value_id=new_value_id,
                     )
                 )
+                logger.info(f"Created association")
+
                 # new_value = Value(
                 #     description=val.description,
                 #     is_numeric=val.is_numeric,
@@ -163,36 +168,38 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
                 # )
                 # session.add(assoc)
 
-    if criterion.tags is not None:
-        existing_tag_ids = {t.tag_id for t in criterion_to_upd.tags}
+            await session.flush()
 
-        for wrapped in criterion.tags:
-            tag = wrapped.tag
+    # if criterion.tags is not None:
+    #     existing_tag_ids = {t.tag_id for t in criterion_to_upd.tags}
 
-            if not tag:
-                continue
+    #     for wrapped in criterion.tags:
+    #         tag = wrapped.tag
 
-            if getattr(tag, "id", None):
-                if tag.id not in existing_tag_ids:
-                    existing_tag = await session.get(Tag, tag.id)
-                    assoc = CriterionHasTag(
-                        criterion_id=criterion_to_upd.id,
-                        tag=existing_tag
-                    )
-                    session.add(assoc)
-            else:
-                new_tag = Tag(
-                    code=tag.code,
-                    type=tag.type
-                )
-                session.add(new_tag)
-                await session.flush()
+    #         if not tag:
+    #             continue
 
-                assoc = CriterionHasTag(
-                    criterion_id=criterion_to_upd.id,
-                    tag=new_tag
-                )
-                session.add(assoc)
+    #         if getattr(tag, "id", None):
+    #             if tag.id not in existing_tag_ids:
+    #                 existing_tag = await session.get(Tag, tag.id)
+    #                 assoc = CriterionHasTag(
+    #                     criterion_id=criterion_to_upd.id,
+    #                     tag=existing_tag
+    #                 )
+    #                 session.add(assoc)
+    #         else:
+    #             new_tag = Tag(
+    #                 code=tag.code,
+    #                 type=tag.type
+    #             )
+    #             session.add(new_tag)
+    #             await session.flush()
+
+    #             assoc = CriterionHasTag(
+    #                 criterion_id=criterion_to_upd.id,
+    #                 tag=new_tag
+    #             )
+    #             session.add(assoc)
 
 
     # scalar_update = criterion.model_dump(
@@ -204,6 +211,7 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
     #     setattr(criterion_to_upd, field, value)
 
     await session.commit()
+    logger.info("Commit completed")
     await session.refresh(criterion_to_upd)
 
     return criterion_to_upd
