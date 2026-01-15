@@ -109,9 +109,12 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
             if getattr(val, "id", None):
                 if val.id not in existing_value_ids:
                     existing_value = await session.get(Value, val.id)
-                    criterion_to_upd.values.append(
-                        CriterionHasValue(value=existing_value)
+
+                    assoc = CriterionHasValue(
+                        criterion_id=criterion_to_upd.id,
+                        value=existing_value
                     )
+                    session.add(assoc)
             else:
                 new_value = Value(
                     description=val.description,
@@ -124,9 +127,11 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
                 session.add(new_value)
                 await session.flush()
 
-                criterion_to_upd.values.append(
-                    CriterionHasValue(value=new_value)
+                assoc = CriterionHasValue(
+                    criterion_id=criterion_to_upd.id,
+                    value=new_value
                 )
+                session.add(assoc)
 
     if criterion.tags is not None:
         existing_tag_ids = {t.tag_id for t in criterion_to_upd.tags}
@@ -140,9 +145,11 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
             if getattr(tag, "id", None):
                 if tag.id not in existing_tag_ids:
                     existing_tag = await session.get(Tag, tag.id)
-                    criterion_to_upd.tags.append(
-                        CriterionHasTag(tag=existing_tag)
+                    assoc = CriterionHasTag(
+                        criterion_id=criterion_to_upd.id,
+                        tag=existing_tag
                     )
+                    session.add(assoc)
             else:
                 new_tag = Tag(
                     code=tag.code,
@@ -151,9 +158,12 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
                 session.add(new_tag)
                 await session.flush()
 
-                criterion_to_upd.tags.append(
-                    CriterionHasTag(tag=new_tag)
+                assoc = CriterionHasTag(
+                    criterion_id=criterion_to_upd.id,
+                    tag=new_tag
                 )
+                session.add(assoc)
+
 
     # scalar_update = criterion.model_dump(
     #     exclude_unset=True,
