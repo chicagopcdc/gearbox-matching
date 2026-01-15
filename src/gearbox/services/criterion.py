@@ -11,6 +11,8 @@ from gearboxdatamodel.util.types import AdjudicationStatus
 from typing import List
 
 from sqlalchemy import insert
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
 async def get_criterion(session: Session, id: int) -> CriterionSchema:
     crit = await criterion_crud.get(session, id)
@@ -101,74 +103,81 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
 
     if criterion.values is not None:
         existing_value_ids = {v.value_id for v in criterion_to_upd.values}
+        logger.info(f"Existing value IDs: {existing_value_ids}")
 
-        for wrapped in criterion.values:
+        for idx, wrapped in enumerate(criterion.values):
             val = wrapped.value
-
             if not val:
                 continue
 
-            if getattr(val, "id", None):
-                if val.id not in existing_value_ids:
-                    logger.info("INSIDE exiting ID")
-                   
-                    # await session.execute(
-                    #     insert(CriterionHasValue).values(
-                    #         criterion_id=criterion_to_upd.id,
-                    #         value_id=val.id,
-                    #     )
-                    # )
+            try:
+                if getattr(val, "id", None):
+                    if val.id not in existing_value_ids:
+                        logger.info(f"Adding existing value {val.id} to criterion {criterion_to_upd.id}")
 
-                    existing_value = await session.get(Value, val.id)
-                    assoc = CriterionHasValue(
-                        criterion_id=criterion_to_upd.id,
-                        value=existing_value
+                        existing_value = await session.get(Value, val.id)
+                        if not existing_value:
+                            logger.warning(f"Value {val.id} not found in database")
+                            continue
+                        assoc = CriterionHasValue(
+                            criterion_id=criterion_to_upd.id,
+                            value_id=val.id
+                        )
+                        criterion_to_upd.values.append(assoc)
+                        logger.info(f"Association added to relationship")
+                    else:
+                        logger.info(f"Value {val.id} already associated, skipping")
+                else:
+                    logger.info(f"Creating new value: {val.value_string}, numeric={val.is_numeric}, unit={val.unit_id}, op={val.operator}")
+
+                    existing_check = await session.execute(
+                        select(Value).where(
+                            Value.is_numeric == val.is_numeric,
+                            Value.unit_id == val.unit_id,
+                            Value.value_string == val.value_string,
+                            Value.operator == val.operator
+                        )
                     )
-                    session.add(assoc)
-            else:
-                logger.info(f"adding New value: {val.description}")
-                result = await session.execute(
-                    insert(Value)
-                    .values(
-                        description=val.description,
-                        is_numeric=val.is_numeric,
-                        value_string=val.value_string,
-                        unit_id=val.unit_id,
-                        operator=val.operator,
-                        active=val.active,
-                    )
-                    .returning(Value.id)
+                    existing_value = existing_check.scalar_one_or_none()
+                    if existing_value:
+                        logger.info(f"Value already exists with id {existing_value.id}, using it")
+                        value_id_to_use = existing_value.id
+                    else:
+                        new_value = Value(
+                            description=val.description,
+                            is_numeric=val.is_numeric,
+                            value_string=val.value_string,
+                            unit_id=val.unit_id,
+                            operator=val.operator,
+                            active=val.active,
+                        )
+                        session.add(new_value)
+                        await session.flush()
+                        value_id_to_use = new_value.id
+                        logger.info(f"New value created with id {value_id_to_use}")
+
+                    
+                    if value_id_to_use not in existing_value_ids:
+                        assoc = CriterionHasValue(
+                            criterion_id=criterion_to_upd.id,
+                            value_id=value_id_to_use
+                        )
+                        criterion_to_upd.values.append(assoc)
+                        logger.info(f"Association created for value {value_id_to_use}")
+                    else:
+                        logger.info(f"Value {value_id_to_use} already associated, skipping")
+
+            except IntegrityError as e:
+                logger.error(f"IntegrityError on value {idx}: {e}")
+                await session.rollback()
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=f"Database constraint violation: {str(e)}"
                 )
+            except Exception as e:
+                logger.error(f"Unexpected error on value {idx}: {e}", exc_info=True)
+                raise
 
-                new_value_id = result.scalar_one()
-                logger.info(f"New value created with id {new_value_id}")
-
-                await session.execute(
-                    insert(CriterionHasValue).values(
-                        criterion_id=criterion_to_upd.id,
-                        value_id=new_value_id,
-                    )
-                )
-                logger.info(f"Created association")
-
-                # new_value = Value(
-                #     description=val.description,
-                #     is_numeric=val.is_numeric,
-                #     value_string=val.value_string,
-                #     unit_id=val.unit_id,
-                #     operator=val.operator,
-                #     active=val.active,
-                # )
-                # session.add(new_value)
-                # await session.flush()
-
-                # assoc = CriterionHasValue(
-                #     criterion_id=criterion_to_upd.id,
-                #     value=new_value
-                # )
-                # session.add(assoc)
-
-            await session.flush()
 
     # if criterion.tags is not None:
     #     existing_tag_ids = {t.tag_id for t in criterion_to_upd.tags}
@@ -210,10 +219,11 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
     # for field, value in scalar_update.items():
     #     setattr(criterion_to_upd, field, value)
 
+    logger.info(f"Total values in relationship before commit: {len(criterion_to_upd.values)}")
     await session.commit()
     logger.info("Commit completed")
     await session.refresh(criterion_to_upd)
-
+    logger.info(f"Total values in relationship after refresh: {len(criterion_to_upd.values)}")
     return criterion_to_upd
 
 
