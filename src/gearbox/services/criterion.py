@@ -103,12 +103,13 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
 
     logger.info("LUCAAAAAAAAa")
     logger.info(criterion.values)
-    
+
     if criterion.values is not None:
         existing_value_ids = {v.value_id for v in criterion_to_upd.values}
         logger.info(f"Existing value IDs: {existing_value_ids}")
 
         for idx, wrapped in enumerate(criterion.values):
+            logger.info(wrapped)
             val = wrapped.value
             if not val:
                 continue
