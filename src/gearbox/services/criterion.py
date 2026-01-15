@@ -115,15 +115,22 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
                     if val.id not in existing_value_ids:
                         logger.info(f"Adding existing value {val.id} to criterion {criterion_to_upd.id}")
 
-                        existing_value = await session.get(Value, val.id)
-                        if not existing_value:
-                            logger.warning(f"Value {val.id} not found in database")
-                            continue
+                        # existing_value = await session.get(Value, val.id)
+                        # if not existing_value:
+                        #     logger.warning(f"Value {val.id} not found in database")
+                        #     continue
+                        # assoc = CriterionHasValue(
+                        #     criterion_id=criterion_to_upd.id,
+                        #     value_id=val.id
+                        # )
+                        # criterion_to_upd.values.append(assoc)
+
                         assoc = CriterionHasValue(
                             criterion_id=criterion_to_upd.id,
                             value_id=val.id
                         )
-                        criterion_to_upd.values.append(assoc)
+                        session.add(assoc)  
+
                         logger.info(f"Association added to relationship")
                     else:
                         logger.info(f"Value {val.id} already associated, skipping")
@@ -162,7 +169,9 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
                             criterion_id=criterion_to_upd.id,
                             value_id=value_id_to_use
                         )
-                        criterion_to_upd.values.append(assoc)
+                        # criterion_to_upd.values.append(assoc)
+
+                        session.add(assoc)
                         logger.info(f"Association created for value {value_id_to_use}")
                     else:
                         logger.info(f"Value {value_id_to_use} already associated, skipping")
