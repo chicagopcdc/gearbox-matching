@@ -7,7 +7,7 @@ from gearboxdatamodel.util import status
 from gearbox.services import criterion as criterion_service
 from gearbox.admin_login import admin_required, super_admin_required
 
-from gearboxdatamodel.schemas import CriterionSearchResults, CriterionCreateIn, Criterion, CriterionUpdate
+from gearboxdatamodel.schemas import CriterionSearchResults, CriterionCreateIn, Criterion
 from gearbox import deps
 from gearbox import auth
 
