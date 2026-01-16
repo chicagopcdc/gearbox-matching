@@ -91,7 +91,7 @@ async def create_new_criterion(session: Session, input_criterion_info: Criterion
     new_crit = await criterion_crud.get(session, id=new_criterion.id)
     return new_crit
 
-async def update_criterion(session: Session, criterion: CriterionSchema) -> CriterionSchema:
+async def update_criterion(session: Session, criterion: CriterionSchema, user_id: int) -> CriterionSchema:
     # TODO figure out the orm / DB issues going on with the scalar updates.
     criterion_to_upd = await criterion_crud.get(db=session, id=criterion.id)
 
@@ -232,6 +232,10 @@ async def update_criterion(session: Session, criterion: CriterionSchema) -> Crit
     await session.commit()
     logger.info("Commit completed")
     await session.refresh(criterion_to_upd)
+
+    #TODO update existing criterion staging records with the udpated information from this criteria
+    await criterion_staging.refresh_criterion_staging(session, criterion_to_upd, user_id)
+
     logger.info(f"Total values in relationship after refresh: {len(criterion_to_upd.values)}")
     return criterion_to_upd
 

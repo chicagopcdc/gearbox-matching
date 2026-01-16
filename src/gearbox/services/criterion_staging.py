@@ -1,9 +1,10 @@
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession as Session
+from sqlalchemy import select
 from gearboxdatamodel.util import status
 from gearboxdatamodel.schemas import CriterionStaging as CriterionStagingSchema, CriterionStagingCreate, CriterionPublish, CriterionCreate, CriterionStagingUpdate, CriterionHasValueCreate, CriterionStagingSearchResult, ElCriteriaHasCriterionPublish, ElCriteriaHasCriterionCreate, CriterionStagingUpdateIn
 from gearboxdatamodel.crud import criterion_staging_crud , value_crud, criterion_has_value_crud, input_type_crud
-from gearboxdatamodel.models import Criterion
+from gearboxdatamodel.models import Criterion, CriterionStaging
 from typing import List
 from gearboxdatamodel.util.types import AdjudicationStatus, EchcAdjudicationStatus
 from gearbox.services import criterion as criterion_service, value as value_service
@@ -74,6 +75,10 @@ async def publish_criterion(session: Session, criterion: CriterionPublish, user_
         for v_id in criterion.values:
             chv = CriterionHasValueCreate(criterion_id=new_criterion.id, value_id=v_id)
             await criterion_has_value_crud.create(db=session,obj_in=chv)
+
+    #TODO update existing criterion staging records with the udpated information from this criteria
+    await refresh_criterion_staging(session, new_criterion, user_id)
+    
     # Call update method below - set criterion_staging criteria adjudication status to active
     stage_upd = CriterionStagingUpdate(id=criterion.criterion_staging_id, criterion_id=new_criterion.id, criterion_adjudication_status="ACTIVE", last_updated_by_user_id=user_id)
     await update(session=session, criterion=stage_upd, user_id=user_id)
@@ -176,3 +181,45 @@ async def get_criterion_staging_inactive_criterion(session: Session, eligibility
 
 async def get_staged_criteria_by_ec_id(session:Session, eligibility_criteria_id: int) -> List[Criterion]:
     return await criterion_staging_crud.get_staged_criteria_by_ec_id(session, eligibility_criteria_id)
+
+async def refresh_criterion_staging(
+    session: Session,
+    criterion: Criterion,  # from DB
+    user_id: int,
+) -> list[CriterionStaging]:
+    """
+    Propagate canonical Criterion changes into all related criterion_staging rows.
+    """
+
+    # Load staged records
+    result = await session.execute(
+        select(CriterionStaging)
+        .where(CriterionStaging.criterion_id == criterion.id)
+    )
+    staged_criteria = result.scalars().all()
+
+    if not staged_criteria:
+        return []
+
+    # Collect value IDs from the canonical criterion
+    value_ids = sorted({
+        cv.value_id for cv in criterion.values              # This may have a different format check it
+    }) if criterion.values else []
+
+    # Apply updates
+    for staged in staged_criteria:
+        staged.code = criterion.code
+        staged.display_name = criterion.display_name
+        staged.description = criterion.description
+        staged.ontology_code_id = criterion.ontology_code_id
+        staged.input_type_id = criterion.input_type_id
+
+        # derived / denormalized field
+        staged.criterion_value_ids = value_ids
+
+        staged.last_updated_by_user_id = user_id
+
+    # Commit once
+    await session.commit()
+
+    return staged_criteria

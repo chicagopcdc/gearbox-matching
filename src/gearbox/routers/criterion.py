@@ -109,9 +109,10 @@ async def update_criterion(
     user_id: int = Depends(auth.authenticate_user)
 ):
 
-    updated_criterion = await criterion_service.update_criterion(session, body)
+    updated_criterion = await criterion_service.update_criterion(session, body, user_id)
     await session.commit()
     return updated_criterion
 
 def init_app(app):
     app.include_router(mod, tags=["criterion"])
+
