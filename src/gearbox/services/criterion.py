@@ -101,6 +101,11 @@ async def update_criterion(session: Session, criterion: CriterionSchema, user_id
             f"Criterion id {criterion.id} not found."
         )
 
+    ## TODO remove this
+    await criterion_staging.refresh_criterion_staging(session, criterion_to_upd, user_id)
+    return criterion_to_upd
+    ### END TODO
+
     if criterion.values is not None:
         existing_value_ids = {v.value_id for v in criterion_to_upd.values}
         logger.info(f"Existing value IDs: {existing_value_ids}")
@@ -220,11 +225,12 @@ async def update_criterion(session: Session, criterion: CriterionSchema, user_id
     await session.commit()
     logger.info("Commit completed")
     await session.refresh(criterion_to_upd)
+    logger.info(f"Total values in relationship after refresh: {len(criterion_to_upd.values)}")
 
     #TODO update existing criterion staging records with the udpated information from this criteria
     await criterion_staging.refresh_criterion_staging(session, criterion_to_upd, user_id)
 
-    logger.info(f"Total values in relationship after refresh: {len(criterion_to_upd.values)}")
+    
     return criterion_to_upd
 
 

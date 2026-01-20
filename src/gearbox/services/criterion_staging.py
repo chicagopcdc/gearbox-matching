@@ -77,7 +77,8 @@ async def publish_criterion(session: Session, criterion: CriterionPublish, user_
             await criterion_has_value_crud.create(db=session,obj_in=chv)
 
     #TODO update existing criterion staging records with the udpated information from this criteria
-    await refresh_criterion_staging(session, new_criterion, user_id)
+    # await refresh_criterion_staging(session, new_criterion, user_id)
+    # If it is new it will have a new criterion_id so it will not be easy to find the same in parallel study criteria creation.
     
     # Call update method below - set criterion_staging criteria adjudication status to active
     stage_upd = CriterionStagingUpdate(id=criterion.criterion_staging_id, criterion_id=new_criterion.id, criterion_adjudication_status="ACTIVE", last_updated_by_user_id=user_id)
@@ -201,10 +202,15 @@ async def refresh_criterion_staging(
     if not staged_criteria:
         return []
 
+    logger.info(stage_criteria)
+    logger.info(criterion.values)
+
     # Collect value IDs from the canonical criterion
     value_ids = sorted({
         cv.value_id for cv in criterion.values              # This may have a different format check it
     }) if criterion.values else []
+
+    logger.info(value_ids)
 
     # Apply updates
     for staged in staged_criteria:
@@ -219,7 +225,8 @@ async def refresh_criterion_staging(
 
         staged.last_updated_by_user_id = user_id
 
-    # Commit once
-    await session.commit()
+
+    #TODO reenable the commit
+    # await session.commit()
 
     return staged_criteria

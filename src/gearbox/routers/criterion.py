@@ -112,7 +112,7 @@ async def update_criterion(
 ):
 
     updated_criterion = await criterion_service.update_criterion(session, body, user_id)
-    await session.commit()
+    # await session.commit()
     return updated_criterion
 
 def init_app(app):
