@@ -61,6 +61,7 @@ async def save_object(
     return new_criterion
 
 
+### TODO move to data model repo and add import for these models
 from pydantic import BaseModel
 from typing import Sequence, List, Optional
 from datetime import datetime
@@ -100,6 +101,7 @@ class CriterionUpdate(BaseModel):
 
     tags: Optional[list[TagUpsert]] = None
     values: Optional[list[ValueUpsert]] = None
+## END TODO
 
 @mod.put("/criterion", response_model=Criterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)])
 async def update_criterion(

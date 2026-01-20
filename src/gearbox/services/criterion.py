@@ -1,6 +1,8 @@
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession as Session
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from . import logger
 from gearboxdatamodel.models import Value, Tag, CriterionHasValue, CriterionHasTag
 from gearboxdatamodel.util import status
@@ -10,9 +12,7 @@ from gearbox.services import criterion_staging
 from gearboxdatamodel.util.types import AdjudicationStatus
 from typing import List
 
-from sqlalchemy import insert
-from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
+
 
 async def get_criterion(session: Session, id: int) -> CriterionSchema:
     crit = await criterion_crud.get(session, id)
@@ -101,9 +101,6 @@ async def update_criterion(session: Session, criterion: CriterionSchema, user_id
             f"Criterion id {criterion.id} not found."
         )
 
-    logger.info("LUCAAAAAAAAa")
-    logger.info(criterion.values)
-
     if criterion.values is not None:
         existing_value_ids = {v.value_id for v in criterion_to_upd.values}
         logger.info(f"Existing value IDs: {existing_value_ids}")
@@ -113,25 +110,18 @@ async def update_criterion(session: Session, criterion: CriterionSchema, user_id
             try:
                 if getattr(val, "id", None):
                     if val.id not in existing_value_ids:
+                        existing_value = await session.get(Value, val.id)
+                        if not existing_value:
+                            logger.error(f"Value {val.id} not found in database. Value not added to criterion {criterion_to_upd.id}")
+                            continue
+
                         logger.info(f"Adding existing value {val.id} to criterion {criterion_to_upd.id}")
-
-                        # existing_value = await session.get(Value, val.id)
-                        # if not existing_value:
-                        #     logger.warning(f"Value {val.id} not found in database")
-                        #     continue
-                        # assoc = CriterionHasValue(
-                        #     criterion_id=criterion_to_upd.id,
-                        #     value_id=val.id
-                        # )
-                        # criterion_to_upd.values.append(assoc)
-
                         assoc = CriterionHasValue(
                             criterion_id=criterion_to_upd.id,
                             value_id=val.id
                         )
                         session.add(assoc)  
-
-                        logger.info(f"Association added to relationship")
+                        logger.info(f"Added value {val.id} to criterion {criterion_to_upd.id}")
                     else:
                         logger.info(f"Value {val.id} already associated, skipping")
                 else:
@@ -169,10 +159,8 @@ async def update_criterion(session: Session, criterion: CriterionSchema, user_id
                             criterion_id=criterion_to_upd.id,
                             value_id=value_id_to_use
                         )
-                        # criterion_to_upd.values.append(assoc)
-
                         session.add(assoc)
-                        logger.info(f"Association created for value {value_id_to_use}")
+                        logger.info(f"Added value {value_id_to_use} to criterion {criterion_to_upd.id}")
                     else:
                         logger.info(f"Value {value_id_to_use} already associated, skipping")
 
