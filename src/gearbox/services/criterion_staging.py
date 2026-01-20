@@ -213,7 +213,7 @@ async def refresh_criterion_staging(
         staged.description = criterion.description
         staged.ontology_code_id = criterion.ontology_code_id
         staged.input_type_id = criterion.input_type_id
-        staged.last_updated_by_user_id = user_id
+        staged.last_updated_by_user_id = int(user_id)
 
         staged.criterion_value_ids = value_ids
 
