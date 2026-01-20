@@ -202,7 +202,7 @@ async def refresh_criterion_staging(
     if not staged_criteria:
         return []
 
-    logger.info(stage_criteria)
+    logger.info(staged_criteria)
     logger.info(criterion.values)
 
     # Collect value IDs from the canonical criterion
