@@ -192,7 +192,6 @@ async def refresh_criterion_staging(
     Propagate canonical Criterion changes into all related criterion_staging rows.
     """
 
-    # Load staged records
     result = await session.execute(
         select(CriterionStaging)
         .where(CriterionStaging.criterion_id == criterion.id)
@@ -202,15 +201,10 @@ async def refresh_criterion_staging(
     if not staged_criteria:
         return []
 
-    logger.info(staged_criteria)
-    logger.info(criterion.values)
-
-    # Collect value IDs from the canonical criterion
+    # Collect value IDs from the DB criterion
     value_ids = sorted({
-        cv.value_id for cv in criterion.values              # This may have a different format check it
+        cv.value_id for cv in criterion.values   
     }) if criterion.values else []
-
-    logger.info(value_ids)
 
     # Apply updates
     for staged in staged_criteria:
@@ -219,14 +213,9 @@ async def refresh_criterion_staging(
         staged.description = criterion.description
         staged.ontology_code_id = criterion.ontology_code_id
         staged.input_type_id = criterion.input_type_id
-
-        # derived / denormalized field
-        staged.criterion_value_ids = value_ids
-
         staged.last_updated_by_user_id = user_id
 
+        staged.criterion_value_ids = value_ids
 
-    #TODO reenable the commit
-    # await session.commit()
-
+    await session.commit()
     return staged_criteria
