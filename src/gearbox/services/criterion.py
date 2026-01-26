@@ -100,7 +100,6 @@ async def update_criterion(session: Session, criterion: CriterionUpdate, user_id
             f"Criterion id {criterion.id} not found."
         )
 
-    # TODO test scalar
     update_in = CriterionUpdateIn.model_validate(
         criterion.model_dump(exclude_unset=True)
     )
@@ -186,7 +185,6 @@ async def update_criterion(session: Session, criterion: CriterionUpdate, user_id
                 logger.error(f"Unexpected error on value {val}: {e}", exc_info=True)
                 raise
 
-    # TODO test tags
     if criterion.tags is not None:
         existing_tag_ids = {t.tag_id for t in criterion_to_upd.tags}
         logger.info(f"Existing tag IDs: {existing_tag_ids}")
