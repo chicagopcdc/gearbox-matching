@@ -101,7 +101,9 @@ async def update_criterion(session: Session, criterion: CriterionUpdate, user_id
         )
 
     # TODO test scalar
-    update_in = CriterionUpdateIn.model_validate(criterion)
+    update_in = CriterionUpdateIn.model_validate(
+        criterion.model_dump(exclude_unset=True)
+    )
     scalar_data = update_in.model_dump(
         exclude_unset=True,
         mode="python",
