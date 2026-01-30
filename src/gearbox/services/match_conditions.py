@@ -573,8 +573,9 @@ async def get_match_conditions(session: Session) -> List[AlgorithmResponse]:
 async def build_match_conditions(session: Session, request: Request) -> List[AlgorithmResponse]:
 
     match_conditions = await get_match_conditions(session)
+    bucket_name = bucket_utils.get_bucket_name()
 
     if not config.BYPASS_S3:
         params = [{'Content-Type':'application/json'}]
-        bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_MATCH_CONDITIONS_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, match_conditions)
+        bucket_utils.put_object(request, bucket_name, config.S3_BUCKET_MATCH_CONDITIONS_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, match_conditions)
     return JSONResponse(jsonable_encoder(match_conditions), status.HTTP_200_OK)
