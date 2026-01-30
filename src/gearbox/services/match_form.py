@@ -18,10 +18,11 @@ import re
 async def build_match_form(session: Session, request: Request, save: bool):
 
     match_form = await get_match_form(session)
+    bucket_name = bucket_utils.get_bucket_name()
     if save:
         if not config.BYPASS_S3:
             params = [{'Content-Type':'application/json'}]
-            bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_MATCH_FORM_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, match_form)
+            bucket_utils.put_object(request, bucket_name, config.S3_BUCKET_MATCH_FORM_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, match_form)
 
     return match_form
 

@@ -154,7 +154,7 @@ async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineC
 
     # update study_version with new study_algorithm_engine_id
     sv_upd = StudyVersionUpdate(id=study_algorithm_engine.study_version_id, study_algorithm_engine_id= study_algorithm_engine_id, status=StudyVersionStatus.IN_PROCESS)
-    updated_sv = await study_version_service.update_study_version(session, study_version=sv_upd)
+    updated_sv = await study_version_service.update_study_version(session, study_version=sv_upd, update_fe_files=False)
     return retval
 
 async def update(session: Session, study_algorithm_engine: StudyAlgorithmEngineUpdate) -> StudyAlgorithmEngine:
