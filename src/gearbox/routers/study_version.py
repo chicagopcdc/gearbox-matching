@@ -84,8 +84,9 @@ async def publish_study_version(
     study_version_id: int,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
+    ignore_warnings: bool = False,
 ):
-    await study_version_service.publish_study_version(session=session, study_version_id=study_version_id, request=request)
+    await study_version_service.publish_study_version(session=session, study_version_id=study_version_id, request=request, ignore_warnings=ignore_warnings)
 
 def init_app(app):
     app.include_router(mod, tags=["study-version"])
