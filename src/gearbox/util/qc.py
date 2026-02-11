@@ -1,15 +1,15 @@
 
 
-class PublishStudyErrorDetail:
-    def __init__(self, code: str, details: str = None):
+class PublishStudyMessageDetail:
+    def __init__(self, code: str, value: str = None):
         self.code = code 
-        self.details = details 
+        self.value = value 
 
     def to_dict(self):
         return vars(self)
 
-class PublishStudyErrorMessage:
-    def __init__(self, message: str, details: list[PublishStudyErrorDetail] = None):
+class PublishStudyMessage:
+    def __init__(self, message: str, details: list[PublishStudyMessageDetail] = None):
         self.message = message
         self.details = details
 
