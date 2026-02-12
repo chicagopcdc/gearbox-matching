@@ -23,7 +23,6 @@ BYPASS_FENCE = config("BYPASS_FENCE", cast=bool, default=False)
 #S3
 BYPASS_IMPORTANT_QUESTIONS = config("BYPASS_IMPORTANT_QUESTIONS", cast=bool, default=False)
 BYPASS_S3 = config("BYPASS_S3", cast=bool, default=False)
-BYPASS_FE_FILE_UPDATE = config("BYPASS_FE_FILE_UPDATE", cast=bool, default=False)
 # DUMMY_S3 - use a public dummy S3 bucket for docker compose testing presigned urls
 DUMMY_S3 = config("DUMMY_S3", cast=bool, default=False)
 BYPASS_MIDDLEWARE_UPDATE = config("BYPASS_MIDDLEWARE_UPDATE", cast=bool, default=False)
