@@ -1,6 +1,7 @@
 from . import logger
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import HTTPException, Request
+from gearbox import config
 from gearboxdatamodel.models import StudyVersion, StudyVersion, Study
 from gearboxdatamodel.schemas import StudyVersionCreate, StudyVersionSearchResults, StudyVersion as StudyVersionSchema, StudyVersionInfo, StudyVersionUpdate, StudyCreate, EligibilityCriteriaCreate
 from gearboxdatamodel.util import status
@@ -62,7 +63,7 @@ async def create_study_version(session: Session, study_version: StudyVersionCrea
     # await session.commit() 
     return new_study_version
 
-async def update_study_version(session: Session, study_version: StudyVersionUpdate, request: Request=None, update_fe_files: bool=True) -> StudyVersionSchema:
+async def update_study_version(session: Session, study_version: StudyVersionUpdate, request: Request=None) -> StudyVersionSchema:
     study_version_in = await study_version_crud.get(db=session, id=study_version.id)
     if study_version_in:
         upd_study_version = await study_version_crud.update(db=session, db_obj=study_version_in, obj_in=study_version)
@@ -72,7 +73,7 @@ async def update_study_version(session: Session, study_version: StudyVersionUpda
     await session.commit() 
 
     #update fe matching files and middleware cache after study version updated
-    if update_fe_files:
+    if not config.BYPASS_FE_FILE_UPDATE:
         await study_service.refresh_study_fe_files(session=session, request=request)
     return upd_study_version
 
