@@ -26,6 +26,7 @@ async def reset_active_status(session: Session, study_id: int) -> bool:
     )
     for sv in sv_to_update:
         await study_version_crud.update(db=session, db_obj=sv, obj_in={"status":StudyVersionStatus.INACTIVE})
+
     return True
 
 async def get_study_version(session: Session, id: int) -> StudyVersionSchema:
@@ -61,7 +62,7 @@ async def create_study_version(session: Session, study_version: StudyVersionCrea
     # await session.commit() 
     return new_study_version
 
-async def update_study_version(session: Session, study_version: StudyVersionUpdate) -> StudyVersionSchema:
+async def update_study_version(session: Session, study_version: StudyVersionUpdate, request: Request=None, update_fe_files: bool=True) -> StudyVersionSchema:
     study_version_in = await study_version_crud.get(db=session, id=study_version.id)
     if study_version_in:
         upd_study_version = await study_version_crud.update(db=session, db_obj=study_version_in, obj_in=study_version)
@@ -69,6 +70,10 @@ async def update_study_version(session: Session, study_version: StudyVersionUpda
         logger.error(f"Study version for id: {study_version.id} not found for update.") 
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study version for id: {study_version.id} not found for update.") 
     await session.commit() 
+
+    #update fe matching files and middleware cache after study version updated
+    if update_fe_files:
+        await study_service.refresh_study_fe_files(session=session, request=request)
     return upd_study_version
 
 
@@ -77,6 +82,7 @@ async def publish_study_version(session: Session, request: Request, study_versio
     publish_errors = []
     publish_warnings = []
 
+    logger.info(f"Publishing study version id: {study_version_id}")
     # get study_version
     study_version = await study_version_crud.get(db=session, id=study_version_id)
     if not study_version:
@@ -292,11 +298,8 @@ async def publish_study_version(session: Session, request: Request, study_versio
 
     # update study version to active
     study_version_upd=StudyVersionUpdate(id=study_version.id, status=StudyVersionStatus.ACTIVE)
-    await update_study_version(session=session, study_version=study_version_upd)
+    await update_study_version(session=session, study_version=study_version_upd, request=request)
 
     # update eligibility_criteria to active
     ec_upd = EligibilityCriteriaCreate(status=EligibilityCriteriaStatus.ACTIVE)
     await eligiblity_criteria_service.update_eligibility_criteria(session=session,eligibility_criteria=ec_upd, eligibility_criteria_id=study_version.eligibility_criteria_id)
-
-    # build and save the match_form containing the newly published study version
-    await match_form_service.build_match_form(session=session, request=request, save=True)
