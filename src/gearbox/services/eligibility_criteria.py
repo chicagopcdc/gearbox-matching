@@ -3,8 +3,8 @@ from gearboxdatamodel.crud import eligibility_criteria_crud
 from gearboxdatamodel.schemas import EligibilityCriteriaCreate, EligibilityCriteriaSearchResults, EligibilityCriteria as EligibilityCriteriaSchema
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import HTTPException, Request
-from gearbox.util import bucket_utils
 from gearboxdatamodel.util import status
+from gearbox.util import bucket_utils, qc
 from gearboxdatamodel.util.types import EligibilityCriteriaStatus
 
 async def reset_active_status(session: Session, study_version_id: int) -> bool:
@@ -60,17 +60,19 @@ async def get_eligibility_criteria_set(session, id: int=None):
                 if render_type in ['radio','select']:
                     fieldValue = value_id
                 elif render_type in ['age']:
-                    unit = the_value.unit.name
-                    if unit in ['years']:
-                        fieldValue = eval(the_value.value_string)
-                    else:
+                    if qc.is_number(the_value.value_string):
+                        unit = the_value.unit.name
                         if unit == 'months':
                             fieldValue = round(eval(the_value.value_string)/12.0)
                         elif unit == 'days':
                             fieldValue = round(eval(the_value.value_string)/365.0)
+                        # default to no conversion (years) for age
+                        else:
+                            fieldValue = eval(the_value.value_string)
+                    else:
+                        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Invalid value for age for echc id: {echc.id} value: {the_value.value_string}")
                 else:
                     fieldValue = eval(the_value.value_string)
-
                 f = {
                     'id': the_id,
                     'fieldId': fieldId,
@@ -86,9 +88,10 @@ async def get_eligibility_criteria_set(session, id: int=None):
 async def build_eligibility_criteria(session: Session,request: Request) -> EligibilityCriteriaSearchResults: 
 
     eligibility_criteria = await get_eligibility_criteria_set(session)
+    bucket_name = bucket_utils.get_bucket_name()
 
     if not config.BYPASS_S3:
         params = [{'Content-Type':'application/json'}]
-        bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, eligibility_criteria)
+        bucket_utils.put_object(request, bucket_name, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, eligibility_criteria)
 
     return eligibility_criteria

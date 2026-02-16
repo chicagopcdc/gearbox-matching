@@ -1,13 +1,18 @@
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.ext.asyncio import AsyncSession as Session
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from . import logger
+from gearboxdatamodel.models import Value, Tag, CriterionHasValue, CriterionHasTag
 from gearboxdatamodel.util import status
-from gearboxdatamodel.schemas import CriterionSearchResults, CriterionCreateIn, CriterionCreate, CriterionHasValueCreate, CriterionHasTagCreate, DisplayRulesCreate, TriggeredByCreate, Criterion as CriterionSchema, CriterionStagingUpdate 
+from gearboxdatamodel.schemas import CriterionSearchResults, CriterionCreateIn, CriterionCreate, CriterionHasValueCreate, CriterionHasTagCreate, DisplayRulesCreate, TriggeredByCreate, Criterion as CriterionSchema, CriterionStagingUpdate, CriterionUpdate, CriterionUpdateIn 
 from gearboxdatamodel.crud import criterion_crud, criterion_has_value_crud, criterion_has_tag_crud, display_rules_crud, triggered_by_crud, value_crud, tag_crud
 from gearbox.services import criterion_staging
 from gearboxdatamodel.util.types import AdjudicationStatus
 from typing import List
+
+
 
 async def get_criterion(session: Session, id: int) -> CriterionSchema:
     crit = await criterion_crud.get(session, id)
@@ -86,16 +91,180 @@ async def create_new_criterion(session: Session, input_criterion_info: Criterion
     new_crit = await criterion_crud.get(session, id=new_criterion.id)
     return new_crit
 
-async def update_criterion(session: Session, criterion: CriterionCreateIn, criterion_id: int) -> CriterionSchema:
-    criterion_to_upd = await criterion_crud.get(db=session, id=criterion_id)
+async def update_criterion(session: Session, criterion: CriterionUpdate, user_id: int) -> CriterionSchema:
+    logger.info(criterion)
+    criterion_to_upd = await criterion_crud.get(db=session, id=criterion.id)
+    if not criterion_to_upd:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND,
+            f"Criterion id {criterion.id} not found."
+        )
 
-    if criterion_to_upd:
-        upd_criterion = await criterion_crud.update(db=session, db_obj=criterion_to_upd, obj_in=criterion)
-    else:
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Criterion id: {criterion_id} not found for update.") 
-    await session.commit() 
+    update_in = CriterionUpdateIn.model_validate(
+        criterion.model_dump(exclude_unset=True)
+    )
+    scalar_data = update_in.model_dump(
+        exclude_unset=True,
+        mode="python",
+    )
+    for field, value in scalar_data.items():
+        logger.info(f"Updating field {field} to value {value}")
+        setattr(criterion_to_upd, field, value)
+        
 
-    return upd_criterion
+    if criterion.values is not None:
+        existing_value_ids = {v.value_id for v in criterion_to_upd.values}
+        logger.info(f"Existing value IDs: {existing_value_ids}")
+
+        for val in criterion.values:
+            try:
+                if getattr(val, "id", None):
+                    if val.id not in existing_value_ids:
+                        existing_value = await session.get(Value, val.id)
+                        if not existing_value:
+                            logger.error(f"Value {val.id} not found in database. Value not added to criterion {criterion_to_upd.id}")
+                            continue
+
+                        logger.info(f"Adding existing value {val.id} to criterion {criterion_to_upd.id}")
+                        assoc = CriterionHasValue(
+                            criterion_id=criterion_to_upd.id,
+                            value_id=val.id
+                        )
+                        session.add(assoc)  
+                        logger.info(f"Added value {val.id} to criterion {criterion_to_upd.id}")
+                    else:
+                        logger.info(f"Value {val.id} already associated, skipping")
+                else:
+                    logger.info(f"Creating new value: {val.value_string}, numeric={val.is_numeric}, unit={val.unit_id}, op={val.operator}")
+
+                    existing_check = await session.execute(
+                        select(Value).where(
+                            Value.is_numeric == val.is_numeric,
+                            Value.unit_id == val.unit_id,
+                            Value.value_string == val.value_string,
+                            Value.operator == val.operator
+                        )
+                    )
+                    existing_value = existing_check.scalar_one_or_none()
+                    if existing_value:
+                        logger.info(f"Value already exists with id {existing_value.id}, using it")
+                        value_id_to_use = existing_value.id
+                    else:
+                        new_value = Value(
+                            description=val.description,
+                            is_numeric=val.is_numeric,
+                            value_string=val.value_string,
+                            unit_id=val.unit_id,
+                            operator=val.operator,
+                            active=val.active,
+                        )
+                        session.add(new_value)
+                        await session.flush()
+                        value_id_to_use = new_value.id
+                        logger.info(f"New value created with id {value_id_to_use}")
+
+                    
+                    if value_id_to_use not in existing_value_ids:
+                        assoc = CriterionHasValue(
+                            criterion_id=criterion_to_upd.id,
+                            value_id=value_id_to_use
+                        )
+                        session.add(assoc)
+                        logger.info(f"Added value {value_id_to_use} to criterion {criterion_to_upd.id}")
+                    else:
+                        logger.info(f"Value {value_id_to_use} already associated, skipping")
+
+            except IntegrityError as e:
+                logger.error(f"IntegrityError on value {val}: {e}")
+                await session.rollback()
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=f"Database constraint violation: {str(e)}"
+                )
+            except Exception as e:
+                logger.error(f"Unexpected error on value {val}: {e}", exc_info=True)
+                raise
+
+    if criterion.tags is not None:
+        existing_tag_ids = {t.tag_id for t in criterion_to_upd.tags}
+        logger.info(f"Existing tag IDs: {existing_tag_ids}")
+
+        for t in criterion.tags:
+            try:
+                if getattr(t, "id", None):
+                    if t.id not in existing_tag_ids:
+                        existing_value = await session.get(Tag, t.id)
+                        if not existing_value:
+                            logger.error(f"Tag {t.id} not found in database. Tag not added to criterion {criterion_to_upd.id}")
+                            continue
+
+                        logger.info(f"Adding existing tag {t.id} to criterion {criterion_to_upd.id}")
+                        assoc = CriterionHasTag(
+                            criterion_id=criterion_to_upd.id,
+                            tag_id=t.id
+                        )
+                        session.add(assoc)  
+                        logger.info(f"Added tag {t.id} to criterion {criterion_to_upd.id}")
+                    else:
+                        logger.info(f"Tag {t.id} already associated, skipping")
+                else:
+                    logger.info(f"Creating new tag: code={t.code}, type={t.type}")
+
+                    existing_check = await session.execute(
+                        select(Tag).where(
+                            Tag.code == t.code,
+                            Tag.type == t.type
+                        )
+                    )
+                    existing_value = existing_check.scalar_one_or_none()
+                    if existing_value:
+                        logger.info(f"Tag already exists with id {existing_value.id}, using it")
+                        value_id_to_use = existing_value.id
+                    else:
+                        new_tag = Tag(
+                            code=t.code,
+                            type=t.type
+                        )
+                        session.add(new_tag)
+                        await session.flush()
+
+                        value_id_to_use = new_tag.id
+                        logger.info(f"New tag created with id {value_id_to_use}")
+
+                    
+                    if value_id_to_use not in existing_tag_ids:
+                        assoc = CriterionHasTag(
+                            criterion_id=criterion_to_upd.id,
+                            tag_id=value_id_to_use
+                        )
+                        session.add(assoc)
+                        logger.info(f"Added tag {value_id_to_use} to criterion {criterion_to_upd.id}")
+                    else:
+                        logger.info(f"Tag {value_id_to_use} already associated, skipping")
+            except IntegrityError as e:
+                logger.error(f"IntegrityError on tag {t}: {e}")
+                await session.rollback()
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=f"Database constraint violation: {str(e)}"
+                )
+            except Exception as e:
+                logger.error(f"Unexpected error on tag {val}: {e}", exc_info=True)
+                raise
+
+    logger.info(f"Total values in relationship before commit: {len(criterion_to_upd.values)}")
+    logger.info(f"Total tags in relationship before commit: {len(criterion_to_upd.tags)}")
+    await session.commit()
+    logger.info("Commit completed")
+    await session.refresh(criterion_to_upd)
+    logger.info(f"Total values in relationship after refresh: {len(criterion_to_upd.values)}")
+    logger.info(f"Total values in relationship after refresh: {len(criterion_to_upd.tags)}")
+
+    # Update existing criterion staging records with the udpated information from this criteria
+    await criterion_staging.refresh_criterion_staging(session, criterion_to_upd, user_id)
+
+    return criterion_to_upd
+
 
 async def save_criterion(session: Session, criterion: CriterionCreate) -> CriterionSchema:
     new_criterion = await criterion_crud.create(db=session, obj_in=criterion)

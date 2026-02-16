@@ -17,6 +17,7 @@ config = Config(".env")
 DEBUG = config("DEBUG", cast=bool, default=False)
 TESTING = config("TESTING", cast=bool, default=False)
 URL_PREFIX = config("URL_PREFIX", default="/" if DEBUG else "/gearbox")
+MIDDLEWARE_URL_PREFIX = config("URL_PREFIX", default="http://gearbox-middleware-service")
 BYPASS_FENCE = config("BYPASS_FENCE", cast=bool, default=False)
 
 #S3
@@ -24,6 +25,7 @@ BYPASS_IMPORTANT_QUESTIONS = config("BYPASS_IMPORTANT_QUESTIONS", cast=bool, def
 BYPASS_S3 = config("BYPASS_S3", cast=bool, default=False)
 # DUMMY_S3 - use a public dummy S3 bucket for docker compose testing presigned urls
 DUMMY_S3 = config("DUMMY_S3", cast=bool, default=False)
+BYPASS_MIDDLEWARE_UPDATE = config("BYPASS_MIDDLEWARE_UPDATE", cast=bool, default=False)
 S3_BUCKET_NAME = config("S3_BUCKET_NAME", default='commons-gearbox-data-bucket-with-versioning')
 S3_TEST_COMPOSE_BUCKET_NAME = config("S3_TEST_COMPOSE_BUCKET_NAME", default='test-compose-gearbox-data-bucket-with-versioning')
 S3_TEST_BUCKET_NAME = config("S3_TEST_BUCKET_NAME", default='test-gearbox-data-bucket-with-versioning')

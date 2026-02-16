@@ -53,9 +53,21 @@ def upgrade():
                existing_type=postgresql.ENUM('NEW', 'EXISTING', 'ACTIVE', 'IN_PROCESS', 'INACTIVE', name='echc_adjudication_status'),
                type_=postgresql.ENUM('NEW', 'ACTIVE', 'IN_PROCESS', 'INACTIVE', name='echc_adjudication_status'),
                existing_nullable=False)
+
+    op.execute("""
+        UPDATE eligibility_criteria
+        SET status = 'NEW'
+        WHERE status IS NULL;
+    """)
     op.alter_column('eligibility_criteria', 'status',
                existing_type=postgresql.ENUM('NEW', 'ACTIVE', 'IN_PROCESS', 'INACTIVE', name='eligibility_criteria_status'),
                nullable=False)
+
+    op.execute("""
+        UPDATE study_version
+        SET status = 'NEW'
+        WHERE status IS NULL;
+    """)
     op.alter_column('study_version', 'status',
                existing_type=postgresql.ENUM('NEW', 'ACTIVE', 'IN_PROCESS', 'INACTIVE', name='study_version_status'),
                type_=postgresql.ENUM('NEW', 'ACTIVE', 'IN_PROCESS', 'INACTIVE', name='study_version_status'),
