@@ -18,15 +18,8 @@ async def get_criterion(session: Session, id: int) -> CriterionSchema:
     crit = await criterion_crud.get(session, id)
     return crit
 
-async def get_criteria(session: Session, include_studies: bool = False) -> CriterionSearchResults:
+async def get_criteria(session: Session) -> CriterionSearchResults:
     aes = await criterion_crud.get_multi(session)
-    
-    if include_studies:
-        # Fetch studies for each criterion
-        for criterion in aes:
-            studies = await criterion_crud.get_studies_for_criterion(session, criterion.id)
-            criterion.studies = studies
-    
     return aes
 
 

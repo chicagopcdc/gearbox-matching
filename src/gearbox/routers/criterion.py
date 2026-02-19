@@ -17,10 +17,9 @@ mod = APIRouter()
 async def get_criteria(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
-    include_studies: bool = False,
 ):
 
-    criteria = await criterion_service.get_criteria(session, include_studies=include_studies)
+    criteria = await criterion_service.get_criteria(session)
     return { "results" :criteria }
 
 @mod.get("/criteria-not-exist-in-match-form", response_model=CriterionSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
