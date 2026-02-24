@@ -1,7 +1,12 @@
-from gearbox import config
-from gearboxdatamodel.util import status
+from datetime import datetime
+import uuid
+from typing import List
+
 from fastapi import HTTPException
 import requests
+from gearboxdatamodel.util import status
+
+from gearbox import config
 from gearbox.routers import logger
 
 
@@ -110,3 +115,74 @@ def get_object(request, bucket_name, key_name, expires, boto_params=[], method=N
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
                 f"Error getting object {bucket_name}: {ex}.",
             )
+
+
+def promote_object_to_prod(
+    request,
+    source_bucket: str,
+    source_keys: List[str],
+    dest_bucket: str,
+    prod_role_arn: str
+):
+    """
+    Copies an object from a staging S3 bucket to a production S3 bucket
+    using cross-account role assumption.
+    """
+    try:
+        sts = request.app.boto_manager.assume_role(prod_role_arn, role_session_name="staging-promote")["Credentials"]
+
+        config = {}
+        config["aws_access_key_id"] = sts["AccessKeyId"]
+        config["aws_secret_access_key"] = sts["SecretAccessKey"]
+        config["aws_session_token"] = sts["SessionToken"]
+
+        deploy_id = f"{datetime.utcnow().isoformat()}-{uuid.uuid4()}"
+        backup_prefix = f"_deploy_backups/{deploy_id}"
+        request.app.boto.assert_keys_exist(source_bucket, source_keys, config)
+        
+        # backup
+        for key in source_keys:
+            request.app.boto_manager.copy_object_between_s3(
+                source_bucket=dest_bucket,
+                source_key=key,
+                dest_bucket=dest_bucket,
+                config=config,
+                dest_key=f"{backup_prefix}/{key}"
+            )
+
+        try:
+            for key in source_keys:
+                request.app.boto_manager.copy_object_between_s3(
+                    source_bucket=source_bucket,
+                    source_key=key,
+                    dest_bucket=dest_bucket,
+                    config=config
+                )
+
+        except Exception:
+            # Rollback
+            for key in source_keys:
+                request.app.boto_manager.copy_object_between_s3(
+                    source_bucket=dest_bucket,
+                    source_key=f"{backup_prefix}/{key}",
+                    dest_bucket=dest_bucket,
+                    config=config,
+                    dest_key=key
+                )
+            raise
+
+        # Clean backups
+        for key in source_keys:
+            request.app.boto_manager.delete_s3_objects(
+                dest_bucket, 
+                f"{backup_prefix}/{key}", 
+                config=config
+            )
+
+ 
+
+    except Exception as ex:
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR,
+            f"Error promoting data to production from {source_bucket} to {dest_bucket} {ex}.",
+        )
