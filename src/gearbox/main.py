@@ -1,7 +1,6 @@
 import asyncio
 from fastapi.responses import JSONResponse
 import click
-from importlib.metadata import version
 from fastapi import FastAPI, APIRouter, Depends, Request
 from fastapi.exceptions import RequestValidationError, ResponseValidationError
 from pydantic import ValidationError
@@ -22,7 +21,7 @@ logger = cdislogging.get_logger(
 )
 
 
-from importlib_metadata import entry_points
+from importlib_metadata import entry_points, version
 
 
 async def lifespan(app: FastAPI):

@@ -8,6 +8,7 @@ from gearboxdatamodel.schemas import StudyVersionUpdate, StudyVersion as StudyVe
 from gearbox import deps
 from gearbox.services import study_version  as study_version_service
 from gearbox.admin_login import admin_required, super_admin_required
+import json
 
 mod = APIRouter()
 
@@ -79,13 +80,21 @@ async def update_object(
     upd_study_version = await study_version_service.update_study_version(session=session, study_version=body, request=request)
     return upd_study_version
 
-@mod.post("/publish-study-version/{study_version_id}", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)])
+@mod.post("/publish-study-version/{study_version_id}", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def publish_study_version(
     study_version_id: int,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
+    ignore_warnings: bool = False,
 ):
-    await study_version_service.publish_study_version(session=session, study_version_id=study_version_id, request=request)
+
+    try:
+        body = await request.json()
+        ignore_warnings = body.get("ignore_warnings")
+    except json.JSONDecodeError:
+        ignore_warnings = False
+
+    await study_version_service.publish_study_version(session=session, study_version_id=study_version_id, request=request, ignore_warnings=ignore_warnings)
 
 def init_app(app):
     app.include_router(mod, tags=["study-version"])

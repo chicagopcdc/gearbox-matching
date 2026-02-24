@@ -146,6 +146,21 @@ async def accept_criterion_staging(session: Session, id: int, user_id: int):
     criterion_upd = CriterionStagingUpdateIn(**criterion_staging.__dict__)
     await update(session=session, criterion=criterion_upd, user_id = user_id)
 
+async def ignore_criterion_staging(session: Session, id: int, user_id: int):
+    """
+    Comments: This function sets the indicated criterion_staging row criterion_adjudication_status
+    to 'INACTIVE' 
+    """
+    # GET THE criterion_staging ROW
+    criterion_staging = await get_criterion_staging(session=session, id=id)
+    if not criterion_staging:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: criterion_staging id:{id} not found.")
+
+    criterion_staging.last_updated_by_user_id = user_id 
+    criterion_staging.criterion_adjudication_status = AdjudicationStatus.INACTIVE
+    criterion_upd = CriterionStagingUpdateIn(**criterion_staging.__dict__)
+    await update(session=session, criterion=criterion_upd, user_id = user_id)
+
 async def save_criterion_staging(session: Session, criterion: CriterionStagingUpdateIn, user_id: int) -> CriterionStagingSchema:
 
     # If the incoming criterion exists and contains a valid code for the id 
