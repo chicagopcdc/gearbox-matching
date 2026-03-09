@@ -2,7 +2,6 @@ import asyncio
 from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse
 import click
-import pkg_resources
 from fastapi import FastAPI, APIRouter, Depends, Request
 from fastapi.exceptions import RequestValidationError, ResponseValidationError
 from pydantic import ValidationError
@@ -23,7 +22,7 @@ logger = cdislogging.get_logger(
 )
 
 
-from importlib_metadata import entry_points
+from importlib_metadata import entry_points, version
 
 
 @asynccontextmanager
@@ -188,7 +187,7 @@ router = APIRouter()
 
 @router.get("/version")
 def get_version():
-    return pkg_resources.get_distribution("gearbox").version
+    return version("gearbox")
 
 
 @router.get("/_status")

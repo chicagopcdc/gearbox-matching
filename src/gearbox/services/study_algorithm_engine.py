@@ -101,6 +101,36 @@ async def validate_eligibility_criteria_ids(session: Session, algorithm_logic: s
         logger.error(f"SQL ERROR IN validate_eligibility_criteria_ids method: {e}")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}")        
 
+async def find_unused_eligibility_criteria(session: Session, algorithm_logic: str, eligibility_criteria_id: int) -> list:
+    """
+    description:
+        The purpose of this function is to find el_criteria_has_criterions
+        that have been defined for the study but do not exist in the study
+        algorithm logic.
+    args:
+        algorithm_logic json
+        study_version_id
+    
+    returns: list of el_criteria_has_criterion rows that are not present in the 
+        study algorithm 
+    """
+    try:
+        result = await session.execute(select(ElCriteriaHasCriterion)
+            .join(ElCriteriaHasCriterion.eligibility_criteria)
+            .where(EligibilityCriteria.id == eligibility_criteria_id)
+            .where(ElCriteriaHasCriterion.active == True)
+        )
+        db_el_criteria_has_criterion = result.unique().scalars().all()
+        input_el_criteria_has_criterion_ids = json_utils.json_extract_ints(algorithm_logic, 'criteria')
+
+        # items that exist in input_el_criteria_has_criterion_ids but not in db_el_criteria_has_criterion_ids
+        db_ids = [x.id for x in db_el_criteria_has_criterion]
+        unused_ids = list(set(db_ids).difference(input_el_criteria_has_criterion_ids))
+        return [x for x in db_el_criteria_has_criterion if x.id in unused_ids]
+
+    except exc.SQLAlchemyError as e:
+        logger.error(f"SQL ERROR IN validate_eligibility_criteria_ids method: {e}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SQL ERROR: {type(e)}: {e}") 
 
 async def get_existing_algorithm_logic_duplicate(session: Session, algorithm_logic: str, study_id: int) -> StudyAlgorithmEngine:
     """
@@ -154,7 +184,7 @@ async def create(session: Session, study_algorithm_engine: StudyAlgorithmEngineC
 
     # update study_version with new study_algorithm_engine_id
     sv_upd = StudyVersionUpdate(id=study_algorithm_engine.study_version_id, study_algorithm_engine_id= study_algorithm_engine_id, status=StudyVersionStatus.IN_PROCESS)
-    updated_sv = await study_version_service.update_study_version(session, study_version=sv_upd)
+    updated_sv = await study_version_service.update_study_version(session, study_version=sv_upd, update_fe_files=False)
     return retval
 
 async def update(session: Session, study_algorithm_engine: StudyAlgorithmEngineUpdate) -> StudyAlgorithmEngine:

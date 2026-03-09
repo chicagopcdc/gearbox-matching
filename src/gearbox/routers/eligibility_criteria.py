@@ -37,7 +37,6 @@ async def get_ec(
     request: Request,
     session: Session = Depends(deps.get_session),
 ):
-    params = []
     presigned_url = await ec.get_eligibility_criteria_set(session, id=ec_id)
     return JSONResponse(presigned_url, status.HTTP_200_OK) 
 
