@@ -112,7 +112,7 @@ async def lifespan(app: FastAPI):
 def get_app():
     app = FastAPI(
         title="Framework Services Object Management Service",
-        version=pkg_resources.get_distribution("gearbox").version,
+        version=version("gearbox"),
         debug=config.DEBUG,
         openapi_prefix=config.URL_PREFIX,
         lifespan=lifespan,
