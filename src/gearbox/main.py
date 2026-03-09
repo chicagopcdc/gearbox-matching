@@ -1,7 +1,6 @@
 import asyncio
 from fastapi.responses import JSONResponse
 import click
-import pkg_resources
 from fastapi import FastAPI, APIRouter, Depends, Request
 from fastapi.exceptions import RequestValidationError, ResponseValidationError
 from pydantic import ValidationError
@@ -22,7 +21,7 @@ logger = cdislogging.get_logger(
 )
 
 
-from importlib_metadata import entry_points
+from importlib_metadata import entry_points, version
 
 
 async def lifespan(app: FastAPI):
@@ -39,7 +38,7 @@ async def lifespan(app: FastAPI):
 def get_app():
     app = FastAPI(
         title="Framework Services Object Management Service",
-        version=pkg_resources.get_distribution("gearbox").version,
+        version=version("gearbox"),
         debug=config.DEBUG,
         openapi_prefix=config.URL_PREFIX,
     )
@@ -158,7 +157,7 @@ router = APIRouter()
 
 @router.get("/version")
 def get_version():
-    return pkg_resources.get_distribution("gearbox").version
+    return version("gearbox")
 
 
 @router.get("/_status")

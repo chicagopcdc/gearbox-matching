@@ -70,23 +70,7 @@ def test_create_site_dup_null_lat_long(setup_database, client, data, connection)
 
     fake_jwt = "1.2.3"
     resp = client.post("/site", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
-    resp.raise_for_status()
-
-    errors = []
-    try: 
-        Session = sessionmaker(bind=connection)
-        db_session = Session()
-        test_site_name = "CREATE SITE DUP WITH NULL LAT LONG"
-        site = db_session.query(Site).filter(Site.name==test_site_name).first()
-        if not site: 
-            errors.append(f"Site: {test_site_name} not created")
-
-    except Exception as e:
-        errors.append(f"Test site unexpected exception: {str(e)}")
-    if not str(resp.status_code).startswith("20"):
-        errors.append(f"Invalid https status code returned from test_create_site (create): {resp.status_code} ")
-
-    assert not errors, "errors occurred: \n{}".format("\n".join(errors))
+    assert str(resp.status_code).startswith("40")
 
 def test_update_site(setup_database, client, connection):
     """

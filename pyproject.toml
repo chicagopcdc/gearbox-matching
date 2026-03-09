@@ -30,7 +30,7 @@ SQLAlchemy = "^2.0.43"
 asyncpg = "^0.30.0"
 typing-extensions = "^4.14.1"
 eval-type-backport = "^0.2.2"
-pytest-postgresql = "^4.1.1"
+pytest-postgresql = "7.0.0"
 deepdiff = "^8.6.1"
 importlib-metadata = "=4.11.4"
 certifi = "2024.7.4"
@@ -45,12 +45,12 @@ aiocache = "0.11.1"
 python-multipart = "^0.0.20"
 authutils = "7.1.1"
 psycopg2-binary = "<3"
-gearboxdatamodel = { git = "https://github.com/chicagopcdc/gearboxDataModel", rev = "0.1.4" }
+gearboxdatamodel = { git = "https://github.com/chicagopcdc/gearboxDataModel", branch = "GEAR-563"}
 greenlet = "^3.2.4"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.0"
-pytest-postgresql = "^4.1.1"
+pytest-postgresql = "7.0.0"
 pytest-cov = "^2.8"
 pytest-asyncio = "^1.2.0"
 pyyaml = ">6.0"
