@@ -5,7 +5,7 @@ from gearboxdatamodel.crud.match_form import get_form_info, clear_dr_tb_tags, in
 from gearboxdatamodel.crud import value_crud
 from .match_conditions import get_tree
 from gearboxdatamodel.schemas import MatchForm, MatchFormUpdate
-from gearbox.services import value as value_service
+from gearbox.services import value as value_service, study as study_service
 from fastapi import HTTPException, Request
 from gearbox.util import bucket_utils
 from sqlalchemy.ext.asyncio import AsyncSession as Session
@@ -23,6 +23,9 @@ async def build_match_form(session: Session, request: Request, save: bool):
         if not config.BYPASS_S3:
             params = [{'Content-Type':'application/json'}]
             bucket_utils.put_object(request, bucket_name, config.S3_BUCKET_MATCH_FORM_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, match_form)
+
+        #update fe matching files and middleware cache after match form is updated
+        await study_service.refresh_study_fe_files(session=session, request=request)
 
     return match_form
 
