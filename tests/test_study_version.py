@@ -150,7 +150,7 @@ def test_publish_study_version_existing_active_fail(setup_database, client, conn
     Comments: test fail for already exsiting active study version for study
     """
     fake_jwt = "1.2.3"
-    resp = client.post(f"/publish-study-version/14", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.post(f"/publish-study-version/33", headers={"Authorization": f"bearer {fake_jwt}"})
     assert 'ACTIVE study versions already exist' in resp.text
     assert str(resp.status_code).startswith("50")
 

@@ -28,7 +28,7 @@ from starlette.status import (
                 "active": True,
                 "sites": [ 
                     {
-                        "name": "TEST STUDY UPDATES TEST SITE NAME",
+                        "name": "TEST STUDY UPDATES TEST SITE NAME 1",
                         "code": "TEST SITE CODE",
                     }
                 ],
@@ -230,7 +230,7 @@ def test_study_updates(setup_database, client, data, connection):
                 "active": True,
                 "sites": [ 
                     {
-                        "name": "TEST STUDY UPDATES TEST SITE NAME",
+                        "name": "TEST STUDY UPDATES TEST SITE NAME 2",
                         "code": "TEST SITE CODE",
                     }
                 ],
@@ -277,7 +277,7 @@ def test_study_updates_unknown_source(setup_database, client, data, connection):
                 "active": True,
                 "sites": [ 
                     {
-                        "name": "TEST STUDY UPDATES TEST SITE NAME",
+                        "name": "TEST STUDY UPDATES TEST SITE NAME 3",
                         "code": "TEST SITE CODE",
                     }
                 ],
@@ -311,3 +311,68 @@ def test_study_updates_missing_source(setup_database, client, data, connection):
     fake_jwt = "1.2.3"
     resp = client.post("/update-studies", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     assert resp.status_code == HTTP_422_UNPROCESSABLE_ENTITY
+
+@pytest.mark.parametrize(
+    "data", [ 
+        {
+            "studies": [
+            {
+                "name": "TEST STUDY UPDATES - *TEST STUDY NAME FIRST!!!*",
+                "code": "NEW_STUDY_CODE",
+                "description": "test study description",
+                "active": True,
+                "sites": [ 
+                    {
+                        "name": "TEST STUDY UPDATES TEST SITE NAME 1",
+                        "code": "TEST SITE CODE",
+                        "zip":"60660"
+                    }
+                ],
+                "links": [ 
+                    {
+                        "name": "UPDATED-----TEST STUDY UPDATES LINK NAME",
+                        "href": "http://www.testlink.org/",
+                        "active": True
+                    }
+                ],
+                "ext_ids": [
+                    {
+                        "ext_id": "testexternalstudyid1",
+                        "source": "test ext id source",
+                        "source_url": "http://www.testsourceurl.gov",
+                        "active": True
+
+                    }
+
+                ]
+            }
+            ],
+            "source": "clinicaltrials.gov"
+        }
+    ]
+)
+@pytest.mark.asyncio
+def test_study_updates_update_zip(setup_database, client, data, connection):
+    """
+    Comments: test create a new study and validates row created in db
+    """
+    fake_jwt = "1.2.3"
+    resp = client.post("/update-studies", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+
+    resp.raise_for_status()
+
+    errors = []
+    try: 
+        Session = sessionmaker(bind=connection)
+        db_session = Session()
+
+        site = db_session.query(Site).filter(Site.name=='TEST STUDY UPDATES TEST SITE NAME 1').first()
+        if not site.zip: 
+            errors.append(f"Null Zip not updated for site {site.name}")
+
+    except Exception as e:
+        errors.append(f"Test study unexpected exception: {str(e)}")
+    if not str(resp.status_code).startswith("20"):
+        errors.append(f"Invalid https status code returned from test_create_study (create): {resp.status_code} ")
+
+    assert not errors, "errors occurred: \n{}".format("\n".join(errors))
