@@ -53,6 +53,25 @@ def test_create_site(setup_database, client, data, connection):
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))
 
+@pytest.mark.parametrize(
+    "data", [ 
+        {
+            "name": "CREATE SITE DUP WITH NULL LAT LONG"
+    }
+    ]
+)
+def test_create_site_dup_null_lat_long(setup_database, client, data, connection):
+    """
+    Comments: test create a new site and validates row created in db
+    """
+    fake_jwt = "1.2.3"
+    resp = client.post("/site", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    resp.raise_for_status()
+
+    fake_jwt = "1.2.3"
+    resp = client.post("/site", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    assert str(resp.status_code).startswith("40")
+
 def test_update_site(setup_database, client, connection):
     """
     Comments: test to validate update site active to false

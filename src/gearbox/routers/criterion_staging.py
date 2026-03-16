@@ -75,7 +75,7 @@ async def save_object(
     return await criterion_staging_service.save_criterion_staging(session=session, criterion=body , user_id=user_id)
 
 @mod.post("/accept-criterion-staging/{criterion_staging_id}", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
-async def accept_object(
+async def accept_staging(
     criterion_staging_id: int,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
@@ -87,6 +87,19 @@ async def accept_object(
     by the adjudicator
     """
     await criterion_staging_service.accept_criterion_staging(session=session , id=criterion_staging_id, user_id=int (user_id))
+
+@mod.post("/ignore-criterion-staging/{criterion_staging_id}", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+async def ignore_staging(
+    criterion_staging_id: int,
+    request: Request,
+    session: AsyncSession = Depends(deps.get_session),
+    user_id: int = Depends(auth.authenticate_user)
+):
+    """
+    Comments: this endpoint updates the criterion_staging row and sets the criterion
+    adjudication status to "INACTIVE". 
+    """
+    await criterion_staging_service.ignore_criterion_staging(session=session , id=criterion_staging_id, user_id=int (user_id))
 
 def init_app(app):
     app.include_router(mod, tags=["criterion-staging"])

@@ -1,7 +1,7 @@
 import asyncio
+from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse
 import click
-from importlib.metadata import version
 from fastapi import FastAPI, APIRouter, Depends, Request
 from fastapi.exceptions import RequestValidationError, ResponseValidationError
 from pydantic import ValidationError
@@ -22,42 +22,29 @@ logger = cdislogging.get_logger(
 )
 
 
-from importlib_metadata import entry_points
+from importlib_metadata import entry_points, version
 
 
+@asynccontextmanager
 async def lifespan(app: FastAPI):
-
-    # Startup logic / tasks
-
-    yield
-
-    # Shutdown logic / tasks
-    logger.info("Closing async client.")
-    await app.async_client.aclose()
-
-
-def get_app():
-    app = FastAPI(
-        title="Framework Services Object Management Service",
-        version=version("gearbox"),
-        debug=config.DEBUG,
-        openapi_prefix=config.URL_PREFIX,
-    )
+    # Startup logic
+    logger.info("Starting up application")
+    
+    # Test database connection
+    logger.info("Testing database connection...")
+    try:
+        from gearbox.util.db import engine
+        async with engine.connect() as conn:
+            result = await conn.execute(text("SELECT 1"))
+            result.scalar()
+        logger.info("Database connection successful")
+    except Exception as e:
+        logger.error(f"Database connection failed: {e}")
+        raise
+    
     app.include_router(router)
-    app.add_middleware(ClientDisconnectMiddleware)
     load_modules(app)
-    app.async_client = httpx.AsyncClient()
-
-    app.boto_manager = BotoManager(
-        {
-            "region_name": config.AWS_REGION,
-            "aws_access_key_id": config.S3_AWS_ACCESS_KEY_ID,
-            "aws_secret_access_key": config.S3_AWS_SECRET_ACCESS_KEY,
-        },
-        logger,
-    )
-    load_keys()
-
+    
     @app.exception_handler(ResponseValidationError)
     async def validation_exception_handler(request: Request, exc: ValueError):
         exc_str = f"{exc}.".replace("\n", "").replace(" ", " ")
@@ -88,7 +75,49 @@ def get_app():
         return JSONResponse(
             content=content, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
         )
+    
+    app.async_client = httpx.AsyncClient()
+    app.boto_manager = BotoManager(
+        {
+            "region_name": config.AWS_REGION,
+            "aws_access_key_id": config.S3_AWS_ACCESS_KEY_ID,
+            "aws_secret_access_key": config.S3_AWS_SECRET_ACCESS_KEY,
+        },
+        logger,
+    )
+    load_keys()
+    logger.info("Application startup complete")
 
+    yield
+
+    # Shutdown logic
+    logger.info("Clearing sensitive configuration data...")
+    config.S3_AWS_ACCESS_KEY_ID = None
+    config.S3_AWS_SECRET_ACCESS_KEY = None
+    config.DB_PASSWORD = None
+    config.DB_STRING = None
+    config.ALEMBIC_DB_STRING = None
+    config.ADMIN_LOGINS = []
+    config.DB_DSN = None
+    logger.info("Closing async client.")
+    await app.async_client.aclose()
+    logger.info("Disposing database engine.")
+    from gearbox.util.db import engine
+    await engine.dispose()
+    logger.info("Dispose of aws client.")
+    app.boto_manager = None
+    logger.info("Application shutdown complete")
+
+
+def get_app():
+    app = FastAPI(
+        title="Framework Services Object Management Service",
+        version=version("gearbox"),
+        debug=config.DEBUG,
+        openapi_prefix=config.URL_PREFIX,
+        lifespan=lifespan,
+    )
+    app.add_middleware(ClientDisconnectMiddleware)
     return app
 
 

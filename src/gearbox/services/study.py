@@ -219,7 +219,7 @@ async def update_studies(session: Session, request:Request, updates: StudyUpdate
                 }
 
                 # name / zipcode are unique to site
-                constraint_cols = [Site.name, Site.zip]
+                constraint_cols = [ Site.name, Site.location_lat, Site.location_long ]
                 no_update_cols=['create_date']
                 new_or_updated_site = await site_crud.upsert(
                     db=session, 
