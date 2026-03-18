@@ -48,7 +48,7 @@ async def publish(
     Comments: The purpose of this endpoint is to 'publish' a criterion_staging row into the 
     criterion table which makes it available to the match-form build. 
     """
-    await criterion_staging_service.publish_criterion(session=session, criterion=body, user_id = int(user_id))
+    await criterion_staging_service.publish_criterion(session=session, request=request, criterion=body, user_id = int(user_id))
 
 @mod.post("/criterion-staging", response_model=CriterionStaging, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def create_object(
