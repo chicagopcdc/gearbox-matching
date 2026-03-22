@@ -18,8 +18,11 @@ async def get_criterion(session: Session, id: int) -> CriterionSchema:
     crit = await criterion_crud.get(session, id)
     return crit
 
-async def get_criteria(session: Session) -> CriterionSearchResults:
-    aes = await criterion_crud.get_multi(session)
+async def get_criteria(session: Session, where: List[str] = None) -> CriterionSearchResults:
+    if where:
+        aes = await criterion_crud.get_multi(db=session, where=where)
+    else:
+        aes = await criterion_crud.get_multi(session)
     return aes
 
 

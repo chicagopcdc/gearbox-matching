@@ -21,9 +21,12 @@ async def get_criteria_staging(session: Session) -> List[CriterionStagingSchema]
     return cs
 
 async def get_criterion_staging_by_ec_id(session: Session, eligibility_criteria_id: int) -> List[CriterionStagingSearchResult]:
-    cs = await criterion_staging_crud.get_criterion_staging_by_ec_id(session, eligibility_criteria_id)
+    try:
+        cs = await criterion_staging_crud.get_criterion_staging_by_ec_id(session, eligibility_criteria_id)
+    except Exception as e:
+        logger.error(f"EXCEPTION: {e}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR IN TEST QUERY: ****")
     criterion_staging_ret = []
-
     for c in cs:
         criterion_staging = CriterionStagingSearchResult(**c.__dict__)
         # only call get if values exist, because we are calling it with the ids parameter

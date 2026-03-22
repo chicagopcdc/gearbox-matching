@@ -150,7 +150,7 @@ def test_publish_study_version_existing_active_fail(setup_database, client, conn
     Comments: test fail for already exsiting active study version for study
     """
     fake_jwt = "1.2.3"
-    resp = client.post(f"/publish-study-version/33", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp = client.post(f"/publish-study-version/3", headers={"Authorization": f"bearer {fake_jwt}"})
     assert 'ACTIVE study versions already exist' in resp.text
     assert str(resp.status_code).startswith("50")
 
@@ -183,6 +183,7 @@ def test_publish_study_version_contains_invalid_criterion_id(setup_database, cli
     """
     fake_jwt = "1.2.3"
     resp = client.post(f"/publish-study-version/26", headers={"Authorization": f"bearer {fake_jwt}"})
+    full_res = resp.json()
     assert 'The following criterion_staging.criterion_value_ids do not exist in the database' in resp.text
     assert str(resp.status_code).startswith("50")
 
