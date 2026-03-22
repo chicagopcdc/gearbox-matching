@@ -1153,8 +1153,8 @@ SQLAlchemy = ">=2.0.43,<3.0"
 [package.source]
 type = "git"
 url = "https://github.com/chicagopcdc/gearboxDataModel"
-reference = "GEAR-587"
-resolved_reference = "9f9d54076a2817d1bb853ceb51679bdd088dc6e6"
+reference = "0.1.8"
+resolved_reference = "5c5f91635702497fbaf35ee823eefcdb5d6821e5"
 
 [[package]]
 name = "gen3authz"
@@ -3952,4 +3952,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9.2,<4.0.0"
-content-hash = "04f1be286a7600107f0626d9843c4f91d39a8b1c4eb9da0b2b441bf4b098abe8"
+content-hash = "d7e6cc46125212a62658236637d52e08e94d4afcf1870aed65fd4104d1ba5467"

@@ -172,6 +172,7 @@ async def publish_study_version(session: Session, request: Request, study_versio
     # Check that all study criteria (questions) have display rules defined (i.e. exist in the match_form)
     # *** ERROR ***
     fully_adjudicated_criteria_ids = [x.criterion_id for x in fully_adjudicated]
+
     if fully_adjudicated_criteria_ids:
         where=[f"criterion.id in ({','.join(map(str, fully_adjudicated_criteria_ids))})"]
         staged_criteria  = await criterion_service.get_criteria(session=session, where=where)
@@ -179,6 +180,7 @@ async def publish_study_version(session: Session, request: Request, study_versio
         for sc in staged_criteria:
             if not sc.display_rules:
                 criteria_not_in_match_form.append(sc)
+
         if criteria_not_in_match_form:
             msg = (f"The following criteria do not appear in the match form (missing display rules):")
             details = [PublishStudyMessageDetail(code=x.code) for x in criteria_not_in_match_form]
@@ -192,6 +194,7 @@ async def publish_study_version(session: Session, request: Request, study_versio
     staged_criteria = await criterion_staging_service.get_criterion_staging_by_ec_id(session=session, eligibility_criteria_id=study_version.eligibility_criteria_id)
     echcs = await echc_service.get_el_criteria_has_criterions_by_ecid(session=session, ecid=study_version.eligibility_criteria_id)
     valid_echc_ids = [x.id for x in echcs]
+
 
     for sc in staged_criteria:
         # Only do qc if criterion adjudication and echc adjudication status is active
