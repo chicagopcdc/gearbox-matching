@@ -20,19 +20,16 @@ async def get_criterion(session: Session, id: int) -> CriterionSchema:
 
 async def get_criteria(session: Session, include_studies: bool = False, where: List[str] = None) -> CriterionSearchResults:
 
-    logger.info("********IN GET_CRITERIA 1")
     if where:
         aes = await criterion_crud.get_multi(db=session, where=where)
     else:
         aes = await criterion_crud.get_multi(session)
     
-    logger.info("********IN GET_CRITERIA 2")
     if include_studies:
         # Fetch studies for each criterion
         for criterion in aes:
             studies = await criterion_crud.get_studies_for_criterion(session, criterion.id)
             criterion.studies = studies
-    logger.info("********IN GET_CRITERIA 3")
     return aes
 
 
