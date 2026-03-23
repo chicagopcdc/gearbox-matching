@@ -1,13 +1,14 @@
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from . import logger
 from fastapi import HTTPException
+from pydantic import ValidationError
 from gearboxdatamodel.models import RawCriteria
 from gearboxdatamodel.schemas import RawCriteriaCreate, RawCriteria as RawCriteriaSchema, StudyVersionCreate, RawCriteriaIn, CriterionStagingCreate, PreAnnotatedCriterionCreate, PreAnnotatedCriterionModelCreate
 from gearboxdatamodel.util import status 
 from gearboxdatamodel.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus
 from gearboxdatamodel.crud import raw_criteria_crud, criterion_crud, study_version_crud, pre_annotated_criterion_crud, pre_annotated_criterion_model_crud
 from gearbox.services import study as study_service, study_version as study_version_service, eligibility_criteria as eligibility_criteria_service, criterion_staging as criterion_staging_service
-from typing import List, Dict
+from typing import List 
 
 import json
 
@@ -116,7 +117,10 @@ async def create_raw_criteria(session: Session, raw_criteria_str: str, user_id: 
     criteria that have not yet been staged. 
     """
     # Convert json string to pydantic model object
-    raw_criteria_mod = RawCriteriaIn.model_validate(json.loads(raw_criteria_str))
+    try:
+        raw_criteria_mod = RawCriteriaIn.model_validate(json.loads(raw_criteria_str))
+    except ValidationError as e:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, f"Raw-criteria schema validation failed: {e}")
 
     # Get the study_id for the study based on the id in the raw criteria json
     ext_id = raw_criteria_mod.nct
