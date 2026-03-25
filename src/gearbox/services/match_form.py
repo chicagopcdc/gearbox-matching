@@ -24,9 +24,6 @@ async def build_match_form(session: Session, request: Request, save: bool):
             params = [{'Content-Type':'application/json'}]
             bucket_utils.put_object(request, bucket_name, config.S3_BUCKET_MATCH_FORM_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, match_form)
 
-        #update fe matching files and middleware cache after match form is updated
-        await study_service.refresh_study_fe_files(session=session, request=request)
-
     return match_form
 
 def update_dict(d, critlookup):
