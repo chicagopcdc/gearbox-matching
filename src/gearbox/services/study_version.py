@@ -75,6 +75,14 @@ async def update_study_version(session: Session, study_version: StudyVersionUpda
         await study_service.refresh_study_fe_files(session=session, request=request)
     return upd_study_version
 
+def raise_and_return(publish_errors: List=None, publish_warnings: List=None):
+
+    errors_warnings = {"publish_errors": [x.to_dict() for x in publish_errors] if publish_errors else None, 
+                           "publish_warnings": [x.to_dict() for x in publish_warnings] if publish_warnings else None} 
+    if publish_errors:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, errors_warnings)
+    else:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, errors_warnings)
 
 async def publish_study_version(session: Session, request: Request, study_version_id: int, ignore_warnings: bool = False):
 
@@ -86,8 +94,8 @@ async def publish_study_version(session: Session, request: Request, study_versio
     study_version = await study_version_crud.get(db=session, id=study_version_id)
     if not study_version:
         msg=(f"Study version for id: {study_version_id} not found for publishing.") 
-        publish_errors.append(PublishStudyMessage(message=msg))
         logger.error(f"{msg}")
+        raise_and_return(publish_errors=[PublishStudyMessage(message=msg)])
 
     # Check for existing ACTIVE study_versions for the study
     # *** ERROR ***
@@ -96,7 +104,7 @@ async def publish_study_version(session: Session, request: Request, study_versio
     if existing_active_svs:
         msg = (f"ACTIVE study versions already exist for id: {[x.id for x in existing_active_svs]}.") 
         logger.error(f"{msg}")
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{msg}")
+        raise_and_return(publish_errors=[PublishStudyMessage(message=msg)])
 
     # Get all echc rows
     echcs = await el_criteria_has_criterion_crud.get_echc_by_ec_id(current_session=session, ec_id=study_version.eligibility_criteria_id)
@@ -124,8 +132,9 @@ async def publish_study_version(session: Session, request: Request, study_versio
         ]
     if len(fully_adjudicated) == 0:
         msg = (f"The study version must have at least one active criterion in order to be published.")
-        publish_errors.append(PublishStudyMessage(message=msg))
         logger.error(f"{msg}")
+        publish_errors.append(PublishStudyMessage(message=msg))
+        raise_and_return(publish_errors=[PublishStudyMessage(message=msg)])
 
     # check criterion_id exists for all rows in the criterion_staging table for the study_version
     # for ACTIVE status criteria 
@@ -152,22 +161,22 @@ async def publish_study_version(session: Session, request: Request, study_versio
     # *** ERROR ***
     if not study_version.study_algorithm_engine:
         msg = (f"Study algorithm (study logic) does not yet exist for study version. See boolean logic builder tab.")
-        publish_errors.append(PublishStudyMessage(message=msg))
         logger.error(f"{msg}: {study_version.id}") 
-
-    # validate all echc ids in the study_algoritm_engine logic
-    # *** ERROR ***
-    invalid_echc_ids_in_logic = await study_algorithm_engine_service.validate_eligibility_criteria_ids(
-        session=session, 
-        algorithm_logic=study_version.study_algorithm_engine.algorithm_logic, 
-        eligibility_criteria_id=study_version.eligibility_criteria_id)
-    if invalid_echc_ids_in_logic:
-        msg = (f"Study algorithm (study logic) contains the following invalid el_criteria_has_criterion.ids: \
+        publish_errors.append(PublishStudyMessage(message=msg))
+        raise_and_return(publish_errors=[PublishStudyMessage(message=msg)])
+    else:
+        # validate all echc ids in the study_algoritm_engine logic
+        # *** ERROR ***
+        invalid_echc_ids_in_logic = await study_algorithm_engine_service.validate_eligibility_criteria_ids(
+            session=session, 
+            algorithm_logic=study_version.study_algorithm_engine.algorithm_logic, 
+            eligibility_criteria_id=study_version.eligibility_criteria_id)
+        if invalid_echc_ids_in_logic:
+            msg = (f"Study algorithm (study logic) contains the following invalid el_criteria_has_criterion.ids: \
                {invalid_echc_ids_in_logic}.")
-        details = [PublishStudyMessageDetail(code=x) for x in invalid_echc_ids_in_logic]
-        publish_errors.append(PublishStudyMessage(message=msg, details=details))
-        logger.error(f"{msg}: {invalid_echc_ids_in_logic}") 
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{msg}")
+            details = [PublishStudyMessageDetail(code=x) for x in invalid_echc_ids_in_logic]
+            publish_errors.append(PublishStudyMessage(message=msg, details=details))
+            logger.error(f"{msg}: {invalid_echc_ids_in_logic}") 
 
     # Check that all study criteria (questions) have display rules defined (i.e. exist in the match_form)
     # *** ERROR ***
@@ -288,14 +297,12 @@ async def publish_study_version(session: Session, request: Request, study_versio
             publish_warnings.append(PublishStudyMessage(message=msg, details=details))
             logger.warning(f"{msg}: {[(x.criterion.code, x.value.value_string) for x in unused_echc_in_logic]}")
         
-        # Only return warnings if ignore_warnings param is false
-        errors_warnings = []
-        errors_warnings = {"publish_errors": [x.to_dict() for x in publish_errors], "publish_warnings": [x.to_dict() for x in publish_warnings]} 
         if publish_errors:
-            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, errors_warnings)
+            raise_and_return(publish_errors=publish_errors, publish_warnings=publish_warnings)
+        # Only return warnings if ignore_warnings param is false
+        if publish_warnings and not ignore_warnings:
+            raise_and_return(publish_errors=publish_errors, publish_warnings=publish_warnings)
 
-        elif publish_warnings and not ignore_warnings:
-            raise HTTPException(status.HTTP_400_BAD_REQUEST, errors_warnings)
     # -- Warnings end
 
     # ---- STEPS TO PUBLISH ---
