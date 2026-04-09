@@ -159,6 +159,8 @@ async def ignore_criterion_staging(session: Session, id: int, user_id: int):
     criterion_staging.last_updated_by_user_id = user_id 
     criterion_staging.criterion_adjudication_status = AdjudicationStatus.INACTIVE
     criterion_upd = CriterionStagingUpdateIn(**criterion_staging.__dict__)
+
+    await criterion_staging_crud.update(db=session, db_obj=criterion_staging, obj_in=criterion_upd)
     await update(session=session, criterion=criterion_upd, user_id = user_id)
 
 async def save_criterion_staging(session: Session, criterion: CriterionStagingUpdateIn, user_id: int) -> CriterionStagingSchema:
