@@ -161,7 +161,30 @@ async def ignore_criterion_staging(session: Session, id: int, user_id: int):
     criterion_staging.last_updated_by_user_id = user_id 
     criterion_staging.criterion_adjudication_status = AdjudicationStatus.INACTIVE
     criterion_upd = CriterionStagingUpdateIn(**criterion_staging.__dict__)
-    await update(session=session, criterion=criterion_upd, user_id = user_id)
+
+    # calling crud func directly here because we don't need to do qc for an ignored criterion
+    await criterion_staging_crud.update(db=session, db_obj=criterion_staging, obj_in=criterion_upd)
+
+async def reset_criterion_staging(session: Session, id: int, user_id: int):
+    """
+    Comments: This function sets the indicated criterion_staging row criterion_adjudication_status
+    from 'INACTIVE' to 'NEW' if no criterion id exists or 'EXISTING' if criterion id exists
+    """
+    # GET THE criterion_staging ROW
+    criterion_staging = await get_criterion_staging(session=session, id=id)
+    if not criterion_staging:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: criterion_staging id:{id} not found.")
+
+    criterion_staging.last_updated_by_user_id = user_id 
+    if criterion_staging.criterion_id:
+        criterion_staging.criterion_adjudication_status = AdjudicationStatus.EXISTING
+    else:
+        criterion_staging.criterion_adjudication_status = AdjudicationStatus.NEW
+
+    criterion_upd = CriterionStagingUpdateIn(**criterion_staging.__dict__)
+
+    # calling crud func directly here because we don't need to do qc here
+    await criterion_staging_crud.update(db=session, db_obj=criterion_staging, obj_in=criterion_upd)
 
 async def save_criterion_staging(session: Session, criterion: CriterionStagingUpdateIn, user_id: int) -> CriterionStagingSchema:
 

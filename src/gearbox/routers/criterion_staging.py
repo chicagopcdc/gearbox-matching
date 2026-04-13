@@ -101,5 +101,18 @@ async def ignore_staging(
     """
     await criterion_staging_service.ignore_criterion_staging(session=session , id=criterion_staging_id, user_id=int (user_id))
 
+@mod.post("/reset-criterion-staging/{criterion_staging_id}", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+async def reset_staging(
+    criterion_staging_id: int,
+    request: Request,
+    session: AsyncSession = Depends(deps.get_session),
+    user_id: int = Depends(auth.authenticate_user)
+):
+    """
+    Comments: this endpoint updates the criterion_staging row and sets the criterion
+    adjudication status to "INACTIVE". 
+    """
+    await criterion_staging_service.reset_criterion_staging(session=session , id=criterion_staging_id, user_id=int (user_id))
+
 def init_app(app):
     app.include_router(mod, tags=["criterion-staging"])
