@@ -1,4 +1,4 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from sqlalchemy import select
 from gearboxdatamodel.util import status
@@ -7,7 +7,7 @@ from gearboxdatamodel.crud import criterion_staging_crud , value_crud, criterion
 from gearboxdatamodel.models import Criterion, CriterionStaging
 from typing import List
 from gearboxdatamodel.util.types import AdjudicationStatus, EchcAdjudicationStatus
-from gearbox.services import criterion as criterion_service, value as value_service
+from gearbox.services import criterion as criterion_service, value as value_service, match_form as match_form_service
 
 from . import logger
 from gearbox import config
@@ -23,7 +23,6 @@ async def get_criteria_staging(session: Session) -> List[CriterionStagingSchema]
 async def get_criterion_staging_by_ec_id(session: Session, eligibility_criteria_id: int) -> List[CriterionStagingSearchResult]:
     cs = await criterion_staging_crud.get_criterion_staging_by_ec_id(session, eligibility_criteria_id)
     criterion_staging_ret = []
-
     for c in cs:
         criterion_staging = CriterionStagingSearchResult(**c.__dict__)
         # only call get if values exist, because we are calling it with the ids parameter
@@ -42,7 +41,7 @@ async def create(session: Session, staging_criterion: CriterionStagingCreate)-> 
     new_staging_criterion = await criterion_staging_crud.create(db=session, obj_in=staging_criterion)
     return new_staging_criterion
 
-async def publish_criterion(session: Session, criterion: CriterionPublish, user_id: int):
+async def publish_criterion(session: Session, request: Request, criterion: CriterionPublish, user_id: int):
     """
     Comments: this function qc's and saves a criterion from the criterion_staging table
     to the criterion table. 
@@ -84,6 +83,9 @@ async def publish_criterion(session: Session, criterion: CriterionPublish, user_
     stage_upd = CriterionStagingUpdate(id=criterion.criterion_staging_id, criterion_id=new_criterion.id, criterion_adjudication_status="ACTIVE", last_updated_by_user_id=user_id)
     await update(session=session, criterion=stage_upd, user_id=user_id)
     logger.info(f"User: {user_id} published criterion: {new_criterion.id} code: {new_criterion.code}")
+
+    # rebuild match form to include the newly published criterion
+    await match_form_service.build_match_form(session=session, request=request, save=True)
 
 async def update(session: Session, criterion: CriterionStagingUpdateIn, user_id: int) -> CriterionStagingSchema:
 

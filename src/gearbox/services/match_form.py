@@ -5,7 +5,7 @@ from gearboxdatamodel.crud.match_form import get_form_info, clear_dr_tb_tags, in
 from gearboxdatamodel.crud import value_crud
 from .match_conditions import get_tree
 from gearboxdatamodel.schemas import MatchForm, MatchFormUpdate
-from gearbox.services import value as value_service
+from gearbox.services import value as value_service, study as study_service
 from fastapi import HTTPException, Request
 from gearbox.util import bucket_utils
 from sqlalchemy.ext.asyncio import AsyncSession as Session

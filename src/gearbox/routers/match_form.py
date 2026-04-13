@@ -4,7 +4,7 @@ from fastapi import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import Request, Depends
 from fastapi.security import HTTPBearer
-from gearbox.services import match_form as match_form_service
+from gearbox.services import match_form as match_form_service, study as study_service
 from . import logger
 from starlette.responses import JSONResponse
 from gearbox import auth
@@ -28,7 +28,10 @@ async def build_match_form(
     is set to true, it will save the match for to S3, if 'save' is false it will just return
     the match form without uploading to S3. 
     """
+    #update fe matching files and middleware cache after match form is updated
+    await study_service.refresh_study_fe_files(session=session, request=request)
     return await match_form_service.build_match_form(session=session, request=request, save=save)
+
 
 @mod.get("/match-form", dependencies=[ Depends(auth.authenticate)], status_code=status.HTTP_200_OK)
 async def get_match_form(
