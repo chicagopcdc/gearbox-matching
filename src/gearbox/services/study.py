@@ -1,6 +1,6 @@
 from . import logger
 import requests
-import json
+import re 
 import urllib3
 from pydantic import ValidationError
 from datetime import datetime
@@ -15,6 +15,7 @@ from gearboxdatamodel.util import status
 from gearboxdatamodel.util.types import StudyVersionStatus
 from gearboxdatamodel.crud import study_crud, site_crud, site_has_study_crud, study_link_crud, site_has_study_crud, study_external_id_crud, source_crud, study_version_crud
 from gearboxdatamodel.models import Study, Site, StudyLink, SiteHasStudy, StudyExternalId, StudyVersion
+from gearboxdatamodel.schemas import StudyLinkCreate
 from operator import itemgetter
 from gearbox.services import match_conditions as mc, match_form as mf, eligibility_criteria as ec
 
@@ -334,6 +335,13 @@ async def build_studies(session: Session, request: Request) -> StudySchema:
     #Remove inactive study links
     for study in new_studies.studies:
         study.links = [x for x in study.links if x.active]
+        # if nct study then create the locations/contacts link
+        ct_link_pattern = re.compile(r"https://clinicaltrials\.gov/.*/NCT", re.IGNORECASE)
+        for link in study.links[:]:
+            if ct_link_pattern.match(str(link.href)):
+                study.links.append(StudyLinkCreate(name="contacts and locations",
+                    href=str(link.href) + "#contacts-and-locations"
+                ))
 
     if not config.BYPASS_S3:
         json_studies = jsonable_encoder(new_studies)
