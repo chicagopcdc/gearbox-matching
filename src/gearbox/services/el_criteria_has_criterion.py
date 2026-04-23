@@ -7,7 +7,7 @@ from gearboxdatamodel.util import status
 from gearboxdatamodel.models import ElCriteriaHasCriterion
 from gearbox.services import criterion_staging as criterion_staging_service
 from gearboxdatamodel.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus
-from gearbox import auth
+from datetime import datetime
 
 async def get_el_criteria_has_criterion(session: Session, id: int) -> ElCriteriaHasCriterionSchema:
     ec = await el_criteria_has_criterion_crud.get(session, id)
@@ -22,7 +22,19 @@ async def get_el_criteria_has_criterions_by_ecid(session: Session, ecid: int) ->
     return ecs
 
 async def create_el_criteria_has_criterion(session: Session, el_criteria_has_criterion: ElCriteriaHasCriterionCreate) -> ElCriteriaHasCriterion:
-    new_echc = await el_criteria_has_criterion_crud.create(db=session, obj_in=el_criteria_has_criterion)
+
+    row = {
+        'criterion_id':el_criteria_has_criterion.criterion_id,
+        'eligibility_criteria_id':el_criteria_has_criterion.eligibility_criteria_id,
+        'active':el_criteria_has_criterion.active,
+        'value_id':el_criteria_has_criterion.value_id,
+        'create_date':datetime.now()
+    }
+    constraint_cols = [ElCriteriaHasCriterion.criterion_id,
+                       ElCriteriaHasCriterion.eligibility_criteria_id,
+                       ElCriteriaHasCriterion.value_id]
+
+    new_echc = await el_criteria_has_criterion_crud.upsert(db=session, model=ElCriteriaHasCriterion, row=row, constraint_cols=constraint_cols)
     return new_echc
 
 async def update_el_criteria_has_criterion(session: Session, el_criteria_has_criterion: ElCriteriaHasCriterionCreate, el_criteria_has_criterion_id: int) -> ElCriteriaHasCriterionSchema:
@@ -55,6 +67,7 @@ async def publish_echc(session: Session, echc: ElCriteriaHasCriterionPublish, us
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: missing FKs for el_criteria_has_criterion publication: {[error for error in check_id_errors if error]}")
 
     new_echc_list = []
+
     # Save echc for each value in publish object
     for val in echc.value_ids:
         echc_create = echc.model_dump()
