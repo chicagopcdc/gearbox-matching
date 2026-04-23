@@ -204,6 +204,10 @@ async def save_criterion_staging(session: Session, criterion: CriterionStagingUp
     else:
         criterion.criterion_adjudication_status = AdjudicationStatus.IN_PROCESS
 
+    # If values have been assigned in the incoming staging rec then set EchcAdjudicationStatus to IN PROCESS
+    if len(criterion.echc_value_ids) > 0:
+        criterion.echc_adjudication_status = EchcAdjudicationStatus.IN_PROCESS
+
     upd_value = await update(session=session, criterion=criterion, user_id = int(user_id))
 
     return upd_value
