@@ -7,7 +7,7 @@ from gearboxdatamodel.util import status
 from gearbox.services import criterion as criterion_service
 from gearbox.admin_login import admin_required, super_admin_required
 
-from gearboxdatamodel.schemas import CriterionSearchResults, CriterionCreateIn, Criterion, Tag, Value, CriterionUpdate
+from gearboxdatamodel.schemas import CriterionSearchResults, CriterionCreateIn, Criterion, Tag, Value, CriterionUpdate, Study
 from gearbox import deps
 from gearbox import auth
 
@@ -48,6 +48,15 @@ async def get_criterion(
             f"criterion not found for id: {criterion_id}")
     else:
         return criterion
+
+@mod.get("/criterion/{criterion_id}/studies", response_model=list[Study], status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+async def get_studies_for_criterion(
+    criterion_id: int,
+    request: Request,
+    session: AsyncSession = Depends(deps.get_session),
+):
+    studies = await criterion_service.get_studies_for_criterion(session=session, criterion_id=criterion_id)
+    return studies
 
 @mod.post("/criterion", response_model=Criterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(

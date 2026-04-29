@@ -32,6 +32,9 @@ async def get_criteria(session: Session, include_studies: bool = False, where: L
             criterion.studies = studies
     return aes
 
+async def get_studies_for_criterion(session: Session, criterion_id: int):
+    return await criterion_crud.get_studies_for_criterion(session, criterion_id)
+
 
 async def create_new_criterion(session: Session, input_criterion_info: CriterionCreateIn, user_id: int) ->CriterionSchema:
 
