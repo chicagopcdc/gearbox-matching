@@ -19,19 +19,6 @@ from gearbox.admin_login import admin_required, super_admin_required
 mod = APIRouter()
 bearer = HTTPBearer(auto_error=False)
 
-@mod.get("/match-conditions", dependencies=[ Depends(auth.authenticate)], status_code=status.HTTP_200_OK)
-async def get_mc(
-    request: Request,
-    session: Session = Depends(deps.get_session)
-):
-    """
-    Comments: This endpoint is called by the front-end to return the presigned_url to the S3
-    bucket that contains the match conditions file
-    """
-    params = []
-    presigned_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_MATCH_CONDITIONS_KEY_NAME, params, "get_object")
-    return JSONResponse(presigned_url, status.HTTP_200_OK)
-
 @mod.post("/build-match-conditions", response_model=List[AlgorithmResponse], dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)], status_code=status.HTTP_200_OK)
 async def build_mc(
     request: Request,
