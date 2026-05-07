@@ -41,7 +41,7 @@ S3_AWS_SECRET_ACCESS_KEY=config("S3_AWS_SECRET_ACCESS_KEY", default='')
 # information to push data to production S3
 S3_PROD_BUCKET_NAME = config("S3_PROD_BUCKET_NAME", default=None)
 PROD_PROMOTION_ROLE_ARN = config("PROD_PROMOTION_ROLE_ARN", default=None)
-
+TESTING_S3 = config("TESTING_S3", cast=bool, default=False)
 # Database
 # ALEMBIC DOES NOT SUPPORT ASYNC DRIVERS YET, SO WE NEED THE SYNC 
 # DRIVER TO PERFORM THE MIGRATIONS

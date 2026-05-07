@@ -362,14 +362,8 @@ async def refresh_study_fe_files(session: Session, request: Request):
         headers = {}
         headers['Authorization'] = request.headers.get("Authorization")
         middleware_update_json_endpoint =  config.MIDDLEWARE_URL_PREFIX + '/admin/update_json_data'
-
-        params=[]
-        mc_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_MATCH_CONDITIONS_KEY_NAME, params, "get_object")
-        ec_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, params, "get_object")
-        mf_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_MATCH_FORM_KEY_NAME, params, "get_object")
-        p_urls = MatchingFilesUrls(mc_url=mc_url, ec_url=ec_url, mf_url=mf_url)
         try:
-            middleware_upd_result = requests.post(middleware_update_json_endpoint, headers=headers, json=p_urls.model_dump(mode='json'))
+            middleware_upd_result = requests.post(middleware_update_json_endpoint, headers=headers)
         except (urllib3.exceptions.NewConnectionError, ValidationError, Exception) as e:
             logger.error(f"Middleware refresh exception: {e}")
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Middleware refresh exception {e}.")
