@@ -91,44 +91,59 @@ async def get_studies_to_update(existing_studies: list[Study], refresh_studies: 
     """
 
     studies_to_update = []
-    existing = [{'name':x.name, 
-                               'code':x.code, 
-                               'description': x.description,
-                               'links': [{'name':y.name,'href':y.href} 
-                                    for y in sorted(x.links, key=lambda x: x.href)],
-                               'sites': [{'name':z.site.name, 
-                                          'country':z.site.country,
-                                          'city':z.site.city,
-                                          'state':z.site.state,
-                                          'zip':z.site.zip,
-                                          'location_lat': str(z.site.location_lat).rstrip('0'),
-                                          'location_long': str(z.site.location_long).rstrip('0')
-                                          } for z in sorted(x.sites,key=lambda x: (x.site.name, x.site.location_lat or 0))],
-                                'ext_ids': [{
-                                                'ext_id':a.ext_id,
-                                                'source':a.source,
-                                                'source_url':str(a.source_url).removeprefix("https://").rstrip('/')
-                                             } for a in sorted(x.ext_ids, key=lambda x: x.ext_id)]
-                               } for x in existing_studies]
+    existing = [
+                    {
+                        'name':x.name, 
+                        'code':x.code, 
+                        'description': x.description,
+                        'links': [
+                            {'name':y.name,'href':y.href} 
+                            for y in sorted(x.links, key=lambda x: x.href)
+                        ],
+                        'sites': [
+                            {'name':z.site.name, 
+                            'country':z.site.country,
+                            'city':z.site.city,
+                            'state':z.site.state,
+                            'zip':z.site.zip,
+                            'location_lat': str(z.site.location_lat).rstrip('0'),
+                            'location_long': str(z.site.location_long).rstrip('0')
+                            } 
+                            for z in sorted(x.sites,key=lambda x: (x.site.name, x.site.location_lat or 0))],
+                            'ext_ids': [{
+                                'ext_id':a.ext_id,
+                                'source':a.source,
+                                'source_url':str(a.source_url).removeprefix("https://").rstrip('/')
+                            } 
+                            for a in sorted(x.ext_ids, key=lambda x: x.ext_id)]
+                    } for x in existing_studies
+                ]
 
-    refresh = [{'name':x.name, 
-                               'code':x.code, 
-                               'description': x.description,
-                               'links': [{'name':y.name,'href':str(y.href)} 
-                                         for y in sorted(x.links, key=lambda x: x.href)],
-                               'sites': [{'name':z.name, 
-                                          'country':z.country, 'city':z.city,
-                                          'state':z.state,
-                                          'zip':z.zip,
-                                          'location_lat': str(z.location_lat).rstrip('0'),
-                                          'location_long': str(z.location_long).rstrip('0')
-                                          } for z in sorted(x.sites,key=lambda x: (x.name, x.location_lat or 0))],
-                                'ext_ids': [{'ext_id':a.ext_id,
-                                             'source':a.source,
-                                             'source_url':str(a.source_url).removeprefix("https://").rstrip('/')
-                                             } for a in sorted(x.ext_ids, key=lambda x: x.ext_id)
-                                             ]
-                               } for x in refresh_studies]
+    refresh = [
+                {'name':x.name, 
+                'code':x.code, 
+                'description': x.description,
+                'links': [
+                    {'name':y.name,'href':str(y.href)} 
+                    for y in sorted(x.links, key=lambda x: x.href)],
+                'sites': [
+                    {'name':z.name, 
+                    'country':z.country, 'city':z.city,
+                    'state':z.state,
+                    'zip':z.zip,
+                    'location_lat': str(z.location_lat).rstrip('0'),
+                    'location_long': str(z.location_long).rstrip('0')
+                    } 
+                    for z in sorted(x.sites,key=lambda x: (x.name, x.location_lat or 0))],
+                    'ext_ids': [
+                        {'ext_id':a.ext_id,
+                        'source':a.source,
+                        'source_url':str(a.source_url).removeprefix("https://").rstrip('/')
+                        } 
+                        for a in sorted(x.ext_ids, key=lambda x: x.ext_id)
+                    ]
+                    } for x in refresh_studies
+                ]
 
     for i in refresh:
         # if a refresh study is not an exact match
@@ -182,14 +197,18 @@ async def update_studies(session: Session, request:Request, updates: StudyUpdate
     study_codes_to_update = await get_studies_to_update(existing_studies=existing_studies, refresh_studies=updates.studies)
     study_ids_reset_to_active = []
 
-    for study in updates.studies:
+    total_studies_existing_not_updated = 0
+    studies_upserted = []
 
+
+    for study in updates.studies:
         if study.code not in study_codes_to_update:
             study_id = await study_crud.get_study_id_by_code(current_session=session , study_code=study.code)
             if study_id:
                 study_ids_reset_to_active.append(study_id)
-
+                total_studies_existing_not_updated += 1
         else:
+            studies_upserted.append(study.code)
             row = {
                 'name':study.name,
                 'code':study.code,
@@ -286,7 +305,6 @@ async def update_studies(session: Session, request:Request, updates: StudyUpdate
                     no_update_cols=no_update_cols, 
                     constraint_cols=constraint_cols
                 )
-
     # Expire all objects after upserts. This is needed in order to keep the
     # ORM and db in sync.
     session.expire_all()
@@ -313,7 +331,10 @@ async def update_studies(session: Session, request:Request, updates: StudyUpdate
 
     # update the front-end json files to reflect study table updates
     await refresh_study_fe_files(session=session, request=request)
-    ## TO DO - LOG AND/OR RETURN THE NUMBER OF STUDIES UPDATED...
+
+    logger.info(f"Refresh completed. Total studies existing no updates: {total_studies_existing_not_updated} Total studies updated: {len(studies_upserted)}")
+    logger.info(f"Studies updated: {studies_upserted}")
+
     return True
 
 def get_new_version(study_info: dict) -> str:
