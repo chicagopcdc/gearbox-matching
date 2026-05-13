@@ -1,6 +1,5 @@
 from . import logger
 import requests
-import json
 import re 
 import urllib3
 from pydantic import ValidationError
@@ -17,7 +16,6 @@ from gearboxdatamodel.util.types import StudyVersionStatus
 from gearboxdatamodel.crud import study_crud, site_crud, site_has_study_crud, study_link_crud, site_has_study_crud, study_external_id_crud, source_crud, study_version_crud
 from gearboxdatamodel.models import Study, Site, StudyLink, SiteHasStudy, StudyExternalId, StudyVersion
 from gearboxdatamodel.schemas import StudyLinkCreate
-from operator import itemgetter
 from gearbox.services import match_conditions as mc, match_form as mf, eligibility_criteria as ec
 
 async def get_study_info(session: Session, id: int) -> StudySchema:
