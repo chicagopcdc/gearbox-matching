@@ -17,19 +17,6 @@ from gearbox.admin_login import admin_required, super_admin_required
 
 mod = APIRouter()
 
-@mod.get("/eligibility-criteria", dependencies=[Depends(auth.authenticate) ] )
-async def get_ec(
-    request: Request,
-    session: Session = Depends(deps.get_session),
-):
-    """
-    Comments: This endpoint is called by the front-end to return the presigned_url to the S3
-    bucket that contains a list of eligibility criteria.
-    """
-    params = []
-    presigned_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_ELIGIBILITY_CRITERIA_KEY_NAME, params, "get_object")
-    return JSONResponse(presigned_url, status.HTTP_200_OK) 
-
 # get single eligibility-criteria set 
 @mod.get("/eligibility-criteria/{ec_id}", dependencies=[Depends(auth.authenticate), Depends(admin_required)] )
 async def get_ec(

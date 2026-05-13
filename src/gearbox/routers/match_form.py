@@ -33,31 +33,6 @@ async def build_match_form(
     return await match_form_service.build_match_form(session=session, request=request, save=save)
 
 
-@mod.get("/match-form", dependencies=[ Depends(auth.authenticate)], status_code=status.HTTP_200_OK)
-async def get_match_form(
-    request: Request,
-    session: Session = Depends(deps.get_session)
-):
-    """
-    Comments: This endpoint is called by the front-end to return the presigned_url to the S3
-    bucket that the match form file.
-    """
-    params = []
-    presigned_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_MATCH_FORM_KEY_NAME, params, "get_object")
-    return JSONResponse(presigned_url, status.HTTP_200_OK)
-
-@mod.get("/important-questions", dependencies=[ Depends(auth.authenticate)], status_code=status.HTTP_200_OK)
-async def get_important_questions(
-    request: Request,
-    session: Session = Depends(deps.get_session)
-):
-    if not config.BYPASS_IMPORTANT_QUESTIONS:
-        params = []
-        presigned_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_IMPORTANT_QUESTIONS_KEY_NAME, params, "get_object")
-        return JSONResponse(presigned_url, status.HTTP_200_OK)
-    else:
-        return JSONResponse(status.HTTP_503_SERVICE_UNAVAILABLE)
-
 @mod.post("/update-match-form", dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)])
 async def update_match_form(
     body: MatchFormUpdate,

@@ -45,7 +45,7 @@ aiocache = "0.11.1"
 python-multipart = "^0.0.20"
 authutils = "7.1.1"
 psycopg2-binary = "<3"
-gearboxdatamodel = { git = "https://github.com/chicagopcdc/gearboxDataModel", rev = "0.1.10" }
+gearboxdatamodel = { git = "https://github.com/chicagopcdc/gearboxDataModel", rev = "0.2.0" }
 greenlet = "^3.2.4"
 
 [tool.poetry.group.dev.dependencies]
@@ -74,7 +74,6 @@ pandas = "^2.0.3"
 "study_algorithm_engine" = "gearbox.routers.study_algorithm_engine"
 "study_version" = "gearbox.routers.study_version"
 "study_link" = "gearbox.routers.study_link"
-"study_has_patient" = "gearbox.routers.study_has_patient"
 "unit" = "gearbox.routers.unit"
 "raw_criteria" = "gearbox.routers.raw_criteria"
 
