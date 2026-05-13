@@ -326,7 +326,7 @@ def get_new_version(study_info: dict) -> str:
 async def build_studies(session: Session, request: Request) -> StudySchema:
 
     results = await get_studies_info(session)
-    bucket_name = bucket_utils.get_bucket_name()
+    bucket_name = bucket_utils.get_bucket_name(config)
     existing_studies = bucket_utils.get_object(request=request, bucket_name=bucket_name, key_name=config.S3_BUCKET_STUDIES_KEY_NAME, expires=300, method="get_object")
     version = get_new_version(existing_studies)
     studies = [StudySchema.model_validate(obj=study_obj, from_attributes=True) for study_obj in results]

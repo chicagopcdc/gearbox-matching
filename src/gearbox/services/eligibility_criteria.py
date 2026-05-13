@@ -6,6 +6,7 @@ from fastapi import HTTPException, Request
 from gearboxdatamodel.util import status
 from gearbox.util import bucket_utils, qc
 from gearboxdatamodel.util.types import EligibilityCriteriaStatus
+from gearbox import config
 
 async def reset_active_status(session: Session, study_version_id: int) -> bool:
     # set all rows related to the study_version to false
@@ -88,7 +89,7 @@ async def get_eligibility_criteria_set(session, id: int=None):
 async def build_eligibility_criteria(session: Session,request: Request) -> EligibilityCriteriaSearchResults: 
 
     eligibility_criteria = await get_eligibility_criteria_set(session)
-    bucket_name = bucket_utils.get_bucket_name()
+    bucket_name = bucket_utils.get_bucket_name(config)
 
     if not config.BYPASS_S3:
         params = [{'Content-Type':'application/json'}]

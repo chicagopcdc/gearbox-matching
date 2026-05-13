@@ -573,7 +573,7 @@ async def get_match_conditions(session: Session) -> List[AlgorithmResponse]:
 async def build_match_conditions(session: Session, request: Request) -> List[AlgorithmResponse]:
 
     match_conditions = await get_match_conditions(session)
-    bucket_name = bucket_utils.get_bucket_name()
+    bucket_name = bucket_utils.get_bucket_name(config)
 
     if not config.BYPASS_S3:
         params = [{'Content-Type':'application/json'}]
