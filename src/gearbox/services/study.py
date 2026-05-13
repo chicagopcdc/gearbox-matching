@@ -1,5 +1,6 @@
 from . import logger
 import requests
+import json
 import re 
 import urllib3
 from pydantic import ValidationError
@@ -93,45 +94,47 @@ async def get_studies_to_update(existing_studies: list[Study], refresh_studies: 
     existing = [{'name':x.name, 
                                'code':x.code, 
                                'description': x.description,
-                               'links': [{'name':y.name,'href':y.href} for y in x.links],
+                               'links': [{'name':y.name,'href':y.href} 
+                                    for y in sorted(x.links, key=lambda x: x.href)],
                                'sites': [{'name':z.site.name, 
                                           'country':z.site.country,
                                           'city':z.site.city,
                                           'state':z.site.state,
                                           'zip':z.site.zip,
-                                          'location_lat': z.site.location_lat,
-                                          'location_long': z.site.location_long
-                                          } for z in x.sites],
-                                'ext_ids': [{'ext_id':a.ext_id,
-                                             'source':a.source,
-                                             'source_url':a.source_url} for a in x.ext_ids]
+                                          'location_lat': str(z.site.location_lat).rstrip('0'),
+                                          'location_long': str(z.site.location_long).rstrip('0')
+                                          } for z in sorted(x.sites,key=lambda x: (x.site.name, x.site.location_lat or 0))],
+                                'ext_ids': [{
+                                                'ext_id':a.ext_id,
+                                                'source':a.source,
+                                                'source_url':str(a.source_url).removeprefix("https://").rstrip('/')
+                                             } for a in sorted(x.ext_ids, key=lambda x: x.ext_id)]
                                } for x in existing_studies]
 
     refresh = [{'name':x.name, 
                                'code':x.code, 
                                'description': x.description,
-                               'links': [{'name':y.name,'href':str(y.href)} for y in x.links],
+                               'links': [{'name':y.name,'href':str(y.href)} 
+                                         for y in sorted(x.links, key=lambda x: x.href)],
                                'sites': [{'name':z.name, 
                                           'country':z.country, 'city':z.city,
                                           'state':z.state,
                                           'zip':z.zip,
-                                          'location_lat': z.location_lat,
-                                          'location_long': z.location_long
-                                          } for z in x.sites],
+                                          'location_lat': str(z.location_lat).rstrip('0'),
+                                          'location_long': str(z.location_long).rstrip('0')
+                                          } for z in sorted(x.sites,key=lambda x: (x.name, x.location_lat or 0))],
                                 'ext_ids': [{'ext_id':a.ext_id,
                                              'source':a.source,
-                                             'source_url':str(a.source_url)} for a in x.ext_ids]
+                                             'source_url':str(a.source_url).removeprefix("https://").rstrip('/')
+                                             } for a in sorted(x.ext_ids, key=lambda x: x.ext_id)
+                                             ]
                                } for x in refresh_studies]
-    
-    existing = sorted(existing, key=itemgetter('code'))
-    refresh = sorted(refresh, key=itemgetter('code'))
 
     for i in refresh:
         # if a refresh study is not an exact match
         # for an existing study
         if i not in existing:
             studies_to_update.append(i.get('code'))
-
 
     return studies_to_update
 
@@ -310,7 +313,7 @@ async def update_studies(session: Session, request:Request, updates: StudyUpdate
 
     # update the front-end json files to reflect study table updates
     await refresh_study_fe_files(session=session, request=request)
-
+    ## TO DO - LOG AND/OR RETURN THE NUMBER OF STUDIES UPDATED...
     return True
 
 def get_new_version(study_info: dict) -> str:
