@@ -16,7 +16,6 @@ from gearboxdatamodel.util.types import StudyVersionStatus
 from gearboxdatamodel.crud import study_crud, site_crud, site_has_study_crud, study_link_crud, site_has_study_crud, study_external_id_crud, source_crud, study_version_crud
 from gearboxdatamodel.models import Study, Site, StudyLink, SiteHasStudy, StudyExternalId, StudyVersion
 from gearboxdatamodel.schemas import StudyLinkCreate
-from operator import itemgetter
 from gearbox.services import match_conditions as mc, match_form as mf, eligibility_criteria as ec
 
 async def get_study_info(session: Session, id: int) -> StudySchema:
@@ -90,48 +89,65 @@ async def get_studies_to_update(existing_studies: list[Study], refresh_studies: 
     """
 
     studies_to_update = []
-    existing = [{'name':x.name, 
-                               'code':x.code, 
-                               'description': x.description,
-                               'links': [{'name':y.name,'href':y.href} for y in x.links],
-                               'sites': [{'name':z.site.name, 
-                                          'country':z.site.country,
-                                          'city':z.site.city,
-                                          'state':z.site.state,
-                                          'zip':z.site.zip,
-                                          'location_lat': z.site.location_lat,
-                                          'location_long': z.site.location_long
-                                          } for z in x.sites],
-                                'ext_ids': [{'ext_id':a.ext_id,
-                                             'source':a.source,
-                                             'source_url':a.source_url} for a in x.ext_ids]
-                               } for x in existing_studies]
+    existing = [
+                    {
+                        'name':x.name, 
+                        'code':x.code, 
+                        'description': x.description,
+                        'links': [
+                            {'name':y.name,'href':y.href} 
+                            for y in sorted(x.links, key=lambda x: x.href)
+                        ],
+                        'sites': [
+                            {'name':z.site.name, 
+                            'country':z.site.country,
+                            'city':z.site.city,
+                            'state':z.site.state,
+                            'zip':z.site.zip,
+                            'location_lat': str(z.site.location_lat).rstrip('0'),
+                            'location_long': str(z.site.location_long).rstrip('0')
+                            } 
+                            for z in sorted(x.sites,key=lambda x: (x.site.name, x.site.location_lat or 0))],
+                            'ext_ids': [{
+                                'ext_id':a.ext_id,
+                                'source':a.source,
+                                'source_url':str(a.source_url).removeprefix("https://").rstrip('/')
+                            } 
+                            for a in sorted(x.ext_ids, key=lambda x: x.ext_id)]
+                    } for x in existing_studies
+                ]
 
-    refresh = [{'name':x.name, 
-                               'code':x.code, 
-                               'description': x.description,
-                               'links': [{'name':y.name,'href':str(y.href)} for y in x.links],
-                               'sites': [{'name':z.name, 
-                                          'country':z.country, 'city':z.city,
-                                          'state':z.state,
-                                          'zip':z.zip,
-                                          'location_lat': z.location_lat,
-                                          'location_long': z.location_long
-                                          } for z in x.sites],
-                                'ext_ids': [{'ext_id':a.ext_id,
-                                             'source':a.source,
-                                             'source_url':str(a.source_url)} for a in x.ext_ids]
-                               } for x in refresh_studies]
-    
-    existing = sorted(existing, key=itemgetter('code'))
-    refresh = sorted(refresh, key=itemgetter('code'))
+    refresh = [
+                {'name':x.name, 
+                'code':x.code, 
+                'description': x.description,
+                'links': [
+                    {'name':y.name,'href':str(y.href)} 
+                    for y in sorted(x.links, key=lambda x: x.href)],
+                'sites': [
+                    {'name':z.name, 
+                    'country':z.country, 'city':z.city,
+                    'state':z.state,
+                    'zip':z.zip,
+                    'location_lat': str(z.location_lat).rstrip('0'),
+                    'location_long': str(z.location_long).rstrip('0')
+                    } 
+                    for z in sorted(x.sites,key=lambda x: (x.name, x.location_lat or 0))],
+                    'ext_ids': [
+                        {'ext_id':a.ext_id,
+                        'source':a.source,
+                        'source_url':str(a.source_url).removeprefix("https://").rstrip('/')
+                        } 
+                        for a in sorted(x.ext_ids, key=lambda x: x.ext_id)
+                    ]
+                    } for x in refresh_studies
+                ]
 
     for i in refresh:
         # if a refresh study is not an exact match
         # for an existing study
         if i not in existing:
             studies_to_update.append(i.get('code'))
-
 
     return studies_to_update
 
@@ -179,14 +195,18 @@ async def update_studies(session: Session, request:Request, updates: StudyUpdate
     study_codes_to_update = await get_studies_to_update(existing_studies=existing_studies, refresh_studies=updates.studies)
     study_ids_reset_to_active = []
 
-    for study in updates.studies:
+    total_studies_existing_not_updated = 0
+    studies_upserted = []
 
+
+    for study in updates.studies:
         if study.code not in study_codes_to_update:
             study_id = await study_crud.get_study_id_by_code(current_session=session , study_code=study.code)
             if study_id:
                 study_ids_reset_to_active.append(study_id)
-
+                total_studies_existing_not_updated += 1
         else:
+            studies_upserted.append(study.code)
             row = {
                 'name':study.name,
                 'code':study.code,
@@ -283,7 +303,6 @@ async def update_studies(session: Session, request:Request, updates: StudyUpdate
                     no_update_cols=no_update_cols, 
                     constraint_cols=constraint_cols
                 )
-
     # Expire all objects after upserts. This is needed in order to keep the
     # ORM and db in sync.
     session.expire_all()
@@ -310,6 +329,9 @@ async def update_studies(session: Session, request:Request, updates: StudyUpdate
 
     # update the front-end json files to reflect study table updates
     await refresh_study_fe_files(session=session, request=request)
+
+    logger.info(f"Refresh completed. Total studies existing no updates: {total_studies_existing_not_updated} Total studies updated: {len(studies_upserted)}")
+    logger.info(f"Studies updated: {studies_upserted}")
 
     return True
 
