@@ -174,12 +174,6 @@ async def update_studies(session: Session, request:Request, updates: StudyUpdate
     # Get study ids of all studies that exist in the db for the source
     source_study_ids = await study_crud.get_study_ids_for_source(db=session, source=source)
 
-    # Reset active to false for all rows in all study-related tables
-    # For incoming studies from the same source
-    await study_crud.set_active_all_rows(db=session, active_upd=False, ids=source_study_ids)
-    await site_has_study_crud.set_active_all_rows(db=session, active_upd=False, ids=source_study_ids)
-    await study_link_crud.set_active_all_rows(db=session, active_upd=False, ids=source_study_ids)
-
     priority = await source_crud.get_priority(db=session, source=source)
 
     # get a list of existing studies
@@ -199,9 +193,14 @@ async def update_studies(session: Session, request:Request, updates: StudyUpdate
     study_codes_to_update = await get_studies_to_update(existing_studies=existing_studies, refresh_studies=updates.studies)
     study_ids_reset_to_active = []
 
+    # Reset active to false for all rows in all study-related tables
+    # For incoming studies from the same source
+    await study_crud.set_active_all_rows(db=session, active_upd=False, ids=source_study_ids)
+    await site_has_study_crud.set_active_all_rows(db=session, active_upd=False, ids=source_study_ids)
+    await study_link_crud.set_active_all_rows(db=session, active_upd=False, ids=source_study_ids)
+
     total_studies_existing_not_updated = 0
     studies_upserted = []
-
 
     for study in updates.studies:
         if study.code not in study_codes_to_update:
