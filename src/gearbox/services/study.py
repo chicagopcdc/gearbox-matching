@@ -107,7 +107,11 @@ async def get_studies_to_update(existing_studies: list[Study], refresh_studies: 
                             'location_lat': str(z.site.location_lat).rstrip('0'),
                             'location_long': str(z.site.location_long).rstrip('0')
                             } 
-                            for z in sorted(x.sites,key=lambda x: (x.site.name, x.site.location_lat or 0))],
+                            for z in sorted(
+                                filter(lambda s: s.active == True, x.sites),
+                                key=lambda x: (x.site.name, x.site.location_lat or 0)
+                                )
+                            ],
                             'ext_ids': [{
                                 'ext_id':a.ext_id,
                                 'source':a.source,
