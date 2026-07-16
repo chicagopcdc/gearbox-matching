@@ -1,5 +1,4 @@
 from re import I
-from telnetlib import EL
 from sqlalchemy import func, update, select, exc
 from sqlalchemy.orm import Session, joinedload, join
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union

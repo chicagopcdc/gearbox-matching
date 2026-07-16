@@ -1,5 +1,4 @@
 from re import I
-from telnetlib import EL
 from sqlalchemy import select, exc, delete
 from fastapi import HTTPException
 from gearbox.util import status
