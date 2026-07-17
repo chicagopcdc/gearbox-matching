@@ -10,7 +10,7 @@ python = ">=3.9.2,<4.0.0"
 fastapi = "^0.115.12"
 uvicorn = {extras = ["standard"], version="^0.34.2"}
 gunicorn = "^23.0.0"
-alembic = "^1.3"
+alembic = "1.14.0"
 gen3authz = "^1.0.0"
 indexclient = "^2.1.0"
 httpx = ">=0.23.0,<1.0.0"
@@ -45,7 +45,7 @@ aiocache = "0.11.1"
 python-multipart = "^0.0.20"
 authutils = "7.1.1"
 psycopg2-binary = "<3"
-gearboxdatamodel = { git = "https://github.com/chicagopcdc/gearboxDataModel", rev = "0.2.0" }
+gearboxdatamodel = { git = "https://github.com/chicagopcdc/gearboxDataModel", branch = "GEAR-564" }
 greenlet = "^3.2.4"
 
 [tool.poetry.group.dev.dependencies]
