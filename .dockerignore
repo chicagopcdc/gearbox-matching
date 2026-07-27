@@ -14,6 +14,8 @@ Secrets/*
 doc/gearbox_table_data
 doc/gearbox_table_data.zip
 env
+!env/src/gearboxDataModel/alembic/versions
+tests
 
 .env
 .DS_Store

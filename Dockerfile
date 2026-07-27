@@ -24,6 +24,9 @@ COPY --chown=gen3:gen3 . /${appname}
 RUN chmod +x /${appname}/dockerrun.bash
 COPY --chown=gen3:gen3 ./deployment/wsgi/wsgi.py /${appname}/wsgi.py
 
+# Copy alembic versions 
+COPY --chown=gen3:gen3 ./env/src/gearboxDataModel/alembic/versions/ /${appname}/env/src/gearboxDataModel/alembic/versions/
+
 RUN poetry install -vv --no-interaction --without dev
 
 ENV  PATH="$(poetry env info --path)/bin:$PATH"
