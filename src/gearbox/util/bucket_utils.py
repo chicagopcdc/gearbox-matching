@@ -96,7 +96,7 @@ def promote_object_to_prod(
 
         deploy_id = f"{datetime.utcnow().isoformat()}-{uuid.uuid4()}"
         backup_prefix = f"_deploy_backups/{deploy_id}"
-        request.app.boto.assert_keys_exist(source_bucket, source_keys, config)
+        request.app.boto_manager.assert_keys_exist(source_bucket, source_keys, config)
         
         # backup
         for key in source_keys:
@@ -140,6 +140,7 @@ def promote_object_to_prod(
  
 
     except Exception as ex:
+        logger.exception(f"Error promoting data to production: {ex}")
         raise HTTPException(
             status.HTTP_500_INTERNAL_SERVER_ERROR,
             f"Error promoting data to production from {source_bucket} to {dest_bucket} {ex}.",

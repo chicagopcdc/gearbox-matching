@@ -52,8 +52,8 @@ async def deploy_prod_data(
 
     return DeployProdDataResponse(
         status="success",
-        source_bucket=config.STAGING_BUCKET,
-        dest_bucket=config.PROD_BUCKET,
+        source_bucket=config.S3_BUCKET_NAME,
+        dest_bucket=config.S3_PROD_BUCKET_NAME,
         promoted_keys=source_keys,
     )
 
