@@ -4,10 +4,10 @@ from collections.abc import Iterable
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Request, Depends, APIRouter, HTTPException
 from . import logger
-from gearbox.util import status
+from gearboxdatamodel.util import status
 from gearbox.admin_login import admin_required
 
-from gearbox.schemas import ElCriteriaHasCriterionCreate, ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterion, ElCriteriaHasCriterions, CriterionStagingUpdate, ElCriteriaHasCriterionPublish
+from gearboxdatamodel.schemas import ElCriteriaHasCriterionCreate, ElCriteriaHasCriterionSearchResults, ElCriteriaHasCriterion, ElCriteriaHasCriterions, CriterionStagingUpdate, ElCriteriaHasCriterionPublish
 from gearbox.services import el_criteria_has_criterion as el_criteria_has_criterion_service, criterion_staging as criterion_staging_service
 from gearbox import deps
 from gearbox import auth 

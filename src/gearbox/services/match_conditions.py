@@ -2,15 +2,15 @@ from typing import List
 from fastapi import HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from starlette.responses import JSONResponse
-from gearbox.util import status
+from gearboxdatamodel.util import status
 from gearbox import config
 import re
 from collections import deque
 from gearbox.routers import logger
-from gearbox.models import StudyVersion
-from gearbox.crud import study_version_crud
-from gearbox.schemas import AlgorithmResponse
-from gearbox.util.types import StudyVersionStatus
+from gearboxdatamodel.models import StudyVersion
+from gearboxdatamodel.crud import study_version_crud
+from gearboxdatamodel.schemas import AlgorithmResponse
+from gearboxdatamodel.util.types import StudyVersionStatus
 from gearbox.util import bucket_utils
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 
@@ -573,8 +573,9 @@ async def get_match_conditions(session: Session) -> List[AlgorithmResponse]:
 async def build_match_conditions(session: Session, request: Request) -> List[AlgorithmResponse]:
 
     match_conditions = await get_match_conditions(session)
+    bucket_name = bucket_utils.get_bucket_name(config)
 
     if not config.BYPASS_S3:
         params = [{'Content-Type':'application/json'}]
-        bucket_utils.put_object(request, config.S3_BUCKET_NAME, config.S3_BUCKET_MATCH_CONDITIONS_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, match_conditions)
+        bucket_utils.put_object(request, bucket_name, config.S3_BUCKET_MATCH_CONDITIONS_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, match_conditions)
     return JSONResponse(jsonable_encoder(match_conditions), status.HTTP_200_OK)

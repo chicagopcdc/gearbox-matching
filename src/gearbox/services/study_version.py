@@ -1,14 +1,15 @@
 from . import logger
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import HTTPException, Request
-from gearbox.models import StudyVersion, StudyVersion, Study
-from gearbox.schemas import StudyVersionCreate, StudyVersionSearchResults, StudyVersion as StudyVersionSchema, StudyVersionInfo, StudyVersionUpdate, StudyCreate, EligibilityCriteriaCreate
-from sqlalchemy.sql.functions import func
-from gearbox.util import status
-from gearbox.crud import study_version_crud 
+from gearbox import config
+from gearboxdatamodel.models import StudyVersion, StudyVersion, Study
+from gearboxdatamodel.schemas import StudyVersionCreate, StudyVersionSearchResults, StudyVersion as StudyVersionSchema, StudyVersionInfo, StudyVersionUpdate, StudyCreate, EligibilityCriteriaCreate
+from gearboxdatamodel.util import status
+from gearboxdatamodel.crud import study_version_crud, criterion_staging_crud, el_criteria_has_criterion_crud
 from typing import List
-from gearbox.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus, EligibilityCriteriaStatus
-from gearbox.services import criterion_staging as criterion_staging_service, study_algorithm_engine as study_algorithm_engine_service, study as study_service, eligibility_criteria as eligiblity_criteria_service, el_criteria_has_criterion as echc_service, value as value_service, match_form as match_form_service
+from gearboxdatamodel.util.types import StudyVersionStatus, AdjudicationStatus, EchcAdjudicationStatus, EligibilityCriteriaStatus
+from gearbox.services import criterion_staging as criterion_staging_service, study_algorithm_engine as study_algorithm_engine_service, study as study_service, eligibility_criteria as eligiblity_criteria_service, el_criteria_has_criterion as echc_service, value as value_service, match_form as match_form_service, criterion as criterion_service
+from gearbox.util.qc import PublishStudyMessageDetail, PublishStudyMessage
 
 async def get_latest_study_version(session: Session, study_id: int) -> int:
 
@@ -26,6 +27,7 @@ async def reset_active_status(session: Session, study_id: int) -> bool:
     )
     for sv in sv_to_update:
         await study_version_crud.update(db=session, db_obj=sv, obj_in={"status":StudyVersionStatus.INACTIVE})
+
     return True
 
 async def get_study_version(session: Session, id: int) -> StudyVersionSchema:
@@ -50,18 +52,16 @@ async def get_study_versions_by_status(session: Session, study_version_status:St
 
 async def create_study_version(session: Session, study_version: StudyVersionCreate ) -> StudyVersionSchema:
 
-    # find
+    # find latest study version
     study_version.study_version_num = await get_latest_study_version(session, study_version.study_id) + 1
 
     # set others to inactive if incoming is active
     if study_version.status == StudyVersionStatus.ACTIVE:
         reset_active = await reset_active_status(session, study_version.study_id)
     new_study_version = await study_version_crud.create(db=session, obj_in=study_version)
-
-    # await session.commit() 
     return new_study_version
 
-async def update_study_version(session: Session, study_version: StudyVersionUpdate) -> StudyVersionSchema:
+async def update_study_version(session: Session, study_version: StudyVersionUpdate, request: Request=None, update_fe_files: bool=True) -> StudyVersionSchema:
     study_version_in = await study_version_crud.get(db=session, id=study_version.id)
     if study_version_in:
         upd_study_version = await study_version_crud.update(db=session, db_obj=study_version_in, obj_in=study_version)
@@ -69,124 +69,241 @@ async def update_study_version(session: Session, study_version: StudyVersionUpda
         logger.error(f"Study version for id: {study_version.id} not found for update.") 
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study version for id: {study_version.id} not found for update.") 
     await session.commit() 
+
+    #update fe matching files and middleware cache after study version updated
+    if update_fe_files:
+        await study_service.refresh_study_fe_files(session=session, request=request)
     return upd_study_version
 
+def raise_and_return(publish_errors: List=None, publish_warnings: List=None):
 
-async def publish_study_version(session: Session, request: Request, study_version_id: int):
+    errors_warnings = {"publish_errors": [x.to_dict() for x in publish_errors] if publish_errors else None, 
+                           "publish_warnings": [x.to_dict() for x in publish_warnings] if publish_warnings else None} 
+    if publish_errors:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, errors_warnings)
+    else:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, errors_warnings)
 
+async def publish_study_version(session: Session, request: Request, study_version_id: int, ignore_warnings: bool = False):
+
+    publish_errors = []
+    publish_warnings = []
+
+    logger.info(f"Publishing study version id: {study_version_id}")
     # get study_version
     study_version = await study_version_crud.get(db=session, id=study_version_id)
     if not study_version:
-        logger.error(f"Study version for id: {study_version_id} not found for publishing.") 
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Study version for id: {study_version.id} not found for update.") 
+        msg=(f"Study version for id: {study_version_id} not found for publishing.") 
+        logger.error(f"{msg}")
+        raise_and_return(publish_errors=[PublishStudyMessage(message=msg)])
 
     # Check for existing ACTIVE study_versions for the study
+    # *** ERROR ***
     existing_active_svs = await study_version_crud.get_multi(session, 
         where=[f"{StudyVersion.__table__.name}.study_id = {study_version.study_id} and {StudyVersion.__table__.name}.status = '{StudyVersionStatus.ACTIVE.value}'"])
-    qc_errors = []
     if existing_active_svs:
-        qc_errors.append(f"Existing ACTIVE study_versions found ids: {[x.id for x in existing_active_svs]}")
+        msg = (f"ACTIVE study versions already exist for id: {[x.id for x in existing_active_svs]}.") 
+        logger.error(f"{msg}")
+        raise_and_return(publish_errors=[PublishStudyMessage(message=msg)])
+
+    # Get all echc rows
+    echcs = await el_criteria_has_criterion_crud.get_echc_by_ec_id(current_session=session, ec_id=study_version.eligibility_criteria_id)
+    # Get all staging rows
+    staging = await criterion_staging_crud.get_criterion_staging_by_ec_id(db=session, eligibility_criteria_id=study_version.eligibility_criteria_id)
 
     # check all rows in criterion_staging are 'ACTIVE' or 'INACTIVE' criterion_adjudication_status
+    # *** ERROR ***
     invalid_status = list(set([x for x in AdjudicationStatus]) - set([AdjudicationStatus.ACTIVE, AdjudicationStatus.INACTIVE]))
-    invalid_criterion_adjudication = await criterion_staging_service.get_criterion_staging_by_criterion_adjudication_status(
-        session=session, 
-        eligibility_criteria_id=study_version.eligibility_criteria_id, 
-        adjudication_status = invalid_status
-    )
-    if invalid_criterion_adjudication:
-        qc_errors.append(f"The following staged criteria require final adjudication: {[x.id for x in invalid_criterion_adjudication ]}")
+
+    # get staging rows that have invalid status
+    invalid_criterion_status = [ x for x in staging if x.criterion_adjudication_status in invalid_status]
+    if invalid_criterion_status:
+        msg = (f"The following criteria have not yet been fully adjudicated:")
+        details = [PublishStudyMessageDetail(code=x.code, value=x.text) for x in invalid_criterion_status]
+        publish_errors.append(PublishStudyMessage(message=msg, details=details))
+        logger.error(f"{msg}:{[x.code for x in invalid_criterion_status]}.") 
+
+    # check at least one active criterion for the study version
+    # *** ERROR ***
+    fully_adjudicated = [
+        x for x in staging 
+        if x.criterion_adjudication_status == AdjudicationStatus.ACTIVE and
+        x.echc_adjudication_status == EchcAdjudicationStatus.ACTIVE 
+        ]
+    if len(fully_adjudicated) == 0:
+        msg = (f"The study version must have at least one active criterion in order to be published.")
+        logger.error(f"{msg}")
+        publish_errors.append(PublishStudyMessage(message=msg))
+        raise_and_return(publish_errors=[PublishStudyMessage(message=msg)])
 
     # check criterion_id exists for all rows in the criterion_staging table for the study_version
-    staging_missing_criterion = await criterion_staging_service.get_criterion_staging_missing_criterion_id(session=session, eligibility_criteria_id=study_version.eligibility_criteria_id)
+    # for ACTIVE status criteria 
+    # *** ERROR ***
+    staging_missing_criterion = [ x for x in fully_adjudicated if x.criterion_id == None ]
     if staging_missing_criterion:
-        qc_errors.append(f"The following criterion_staging ids are missing criterion ids: {[x.id for x in staging_missing_criterion]}")
+        msg = (f"The following staged criteria have been adjudicated but are missing criterion ids:") 
+        details = [PublishStudyMessageDetail(code=x.code, value=x.text) for x in staging_missing_criterion]
+        publish_errors.append(PublishStudyMessage(message=msg, details=details))
+        logger.error(f"{msg}: {[x.code for x in staging_missing_criterion]}")
 
-    # check all criterion_ids in criterion_staging are for ACTIVE criteria
+    # check all criterion_ids in criterion_staging are for ACTIVE criteria (criterion.active = True) for criteria used
+    # in the study (criterion_adjudication_status and echc_adjudication_status are both ACTIVE)
+    # *** ERROR ***
     staging_inactive_criterion = await criterion_staging_service.get_criterion_staging_inactive_criterion(session=session, eligibility_criteria_id=study_version.eligibility_criteria_id)
     if staging_inactive_criterion:
-        qc_errors.append(f"The following criterion ids are used in the study but are inactive: {[x.criterion_id for x in staging_inactive_criterion]}")
+        msg = (f"The following staged criteria are used in the study but are inactive:")
+        details = [PublishStudyMessageDetail(code=x.code, value=x.text) for x in staging_inactive_criterion]
+        publish_errors.append(PublishStudyMessage(message=msg, details=details))
+        logger.error(f"{msg}: {[x.text for x in staging_inactive_criterion]}")
 
-    # check all rows in criterion_staging are 'ACTIVE' or 'INACTIVE' echc_adjudication_status
-    invalid_echc_adjudication = await criterion_staging_service.get_criterion_staging_by_echc_criterion_adjudication_status(
-        session=session, 
-        eligibility_criteria_id=study_version.eligibility_criteria_id,
-        echc_adjudication_status=[EchcAdjudicationStatus.NEW, EchcAdjudicationStatus.IN_PROCESS] 
-    )
-    if invalid_echc_adjudication:
-        qc_errors.append(f"The following criterion_staging ids are used in the study but el_criteria_has_criterion adjudication is not finalized: {[x.id for x in invalid_echc_adjudication]}")
-
+    # El criteria has criterion QC
     # check if study_algoritm_engine (study_version logic) exists for study_version
+    # *** ERROR ***
     if not study_version.study_algorithm_engine:
-        qc_errors.append(f"Study algorithm (study logic) does not exist for study version.")
-
-    # validate all echc ids in the study_algoritm_engine logic
-    invalid_echc_ids_in_logic = await study_algorithm_engine_service.validate_eligibility_criteria_ids(
-        session=session, 
-        algorithm_logic=study_version.study_algorithm_engine.algorithm_logic, 
-        eligibility_criteria_id=study_version.eligibility_criteria_id)
-    if invalid_echc_ids_in_logic:
-        qc_errors.append(f"Study algorithm (study logic) contains the following invalid el_criteria_has_criterion.ids: {invalid_echc_ids_in_logic}.")
+        msg = (f"Study algorithm (study logic) does not yet exist for study version. See boolean logic builder tab.")
+        logger.error(f"{msg}: {study_version.id}") 
+        publish_errors.append(PublishStudyMessage(message=msg))
+        raise_and_return(publish_errors=[PublishStudyMessage(message=msg)])
+    else:
+        # validate all echc ids in the study_algoritm_engine logic
+        # *** ERROR ***
+        invalid_echc_ids_in_logic = await study_algorithm_engine_service.validate_eligibility_criteria_ids(
+            session=session, 
+            algorithm_logic=study_version.study_algorithm_engine.algorithm_logic, 
+            eligibility_criteria_id=study_version.eligibility_criteria_id)
+        if invalid_echc_ids_in_logic:
+            msg = (f"Study algorithm (study logic) contains the following invalid el_criteria_has_criterion.ids: \
+               {invalid_echc_ids_in_logic}.")
+            details = [PublishStudyMessageDetail(code=x) for x in invalid_echc_ids_in_logic]
+            publish_errors.append(PublishStudyMessage(message=msg, details=details))
+            logger.error(f"{msg}: {invalid_echc_ids_in_logic}") 
 
     # Check that all study criteria (questions) have display rules defined (i.e. exist in the match_form)
-    staged_criteria_criterion_t = await criterion_staging_service.get_staged_criteria_by_ec_id(session=session, eligibility_criteria_id=study_version.eligibility_criteria_id)
-    criteria_not_in_match_form = []
-    for sc in staged_criteria_criterion_t:
-        if not sc.display_rules:
-            criteria_not_in_match_form.append(sc.id)
-    if criteria_not_in_match_form:
-        qc_errors.append(f"The following criteria do not appear in the match form: {criteria_not_in_match_form}")
+    # *** ERROR ***
+    fully_adjudicated_criteria_ids = [x.criterion_id for x in fully_adjudicated]
+
+    if fully_adjudicated_criteria_ids:
+        where=[f"criterion.id in ({','.join(map(str, fully_adjudicated_criteria_ids))})"]
+        staged_criteria  = await criterion_service.get_criteria(session=session, where=where)
+        criteria_not_in_match_form = []
+        for sc in staged_criteria:
+            if not sc.display_rules:
+                criteria_not_in_match_form.append(sc)
+
+        if criteria_not_in_match_form:
+            msg = (f"The following criteria do not appear in the match form (missing display rules):")
+            details = [PublishStudyMessageDetail(code=x.code) for x in criteria_not_in_match_form]
+            publish_errors.append(PublishStudyMessage(message=msg, details=details))
+            logger.error(f"{msg}:{[x.code for x in criteria_not_in_match_form]}") 
     
-    # check for valid echc_ids in criterion_staging - each row in the criterion_staging
-    # table should have at least one valid el_criteria_has_criterion id
+    # check for valid echc_ids in criterion_staging - each fully adjudicated row 
+    # in the criterion_staging table should have at least one valid el_criteria_has_criterion id
     invalid_echc_ids=[]
-    criterion_staging_ids_missing_echc=[]
+    criterion_staging_missing_echc=[]
     staged_criteria = await criterion_staging_service.get_criterion_staging_by_ec_id(session=session, eligibility_criteria_id=study_version.eligibility_criteria_id)
     echcs = await echc_service.get_el_criteria_has_criterions_by_ecid(session=session, ecid=study_version.eligibility_criteria_id)
     valid_echc_ids = [x.id for x in echcs]
-    for sc in staged_criteria:
-        if not sc.echc_ids:
-            criterion_staging_ids_missing_echc.append(sc.id)
-        else:
-            for staged_echc_id in sc.echc_ids:
-                if staged_echc_id not in valid_echc_ids:
-                    invalid_echc_ids.append(staged_echc_id)
-    if invalid_echc_ids:
-        qc_errors.append(f"The following invalid el_criteria_has_criterion_ids found: {invalid_echc_ids} ")
-    if criterion_staging_ids_missing_echc:
-        qc_errors.append(f"The following criterion_staging records are missing el_criteria_has_criterion ids: {criterion_staging_ids_missing_echc} ")
 
-    # QC echc_value_ids and criterion_value_ids    
+
+    for sc in staged_criteria:
+        # Only do qc if criterion adjudication and echc adjudication status is active
+        if sc.criterion_adjudication_status == AdjudicationStatus.ACTIVE and sc.echc_adjudication_status == EchcAdjudicationStatus.ACTIVE:
+            if not sc.echc_ids:
+                criterion_staging_missing_echc.append(sc)
+            else:
+                for staged_echc_id in sc.echc_ids:
+                    if staged_echc_id not in valid_echc_ids:
+                        invalid_echc_ids.append(staged_echc_id)
+
+    if invalid_echc_ids:
+        msg = (f"The following criterion_staging.echc_value_ids do not exist in the database for the study version: {invalid_echc_ids} ")
+        details = [PublishStudyMessageDetail(code=x) for x in invalid_echc_ids]
+        publish_errors.append(PublishStudyMessage(message=msg, details=details))
+        logger.error(f"{msg} : {invalid_echc_ids}") 
+
+    if criterion_staging_missing_echc:
+        msg = (f"The following criterion_staging records are missing el_criteria_has_criterion ids:")
+        details = [PublishStudyMessageDetail(code=x.code, value=x.text) for x in criterion_staging_missing_echc]
+        publish_errors.append(PublishStudyMessage(message=msg, details=details))
+        logger.error(f"{msg}: {criterion_staging_missing_echc}") 
+
+    # QC echc_value_ids and criterion_value_ids 
+    # *** ERROR ***
     valid_values = await value_service.get_values(session=session)
     valid_value_ids = [x.id for x in valid_values]
     invalid_echc_value_ids=[]
     invalid_criterion_value_ids=[]
     criterion_staging_missing_echc_value_ids=[]
+
     for sc in staged_criteria:
 
-        if not sc.echc_value_ids:
-            criterion_staging_missing_echc_value_ids.append(sc.id)
-        else:
-            for staged_value_id in sc.echc_value_ids:
-                if staged_value_id not in valid_value_ids:
-                    invalid_echc_value_ids.append(staged_value_id)
+        # Only do QC for active criteria - 
+        if sc.criterion_adjudication_status == AdjudicationStatus.ACTIVE:
+            if not sc.echc_value_ids:
+                criterion_staging_missing_echc_value_ids.append(sc)
+            else:
+                for staged_value_id in sc.echc_value_ids:
+                    if staged_value_id not in valid_value_ids:
+                        invalid_echc_value_ids.append(staged_value_id)
 
-        if sc.criterion_value_ids:
-            for staged_criterion_value_id in sc.criterion_value_ids:
-                if staged_criterion_value_id not in valid_value_ids:
-                    invalid_criterion_value_ids.append(staged_criterion_value_id)
+            if sc.criterion_value_ids:
+                for staged_criterion_value_id in sc.criterion_value_ids:
+                    if staged_criterion_value_id not in valid_value_ids:
+                        invalid_criterion_value_ids.append(staged_criterion_value_id)
 
     if invalid_echc_value_ids:
-        qc_errors.append(f"The following invalid criterion_staging.echc_value_ids found: {invalid_echc_value_ids} ")
-    if invalid_criterion_value_ids:
-        qc_errors.append(f"The following invalid criterion_staging.criterion_value_ids found: {invalid_criterion_value_ids} ")
-    if criterion_staging_missing_echc_value_ids:
-        qc_errors.append(f"The following criterion_staging missing echc_value_ids: {criterion_staging_missing_echc_value_ids} ")
+        msg = (f"The following criterion_staging.echc_value_ids do not exist in the database:")
+        details = [PublishStudyMessageDetail(code=x) for x in invalid_echc_value_ids]
+        publish_errors.append(PublishStudyMessage(message=msg, details=details))
+        logger.error(f"{msg} : {invalid_echc_value_ids}") 
 
-    # log and raise exception for any qc errors 
-    if qc_errors:
-        logger.error(f"Errors found in study_version publish process: {qc_errors}")
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"{qc_errors}")
+    if invalid_criterion_value_ids:
+        msg = (f"The following criterion_staging.criterion_value_ids do not exist in the database:") 
+        details = [PublishStudyMessageDetail(code=x) for x in invalid_criterion_value_ids]
+        publish_errors.append(PublishStudyMessage(message=msg, details=details))
+        logger.error(f"{msg} : {invalid_criterion_value_ids}") 
+
+    if criterion_staging_missing_echc_value_ids:
+        msg = (f"The following criterion_staging missing echc_value_ids:")
+        details = [PublishStudyMessageDetail(code=x.code, value=x.text) for x in criterion_staging_missing_echc_value_ids]
+        publish_errors.append(PublishStudyMessage(message=msg, details=details))
+        logger.error(f"{msg} :  {[x.code for x in criterion_staging_missing_echc_value_ids]}") 
+
+#------------------------------------------------- WARNINGS ------------------------------------
+    if not ignore_warnings:
+        # check all rows in criterion_staging are 'ACTIVE' or 'INACTIVE' echc_adjudication_status
+        # *** WARNING ***
+        invalid_echc_adjudication = await criterion_staging_service.get_criterion_staging_by_echc_criterion_adjudication_status(
+            session=session, 
+            eligibility_criteria_id=study_version.eligibility_criteria_id,
+            echc_adjudication_status=[EchcAdjudicationStatus.NEW, EchcAdjudicationStatus.IN_PROCESS] 
+        )
+        if invalid_echc_adjudication:
+            msg = (f"The following criterion_staging criteria are used in the study but el_criteria_has_criterion adjudication is not finalized:")
+            details = [PublishStudyMessageDetail(code=x.code) for x in invalid_echc_adjudication]
+            publish_warnings.append(PublishStudyMessage(message=msg, details=details))
+            logger.warning(f"{msg}: {[x.code for x in invalid_echc_adjudication]}")
+
+        # *** WARNING
+        # Check for study version values (el_criteria_has_criterion rows) that are in the
+        # staging table for the study version but do not occur in the study logic
+        unused_echc_in_logic = await study_algorithm_engine_service.find_unused_eligibility_criteria(
+            session=session, 
+            algorithm_logic=study_version.study_algorithm_engine.algorithm_logic, 
+            eligibility_criteria_id=study_version.eligibility_criteria_id)
+        if unused_echc_in_logic:
+            msg = (f"The following eligibility criteria were defined for the study but do not exist in the logic:")
+            details = [PublishStudyMessageDetail(code=x.criterion.code, value=x.value.value_string) for x in unused_echc_in_logic]
+            publish_warnings.append(PublishStudyMessage(message=msg, details=details))
+            logger.warning(f"{msg}: {[(x.criterion.code, x.value.value_string) for x in unused_echc_in_logic]}")
+        
+        if publish_errors:
+            raise_and_return(publish_errors=publish_errors, publish_warnings=publish_warnings)
+        # Only return warnings if ignore_warnings param is false
+        if publish_warnings and not ignore_warnings:
+            raise_and_return(publish_errors=publish_errors, publish_warnings=publish_warnings)
+
+    # -- Warnings end
 
     # ---- STEPS TO PUBLISH ---
     # update study to active
@@ -196,11 +313,9 @@ async def publish_study_version(session: Session, request: Request, study_versio
 
     # update study version to active
     study_version_upd=StudyVersionUpdate(id=study_version.id, status=StudyVersionStatus.ACTIVE)
-    await update_study_version(session=session, study_version=study_version_upd)
+    await update_study_version(session=session, study_version=study_version_upd, request=request)
 
     # update eligibility_criteria to active
     ec_upd = EligibilityCriteriaCreate(status=EligibilityCriteriaStatus.ACTIVE)
     await eligiblity_criteria_service.update_eligibility_criteria(session=session,eligibility_criteria=ec_upd, eligibility_criteria_id=study_version.eligibility_criteria_id)
-
-    # build and save the match_form containing the newly published study version
-    await match_form_service.build_match_form(session=session, request=request, save=True)
+    logger.info(f"Successfully published study version id: {study_version_id}")

@@ -1,5 +1,6 @@
 from gearbox import config
-from gearbox.util import status, bucket_utils
+from gearboxdatamodel.util import status
+from gearbox.util import bucket_utils
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Request, Depends, APIRouter, HTTPException
 from . import logger
@@ -8,7 +9,7 @@ from starlette.responses import JSONResponse
 from gearbox import auth
 from gearbox.admin_login import admin_required, super_admin_required
 
-from gearbox.schemas import Study, StudyCreate, StudyUpdates, StudyResults 
+from gearboxdatamodel.schemas import Study, StudyCreate, StudyUpdates, StudyResults 
 from gearbox import deps
 from gearbox.services import study as study_service
 from fastapi.encoders import jsonable_encoder
@@ -36,18 +37,7 @@ async def build_all_studies(
     new_studies = await study_service.build_studies(session=session, request=request)
     return new_studies
 
-@mod.get("/studies", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate)] )
-async def get_all_studies(
-    request: Request,
-    session: AsyncSession = Depends(deps.get_session)
-):
-    """
-    Comments: This endpoint is called by the front-end to return the presigned_url to the S3
-    bucket that contains the study file
-    """
-    params = []
-    presigned_url = bucket_utils.get_presigned_url(request, config.S3_BUCKET_STUDIES_KEY_NAME, params, "get_object")
-    return JSONResponse(presigned_url, status.HTTP_200_OK)
+
 
 @mod.post("/study", response_model=Study,status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(

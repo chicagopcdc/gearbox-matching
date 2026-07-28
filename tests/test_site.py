@@ -2,7 +2,7 @@ import pytest
 import random
 
 from sqlalchemy.orm import sessionmaker, Session
-from gearbox.models import Site
+from gearboxdatamodel.models import Site
 
 def test_get_sites(setup_database, client):
     """
@@ -52,6 +52,25 @@ def test_create_site(setup_database, client, data, connection):
         errors.append(f"Invalid https status code returned from test_create_site (create): {resp.status_code} ")
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))
+
+@pytest.mark.parametrize(
+    "data", [ 
+        {
+            "name": "CREATE SITE DUP WITH NULL LAT LONG"
+    }
+    ]
+)
+def test_create_site_dup_null_lat_long(setup_database, client, data, connection):
+    """
+    Comments: test create a new site and validates row created in db
+    """
+    fake_jwt = "1.2.3"
+    resp = client.post("/site", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    resp.raise_for_status()
+
+    fake_jwt = "1.2.3"
+    resp = client.post("/site", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    assert str(resp.status_code).startswith("40")
 
 def test_update_site(setup_database, client, connection):
     """

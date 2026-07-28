@@ -2,8 +2,8 @@ import pytest
 import random
 
 from sqlalchemy.orm import sessionmaker
-from gearbox.models import Study, StudyLink, Site, StudyExternalId, SiteHasStudy, StudyVersion
-from gearbox.util.types import StudyVersionStatus
+from gearboxdatamodel.models import Study, StudyLink, Site, StudyExternalId, SiteHasStudy, StudyVersion
+from gearboxdatamodel.util.types import StudyVersionStatus
 from .test_utils import is_aws_url
 
 from starlette.status import (
@@ -28,7 +28,7 @@ from starlette.status import (
                 "active": True,
                 "sites": [ 
                     {
-                        "name": "TEST STUDY UPDATES TEST SITE NAME",
+                        "name": "TEST STUDY UPDATES TEST SITE NAME 1",
                         "code": "TEST SITE CODE",
                     }
                 ],
@@ -230,7 +230,7 @@ def test_study_updates(setup_database, client, data, connection):
                 "active": True,
                 "sites": [ 
                     {
-                        "name": "TEST STUDY UPDATES TEST SITE NAME",
+                        "name": "TEST STUDY UPDATES TEST SITE NAME 2",
                         "code": "TEST SITE CODE",
                     }
                 ],
@@ -277,7 +277,7 @@ def test_study_updates_unknown_source(setup_database, client, data, connection):
                 "active": True,
                 "sites": [ 
                     {
-                        "name": "TEST STUDY UPDATES TEST SITE NAME",
+                        "name": "TEST STUDY UPDATES TEST SITE NAME 3",
                         "code": "TEST SITE CODE",
                     }
                 ],
@@ -311,3 +311,309 @@ def test_study_updates_missing_source(setup_database, client, data, connection):
     fake_jwt = "1.2.3"
     resp = client.post("/update-studies", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
     assert resp.status_code == HTTP_422_UNPROCESSABLE_ENTITY
+
+@pytest.mark.parametrize(
+    "data", [ 
+        {
+            "studies": [
+            {
+                "name": "TEST STUDY UPDATES - *TEST STUDY NAME FIRST!!!*",
+                "code": "NEW_STUDY_CODE",
+                "description": "test study description",
+                "active": True,
+                "sites": [ 
+                    {
+                        "name": "TEST STUDY UPDATES TEST SITE NAME 1",
+                        "code": "TEST SITE CODE",
+                        "zip":"60660"
+                    }
+                ],
+                "links": [ 
+                    {
+                        "name": "UPDATED-----TEST STUDY UPDATES LINK NAME",
+                        "href": "http://www.testlink.org/",
+                        "active": True
+                    }
+                ],
+                "ext_ids": [
+                    {
+                        "ext_id": "testexternalstudyid1",
+                        "source": "test ext id source",
+                        "source_url": "http://www.testsourceurl.gov",
+                        "active": True
+
+                    }
+
+                ]
+            }
+            ],
+            "source": "clinicaltrials.gov"
+        }
+    ]
+)
+@pytest.mark.asyncio
+def test_study_updates_update_zip(setup_database, client, data, connection):
+    """
+    Comments: test create a new study and validates row created in db
+    """
+    fake_jwt = "1.2.3"
+    resp = client.post("/update-studies", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+
+    resp.raise_for_status()
+
+    errors = []
+    try: 
+        Session = sessionmaker(bind=connection)
+        db_session = Session()
+
+        site = db_session.query(Site).filter(Site.name=='TEST STUDY UPDATES TEST SITE NAME 1').first()
+        if not site.zip: 
+            errors.append(f"Null Zip not updated for site {site.name}")
+
+    except Exception as e:
+        errors.append(f"Test study unexpected exception: {str(e)}")
+    if not str(resp.status_code).startswith("20"):
+        errors.append(f"Invalid https status code returned from test_create_study (create): {resp.status_code} ")
+
+    assert not errors, "errors occurred: \n{}".format("\n".join(errors))
+@pytest.mark.parametrize(
+    "data", [ 
+        {
+            "studies": [
+            {
+                "name": "Cord Blood Transplantation in Children and Young Adults With Hematologic Malignancies",
+                "code": "26-168",
+                "description": "The purpose of this study is to find out whether Cord Blood Transplantation/CBT as the first",
+                "active": True,
+                "sites": [ 
+                    {
+                        "name": " Memorial Sloan Kettering Basking Ridge (Limited Protocol Activities)",
+                        "code": "TEST SITE CODE 1",
+                        "country": "United States",
+                        "city": "Basking Ridge",
+                        "state": "New Jersey",
+                        "zip": "07920",
+			            "location_lat":41.885033,
+                        "location_long":-87.784500
+
+                    },
+                    {
+                        "name": "Memorial Sloan Kettering Monmouth (Limited Protocol Activities) ",
+                        "code": "TEST SITE CODE 2",
+                        "country": "United States",
+                        "city": "Monmouth",
+                        "state": "New Jersey",
+                        "zip": "07748",
+                        "location_lat":40.39428000,
+                        "location_long":-74.11709000
+                    },
+                    {
+                        "name": "Memorial Sloan Kettering Bergen (Limited Protocol Activities)",
+                        "code": "TEST SITE CODE 3",
+                        "country": "United States",
+                        "city": "Bergen",
+                        "state": "New Jersey",
+                        "zip": "07645",
+            			"location_lat":41.04676000,
+                        "location_long":-74.02292000
+
+                    },
+                    {
+                        "name": "Memorial Sloan Kettering Suffolk - Commack (Limited Protocol Activities)",
+                        "code": "TEST SITE CODE 4",
+                        "country": "United States",
+                        "city": "Suffolk",
+                        "state": "New York",
+                        "zip": "11725",
+                        "location_lat":40.84288000,
+                        "location_long":-73.29289000
+                    },
+                    {
+                        "name": "Memorial Sloan Kettering Westchester (Limited Protocol Activities)",
+                        "code": "TEST SITE CODE 5",
+                        "country": "United States",
+                        "city": "Westchester",
+                        "state": "New York",
+                        "zip": "10065",
+                        "location_lat":41.885033,
+                        "location_long":-87.784500
+                    }
+                ],
+                "links": [ 
+                    {
+                        "name": "26-168 link",
+                        "href": "http://www.26-168.org/",
+                        "active": True
+                    }
+                ],
+                "ext_ids": [
+                    {
+                        "ext_id": "NCT07566377",
+                        "source": "clinicaltrials.gov",
+                        "source_url": "http://www.testsourceurl.gov",
+                        "active": True
+
+                    }
+
+                ]
+            },
+            {
+                "name": "GVAX Plus Checkpoint Blockade in Neuroblastoma",
+                "code": "19-680",
+                "description": "This research clinical trial is studying the creation and administration of GVAX, an irradiated GM-CSF secreting, autologous neuroblastoma cell vaccine (GVAX) in combination with nivolumab and ipilimumab as a possible treatment for neuroblastoma.  The names of the study drugs involved in this study are:  GVAX Vaccine, an immunotherapy developed from surgically removed tumor tissue Nivolumab Ipilimumab",
+                "active": True,
+                "sites": [ 
+                     {
+                "name": "Dana Farber Cancer Institite"
+            },
+            {
+                "name": "Boston Children's Hospital"
+            }
+                ],
+                "links": [ 
+                      {
+                "name": "ClinicalTrials.gov",
+                "href": "https://clinicaltrials.gov/ct2/show/NCT04239040"
+            }
+                ],
+                "ext_ids": [
+                      {
+                "ext_id": "NCT04239040",
+                "source": "NIH",
+                "source_url": "https://clinicaltrials.gov"
+            }
+            ]
+            }
+            ],
+            "source": "clinicaltrials.gov"
+        }
+    ]
+)
+@pytest.mark.asyncio
+def test_study_updates_compare1(setup_database, client, data, connection):
+    """
+    Comments: test study updates 
+    """
+    fake_jwt = "1.2.3"
+    resp = client.post("/update-studies", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    resp.raise_for_status()
+
+@pytest.mark.parametrize(
+    "data", [ 
+        {
+            "studies": [
+            {
+                "name": "Cord Blood Transplantation in Children and Young Adults With Hematologic Malignancies",
+                "code": "26-168",
+                "description": "The purpose of this study is to find out whether Cord Blood Transplantation/CBT as the first",
+                "active": True,
+                "sites": [ 
+                    {
+                        "name": "Memorial Sloan Kettering Monmouth (Limited Protocol Activities) ",
+                        "code": "TEST SITE CODE 2",
+                        "country": "United States",
+                        "city": "Monmouth",
+                        "state": "New Jersey",
+                        "zip": "07748",
+                        "location_lat":40.39428000,
+                        "location_long":-74.11709000
+                    },
+                    {
+                        "name": "Memorial Sloan Kettering Bergen (Limited Protocol Activities)",
+                        "code": "TEST SITE CODE 3",
+                        "country": "United States",
+                        "city": "Bergen",
+                        "state": "New Jersey",
+                        "zip": "07645",
+            			"location_lat":41.04676000,
+                        "location_long":-74.02292000
+
+                    },
+                    {
+                        "name": "Memorial Sloan Kettering Suffolk - Commack (Limited Protocol Activities)",
+                        "code": "TEST SITE CODE 4",
+                        "country": "United States",
+                        "city": "Suffolk",
+                        "state": "New York",
+                        "zip": "11725",
+                        "location_lat":40.84288000,
+                        "location_long":-73.29289000
+                    },
+                    {
+                        "name": "Memorial Sloan Kettering Westchester (Limited Protocol Activities)",
+                        "code": "TEST SITE CODE 5",
+                        "country": "United States",
+                        "city": "Westchester",
+                        "state": "New York",
+                        "location_long":-87.784500,
+                        "zip": "10065",
+                        "location_lat":41.885033
+                    },
+                    {
+                        "name": " Memorial Sloan Kettering Basking Ridge (Limited Protocol Activities)",
+                        "code": "TEST SITE CODE 1",
+                        "country": "United States",
+                        "city": "Basking Ridge",
+                        "state": "New Jersey",
+                        "zip": "07920",
+			            "location_lat":41.885033,
+                        "location_long":-87.784500
+                    }
+                ],
+                "links": [ 
+                    {
+                        "name": "26-168 link",
+                        "href": "http://www.26-168.org/",
+                        "active": True
+                    }
+                ],
+                "ext_ids": [
+                    {
+                        "ext_id": "NCT07566377",
+                        "source": "clinicaltrials.gov",
+                        "source_url": "http://www.testsourceurl.gov",
+                        "active": True
+
+                    }
+
+                ]
+            },
+            {
+                "name": "GVAX Plus Checkpoint Blockade in Neuroblastoma",
+                "code": "19-680",
+                "description": "This research clinical trial is studying the creation and administration of GVAX, an irradiated GM-CSF secreting, autologous neuroblastoma cell vaccine (GVAX) in combination with nivolumab and ipilimumab as a possible treatment for neuroblastoma.  The names of the study drugs involved in this study are:  GVAX Vaccine, an immunotherapy developed from surgically removed tumor tissue Nivolumab Ipilimumab",
+                "active": True,
+                "sites": [ 
+                     {
+                "name": "Dana Farber Cancer Institite"
+            },
+            {
+                "name": "Boston Children's Hospital"
+            }
+                ],
+                "links": [ 
+                      {
+                "name": "ClinicalTrials.gov",
+                "href": "https://clinicaltrials.gov/ct2/show/NCT04239040"
+            }
+                ],
+                "ext_ids": [
+                      {
+                "ext_id": "NCT04239040",
+                "source": "NIH",
+                "source_url": "https://clinicaltrials.gov"
+            }
+            ]
+            }
+            ],
+            "source": "clinicaltrials.gov"
+        }
+    ]
+)
+@pytest.mark.asyncio
+def test_study_updates_compare2(setup_database, client, data, connection):
+    """
+    Comments: test study updates sort / compare
+    """
+    fake_jwt = "1.2.3"
+    resp = client.post("/update-studies", json=data, headers={"Authorization": f"bearer {fake_jwt}"})

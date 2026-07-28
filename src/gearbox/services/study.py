@@ -1,16 +1,21 @@
 from . import logger
+import requests
+import re 
+import urllib3
+from pydantic import ValidationError
 from datetime import datetime
 from gearbox import config
 from fastapi.encoders import jsonable_encoder
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import HTTPException, Request
-from gearbox.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate, StudyUpdates, StudyResults
-from gearbox.util import status, bucket_utils
-from gearbox.util.types import StudyVersionStatus
-from gearbox.crud import study_crud, site_crud, site_has_study_crud, study_link_crud, site_has_study_crud, study_external_id_crud, source_crud, study_version_crud
-from gearbox.models import Study, Site, StudyLink, SiteHasStudy, StudyExternalId, StudyVersion
-from operator import itemgetter
+from gearboxdatamodel.schemas import StudyCreate, StudySearchResults, Study as StudySchema, SiteHasStudyCreate, StudyUpdates, StudyResults, MatchingFilesUrls
+from gearbox.util import bucket_utils
+from gearboxdatamodel.util import status
+from gearboxdatamodel.util.types import StudyVersionStatus
+from gearboxdatamodel.crud import study_crud, site_crud, site_has_study_crud, study_link_crud, site_has_study_crud, study_external_id_crud, source_crud, study_version_crud
+from gearboxdatamodel.models import Study, Site, StudyLink, SiteHasStudy, StudyExternalId, StudyVersion
+from gearboxdatamodel.schemas import StudyLinkCreate
 from gearbox.services import match_conditions as mc, match_form as mf, eligibility_criteria as ec
 
 async def get_study_info(session: Session, id: int) -> StudySchema:
@@ -84,41 +89,63 @@ async def get_studies_to_update(existing_studies: list[Study], refresh_studies: 
     """
 
     studies_to_update = []
-    existing = [{'name':x.name, 
-                               'code':x.code, 
-                               'description': x.description,
-                               'links': [{'name':y.name,'href':y.href} for y in x.links],
-                               'sites': [{'name':z.site.name, 
-                                          'country':z.site.country,
-                                          'city':z.site.city,
-                                          'state':z.site.state,
-                                          'zip':z.site.zip,
-                                          'location_lat': z.site.location_lat,
-                                          'location_long': z.site.location_long
-                                          } for z in x.sites],
-                                'ext_ids': [{'ext_id':a.ext_id,
-                                             'source':a.source,
-                                             'source_url':a.source_url} for a in x.ext_ids]
-                               } for x in existing_studies]
+    existing = [
+                    {
+                        'name':x.name, 
+                        'code':x.code, 
+                        'description': x.description,
+                        'links': [
+                            {'name':y.name,'href':y.href} 
+                            for y in sorted(x.links, key=lambda x: x.href)
+                        ],
+                        'sites': [
+                            {'name':z.site.name, 
+                            'country':z.site.country,
+                            'city':z.site.city,
+                            'state':z.site.state,
+                            'zip':z.site.zip,
+                            'location_lat': str(z.site.location_lat).rstrip('0'),
+                            'location_long': str(z.site.location_long).rstrip('0')
+                            } 
+                            for z in sorted(
+                                filter(lambda s: s.active == True, x.sites),
+                                key=lambda x: (x.site.name, x.site.location_lat or 0)
+                                )
+                            ],
+                            'ext_ids': [{
+                                'ext_id':a.ext_id,
+                                'source':a.source,
+                                'source_url':str(a.source_url).removeprefix("https://").rstrip('/')
+                            } 
+                            for a in sorted(x.ext_ids, key=lambda x: x.ext_id)]
+                    } for x in existing_studies
+                ]
 
-    refresh = [{'name':x.name, 
-                               'code':x.code, 
-                               'description': x.description,
-                               'links': [{'name':y.name,'href':str(y.href)} for y in x.links],
-                               'sites': [{'name':z.name, 
-                                          'country':z.country, 'city':z.city,
-                                          'state':z.state,
-                                          'zip':z.zip,
-                                          'location_lat': z.location_lat,
-                                          'location_long': z.location_long
-                                          } for z in x.sites],
-                                'ext_ids': [{'ext_id':a.ext_id,
-                                             'source':a.source,
-                                             'source_url':str(a.source_url)} for a in x.ext_ids]
-                               } for x in refresh_studies]
-    
-    existing = sorted(existing, key=itemgetter('code'))
-    refresh = sorted(refresh, key=itemgetter('code'))
+    refresh = [
+                {'name':x.name, 
+                'code':x.code, 
+                'description': x.description,
+                'links': [
+                    {'name':y.name,'href':str(y.href)} 
+                    for y in sorted(x.links, key=lambda x: x.href)],
+                'sites': [
+                    {'name':z.name, 
+                    'country':z.country, 'city':z.city,
+                    'state':z.state,
+                    'zip':z.zip,
+                    'location_lat': str(z.location_lat).rstrip('0'),
+                    'location_long': str(z.location_long).rstrip('0')
+                    } 
+                    for z in sorted(x.sites,key=lambda x: (x.name, x.location_lat or 0))],
+                    'ext_ids': [
+                        {'ext_id':a.ext_id,
+                        'source':a.source,
+                        'source_url':str(a.source_url).removeprefix("https://").rstrip('/')
+                        } 
+                        for a in sorted(x.ext_ids, key=lambda x: x.ext_id)
+                    ]
+                    } for x in refresh_studies
+                ]
 
     for i in refresh:
         # if a refresh study is not an exact match
@@ -126,10 +153,9 @@ async def get_studies_to_update(existing_studies: list[Study], refresh_studies: 
         if i not in existing:
             studies_to_update.append(i.get('code'))
 
-
     return studies_to_update
 
-async def update_studies(session: Session, request:Request, updates: StudyUpdates, update_fe: bool=True):
+async def update_studies(session: Session, request:Request, updates: StudyUpdates):
     """
     Comments: This function does a refresh of the study, study_links, study_external_ids,
         site_has_study, and site tables. Rather than delete the existing information,
@@ -147,12 +173,6 @@ async def update_studies(session: Session, request:Request, updates: StudyUpdate
 
     # Get study ids of all studies that exist in the db for the source
     source_study_ids = await study_crud.get_study_ids_for_source(db=session, source=source)
-
-    # Reset active to false for all rows in all study-related tables
-    # For incoming studies from the same source
-    await study_crud.set_active_all_rows(db=session, active_upd=False, ids=source_study_ids)
-    await site_has_study_crud.set_active_all_rows(db=session, active_upd=False, ids=source_study_ids)
-    await study_link_crud.set_active_all_rows(db=session, active_upd=False, ids=source_study_ids)
 
     priority = await source_crud.get_priority(db=session, source=source)
 
@@ -173,14 +193,23 @@ async def update_studies(session: Session, request:Request, updates: StudyUpdate
     study_codes_to_update = await get_studies_to_update(existing_studies=existing_studies, refresh_studies=updates.studies)
     study_ids_reset_to_active = []
 
-    for study in updates.studies:
+    # Reset active to false for all rows in all study-related tables
+    # For incoming studies from the same source
+    await study_crud.set_active_all_rows(db=session, active_upd=False, ids=source_study_ids)
+    await site_has_study_crud.set_active_all_rows(db=session, active_upd=False, ids=source_study_ids)
+    await study_link_crud.set_active_all_rows(db=session, active_upd=False, ids=source_study_ids)
 
+    total_studies_existing_not_updated = 0
+    studies_upserted = []
+
+    for study in updates.studies:
         if study.code not in study_codes_to_update:
             study_id = await study_crud.get_study_id_by_code(current_session=session , study_code=study.code)
             if study_id:
                 study_ids_reset_to_active.append(study_id)
-
+                total_studies_existing_not_updated += 1
         else:
+            studies_upserted.append(study.code)
             row = {
                 'name':study.name,
                 'code':study.code,
@@ -214,7 +243,7 @@ async def update_studies(session: Session, request:Request, updates: StudyUpdate
                 }
 
                 # name / zipcode are unique to site
-                constraint_cols = [Site.name, Site.zip]
+                constraint_cols = [ Site.name, Site.location_lat, Site.location_long ]
                 no_update_cols=['create_date']
                 new_or_updated_site = await site_crud.upsert(
                     db=session, 
@@ -277,6 +306,9 @@ async def update_studies(session: Session, request:Request, updates: StudyUpdate
                     no_update_cols=no_update_cols, 
                     constraint_cols=constraint_cols
                 )
+    # Expire all objects after upserts. This is needed in order to keep the
+    # ORM and db in sync.
+    session.expire_all()
 
     # Reset to active all study_ids that were in the incoming updates 
     # but did not have any changes
@@ -298,8 +330,11 @@ async def update_studies(session: Session, request:Request, updates: StudyUpdate
         for sv in svs:
             await study_version_crud.update(db=session, db_obj=sv, obj_in={"status":StudyVersionStatus.INACTIVE.value})
 
-    if update_fe:
-        await refresh_study_fe_files(session=session, request=request)
+    # update the front-end json files to reflect study table updates
+    await refresh_study_fe_files(session=session, request=request)
+
+    logger.info(f"Refresh completed. Total studies existing no updates: {total_studies_existing_not_updated} Total studies updated: {len(studies_upserted)}")
+    logger.info(f"Studies updated: {studies_upserted}")
 
     return True
 
@@ -316,7 +351,7 @@ def get_new_version(study_info: dict) -> str:
 async def build_studies(session: Session, request: Request) -> StudySchema:
 
     results = await get_studies_info(session)
-    bucket_name = bucket_utils.get_bucket_name()
+    bucket_name = bucket_utils.get_bucket_name(config)
     existing_studies = bucket_utils.get_object(request=request, bucket_name=bucket_name, key_name=config.S3_BUCKET_STUDIES_KEY_NAME, expires=300, method="get_object")
     version = get_new_version(existing_studies)
     studies = [StudySchema.model_validate(obj=study_obj, from_attributes=True) for study_obj in results]
@@ -325,17 +360,39 @@ async def build_studies(session: Session, request: Request) -> StudySchema:
     #Remove inactive study links
     for study in new_studies.studies:
         study.links = [x for x in study.links if x.active]
+        # if nct study then create the locations/contacts link
+        ct_link_pattern = re.compile(r"https://clinicaltrials\.gov/.*/NCT", re.IGNORECASE)
+        for link in study.links[:]:
+            if ct_link_pattern.match(str(link.href)):
+                study.links.append(StudyLinkCreate(name="contacts and locations",
+                    href=str(link.href) + "#contacts-and-locations"
+                ))
 
     if not config.BYPASS_S3:
         json_studies = jsonable_encoder(new_studies)
         params = [{'Content-Type':'application/json'}]
         bucket_utils.put_object(request, bucket_name, config.S3_BUCKET_STUDIES_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, json_studies)
-
     return new_studies
 
 async def refresh_study_fe_files(session: Session, request: Request):
 
-    await build_studies(session=session, request=request)
-    await mc.build_match_conditions(session=session, request=request)
-    await mf.build_match_form(session=session, request=request, save=True)
-    await ec.build_eligibility_criteria(session=session, request=request)
+    if not config.BYPASS_MIDDLEWARE_UPDATE:
+        # refresh fe matching files
+        await build_studies(session=session, request=request)
+        await mc.build_match_conditions(session=session, request=request)
+        await mf.build_match_form(session=session, request=request, save=True)
+        await ec.build_eligibility_criteria(session=session, request=request)
+
+        ## call middleware to reset cached json data
+        headers = {}
+        headers['Authorization'] = request.headers.get("Authorization")
+        middleware_update_json_endpoint =  config.MIDDLEWARE_URL_PREFIX + '/admin/update_json_data'
+        try:
+            middleware_upd_result = requests.post(middleware_update_json_endpoint, headers=headers)
+        except (urllib3.exceptions.NewConnectionError, ValidationError, Exception) as e:
+            logger.error(f"Middleware refresh exception: {e}")
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Middleware refresh exception {e}.")
+
+        logger.info(f"FE study files refreshed successfully.")
+    else:
+        logger.info(f"FE study files update skipped.")

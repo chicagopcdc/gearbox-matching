@@ -2,7 +2,7 @@ import pytest
 import random
 
 from sqlalchemy.orm import sessionmaker
-from gearbox.models import Study, StudyLink, Site
+from gearboxdatamodel.models import Study, StudyLink, Site
 from .test_utils import is_aws_url
 
 @pytest.mark.parametrize(
@@ -14,13 +14,11 @@ from .test_utils import is_aws_url
             "active": True,
             "sites": [ 
                 {
-                    "name": "CREATE UPDATE TEST SITE NAME",
-                    "code": "TEST STUDY WITH SITE CODE",
+                    "name": "CREATE UPDATE TEST STUDY SITE NAME",
                     "active": True
                 },
                 {
-                    "name": "CREATE UPDATE TEST SITE NAME 2",
-                    "code": "TEST STUDY WITH SITE CODE 2",
+                    "name": "CREATE UPDATE TEST STUDY SITE NAME 2",
                     "active": True
                 }
             ]
@@ -62,8 +60,7 @@ def test_create_study_with_sites(setup_database, client, data, connection):
             "active": True,
             "sites": [ 
                 {
-                    "name": "CREATE UPDATE TEST SITE NAME",
-                    "code": "TEST SITE CODE",
+                    "name": "CREATE UPDATE TEST SITE NAME WITH LINKS TEST",
                     "active": True
                 }
             ],

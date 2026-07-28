@@ -1,12 +1,13 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession as Session
-from gearbox.util import status
-from gearbox.schemas import CriterionStaging as CriterionStagingSchema, CriterionStagingCreate, CriterionPublish, CriterionCreate, CriterionStagingUpdate, CriterionHasValueCreate, CriterionStagingSearchResult, ElCriteriaHasCriterionPublish, ElCriteriaHasCriterionCreate, CriterionStagingUpdateIn
-from gearbox.crud import criterion_staging_crud , study_version_crud, value_crud, criterion_has_value_crud, input_type_crud
-from gearbox.models import Criterion
+from sqlalchemy import select
+from gearboxdatamodel.util import status
+from gearboxdatamodel.schemas import CriterionStaging as CriterionStagingSchema, CriterionStagingCreate, CriterionPublish, CriterionCreate, CriterionStagingUpdate, CriterionHasValueCreate, CriterionStagingSearchResult, ElCriteriaHasCriterionPublish, ElCriteriaHasCriterionCreate, CriterionStagingUpdateIn
+from gearboxdatamodel.crud import criterion_staging_crud , value_crud, criterion_has_value_crud, input_type_crud
+from gearboxdatamodel.models import Criterion, CriterionStaging
 from typing import List
-from gearbox.util.types import AdjudicationStatus, EchcAdjudicationStatus
-from gearbox.services import criterion as criterion_service, value as value_service, el_criteria_has_criterion as el_criteria_has_criterion_service
+from gearboxdatamodel.util.types import AdjudicationStatus, EchcAdjudicationStatus
+from gearbox.services import criterion as criterion_service, value as value_service, match_form as match_form_service
 
 from . import logger
 from gearbox import config
@@ -22,7 +23,6 @@ async def get_criteria_staging(session: Session) -> List[CriterionStagingSchema]
 async def get_criterion_staging_by_ec_id(session: Session, eligibility_criteria_id: int) -> List[CriterionStagingSearchResult]:
     cs = await criterion_staging_crud.get_criterion_staging_by_ec_id(session, eligibility_criteria_id)
     criterion_staging_ret = []
-
     for c in cs:
         criterion_staging = CriterionStagingSearchResult(**c.__dict__)
         # only call get if values exist, because we are calling it with the ids parameter
@@ -41,7 +41,7 @@ async def create(session: Session, staging_criterion: CriterionStagingCreate)-> 
     new_staging_criterion = await criterion_staging_crud.create(db=session, obj_in=staging_criterion)
     return new_staging_criterion
 
-async def publish_criterion(session: Session, criterion: CriterionPublish, user_id: int):
+async def publish_criterion(session: Session, request: Request, criterion: CriterionPublish, user_id: int):
     """
     Comments: this function qc's and saves a criterion from the criterion_staging table
     to the criterion table. 
@@ -74,10 +74,18 @@ async def publish_criterion(session: Session, criterion: CriterionPublish, user_
         for v_id in criterion.values:
             chv = CriterionHasValueCreate(criterion_id=new_criterion.id, value_id=v_id)
             await criterion_has_value_crud.create(db=session,obj_in=chv)
+
+    #TODO update existing criterion staging records with the udpated information from this criteria
+    # await refresh_criterion_staging(session, new_criterion, user_id)
+    # If it is new it will have a new criterion_id so it will not be easy to find the same in parallel study criteria creation.
+    
     # Call update method below - set criterion_staging criteria adjudication status to active
     stage_upd = CriterionStagingUpdate(id=criterion.criterion_staging_id, criterion_id=new_criterion.id, criterion_adjudication_status="ACTIVE", last_updated_by_user_id=user_id)
     await update(session=session, criterion=stage_upd, user_id=user_id)
     logger.info(f"User: {user_id} published criterion: {new_criterion.id} code: {new_criterion.code}")
+
+    # rebuild match form to include the newly published criterion
+    await match_form_service.build_match_form(session=session, request=request, save=True)
 
 async def update(session: Session, criterion: CriterionStagingUpdateIn, user_id: int) -> CriterionStagingSchema:
 
@@ -140,6 +148,44 @@ async def accept_criterion_staging(session: Session, id: int, user_id: int):
     criterion_upd = CriterionStagingUpdateIn(**criterion_staging.__dict__)
     await update(session=session, criterion=criterion_upd, user_id = user_id)
 
+async def ignore_criterion_staging(session: Session, id: int, user_id: int):
+    """
+    Comments: This function sets the indicated criterion_staging row criterion_adjudication_status
+    to 'INACTIVE' 
+    """
+    # GET THE criterion_staging ROW
+    criterion_staging = await get_criterion_staging(session=session, id=id)
+    if not criterion_staging:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: criterion_staging id:{id} not found.")
+
+    criterion_staging.last_updated_by_user_id = user_id 
+    criterion_staging.criterion_adjudication_status = AdjudicationStatus.INACTIVE
+    criterion_upd = CriterionStagingUpdateIn(**criterion_staging.__dict__)
+
+    # calling crud func directly here because we don't need to do qc for an ignored criterion
+    await criterion_staging_crud.update(db=session, db_obj=criterion_staging, obj_in=criterion_upd)
+
+async def reset_criterion_staging(session: Session, id: int, user_id: int):
+    """
+    Comments: This function sets the indicated criterion_staging row criterion_adjudication_status
+    from 'INACTIVE' to 'NEW' if no criterion id exists or 'EXISTING' if criterion id exists
+    """
+    # GET THE criterion_staging ROW
+    criterion_staging = await get_criterion_staging(session=session, id=id)
+    if not criterion_staging:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"ERROR: criterion_staging id:{id} not found.")
+
+    criterion_staging.last_updated_by_user_id = user_id 
+    if criterion_staging.criterion_id:
+        criterion_staging.criterion_adjudication_status = AdjudicationStatus.EXISTING
+    else:
+        criterion_staging.criterion_adjudication_status = AdjudicationStatus.NEW
+
+    criterion_upd = CriterionStagingUpdateIn(**criterion_staging.__dict__)
+
+    # calling crud func directly here because we don't need to do qc here
+    await criterion_staging_crud.update(db=session, db_obj=criterion_staging, obj_in=criterion_upd)
+
 async def save_criterion_staging(session: Session, criterion: CriterionStagingUpdateIn, user_id: int) -> CriterionStagingSchema:
 
     # If the incoming criterion exists and contains a valid code for the id 
@@ -157,6 +203,10 @@ async def save_criterion_staging(session: Session, criterion: CriterionStagingUp
     # If this is a new criterion set status to IN_PROCESS then update
     else:
         criterion.criterion_adjudication_status = AdjudicationStatus.IN_PROCESS
+
+    # If values have been assigned in the incoming staging rec then set EchcAdjudicationStatus to IN PROCESS
+    if criterion.echc_value_ids:
+        criterion.echc_adjudication_status = EchcAdjudicationStatus.IN_PROCESS
 
     upd_value = await update(session=session, criterion=criterion, user_id = int(user_id))
 
@@ -176,3 +226,40 @@ async def get_criterion_staging_inactive_criterion(session: Session, eligibility
 
 async def get_staged_criteria_by_ec_id(session:Session, eligibility_criteria_id: int) -> List[Criterion]:
     return await criterion_staging_crud.get_staged_criteria_by_ec_id(session, eligibility_criteria_id)
+
+async def refresh_criterion_staging(
+    session: Session,
+    criterion: Criterion,  # from DB
+    user_id: int,
+) -> list[CriterionStaging]:
+    """
+    Propagate canonical Criterion changes into all related criterion_staging rows.
+    """
+
+    result = await session.execute(
+        select(CriterionStaging)
+        .where(CriterionStaging.criterion_id == criterion.id)
+    )
+    staged_criteria = result.scalars().all()
+
+    if not staged_criteria:
+        return []
+
+    # Collect value IDs from the DB criterion
+    value_ids = sorted({
+        cv.value_id for cv in criterion.values   
+    }) if criterion.values else []
+
+    # Apply updates
+    for staged in staged_criteria:
+        staged.code = criterion.code
+        staged.display_name = criterion.display_name
+        staged.description = criterion.description
+        staged.ontology_code_id = criterion.ontology_code_id
+        staged.input_type_id = criterion.input_type_id
+        staged.last_updated_by_user_id = int(user_id)
+
+        staged.criterion_value_ids = value_ids
+
+    await session.commit()
+    return staged_criteria
