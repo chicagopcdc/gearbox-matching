@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from fastapi.encoders import jsonable_encoder
 from fastapi import APIRouter
 from fastapi.security import HTTPBearer
-from fastapi import HTTPException, 
+from fastapi import HTTPException 
 from fastapi import status as fastapi_status
 from sqlalchemy.orm import Session
 from fastapi import Request, Depends 
