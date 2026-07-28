@@ -16,7 +16,7 @@ from gearbox.services import match_conditions as mc
 from gearboxdatamodel.util import status
 from gearbox.util import bucket_utils
 from gearbox.admin_login import admin_required, super_admin_required
-from gearbox.utils.bucket_util import promote_object_to_prod
+from gearbox.util.bucket_utils import promote_object_to_prod
 from gearbox.schemas import DeployProdDataResponse
 
 mod = APIRouter()
