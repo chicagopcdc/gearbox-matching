@@ -61,22 +61,22 @@ numpy = "^1.24.4"
 pandas = "^2.0.3"
 
 [tool.poetry.plugins."gearbox.modules"]
-"site" = "gearbox.routers.site"
-"study" = "gearbox.routers.study"
-"eligibility_criteria" = "gearbox.routers.eligibility_criteria"
+"criterion"="gearbox.routers.criterion"
+"criterion_staging"="gearbox.routers.criterion_staging"
 "el_criteria_has_criterion" = "gearbox.routers.el_criteria_has_criterion"
+"eligibility_criteria" = "gearbox.routers.eligibility_criteria"
 "input_type" = "gearbox.routers.input_type"
 "match_conditions" = "gearbox.routers.match_conditions"
 "match_form" = "gearbox.routers.match_form"
-"value" = "gearbox.routers.value"
-"criterion"="gearbox.routers.criterion"
-"criterion_staging"="gearbox.routers.criterion_staging"
-"study_algorithm_engine" = "gearbox.routers.study_algorithm_engine"
-"study_version" = "gearbox.routers.study_version"
-"study_link" = "gearbox.routers.study_link"
-"unit" = "gearbox.routers.unit"
+"prod_deploy" = "gearbox.routers.prod_deploy"
 "raw_criteria" = "gearbox.routers.raw_criteria"
-
+"site" = "gearbox.routers.site"
+"study" = "gearbox.routers.study"
+"study_algorithm_engine" = "gearbox.routers.study_algorithm_engine"
+"study_link" = "gearbox.routers.study_link"
+"study_version" = "gearbox.routers.study_version"
+"unit" = "gearbox.routers.unit"
+"value" = "gearbox.routers.value"
 
 [build-system]
 requires = ["poetry>=0.12"]
