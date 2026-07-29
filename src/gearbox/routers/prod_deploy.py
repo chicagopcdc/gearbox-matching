@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from fastapi.encoders import jsonable_encoder
 from fastapi import APIRouter
 from fastapi.security import HTTPBearer
-from fastapi import HTTPException, 
+from fastapi import HTTPException 
 from fastapi import status as fastapi_status
 from sqlalchemy.orm import Session
 from fastapi import Request, Depends 
@@ -16,7 +16,7 @@ from gearbox.services import match_conditions as mc
 from gearboxdatamodel.util import status
 from gearbox.util import bucket_utils
 from gearbox.admin_login import admin_required, super_admin_required
-from gearbox.utils.bucket_util import promote_object_to_prod
+from gearbox.util.bucket_utils import promote_object_to_prod
 from gearbox.schemas import DeployProdDataResponse
 
 mod = APIRouter()
@@ -52,8 +52,8 @@ async def deploy_prod_data(
 
     return DeployProdDataResponse(
         status="success",
-        source_bucket=config.STAGING_BUCKET,
-        dest_bucket=config.PROD_BUCKET,
+        source_bucket=config.S3_BUCKET_NAME,
+        dest_bucket=config.S3_PROD_BUCKET_NAME,
         promoted_keys=source_keys,
     )
 
