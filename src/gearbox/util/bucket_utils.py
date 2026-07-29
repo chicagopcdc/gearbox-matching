@@ -96,9 +96,11 @@ def promote_object_to_prod(
 
         deploy_id = f"{datetime.utcnow().isoformat()}-{uuid.uuid4()}"
         backup_prefix = f"_deploy_backups/{deploy_id}"
-        request.app.boto_manager.assert_keys_exist(source_bucket, source_keys, config)
-        
-        # backup
+
+        # Check source keys using the app's own credentials (no config/STS override)
+        request.app.boto_manager.assert_keys_exist(source_bucket, source_keys)
+
+        # backup using the prod role creds (config)
         for key in source_keys:
             request.app.boto_manager.copy_object_between_s3(
                 source_bucket=dest_bucket,
