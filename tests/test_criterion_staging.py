@@ -3,8 +3,8 @@ import pytest
 from gearbox import config
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select, func
-from gearbox.models import CriterionStaging, Criterion
-from gearbox.util.types import AdjudicationStatus
+from gearboxdatamodel.models import CriterionStaging, Criterion
+from gearboxdatamodel.util.types import AdjudicationStatus
 
 @pytest.mark.asyncio
 def test_get_criterion_staging(setup_database, client):
@@ -272,6 +272,32 @@ def test_accept_criterion_staging(setup_database, client, connection):
     resp = client.post(f"/accept-criterion-staging/1", headers={"Authorization": f"bearer {fake_jwt}"})
     resp.raise_for_status()
     assert str(resp.status_code).startswith("20")
+
+def test_ignore_criterion_staging(setup_database, client, connection):
+
+    fake_jwt = "1.2.3"
+    resp = client.post(f"/ignore-criterion-staging/1", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp.raise_for_status()
+    assert str(resp.status_code).startswith("20")
+
+    Session = sessionmaker(bind=connection)
+    db_session = Session()
+    stmt = select(CriterionStaging).where(CriterionStaging.id == 1)
+    row = db_session.execute(stmt).first()
+    assert row.CriterionStaging.criterion_adjudication_status == AdjudicationStatus.INACTIVE
+
+def test_reset_criterion_staging(setup_database, client, connection):
+
+    fake_jwt = "1.2.3"
+    resp = client.post(f"/reset-criterion-staging/27", headers={"Authorization": f"bearer {fake_jwt}"})
+    resp.raise_for_status()
+    assert str(resp.status_code).startswith("20")
+
+    Session = sessionmaker(bind=connection)
+    db_session = Session()
+    stmt = select(CriterionStaging).where(CriterionStaging.id == 27)
+    row = db_session.execute(stmt).first()
+    assert row.CriterionStaging.criterion_adjudication_status == AdjudicationStatus.EXISTING
 
 def test_accept_criterion_staging_not_found(setup_database, client, connection):
 

@@ -1,7 +1,7 @@
-import pytest
+import pytest, json
 from sqlalchemy.orm import sessionmaker 
-from gearbox.models import StudyVersion
-from gearbox.util.types import StudyVersionStatus
+from gearboxdatamodel.models import StudyVersion
+from gearboxdatamodel.util.types import StudyVersionStatus
 
 
 @pytest.mark.asyncio
@@ -112,8 +112,9 @@ def test_publish_study_version_incomplete_criterion_adjudication(setup_database,
     """
     fake_jwt = "1.2.3"
     resp = client.post(f"/publish-study-version/22", headers={"Authorization": f"bearer {fake_jwt}"})
-    assert 'staged criteria require final adjudication' in resp.text
-    assert str(resp.status_code).startswith("50")
+    full_res = resp.json()
+    assert 'The study version must have at least one active criterion' in resp.text
+    assert str(resp.status_code).startswith("42")
 
 @pytest.mark.asyncio
 def test_publish_study_version_incomplete_echc_adjudication(setup_database, client, connection):
@@ -122,8 +123,26 @@ def test_publish_study_version_incomplete_echc_adjudication(setup_database, clie
     """
     fake_jwt = "1.2.3"
     resp = client.post(f"/publish-study-version/23", headers={"Authorization": f"bearer {fake_jwt}"})
+    full_res = resp.json()
     assert 'el_criteria_has_criterion adjudication is not finalized' in resp.text
-    assert str(resp.status_code).startswith("50")
+    assert str(resp.status_code).startswith("40")
+
+@pytest.mark.parametrize(
+    "data", [ 
+        {
+            "ignore_warnings" : True
+    }
+    ]
+)
+@pytest.mark.asyncio
+def test_publish_ignore_warnings(setup_database, client, data, connection):
+    """
+    Comments: test fail for incomplete el_criteria_has_criterion adjudication
+    """
+    fake_jwt = "1.2.3"
+    resp = client.post(f"/publish-study-version/23", json=data, headers={"Authorization": f"bearer {fake_jwt}"})
+    full_res = resp.json()
+    assert str(resp.status_code).startswith("20")
 
 @pytest.mark.asyncio
 def test_publish_study_version_existing_active_fail(setup_database, client, connection):
@@ -131,9 +150,9 @@ def test_publish_study_version_existing_active_fail(setup_database, client, conn
     Comments: test fail for already exsiting active study version for study
     """
     fake_jwt = "1.2.3"
-    resp = client.post(f"/publish-study-version/14", headers={"Authorization": f"bearer {fake_jwt}"})
-    assert 'Existing ACTIVE study_versions found' in resp.text
-    assert str(resp.status_code).startswith("50")
+    resp = client.post(f"/publish-study-version/21", headers={"Authorization": f"bearer {fake_jwt}"})
+    assert 'ACTIVE study versions already exist' in resp.text
+    assert str(resp.status_code).startswith("42")
 
 @pytest.mark.asyncio
 def test_publish_study_version_contains_inactive_criterion(setup_database, client, connection):
@@ -142,8 +161,9 @@ def test_publish_study_version_contains_inactive_criterion(setup_database, clien
     """
     fake_jwt = "1.2.3"
     resp = client.post(f"/publish-study-version/24", headers={"Authorization": f"bearer {fake_jwt}"})
-    assert 'criterion ids are used in the study but are inactive' in resp.text
-    assert str(resp.status_code).startswith("50")
+    full_res = resp.json()
+    assert 'The following criteria do not appear in the match form' in resp.text
+    assert str(resp.status_code).startswith("42")
 
 @pytest.mark.asyncio
 def test_publish_study_version_contains_invalid_echc_id(setup_database, client, connection):
@@ -152,18 +172,20 @@ def test_publish_study_version_contains_invalid_echc_id(setup_database, client, 
     """
     fake_jwt = "1.2.3"
     resp = client.post(f"/publish-study-version/25", headers={"Authorization": f"bearer {fake_jwt}"})
-    assert 'invalid criterion_staging.echc_value_ids' in resp.text
-    assert str(resp.status_code).startswith("50")
+    full_res = resp.json()
+    assert 'The following criterion_staging.echc_value_ids do not exist in the database for the study version' in resp.text
+    assert str(resp.status_code).startswith("42")
 
 @pytest.mark.asyncio
 def test_publish_study_version_contains_invalid_criterion_id(setup_database, client, connection):
     """
-    Comments: test fail for study includes inactive criterion (that are not in match form)
+    Comments: test fail for study includes invalid criterion value ids
     """
     fake_jwt = "1.2.3"
     resp = client.post(f"/publish-study-version/26", headers={"Authorization": f"bearer {fake_jwt}"})
-    assert 'invalid criterion_staging.criterion_value_ids' in resp.text
-    assert str(resp.status_code).startswith("50")
+    full_res = resp.json()
+    assert 'The following criterion_staging.criterion_value_ids do not exist in the database' in resp.text
+    assert str(resp.status_code).startswith("42")
 
 @pytest.mark.asyncio
 def test_publish_criteria_not_in_match_form(setup_database, client, connection):
@@ -173,7 +195,7 @@ def test_publish_criteria_not_in_match_form(setup_database, client, connection):
     fake_jwt = "1.2.3"
     resp = client.post(f"/publish-study-version/27", headers={"Authorization": f"bearer {fake_jwt}"})
     assert 'criteria do not appear in the match form' in resp.text
-    assert str(resp.status_code).startswith("50")
+    assert str(resp.status_code).startswith("42")
 
 @pytest.mark.asyncio
 def test_publish_invalid_criteria_ids_in_logic(setup_database, client, connection):
@@ -183,4 +205,4 @@ def test_publish_invalid_criteria_ids_in_logic(setup_database, client, connectio
     fake_jwt = "1.2.3"
     resp = client.post(f"/publish-study-version/28", headers={"Authorization": f"bearer {fake_jwt}"})
     assert 'contains the following invalid el_criteria_has_criterion.ids' in resp.text
-    assert str(resp.status_code).startswith("50")
+    assert str(resp.status_code).startswith("42")

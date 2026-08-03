@@ -1,14 +1,14 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import APIRouter, HTTPException, Request, Depends
 from typing import List
-from gearbox.util import status
+from gearboxdatamodel.util import status
 from gearbox.services import criterion_staging as criterion_staging_service
 from gearbox.admin_login import admin_required
 
-from gearbox.schemas import CriterionStaging, CriterionStagingUpdateIn, CriterionPublish, CriterionStagingCreate, CriterionStagingSearchResult, ElCriteriaHasCriterionPublish
+from gearboxdatamodel.schemas import CriterionStaging, CriterionStagingUpdateIn, CriterionPublish, CriterionStagingCreate, CriterionStagingSearchResult, ElCriteriaHasCriterionPublish
 from gearbox import deps
 from gearbox import auth 
-from gearbox.util.types import AdjudicationStatus
+from gearboxdatamodel.util.types import AdjudicationStatus
 
 mod = APIRouter()
 
@@ -48,7 +48,7 @@ async def publish(
     Comments: The purpose of this endpoint is to 'publish' a criterion_staging row into the 
     criterion table which makes it available to the match-form build. 
     """
-    await criterion_staging_service.publish_criterion(session=session, criterion=body, user_id = int(user_id))
+    await criterion_staging_service.publish_criterion(session=session, request=request, criterion=body, user_id = int(user_id))
 
 @mod.post("/criterion-staging", response_model=CriterionStaging, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def create_object(
@@ -75,7 +75,7 @@ async def save_object(
     return await criterion_staging_service.save_criterion_staging(session=session, criterion=body , user_id=user_id)
 
 @mod.post("/accept-criterion-staging/{criterion_staging_id}", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
-async def accept_object(
+async def accept_staging(
     criterion_staging_id: int,
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
@@ -87,6 +87,32 @@ async def accept_object(
     by the adjudicator
     """
     await criterion_staging_service.accept_criterion_staging(session=session , id=criterion_staging_id, user_id=int (user_id))
+
+@mod.post("/ignore-criterion-staging/{criterion_staging_id}", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+async def ignore_staging(
+    criterion_staging_id: int,
+    request: Request,
+    session: AsyncSession = Depends(deps.get_session),
+    user_id: int = Depends(auth.authenticate_user)
+):
+    """
+    Comments: this endpoint updates the criterion_staging row and sets the criterion
+    adjudication status to "INACTIVE". 
+    """
+    await criterion_staging_service.ignore_criterion_staging(session=session , id=criterion_staging_id, user_id=int (user_id))
+
+@mod.post("/reset-criterion-staging/{criterion_staging_id}", status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+async def reset_staging(
+    criterion_staging_id: int,
+    request: Request,
+    session: AsyncSession = Depends(deps.get_session),
+    user_id: int = Depends(auth.authenticate_user)
+):
+    """
+    Comments: this endpoint updates the criterion_staging row and sets the criterion
+    adjudication status to "INACTIVE". 
+    """
+    await criterion_staging_service.reset_criterion_staging(session=session , id=criterion_staging_id, user_id=int (user_id))
 
 def init_app(app):
     app.include_router(mod, tags=["criterion-staging"])

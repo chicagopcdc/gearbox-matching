@@ -1,7 +1,7 @@
 import pytest
 
 from sqlalchemy.orm import sessionmaker 
-from gearbox.models import Unit
+from gearboxdatamodel.models import Unit
 
 def test_get_units(setup_database, client):
     """

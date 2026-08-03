@@ -3,14 +3,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Request, Depends, HTTPException, APIRouter
 
 from . import logger
-from gearbox.util import status
+from gearboxdatamodel.util import status
 from gearbox.services import criterion as criterion_service
-from gearbox.admin_login import admin_required
+from gearbox.admin_login import admin_required, super_admin_required
 
-from gearbox.schemas import CriterionSearchResults, CriterionCreateIn, Criterion
+from gearboxdatamodel.schemas import CriterionSearchResults, CriterionCreateIn, Criterion, Tag, Value, CriterionUpdate, Study
 from gearbox import deps
-from gearbox import auth 
-from gearbox.services.user_input import reset_user_validation_data
+from gearbox import auth
 
 mod = APIRouter()
 
@@ -18,9 +17,10 @@ mod = APIRouter()
 async def get_criteria(
     request: Request,
     session: AsyncSession = Depends(deps.get_session),
+    include_studies: bool = False,
 ):
 
-    criteria = await criterion_service.get_criteria(session)
+    criteria = await criterion_service.get_criteria(session, include_studies=include_studies)
     return { "results" :criteria }
 
 @mod.get("/criteria-not-exist-in-match-form", response_model=CriterionSearchResults, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
@@ -49,6 +49,15 @@ async def get_criterion(
     else:
         return criterion
 
+@mod.get("/criterion/{criterion_id}/studies", response_model=list[Study], status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
+async def get_studies_for_criterion(
+    criterion_id: int,
+    request: Request,
+    session: AsyncSession = Depends(deps.get_session),
+):
+    studies = await criterion_service.get_studies_for_criterion(session=session, criterion_id=criterion_id)
+    return studies
+
 @mod.post("/criterion", response_model=Criterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(admin_required)])
 async def save_object(
     body: CriterionCreateIn,
@@ -59,8 +68,20 @@ async def save_object(
 
     new_criterion = await criterion_service.create_new_criterion(session, body, user_id=int(user_id))
     await session.commit()
-    await reset_user_validation_data()
     return new_criterion
+
+
+@mod.put("/criterion", response_model=Criterion, status_code=status.HTTP_200_OK, dependencies=[ Depends(auth.authenticate), Depends(super_admin_required)])
+async def update_criterion(
+    body: CriterionUpdate,
+    request: Request,
+    session: AsyncSession = Depends(deps.get_session),
+    user_id: int = Depends(auth.authenticate_user)
+):
+
+    updated_criterion = await criterion_service.update_criterion(session, body, user_id)
+    return updated_criterion
 
 def init_app(app):
     app.include_router(mod, tags=["criterion"])
+

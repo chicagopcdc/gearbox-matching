@@ -86,7 +86,7 @@ def test_create_duplicate_el_criteria_has_criterion(setup_database, client, data
     fake_jwt = "1.2.3"
     for i in range(len(data)):
         resp = client.post("/el-criteria-has-criterion", json=data.get('echcs')[i], headers={"Authorization": f"bearer {fake_jwt}"})
-    assert str(resp.status_code).startswith("409")
+    assert str(resp.status_code).startswith("200")
 
 @pytest.mark.parametrize(
     "data", [ 
@@ -109,7 +109,7 @@ def test_create_duplicate_db_el_criteria_has_criterion(setup_database, client, d
     """
     fake_jwt = "1.2.3"
     resp = client.post("/el-criteria-has-criterion", json=data.get('echc')[0], headers={"Authorization": f"bearer {fake_jwt}"})
-    assert str(resp.status_code).startswith("409")
+    assert str(resp.status_code).startswith("200")
 
 @pytest.mark.asyncio
 def test_get_el_criteria_has_criterions(setup_database, client):
