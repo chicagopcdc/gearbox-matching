@@ -26,7 +26,7 @@ services:
       # boto manager to create the presiged urls.
       - S3_AWS_ACCESS_KEY_ID = "your access key id here"
       - S3_AWS_SECRET_ACCESS_KEY = "your secret access key here"
-    command: /env/bin/uvicorn --host 0.0.0.0 --port 80 gearbox.asgi:app --reload
+    command: poetry run uvicorn --host 0.0.0.0 --port 80 gearbox.asgi:app --reload
   db_migration:
     build: .
     image: gearbox_be
@@ -38,10 +38,10 @@ services:
       - DB_HOST=db
       - DB_USER=gearbox_user
     command: sh -c '
-         /env/bin/alembic upgrade head
+         poetry run alembic upgrade head
       '
   db:
-    image: postgres
+    image: postgres:17
     environment:
       - POSTGRES_USER=gearbox_user
       - POSTGRES_PASSWORD=postgres

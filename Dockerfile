@@ -1,7 +1,7 @@
-ARG AZLINUX_BASE_VERSION=master
+ARG AZLINUX_BASE_VERSION=3.13-pythonnginx
 
 # Base stage with python-build-base
-FROM quay.io/cdis/python-nginx-al:${AZLINUX_BASE_VERSION} AS base
+FROM quay.io/cdis/amazonlinux-base:${AZLINUX_BASE_VERSION} AS base
 
 ENV appname=gearbox
 
@@ -11,6 +11,9 @@ WORKDIR /${appname}
 
 # Builder stage
 FROM base AS builder
+
+USER root
+RUN chown -R gen3:gen3 /venv
 
 USER gen3
 
@@ -31,6 +34,8 @@ ENV  PATH="$(poetry env info --path)/bin:$PATH"
 # Final stage
 FROM base
 
+USER root
+
 # Install ccrypt to decrypt dbgap telmetry files
 RUN echo "Upgrading dnf"; \
     dnf upgrade -y; \
@@ -39,6 +44,7 @@ RUN echo "Upgrading dnf"; \
         libxcrypt-compat-4.4.33 \
         libpq-15.0 \
         gcc \
+        diffutils \
         tar xz; \
     echo "Installing RPM"; \
     rpm -i https://ccrypt.sourceforge.net/download/1.11/ccrypt-1.11-1.src.rpm && \
@@ -46,6 +52,7 @@ RUN echo "Upgrading dnf"; \
     tar -zxf ccrypt-1.11.tar.gz && cd ccrypt-1.11 && ./configure --disable-libcrypt && make install && make check;
 
 COPY --from=builder /${appname} /${appname}
+COPY --from=builder /venv /venv
 
 # Switch to non-root user 'gen3' for the serving process
 
