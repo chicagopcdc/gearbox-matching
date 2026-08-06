@@ -40,7 +40,7 @@ urllib3 = "^1.26.9"
 pcdc-aws-client = {git = "https://github.com/chicagopcdc/pcdc-aws-client.git", rev = "1.5.0"}
 jsonschema = "^4.17.3"
 werkzeug = "3.1.5"
-pcdcutils = {git = "https://github.com/chicagopcdc/pcdcutils.git", rev = "0.1.2"}
+pcdcutils = {git = "https://github.com/chicagopcdc/pcdcutils.git", rev = "0.5.3"}
 aiocache = "0.11.1"
 python-multipart = "^0.0.20"
 pyjwt = "^2.13.0"
@@ -49,6 +49,7 @@ flask = ">=2.3"
 psycopg2-binary = "<3"
 gearboxdatamodel = { git = "https://github.com/chicagopcdc/gearboxDataModel", rev = "0.2.0" }
 greenlet = "^3.2.4"
+pycryptodome = "3.21.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.0"
@@ -59,7 +60,7 @@ pyyaml = ">6.0"
 requests = "^2.22"
 respx = "*"
 nest-asyncio = "^1.5.1"
-numpy = "^1.24.4"
+numpy = "^2.0"
 pandas = "^2.0.3"
 
 [tool.poetry.plugins."gearbox.modules"]
