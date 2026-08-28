@@ -14,7 +14,7 @@ FROM base AS builder
 
 USER gen3
 
-COPY poetry.lock pyproject.toml /${appname}/
+COPY poetry.lock pyproject.toml build.py /${appname}/
 
 
 # RUN python3 -m venv /env && . /env/bin/activate &&
