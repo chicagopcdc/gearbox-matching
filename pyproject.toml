@@ -47,8 +47,6 @@ python-multipart = "^0.0.20"
 authutils = "7.1.1"
 psycopg2-binary = "<3"
 gearboxdatamodel = { git = "https://github.com/chicagopcdc/gearboxDataModel", rev = "0.3.0" }
-#Use branch arg and develop=true for local development / testing this will copy migrations into env/src/gearboxDataModel/migrations after poetry install.
-#gearboxdatamodel = { git = "https://github.com/chicagopcdc/gearboxDataModel", branch = "<branch>", develop=true }
 greenlet = "^3.2.4"
 
 [tool.poetry.group.dev.dependencies]
