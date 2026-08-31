@@ -326,18 +326,19 @@ files = [
 
 [[package]]
 name = "authlib"
-version = "1.6.12"
+version = "1.8.0"
 description = "The ultimate Python library in building OAuth and OpenID Connect servers and clients."
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "authlib-1.6.12-py2.py3-none-any.whl", hash = "sha256:e9229ad7fde610b139dd12f5edbe97eab9ee78bfb85691247e767727850b99ab"},
-    {file = "authlib-1.6.12.tar.gz", hash = "sha256:0656d8482f28fc8221929d5f35b2bde5d13e10555ebc06b4561b0d622e83b1bd"},
+    {file = "authlib-1.8.0-py2.py3-none-any.whl", hash = "sha256:88aebbd9af6757e14e912d5dc007ae1dc1f3e27e3b2152ce7c552ee2c3b3c121"},
+    {file = "authlib-1.8.0.tar.gz", hash = "sha256:f3ecd5f1da737262fb53bf1a4d95c4ea1ad9dd509316587a255c99ab1838a4f0"},
 ]
 
 [package.dependencies]
-cryptography = "*"
+cryptography = ">=45.0.1"
+joserfc = ">=1.6.1"
 
 [[package]]
 name = "authutils"
@@ -483,13 +484,14 @@ flask = ["Flask (>=1.1.2,<2.0.0)"]
 
 [[package]]
 name = "cdislogging"
-version = "1.1.1"
-description = "Standardized logging tool and format for cdis applications"
+version = "1.2.0"
+description = "Standardized logging tool and format for CTDS applications"
 optional = false
-python-versions = "*"
+python-versions = "<4,>=3.13"
 groups = ["main"]
 files = [
-    {file = "cdislogging-1.1.1.tar.gz", hash = "sha256:77e11648244cda3a8094b8ae6081435a2303f259612846c49ef8825c7be141e3"},
+    {file = "cdislogging-1.2.0-py3-none-any.whl", hash = "sha256:3596addc972c3e65c738231381244089f84466e9c6e2662e096ad53154018f54"},
+    {file = "cdislogging-1.2.0.tar.gz", hash = "sha256:ca7511b685bbf0b4727fef85ca4eab78271b4618139a621b09c2846aed6d19d1"},
 ]
 
 [[package]]
@@ -1895,6 +1897,24 @@ files = [
     {file = "jmespath-1.1.0-py3-none-any.whl", hash = "sha256:a5663118de4908c91729bea0acadca56526eb2698e83de10cd116ae0f4e97c64"},
     {file = "jmespath-1.1.0.tar.gz", hash = "sha256:472c87d80f36026ae83c6ddd0f1d05d4e510134ed462851fd5f754c8c3cbb88d"},
 ]
+
+[[package]]
+name = "joserfc"
+version = "1.7.5"
+description = "The ultimate Python library for JOSE RFCs, including JWS, JWE, JWK, JWA, JWT"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "joserfc-1.7.5-py3-none-any.whl", hash = "sha256:add2c2c84e8373b084d526a8b53daba5d7a513a118cd2dcd9fc9f979d0922159"},
+    {file = "joserfc-1.7.5.tar.gz", hash = "sha256:d5ff536e658e17664f8c1b1ab60dc4aa62aa973fcef1edd33cc44bda45d6f5ea"},
+]
+
+[package.dependencies]
+cryptography = ">=45.0.1"
+
+[package.extras]
+drafts = ["pycryptodome"]
 
 [[package]]
 name = "jsonpath-ng"
