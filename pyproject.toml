@@ -38,7 +38,7 @@ certifi = "2024.7.4"
 python-dateutil = "^2.8.2"
 six = "^1.16.0"
 urllib3 = "^1.26.9"
-pcdc-aws-client = {git = "https://github.com/chicagopcdc/pcdc-aws-client.git", rev = "1.5.0"}
+pcdc-aws-client = {git = "https://github.com/chicagopcdc/pcdc-aws-client.git", rev = "1.5.3"}
 jsonschema = "^4.17.3"
 werkzeug = "3.1.5"
 pcdcutils = {git = "https://github.com/chicagopcdc/pcdcutils.git", rev = "0.5.3"}
