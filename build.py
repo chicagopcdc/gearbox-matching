@@ -19,6 +19,13 @@ def _is_commit_sha(value: str) -> bool:
     return 7 <= len(value) <= 40 and all(c in "0123456789abcdefABCDEF" for c in value)
 
 
+# Marker file written inside migrations/ after a successful fetch.
+# Stores the ref that was used so subsequent calls (e.g. a second
+# `poetry install` in the same Docker build layer) can skip the git
+# clone when migrations are already up-to-date.
+_REF_MARKER = ".build_ref"
+
+
 def build(setup_kwargs):
     destination = Path(os.getcwd()) / "migrations"
 
@@ -46,6 +53,15 @@ def build(setup_kwargs):
         raise Exception(
             "gearboxdatamodel dependency must specify 'branch', 'rev', or 'tag'."
         )
+
+    # Skip the clone if migrations/ was already populated from the same ref.
+    # This makes the build idempotent and avoids a redundant git clone when
+    # `poetry install` (which invokes this hook) is run more than once in the
+    # same environment (e.g., two RUN layers in a Dockerfile).
+    marker = destination / _REF_MARKER
+    if destination.exists() and marker.exists() and marker.read_text().strip() == ref:
+        print(f"migrations/ already populated from {ref!r}, skipping git clone.")
+        return
 
     with tempfile.TemporaryDirectory() as tmpdir:
         # git clone -b accepts branch names and tags but NOT commit SHAs.
@@ -104,6 +120,9 @@ def build(setup_kwargs):
         if destination.exists():
             shutil.rmtree(destination)
         dest_staging.rename(destination)
+
+        # Write ref marker so subsequent calls with the same ref are no-ops.
+        (destination / _REF_MARKER).write_text(ref)
         print(f"Successfully copied {source_dir.name} to {destination}")
 
 

@@ -20,3 +20,8 @@ env
 *.pem
 keys/
 postgres-data/
+
+# migrations/ is a generated artifact fetched by build.py from gearboxdatamodel.
+# Run `python build.py` to populate it locally.
+migrations/
+.migrations_new_*/

@@ -48,6 +48,9 @@ pyjwt = "^2.13.0"
 authutils = {version = "^7.2.8", extras = ["fastapi"]}
 flask = ">=2.3"
 psycopg2-binary = "<3"
+# NOTE: this rev controls BOTH the installed Python package and the alembic
+# migrations fetched by build.py.  Keep them in sync — bumping the rev here
+# will update the migration history on the next `python build.py` run.
 gearboxdatamodel = { git = "https://github.com/chicagopcdc/gearboxDataModel", rev = "0.3.0" }
 greenlet = "^3.2.4"
 pycryptodome = "3.21.0"
