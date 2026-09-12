@@ -72,6 +72,14 @@ def file_to_table_with_cols(conn, cursor, table_name, file_name, ordered_column_
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_database(connection) -> Engine:
+    import pathlib
+    env_py = pathlib.Path(__file__).parent.parent / "migrations" / "env.py"
+    if not env_py.exists():
+        raise RuntimeError(
+            "migrations/env.py not found. "
+            "Run `python build.py` from the project root to fetch migrations "
+            "from the gearboxdatamodel package before running the test suite."
+        )
 
     Session = sessionmaker(bind=connection)
     session = Session()

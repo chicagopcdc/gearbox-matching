@@ -4,13 +4,14 @@ version = "1.6.2"
 description = "Gearbox Service"
 authors = ["CTDS UChicago <cdis@uchicago.edu>"]
 license = "Apache-2.0"
+build = "build.py"
 
 [tool.poetry.dependencies]
 python = ">=3.13,<4.0.0"
 fastapi = "^0.115.12"
 uvicorn = {extras = ["standard"], version="^0.34.2"}
 gunicorn = "^23.0.0"
-alembic = "^1.3"
+alembic = "1.14.0"
 gen3authz = "^1.0.0"
 indexclient = "^2.1.0"
 httpx = ">=0.23.0,<1.0.0"
@@ -37,7 +38,7 @@ certifi = "2024.7.4"
 python-dateutil = "^2.8.2"
 six = "^1.16.0"
 urllib3 = "^1.26.9"
-pcdc-aws-client = {git = "https://github.com/chicagopcdc/pcdc-aws-client.git", rev = "1.5.0"}
+pcdc-aws-client = {git = "https://github.com/chicagopcdc/pcdc-aws-client.git", rev = "1.5.3"}
 jsonschema = "^4.17.3"
 werkzeug = "3.1.5"
 pcdcutils = {git = "https://github.com/chicagopcdc/pcdcutils.git", rev = "0.5.3"}
@@ -47,7 +48,10 @@ pyjwt = "^2.13.0"
 authutils = {version = "^7.2.8", extras = ["fastapi"]}
 flask = ">=2.3"
 psycopg2-binary = "<3"
-gearboxdatamodel = { git = "https://github.com/chicagopcdc/gearboxDataModel", rev = "0.2.0" }
+# NOTE: this rev controls BOTH the installed Python package and the alembic
+# migrations fetched by build.py.  Keep them in sync — bumping the rev here
+# will update the migration history on the next `python build.py` run.
+gearboxdatamodel = { git = "https://github.com/chicagopcdc/gearboxDataModel", rev = "0.3.0" }
 greenlet = "^3.2.4"
 pycryptodome = "3.21.0"
 
