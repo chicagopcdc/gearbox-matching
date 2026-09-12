@@ -34,7 +34,9 @@ RUN chmod +x /${appname}/dockerrun.bash
 COPY --chown=gen3:gen3 ./deployment/wsgi/wsgi.py /${appname}/wsgi.py
 
 # Fetch migrations once, explicitly and cleanly.
-RUN python build.py
+# Use `poetry run python` so the venv's interpreter is used regardless of
+# what (if anything) the system PATH exposes as `python` or `python3`.
+RUN poetry run python build.py
 
 # Install the root package.  build.py's ref-marker check makes this a no-op
 # for the git-clone step if migrations/ is already populated.
