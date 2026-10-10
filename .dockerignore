@@ -14,9 +14,15 @@ Secrets/*
 doc/gearbox_table_data
 doc/gearbox_table_data.zip
 env
+tests
 
 .env
 .DS_Store
 *.pem
 keys/
 postgres-data/
+
+# migrations/ is fetched inside the Docker build by build.py; exclude any
+# locally-fetched copy so it doesn't overwrite the one built in the image.
+migrations/
+.migrations_new_*/

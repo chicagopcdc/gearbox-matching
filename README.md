@@ -12,8 +12,9 @@ The server is built with [FastAPI](https://fastapi.tiangolo.com/) and packaged w
 Install required software:
 
 * [PostgreSQL](PostgreSQL) 9.6 or above
-* [Python](https://www.python.org/downloads/) 3.7 or above
+* [Python](https://www.python.org/downloads/) 3.13 or above
 * [Poetry](https://poetry.eustace.io/docs/#installation)
+* [Git](https://git-scm.com/) (required by `build.py` to fetch migrations)
 
 Then use `poetry install` to install the dependencies. Before that,
 a [virtualenv](https://virtualenv.pypa.io/) is recommended.
@@ -23,6 +24,17 @@ during `poetry install`, and you must activate it by:
 ```bash
 poetry shell
 ```
+
+Fetch the alembic migrations from the `gearboxdatamodel` package:
+
+```bash
+python build.py
+```
+
+> **Note:** `migrations/` is a generated directory. It is not committed to
+> the repository. Re-run `python build.py` after bumping the
+> `gearboxdatamodel` rev in `pyproject.toml`, or to start fresh after
+> deleting `migrations/`.
 
 ## Development
 
@@ -45,9 +57,10 @@ Create a file `.env` in the root directory of the checkout:
 # BYPASS_FENCE_DUMMYER_USER_ID = ...  # default: 4
 ```
 
-Run database schema migration:
+Fetch migrations and run database schema migration:
 
 ```bash
+python build.py
 alembic upgrade head
 ```
 
@@ -69,8 +82,14 @@ psql
 CREATE DATABASE test_gearbox;
 ```
 
+Fetch migrations (required before the first test run on a clean checkout):
+
 ```bash
-pytest --cov=src --cov=migrations/versions tests
+python build.py
+```
+
+```bash
+pytest --cov=src tests
 ```
 
 ## Develop with Docker
@@ -90,7 +109,7 @@ docker-compose exec app alembic upgrade head
 Run tests:
 
 ```bash
-docker-compose exec app pytest --cov=src --cov=migrations/versions tests
+docker-compose exec app pytest --cov=src tests
 ```
 
 ## Deployment
@@ -119,6 +138,8 @@ Except that, don't use `123` or `456` as the password.
 `source env/bin/activate`
 
 `poetry install`
+
+`python build.py`
 
 `alembic revision -m "add_save"`
 
