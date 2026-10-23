@@ -15,6 +15,7 @@ def put_object(request, bucket_name, key_name, expires, config, contents):
             bucket_name, key_name, expires, config, contents
         )
     except Exception as ex:
+        logger.error(f"Error putting object {bucket_name}: {ex}.")
         raise HTTPException(
             status.HTTP_500_INTERNAL_SERVER_ERROR,
             f"Error putting object {bucket_name}: {ex}.",

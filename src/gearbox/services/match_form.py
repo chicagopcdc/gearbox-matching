@@ -23,7 +23,6 @@ async def build_match_form(session: Session, request: Request, save: bool):
         if not config.BYPASS_S3:
             params = [{'Content-Type':'application/json'}]
             bucket_utils.put_object(request, bucket_name, config.S3_BUCKET_MATCH_FORM_KEY_NAME, config.S3_PUT_OBJECT_EXPIRES, params, match_form)
-
     return match_form
 
 def update_dict(d, critlookup):
@@ -54,123 +53,126 @@ async def get_match_form(session:Session)-> MatchForm:
     F = []
 
     for display_rules in form_info:
-        criterion_dict = {}
-        for ctag in display_rules.criterion.tags:
-            g = {
-                'id': ctag.tag.id,
-                'name': ctag.tag.code
-            }
-            G.append(g)
-            # get unique groups 
-            G = list({v['id']:v for v in G}.values())
-            G = sorted(G, key = lambda i: i['id'])
-
-        if display_rules.active:
-            criterion_dict = {'id': display_rules.criterion_id}
+        if display_rules.criterion.active == True:
+            criterion_dict = {}
             for ctag in display_rules.criterion.tags:
-                if ctag.tag.type == 'form':
-                    criterion_dict.update({'groupId': ctag.tag.id})
-            if display_rules.criterion.active:
-                code = display_rules.criterion.code
-                criterion_dict.update({'name': code})
-                if code in bounds.keys():
-                    criterion_dict.update(bounds[code])
+                g = {
+                    'id': ctag.tag.id,
+                    'name': ctag.tag.code
+                }
+                G.append(g)
+                # get unique groups 
+                G = list({v['id']:v for v in G}.values())
+                G = sorted(G, key = lambda i: i['id'])
 
-                criterion_dict.update({'label':display_rules.criterion.description})
-                criterion_dict.update({'type':display_rules.criterion.input_type.render_type})
+            if display_rules.active:
+                criterion_dict = {'id': display_rules.criterion_id}
+                for ctag in display_rules.criterion.tags:
+                    if ctag.tag.type == 'form':
+                        criterion_dict.update({'groupId': ctag.tag.id})
+                if display_rules.criterion.active:
+                    code = display_rules.criterion.code
+                    criterion_dict.update({'name': code})
+                    if code in bounds.keys():
+                        criterion_dict.update(bounds[code])
 
-                if display_rules.criterion.input_type.data_type.upper() == 'INTEGER':
-                    criterion_dict.update({'min' : 0})
-                if display_rules.criterion.input_type.data_type.upper() == 'FLOAT':
-                    criterion_dict.update({'min' : float(0.0)})
-                    criterion_dict.update({'step' : float(0.1)})
-                if display_rules.criterion.input_type.data_type.upper() == 'PERCENTAGE':
-                    criterion_dict.update({'min' : float(0.0)})
-                    criterion_dict.update({'max' : float(100.0)})
-                    criterion_dict.update({'step' : float(0.1)})
+                    criterion_dict.update({'label':display_rules.criterion.description})
+                    criterion_dict.update({'type':display_rules.criterion.input_type.render_type})
 
-                options = []
-                if len(display_rules.criterion.values) > 1:
-                    if display_rules.criterion.input_type.render_type == 'select':
-                        criterion_dict.update({'placeholder': 'Select'})
-                        chvalues = [x for x in display_rules.criterion.values]
-                        for chvalue in chvalues:
-                            o = {'value': chvalue.value.id}
-                            o.update({'label':chvalue.value.description})
-                            options.append(o)
-                    if display_rules.criterion.input_type.render_type == 'radio':
-                        chvalues = [x for x in display_rules.criterion.values]
-                        for chvalue in chvalues:
-                            o = {'value': chvalue.value.id}
-                            o.update({'label': chvalue.value.value_string})
-                            o.update({'description': ""})
-                            options.append(o)
+                    if display_rules.criterion.input_type.data_type.upper() == 'INTEGER':
+                        criterion_dict.update({'min' : 0})
+                    if display_rules.criterion.input_type.data_type.upper() == 'FLOAT':
+                        criterion_dict.update({'min' : float(0.0)})
+                        criterion_dict.update({'step' : float(0.1)})
+                    if display_rules.criterion.input_type.data_type.upper() == 'PERCENTAGE':
+                        criterion_dict.update({'min' : float(0.0)})
+                        criterion_dict.update({'max' : float(100.0)})
+                        criterion_dict.update({'step' : float(0.1)})
+
+                    options = []
+                    if len(display_rules.criterion.values) > 1:
+                        if display_rules.criterion.input_type.render_type == 'select' or display_rules.criterion.input_type.render_type == 'picklist':
+                            criterion_dict.update({'placeholder': 'Select'})
+                            chvalues = [x for x in display_rules.criterion.values]
+                            for chvalue in chvalues:
+                                o = {'value': chvalue.value.id}
+                                o.update({'label':chvalue.value.description})
+                                if display_rules.criterion.input_type.render_type == 'picklist':
+                                    o.update({'operator':chvalue.value.operator})
+                                options.append(o)
+                        if display_rules.criterion.input_type.render_type == 'radio':
+                            chvalues = [x for x in display_rules.criterion.values]
+                            for chvalue in chvalues:
+                                o = {'value': chvalue.value.id}
+                                o.update({'label': chvalue.value.value_string})
+                                o.update({'description': ""})
+                                options.append(o)
 
 
 
-                if len(options) > 0:
-                    options = sorted(options, key=lambda d: d['value'])
-                    # move unknown or not sure to end of the option list
-                    for o in options:
-                        if o['label'].upper() in ['UNKNOWN','NOT SURE']:
-                            options.append(options.pop(options.index(o)))
+                    if len(options) > 0:
+                        options = sorted(options, key=lambda d: d['value'])
+                        # move unknown or not sure to end of the option list
+                        for o in options:
+                            if o['label'].upper() in ['UNKNOWN','NOT SURE']:
+                                options.append(options.pop(options.index(o)))
 
-                    criterion_dict.update({'options': options})
+                        criterion_dict.update({'options': options})
 
-                # Get paths from triggered bys
-                pathlist = []
-                critlookup = {}
-                path_tree = None
-                triggered_bys = [x for x in display_rules.triggered_bys]
-                for tb in triggered_bys:
-                    if tb.active:
-                        tb_value = ''
-                        if (tb.path):
-                            pathlist.append(tb.path)
-                        # MODIFY TO tb.value.is_numeric
-                        if tb.value.is_numeric:
-                            try:
-                                tb_value = float(tb.value.value_string)
-                            except ValueError:
-                                logger.error(f"Value {tb.value.value_string} cannot be converted to number") 
+                    # Get paths from triggered bys
+                    pathlist = []
+                    critlookup = {}
+                    path_tree = None
+                    triggered_bys = [x for x in display_rules.triggered_bys]
+                    for tb in triggered_bys:
+                        if tb.active:
+                            tb_value = ''
+                            if (tb.path):
+                                pathlist.append(tb.path)
+                            # MODIFY TO tb.value.is_numeric
+                            if tb.value.is_numeric:
+                                try:
+                                    tb_value = float(tb.value.value_string)
+                                except ValueError:
+                                    logger.error(f"Value {tb.value.value_string} cannot be converted to number") 
+                            else:
+                                tb_value = tb.value.id
+
+                            critdict = {
+                                "id": tb.criterion.id,
+                                "value": tb_value,
+                                "valueId": tb.value.id,
+                                "operator": tb.value.operator
+                            }
+                            critlookup[tb.id] = critdict
+
+                    if len(pathlist) == 2 or len(critlookup) == 1 or len(critlookup) == 2:
+                        critlist = []
+                        for crit_key in critlookup:
+                            if critlookup[crit_key]:
+                                critlist.append(critlookup[crit_key])
+
+
+                        m = re.search("OR", str(pathlist))
+                        if m and len(pathlist) == 1:
+                            path_tree = {
+                                "operator": "OR",
+                                "criteria": critlist 
+                            }
                         else:
-                            tb_value = tb.value.id
+                            path_tree = {
+                                "operator": "AND",
+                                "criteria": critlist 
+                            }
 
-                        critdict = {
-                            "id": tb.criterion.id,
-                            "value": tb_value,
-                            "valueId": tb.value.id,
-                            "operator": tb.value.operator
-                        }
-                        critlookup[tb.id] = critdict
+                    elif (pathlist):
+                        path_tree = get_tree(pathlist, suppress_header=True)
+                        path_tree = update_dict(path_tree, critlookup)
 
-                if len(pathlist) == 2 or len(critlookup) == 1 or len(critlookup) == 2:
-                    critlist = []
-                    for crit_key in critlookup:
-                        if critlookup[crit_key]:
-                            critlist.append(critlookup[crit_key])
+                    if path_tree:
+                        criterion_dict.update({'showIf':path_tree})
 
-
-                    m = re.search("OR", str(pathlist))
-                    if m and len(pathlist) == 1:
-                        path_tree = {
-                            "operator": "OR",
-                            "criteria": critlist 
-                        }
-                    else:
-                        path_tree = {
-                            "operator": "AND",
-                            "criteria": critlist 
-                        }
-
-                elif (pathlist):
-                    path_tree = get_tree(pathlist, suppress_header=True)
-                    path_tree = update_dict(path_tree, critlookup)
-
-                if path_tree:
-                    criterion_dict.update({'showIf':path_tree})
-
-            F.append(criterion_dict)
+                F.append(criterion_dict)
 
         match_form = {"groups": G, "fields": F}
 
