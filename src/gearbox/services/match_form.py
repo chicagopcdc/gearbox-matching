@@ -40,6 +40,22 @@ def update_dict(d, critlookup):
                         update_dict(d[key][i], critlookup)
     return d
 
+def get_mutually_exclusive_values(form_info: list):
+    picklist_values={}
+    for display_rules in form_info:
+        if display_rules.criterion.active == True:
+            if display_rules.criterion.input_type.render_type == 'picklist':
+                for val in display_rules.criterion.values:
+                    picklist_values[val.value.id] = {"value_string": val.value.value_string}
+    for id, value in picklist_values.items():
+        for ex_id, ex_value in picklist_values.items():
+            if ex_value["value_string"] in value["value_string"] and ex_value["value_string"] != value["value_string"]:
+                picklist_values[id].update({"ex_id": ex_id})
+                picklist_values[ex_id].update({"ex_id":id})
+
+    return picklist_values
+
+
 async def get_match_form(session:Session)-> MatchForm:
 
     """
@@ -48,9 +64,12 @@ async def get_match_form(session:Session)-> MatchForm:
     """
 
     form_info = await get_form_info(session)
+    picklist_mutually_exclusive_values = get_mutually_exclusive_values(form_info)
 
     G = []
     F = []
+
+
 
     for display_rules in form_info:
         if display_rules.criterion.active == True:
@@ -98,7 +117,11 @@ async def get_match_form(session:Session)-> MatchForm:
                                 o = {'value': chvalue.value.id}
                                 o.update({'label':chvalue.value.description})
                                 if display_rules.criterion.input_type.render_type == 'picklist':
-                                    o.update({'operator':chvalue.value.operator})
+                                    # check -Not- and add negative_picklist_option...
+                                    npo = True if chvalue.value.description.startswith('-NOT-') else False
+                                    o.update({'negative_picklist_option':npo})
+                                    if picklist_mutually_exclusive_values.get(chvalue.value.id):
+                                        o.update({'exclusive_rule_id': picklist_mutually_exclusive_values.get(chvalue.value.id).get("ex_id")})
                                 options.append(o)
                         if display_rules.criterion.input_type.render_type == 'radio':
                             chvalues = [x for x in display_rules.criterion.values]
