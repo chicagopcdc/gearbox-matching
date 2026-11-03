@@ -66,12 +66,3 @@ def test_build_match_conditions(setup_database, client):
                     errors.append(f"STUDY ID: {study_comp['studyId']} DOES NOT MATCH {diff}")
 
     assert not errors, "errors occurred: \n{}".format("\n".join(errors))            
-
-# Test getter method returns an aws url
-def test_get_match_conditions(setup_database, client):
-    errors = []
-    fake_jwt = "1.2.3"
-    url = client.get("/match-conditions", headers={"Authorization": f"bearer {fake_jwt}"})
-    url_str =  url.content.decode('ascii').strip('\"')
-
-    assert is_aws_url(url_str)

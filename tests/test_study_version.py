@@ -19,6 +19,7 @@ def test_get_study_versions_for_adjudication(setup_database, client):
     Comments: Test to fetch study_versions available for adjudication
     """
     fake_jwt = "1.2.3"
+
     resp = client.get("/study-versions-adjudication", headers={"Authorization": f"bearer {fake_jwt}"})
     assert str(resp.status_code).startswith("20")
 

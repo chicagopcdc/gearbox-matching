@@ -120,6 +120,41 @@ from starlette.status import (
                     }
             ]
             },
+            {   
+                "name": "A Phase I Open-label, Multicenter Study to Evaluate the Safety, Efficacy, Pharmacokinetics and Pharmacodynamics of SAIL66 in Patients With CLDN6-positive Locally Advanced or Metastatic Solid Tumors",
+                "code": "SAL101JG",
+                "description": "This is a Phase 1 dose-escalation and expansion study that will evaluate the safety, tolerability, pharmacokinetics (PK), pharmacodynamics (PD) and preliminary efficacy of SAIL66 in patients with CLDN6-positive locally advanced or metastatic solid tumors.",
+                "active": True,
+                "sites": [ 
+                    {   
+                        "name": "TEST STUDY UPDATES TEST SITE NAME -> UPDATED",
+                        "code": "TEST SITE CODE",
+                        "country": "USA",
+                        "status":"recruiting",
+                        "city":"Chicago",
+                        "state":"IL",
+                        "zip":"60660",
+                        "location_lat":41.885033,
+                        "location_long":-87.784500
+                    }   
+                ],  
+                "links": [ 
+                    {   
+                        "name": "UPDATED-----TEST STUDY UPDATES LINK NAME",
+                        "href": "http://www.testlink.org-for-test",
+                        "active": True
+                    }   
+                ],  
+                "ext_ids": [
+                    {   
+                        "ext_id": "testexternalstudyid2",
+                        "source": "test ext id source",
+                        "source_url": "http://www.testsourceurl.gov",
+                        "active": True
+
+                    }   
+            ]   
+            },  
             {
                 "name": "GVAX Plus Checkpoint Blockade in Neuroblastoma",
                 "code": "19-680",
@@ -195,16 +230,16 @@ def test_study_updates(setup_database, client, data, connection):
         
 
         active_studies = db_session.query(Study).filter(Study.active==True).all()
-        if not len(active_studies) == 3:
-            errors.append(f"ERROR: should be 2 active studies, found: {len(active_studies)} active studies in study table.")
+        if not len(active_studies) == 4:
+            errors.append(f"ERROR: should be 4 active studies, found: {len(active_studies)} active studies in study table.")
 
         active_links = db_session.query(StudyLink).filter(StudyLink.active==True).all()
-        if not len(active_links) == 3:
-            errors.append(f"ERROR: should be 2 active study links, found: {len(active_links)} active study links in study_links table.")
+        if not len(active_links) == 4:
+            errors.append(f"ERROR: should be 4 active study links, found: {len(active_links)} active study links in study_links table.")
 
         active_study_sites = db_session.query(SiteHasStudy).filter(SiteHasStudy.active==True).all()
-        if not len(active_study_sites) == 4:
-            errors.append(f"ERROR: should be 2 active study sites, found: {len(active_study_sites)} active study sites in site_has_study table.")
+        if not len(active_study_sites) == 5:
+            errors.append(f"ERROR: should be 5 active study sites, found: {len(active_study_sites)} active study sites in site_has_study table.")
 
         # confirm that study_version for inactive study was set to status = INACTIVE
         #inactive_study_version = db_session.query(StudyVersion).filter(StudyVersion.study_id==8).filter(StudyVersion.status=StudyVersionStatus.INACTIVE.value)
@@ -457,6 +492,41 @@ def test_study_updates_update_zip(setup_database, client, data, connection):
 
                 ]
             },
+                       {   
+                "name": "A Phase I Open-label, Multicenter Study to Evaluate the Safety, Efficacy, Pharmacokinetics and Pharmacodynamics of SAIL66 in Patients With CLDN6-positive Locally Advanced or Metastatic Solid Tumors",
+                "code": "SAL101JG",
+                "description": "This is a Phase 1 dose-escalation and expansion study that will evaluate the safety, tolerability, pharmacokinetics (PK), pharmacodynamics (PD) and preliminary efficacy of SAIL66 in patients with CLDN6-positive locally advanced or metastatic solid tumors.",
+                "active": True,
+                "sites": [ 
+                    {   
+                        "name": "TEST STUDY UPDATES TEST SITE NAME -> UPDATED",
+                        "code": "TEST SITE CODE",
+                        "country": "USA",
+                        "status":"recruiting",
+                        "city":"Chicago",
+                        "state":"IL",
+                        "zip":"60660",
+                        "location_lat":41.885033,
+                        "location_long":-87.784500
+                    }   
+                ],  
+                "links": [ 
+                    {   
+                        "name": "UPDATED-----TEST STUDY UPDATES LINK NAME",
+                        "href": "http://www.testlink.org-for-test",
+                        "active": True
+                    }   
+                ],  
+                "ext_ids": [
+                    {   
+                        "ext_id": "testexternalstudyid2",
+                        "source": "test ext id source",
+                        "source_url": "http://www.testsourceurl.gov",
+                        "active": True
+
+                    }   
+            ]   
+            },  
             {
                 "name": "GVAX Plus Checkpoint Blockade in Neuroblastoma",
                 "code": "19-680",
@@ -578,6 +648,41 @@ def test_study_updates_compare1(setup_database, client, data, connection):
 
                 ]
             },
+                       {   
+                "name": "A Phase I Open-label, Multicenter Study to Evaluate the Safety, Efficacy, Pharmacokinetics and Pharmacodynamics of SAIL66 in Patients With CLDN6-positive Locally Advanced or Metastatic Solid Tumors",
+                "code": "SAL101JG",
+                "description": "This is a Phase 1 dose-escalation and expansion study that will evaluate the safety, tolerability, pharmacokinetics (PK), pharmacodynamics (PD) and preliminary efficacy of SAIL66 in patients with CLDN6-positive locally advanced or metastatic solid tumors.",
+                "active": True,
+                "sites": [ 
+                    {   
+                        "name": "TEST STUDY UPDATES TEST SITE NAME -> UPDATED",
+                        "code": "TEST SITE CODE",
+                        "country": "USA",
+                        "status":"recruiting",
+                        "city":"Chicago",
+                        "state":"IL",
+                        "zip":"60660",
+                        "location_lat":41.885033,
+                        "location_long":-87.784500
+                    }   
+                ],  
+                "links": [ 
+                    {   
+                        "name": "UPDATED-----TEST STUDY UPDATES LINK NAME",
+                        "href": "http://www.testlink.org-for-test",
+                        "active": True
+                    }   
+                ],  
+                "ext_ids": [
+                    {   
+                        "ext_id": "testexternalstudyid2",
+                        "source": "test ext id source",
+                        "source_url": "http://www.testsourceurl.gov",
+                        "active": True
+
+                    }   
+            ]   
+            },  
             {
                 "name": "GVAX Plus Checkpoint Blockade in Neuroblastoma",
                 "code": "19-680",
