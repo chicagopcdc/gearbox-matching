@@ -25,3 +25,5 @@ postgres-data/
 # Run `python build.py` to populate it locally.
 migrations/
 .migrations_new_*/
+
+.python-version
