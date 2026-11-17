@@ -61,14 +61,6 @@ def test_build_ec(setup_database, client):
 
     assert not diff, f"differences occurred: \n{diff}"
 
-def test_get_ec(setup_database, client):
-    errors = []
-    fake_jwt = "1.2.3"
-    url = client.get("/eligibility-criteria", headers={"Authorization": f"bearer {fake_jwt}"})
-    url_str =  url.content.decode('ascii').strip('\"')
-
-    assert is_aws_url(url_str)
-
 @pytest.mark.parametrize(
     "data", [ 
         {

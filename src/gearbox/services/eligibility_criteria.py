@@ -1,5 +1,5 @@
 from gearbox import config
-from gearboxdatamodel.crud import eligibility_criteria_crud
+from gearboxdatamodel.crud import eligibility_criteria_crud, el_criteria_has_criterion_crud
 from gearboxdatamodel.schemas import EligibilityCriteriaCreate, EligibilityCriteriaSearchResults, EligibilityCriteria as EligibilityCriteriaSchema
 from sqlalchemy.ext.asyncio import AsyncSession as Session
 from fastapi import HTTPException, Request
@@ -47,6 +47,7 @@ async def update_eligibility_criteria(session: Session, eligibility_criteria: El
 async def get_eligibility_criteria_set(session, id: int=None):
 
     results = await eligibility_criteria_crud.get_eligibility_criteria_set(session, ec_id=id)
+
     eligibility_criteria = []
 
     if results:
@@ -58,7 +59,7 @@ async def get_eligibility_criteria_set(session, id: int=None):
                 the_value = echc.value
                 operator = the_value.operator
                 render_type = echc.criterion.input_type.render_type
-                if render_type in ['radio','select']:
+                if render_type in ['radio','select','picklist']:
                     fieldValue = value_id
                 elif render_type in ['age']:
                     if qc.is_number(the_value.value_string):

@@ -61,14 +61,21 @@ def connection():
     return engine.connect()
 
 def file_to_table(conn, cursor, table_name, file_name):
+
     with open(file_name, 'r') as f:
         copy_sql = "COPY " + table_name + " FROM stdin DELIMITER E'\t' CSV HEADER"
-        cursor.copy_expert(sql=copy_sql, file=f)
+        with cursor.copy(copy_sql) as copy:
+            while data := f.read(8192):
+                copy.write(data)
+            
 
 def file_to_table_with_cols(conn, cursor, table_name, file_name, ordered_column_list):
     with open(file_name, 'r') as f:
         copy_sql = "COPY " + table_name +  ordered_column_list +  " FROM stdin DELIMITER E'\t' CSV HEADER"
-        cursor.copy_expert(sql=copy_sql, file=f)
+        with cursor.copy(copy_sql) as copy:
+            while data := f.read(8192):
+                copy.write(data)
+
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_database(connection) -> Engine:

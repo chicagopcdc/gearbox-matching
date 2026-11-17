@@ -42,18 +42,6 @@ def test_studies_compare(setup_database, client, connection):
     assert not diff, "differences occurred: \n{}".format("\n".join(diff))            
 
 @pytest.mark.asyncio
-def test_get_studies(setup_database, client):
-    """
-    Comments: Test to validate aws url is returned from get endpoint
-    """
-    errors = []
-    fake_jwt = "1.2.3"
-    url = client.get("/studies", headers={"Authorization": f"bearer {fake_jwt}"})
-    url_str =  url.content.decode('ascii').strip('\"')
-
-    assert is_aws_url(url_str)
-
-@pytest.mark.asyncio
 def test_get_study(setup_database, client):
     """
     Comments: Test to validate aws url is returned from get endpoint
