@@ -40,6 +40,8 @@ def update_dict(d, critlookup):
                         update_dict(d[key][i], critlookup)
     return d
 
+# This function finds all mutually exclusive picklist values
+# which are indicated in the match_form for the front end picklist logic.
 def get_mutually_exclusive_values(form_info: list):
     picklist_values={}
     for display_rules in form_info:
